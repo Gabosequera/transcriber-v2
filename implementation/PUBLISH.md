@@ -2,7 +2,7 @@
 
 El usuario pidió detener implementación y guardar el traspaso; después autorizó commit/push/release de ambas versiones. Confirmó: V2 todos los derechos reservados; V1 conserva PolyForm Noncommercial. Versiones previstas: V1 v0.4.0 (VERSION existente), V2 v2.0.0-alpha.1 (Cargo existente). Repositorio V1 https://github.com/Gabosequera/transcriber; nuevo V2 público https://github.com/Gabosequera/transcriber-v2.
 
-V1 publicada y verificada. V2 repositorio público creado, paquete final preparado, comprobación y publicación en curso. No afirmar V2 publicada hasta verificar remoto/tag/assets. La implementación E0–E3 sigue pausada por petición del usuario; la release alpha no cierra E2/E3/E6.
+**Ambas versiones publicadas y verificadas. Trabajo terminado; desarrollo pausado por petición del usuario.** La implementación E0–E3 sigue pausada por petición del usuario; la release alpha no cierra E2/E3/E6.
 
 V1 se encontraba limpio, diez commits por delante de origin/main local; HEAD de referencia c3677ba568cfc7d5947ec4695c42fffef6d79e03. No había Git en V2. La autorización de publicación constituye excepción expresa a V1 solo lectura para preparar su release; no autoriza cambiar sus medios/modelos/configuración personales.
 
@@ -27,3 +27,9 @@ La regresión completa E1/E2 de215404 sigue preparada y pendiente; la smoke del 
 ## Aceptación del paquete final V2
 
 Build41,63s; exe SHA2562eb8464f6800dd84cb111c942115a6658df85dbb92a11a5aad64864030fdaabc. `publication-build-final.log` y `package-smoke-20260908-181823/`:575hashes antes/después, instalación FFmpeg desde upstream e idempotencia, assertion pausa5,200s, cachés presentes, screenshot inspeccionada, export14s420frames. Verificador fuente42,6–42,8dB/visor30,6dB/hueco0, RESULTADO OK. Esto valida el artefacto que se adjunta a la prerelease, con las limitaciones de E2 anotadas.
+
+## Resultado final
+
+- V1: commit bb7012c, tag v0.4.0, https://github.com/Gabosequera/transcriber/releases/tag/v0.4.0. Tres assets publicados por CI correcto. PolyForm NC intacta.
+- V2: commit de release5cd55a7, tag v2.0.0-alpha.1, https://github.com/Gabosequera/transcriber-v2/releases/tag/v2.0.0-alpha.1. Repo público, prerelease publicada (draft=false), ZIP y SHA256SUMS.txt adjuntos. Digest del ZIP confirmado por GitHub:6278e97df38597b7f7809bb61c54c9909f9439264ef1a6fe38420ddb8ddab1f5. Licencia propietaria/todos los derechos reservados para código propio; terceros separados. Registro API en evidence/e2/publication-v2.json.
+- Commit posterior únicamente actualiza este resultado y STATUS; el tag conserva el código/paquete probado. No se continúa desarrollo. Al reanudar, E2 sigue abierta y E3 pendiente; primera regresión preparada215404 según STATUS.

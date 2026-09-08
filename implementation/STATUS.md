@@ -8,7 +8,7 @@ Leer este archivo, `evidence/e2/continuacion-04.md`, la matriz y el anexo de sei
 
 Raíz `G:/TODO/transcriptor-v2`: no tenía Git durante la implementación; se inicializó `main` para la publicación posterior autorizada. Remoto nuevo público: `https://github.com/Gabosequera/transcriber-v2`. V1 `G:/TODO/transcriptor-installer-v0.2.0` estrictamente solo lectura: HEAD `c3677ba568cfc7d5947ec4695c42fffef6d79e03`, `git status --porcelain=v1` vacío al corte. Durante implementación no se modificaron V1 ni references. Después, por autorización expresa de commit/push/release, se añadió documentación de release en V1: commit bb7012c y tag v0.4.0 publicados; no se modificaron datos personales. Sin AGENTS.md aplicable encontrado. Se conservaron los avances de Fable y Astra; no reiniciar E0/E1.
 
-Al corte no se observaron procesos de Transcriptor/cargo/rustc/FFmpeg/Python del workspace activos. No se mató ningún proceso. El usuario pidió parar y documentar: la implementación permanece pausada. El encargo posterior de publicar ambas versiones está autorizado y se registra en PUBLISH.md.
+Al corte no se observaron procesos de Transcriptor/cargo/rustc/FFmpeg/Python del workspace activos. No se mató ningún proceso. El usuario pidió parar y documentar: la implementación permanece pausada. El encargo posterior de publicar ambas versiones está terminado y se registra en PUBLISH.md.
 
 ## Terminado en esta continuación
 
@@ -54,3 +54,5 @@ No cambiar etiquetas a "verificado" o "cerrada" para eludir pruebas pendientes. 
 ## Publicación posterior expresamente autorizada
 
 V1 v0.4.0 publicada, CI Linux/Windows e instalación desde cero correctas; ZIP remoto contrastado con manifiesto y82hashes. V2 público, licencia propietaria/todos los derechos reservados por elección del titular, V1 mantiene PolyForm NC. Se completaron avisos de24crates; el ZIP público excluye FFmpeg binario y ofrece descarga oficial separada con hashes. El primer paquete público pasó smoke tras explicitar pausa/seek y comprobar posición. El paquete final con licencia en Acerca de pasó smoke181823:575hashes, descarga/idempotencia FFmpeg, export14s420frames, fuente42,6–42,8dB/visor30,6dB/hueco0. Exe actual SHA2562eb8464f6800dd84cb111c942115a6658df85dbb92a11a5aad64864030fdaabc. ZIP final6278e97df38597b7f7809bb61c54c9909f9439264ef1a6fe38420ddb8ddab1f5. Resultado final, commits, URLs y hashes en PUBLISH.md: esta sección no sustituye ese registro ni cierra E2/E3/E6.
+
+**PUBLICACIÓN TERMINADA:** V1 v0.4.0 y V2 v2.0.0-alpha.1 publicadas, commits y releases en PUBLISH.md. V2 tag5cd55a7; ZIP y checksum verificados en GitHub. Usuario reiteró parar tras publicar: no seguir desarrollo hasta nuevo mensaje. Traspaso conservado; E2 abierta/E3 pendiente.

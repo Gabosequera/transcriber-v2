@@ -1,0 +1,20 @@
+{
+  "url": "https://github.com/Gabosequera/transcriber-v2/releases/tag/v2.0.0-alpha.1",
+  "tag": "v2.0.0-alpha.1",
+  "prerelease": true,
+  "draft": false,
+  "assets": [
+    {
+      "name": "SHA256SUMS.txt",
+      "size": 111,
+      "url": "https://github.com/Gabosequera/transcriber-v2/releases/download/v2.0.0-alpha.1/SHA256SUMS.txt",
+      "digest": "sha256:27f89a32ea5eeb0bbebf8608927846e0fc0549578c1f01b164212400345c967b"
+    },
+    {
+      "name": "Transcriptor-v2.0.0-alpha.1-windows-x64.zip",
+      "size": 12041211,
+      "url": "https://github.com/Gabosequera/transcriber-v2/releases/download/v2.0.0-alpha.1/Transcriptor-v2.0.0-alpha.1-windows-x64.zip",
+      "digest": "sha256:6278e97df38597b7f7809bb61c54c9909f9439264ef1a6fe38420ddb8ddab1f5"
+    }
+  ]
+}
