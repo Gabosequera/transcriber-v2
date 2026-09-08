@@ -1,0 +1,155 @@
+   Compiling tv2-domain v2.0.0-alpha.1 (G:\TODO\transcriptor-v2\crates\domain)
+   Compiling tv2-media v2.0.0-alpha.1 (G:\TODO\transcriptor-v2\crates\media)
+   Compiling tv2-v1compat v2.0.0-alpha.1 (G:\TODO\transcriptor-v2\crates\v1compat)
+   Compiling tv2-application v2.0.0-alpha.1 (G:\TODO\transcriptor-v2\crates\application)
+   Compiling transcriptor v2.0.0-alpha.1 (G:\TODO\transcriptor-v2\apps\desktop)
+    Finished `test` profile [optimized + debuginfo] target(s) in 17.58s
+     Running unittests src\main.rs (target\debug\deps\Transcriptor-1dfbd5641c6af1b7.exe)
+
+running 17 tests
+test gesture_tests::dense_ui_benchmark ... ignored, benchmark release explícito, no prueba de presentación GPU
+test keymap::tests::chords_normalize_like_v1 ... ok
+test keymap::tests::altgr_on_windows_is_plain_key ... ok
+test keymap::tests::defaults_have_no_conflicts_and_keep_v1_ids ... ok
+test keymap::tests::overrides_apply_and_conflicts_reported ... ok
+test timeline_index::tests::dense_timeline_query_skips_offscreen_items_and_preserves_overlaps ... ok
+test gesture_tests::trim_end_handle_shrinks_source_range ... ok
+test gesture_tests::drag_moves_linked_clips_in_one_transaction_and_snaps_to_frames ... ok
+test gesture_tests::ruler_scrub_moves_playhead_and_pauses ... ok
+test gesture_tests::shutdown_joins_active_export_and_caches_and_discards_queue ... ok
+test gesture_tests::autoscroll_move_keeps_pointer_mapping_and_commits_once ... ok
+test gesture_tests::export_queue_cancels_and_freezes_each_revision_before_concurrent_edit ... ok
+test gesture_tests::export_selection_compacts_ranges_and_preserves_repeated_editorial_occurrences ... ok
+test gesture_tests::visible_media_cache_draws_in_source_and_sequence_without_editing_project ... ok
+test gesture_tests::markers_snap_drag_and_undo_insert_keeps_linked_audio ... ok
+test gesture_tests::keyboard_split_does_not_fire_while_typing ... ok
+test gesture_tests::escape_cancels_drag_without_residue ... ok
+
+test result: ok. 16 passed; 0 failed; 1 ignored; 0 measured; 0 filtered out; finished in 0.60s
+
+     Running unittests src\lib.rs (target\debug\deps\tv2_application-1400b4466fae59af.exe)
+
+running 6 tests
+test session::tests::revisions_grow_and_undo_creates_new_revision ... ok
+test session::tests::undo_after_external_change_is_rejected_not_applied ... ok
+test session::tests::stale_base_is_rejected_and_idempotent_retry_replays ... ok
+test session::tests::failed_batch_leaves_project_untouched_and_dry_run_does_not_commit ... ok
+test store::tests::journal_is_append_only_and_tolerates_truncated_tail ... ok
+test store::tests::save_load_round_trip_and_atomic_replace ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running unittests src\lib.rs (target\debug\deps\tv2_domain-1e67fd0c169d6c57.exe)
+
+running 25 tests
+test commands::tests::commands_serialize_with_type_tag ... ok
+test project::tests::iso_date_looks_right ... ok
+test digest::tests::float_repr_matches_python ... ok
+test commands::tests::layers_follow_v1_rules ... ok
+test commands::tests::linked_group_insert_keeps_video_and_audio_in_sync_and_closes_gaps ... ok
+test commands::tests::overwrite_splits_covered_clip ... ok
+test commands::tests::split_trim_move_remove_match_v1_semantics ... ok
+test ids::tests::ids_are_unique_and_valid ... ok
+test digest::tests::canonical_json_matches_python_dumps ... ok
+test layers::tests::enabled_intervals_merge_regardless_of_acceptance ... ok
+test digest::tests::digests_match_python_hashlib_goldens ... ok
+test project::tests::unknown_fields_survive_round_trip ... ok
+test layers::tests::hierarchy_and_multirange_rules_match_v1 ... ok
+test layers::tests::points_only_when_allowed_and_ranges_ordered ... ok
+test commands::tests::locked_track_blocks_edits_and_batch_is_atomic ... ok
+test resolve::tests::gain_is_linear_product ... ok
+test commands::tests::split_keeps_halves_linked_but_independent_between_them ... ok
+test time::tests::flicks_are_exact_for_common_rates_and_samples ... ok
+test time::tests::ms_round_trip_matches_v1_rounding ... ok
+test layers::tests::deep_hierarchy_limit_is_32 ... ok
+test time::tests::no_accumulated_drift_over_hours ... ok
+test time::tests::timecodes ... ok
+test commands::tests::overlap_is_rejected_by_default ... ok
+test time::tests::ranges ... ok
+test resolve::tests::upper_video_track_covers_lower_and_audio_mixes ... ok
+
+test result: ok. 25 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src\lib.rs (target\debug\deps\tv2_media-bcc3652250239297.exe)
+
+running 26 tests
+test audio::tests::tempo_chain_matches_v1_policy ... ok
+test compositor::tests::fit_letterboxes_and_alpha_blends ... ok
+test decoder::tests::image_with_alpha_decodes ... ok
+test cache::tests::prune_respects_budget ... ok
+test cache::tests::clear_cancels_workers_without_freeing_their_slots_early ... ok
+test ffmpeg::tests::inventory_json_has_python_shape ... ok
+test decoder::tests::decodes_from_exact_offset_outside_keyframe ... ok
+test cache::tests::corrupt_cache_version_and_lengths_are_rejected_and_regenerated ... ok
+test audio::tests::decodes_tone_and_rate_2x_halves_length ... ok
+test cache::tests::waveform_is_progressive_lod_and_persisted ... ok
+test process::tests::cancellation_unblocks_ffmpeg_waiting_for_input ... ok
+test cache::tests::memory_admission_holds_reservation_until_last_handle_and_retries_after_release ... ok
+test audio::tests::delayed_audio_stream_preserves_leading_silence_after_seek_and_rate_change ... ok
+test cache::tests::thumbnails_coarse_then_fine_indexed_by_time ... ok
+test ffmpeg::tests::locate_and_probe_fixture ... ok
+test render::tests::nonzero_container_start_is_not_added_twice_by_the_renderer ... ok
+test export::tests::decoder_failures_do_not_publish_black_video_or_silent_audio ... ok
+test ffmpeg::tests::relink_moved_unicode_fixture_preserves_identity_and_rejects_wrong_media ... ok
+test export::tests::cancel_leaves_no_output_nor_staging ... ok
+test render::tests::renders_split_clip_with_overlay_from_real_media ... ok
+test audio::tests::atempo_path_keeps_time_alignment_within_tolerance ... ok
+test export::tests::encoder_failure_and_bad_destination_are_explained_without_leftovers ... ok
+test export::tests::missing_sources_are_checked_at_execution_and_only_for_requested_content ... ok
+test export::tests::mute_solo_and_gain_match_preview_and_pcm_export ... ok
+test export::tests::exported_flash_and_audio_bursts_remain_synchronized_after_non_keyframe_cut ... ok
+test export::tests::format_matrix_every_available_preset_produces_inspectable_output ... ok
+
+test result: ok. 26 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 9.03s
+
+     Running unittests src\lib.rs (target\debug\deps\tv2_v1compat-02ba6d343146acd3.exe)
+
+running 11 tests
+test montaje::tests::validation_rejects_overlap_in_same_track_and_other_media ... ok
+test trims::tests::round_trip_is_canonically_identical ... ok
+test montaje::tests::conversion_to_v2_keeps_observable_result_and_provenance ... ok
+test montaje::tests::gaps_and_repeated_source_mapping ... ok
+test layers::tests::round_trip_preserves_ids_ranges_states_and_unknown_fields ... ok
+test trims::tests::old_document_without_lane_gets_lane_by_origin ... ok
+test layers::tests::rejects_other_media_and_bad_hierarchy ... ok
+test montaje::tests::top_track_covers_bottom_at_start_middle_and_end ... ok
+test trims::tests::states_follow_cut_state_and_export_union_ignores_acceptance ... ok
+test master::tests::parses_fixture_master_and_digest_ignores_chunks ... ok
+test import::tests::imports_folder_with_layers_trims_and_montage ... ok
+
+test result: ok. 11 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running tests\golden_v1.rs (target\debug\deps\golden_v1-bf7461ebecfada79.exe)
+
+running 4 tests
+test source_master_digest_matches_v1 ... ok
+test trims_union_and_montage_flatten_match_v1 ... ok
+test v2_fingerprint_equals_v1_fingerprint_for_the_same_file ... ok
+test folder_import_produces_v2_project_with_same_observable_sequence ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.08s
+
+   Doc-tests tv2_application
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests tv2_domain
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests tv2_media
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests tv2_v1compat
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+

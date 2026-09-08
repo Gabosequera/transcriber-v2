@@ -1,0 +1,1 @@
+format=rgba,pad=320:180:40:40:color=black@0.0,drawtext=fontfile='C\:/Windows/Fonts/arial.ttf':text='OVERLAY':x=60:y=70:fontsize=40:fontcolor=white

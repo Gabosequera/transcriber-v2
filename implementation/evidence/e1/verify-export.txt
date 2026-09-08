@@ -1,0 +1,10 @@
+﻿export: duración 12.000 s (esperada 12.0), streams ['video', 'audio']
+  video h264 1280x720 30/1 nb_frames=360
+  audio pico -11.059891 dBFS
+  t=0.5s → fuente 5.5s: PSNR 42.6 dB (control 0.5s: 20.3 dB) OK
+  t=6.5s → fuente 11.5s: PSNR 42.4 dB (control 6.5s: 17.5 dB) OK
+  t=6.9s → fuente 11.9s: PSNR 42.9 dB (control 6.9s: 19.6 dB) OK
+  t=7.5s → fuente 0.5s: PSNR 42.7 dB (control 7.5s: 17.8 dB) OK
+  t=11.5s → fuente 4.5s: PSNR 42.5 dB (control 11.5s: 17.6 dB) OK
+  overlay t=2.5s px(160,90)=(159,8,88) PSNR vs fuente sin overlay 16.6 dB OK
+RESULTADO: OK

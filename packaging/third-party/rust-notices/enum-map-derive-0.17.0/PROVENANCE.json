@@ -1,0 +1,17 @@
+{
+  "package": "enum-map-derive",
+  "version": "0.17.0",
+  "license": "MIT OR Apache-2.0",
+  "sources": [
+    {
+      "path": "LICENSE-MIT.txt",
+      "url": "https://codeberg.org/xfix/enum-map/raw/commit/2026968c30ad14d268f3d70c618a704e22a3b980/LICENSES/MIT.txt",
+      "sha256": "b85dcd3e453d05982552c52b5fc9e0bdd6d23c6f8e844b984a88af32570b0cc0"
+    },
+    {
+      "path": "LICENSE-Apache-2.0.txt",
+      "url": "https://codeberg.org/xfix/enum-map/raw/commit/2026968c30ad14d268f3d70c618a704e22a3b980/LICENSES/Apache-2.0.txt",
+      "sha256": "074e6e32c86a4c0ef8b3ed25b721ca23aca83df277cd88106ef7177c354615ff"
+    }
+  ]
+}

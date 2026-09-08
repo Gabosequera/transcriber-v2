@@ -1,0 +1,15 @@
+   Compiling tv2-domain v2.0.0-alpha.1 (G:\TODO\transcriptor-v2\crates\domain)
+   Compiling tv2-v1compat v2.0.0-alpha.1 (G:\TODO\transcriptor-v2\crates\v1compat)
+   Compiling tv2-application v2.0.0-alpha.1 (G:\TODO\transcriptor-v2\crates\application)
+   Compiling tv2-media v2.0.0-alpha.1 (G:\TODO\transcriptor-v2\crates\media)
+   Compiling transcriptor v2.0.0-alpha.1 (G:\TODO\transcriptor-v2\apps\desktop)
+error[E0559]: variant `tv2_domain::Command::CreateLayer` has no field named `layer`
+  --> apps\desktop\src\gesture_tests.rs:55:47
+   |
+55 |     h.state_mut().exec(Command::CreateLayer { layer });
+   |                                               ^^^^^ `tv2_domain::Command::CreateLayer` does not have this field
+   |
+   = note: available fields are: `asset_id`, `kind`, `name`, `color`, `layer_id`
+
+For more information about this error, try `rustc --explain E0559`.
+error: could not compile `transcriptor` (bin "Transcriptor" test) due to 1 previous error

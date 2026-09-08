@@ -1,0 +1,65 @@
+{
+  "revision": 4,
+  "view": "Sequence",
+  "playhead_ms": 5000,
+  "player": {
+    "position_ms": 5000,
+    "playing": false,
+    "rate": 1.0,
+    "generation": 5,
+    "buffering": false,
+    "decode_ms": 49.80289840698242,
+    "audio_available": true
+  },
+  "last_frame": {
+    "position_ms": 5000,
+    "w": 816,
+    "h": 460,
+    "generation": 5
+  },
+  "clips": [
+    {
+      "id": "clip-1e58535c6055",
+      "track": "V1",
+      "position_ms": 0,
+      "source_start_ms": 0,
+      "source_end_ms": 5000,
+      "enabled": true,
+      "link": "link-d9448e8c39c4"
+    },
+    {
+      "id": "clip-013c4b02d38d",
+      "track": "A1",
+      "position_ms": 0,
+      "source_start_ms": 0,
+      "source_end_ms": 5000,
+      "enabled": true,
+      "link": "link-d9448e8c39c4"
+    },
+    {
+      "id": "clip-e5e593710ce5",
+      "track": "V1",
+      "position_ms": 5000,
+      "source_start_ms": 5000,
+      "source_end_ms": 12000,
+      "enabled": true,
+      "link": "link-d9448e8c39c4@3528000000"
+    },
+    {
+      "id": "clip-39c720657482",
+      "track": "A1",
+      "position_ms": 5000,
+      "source_start_ms": 5000,
+      "source_end_ms": 12000,
+      "enabled": true,
+      "link": "link-d9448e8c39c4@3528000000"
+    }
+  ],
+  "layers": [],
+  "toasts": [
+    "×2 · audio acelerado con tono preservado (atempo)",
+    "×1 · audio normal",
+    "el clip se solaparía con «fixture-a.mp4» (clip-1e58535c6055) · elige otra posición, otra pista o usa sobrescribir"
+  ],
+  "undo": "Dividir clips"
+}

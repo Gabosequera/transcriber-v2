@@ -1,0 +1,15 @@
+{
+  "repo": "https://github.com/Gabosequera/transcriber",
+  "release": "https://github.com/Gabosequera/transcriber/releases/tag/v0.4.0",
+  "commit": "bb7012c",
+  "tag": "v0.4.0",
+  "workflow": "https://github.com/Gabosequera/transcriber/actions/runs/34284363498",
+  "workflow_conclusion": "success",
+  "downloaded_asset": {
+    "name": "transcriptor-windows-v0.4.0.zip",
+    "sha256": "c1720afa1c2a424aebad9f3b1f41279a12a1e7b3ff593491de6474df1885a6a3",
+    "size": 636792
+  },
+  "verified_files": 82,
+  "local_tests": "150 run,148 passed,2 skipped"
+}

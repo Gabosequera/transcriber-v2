@@ -1,0 +1,130 @@
+paso 1: Log { text: "E2 transporte: velocidades 1×/2×/3×/4×/8×, pausa, seek, frame step, loop IN/OUT y política de audio" }
+E2 transporte: velocidades 1×/2×/3×/4×/8×, pausa, seek, frame step, loop IN/OUT y política de audio
+paso 2: Wait { ms: 500 }
+paso 3: Import { path: "G:/TODO/transcriptor-v2/tests/fixtures/media/fixture-a.mp4" }
+  toast: Info: Importado fixture-a.mp4: video · 640×360 · 30.000 fps · h264 · 1 pista(s) de audio 48000 Hz 1 can. · 00:00:12.000
+paso 4: Insert { asset: 0, at: Some(0.0) }
+  toast: Info: Insertado en 00:00:00.000
+paso 5: Action { id: "view.fit" }
+  toast: Info: Insertado en 00:00:00.000
+paso 6: Seek { t: 0.0 }
+  toast: Info: Insertado en 00:00:00.000
+paso 7: WaitFrame { ms: 2000 }
+  toast: Info: Insertado en 00:00:00.000
+fotograma presentado: seq 2 (posición 00:00:00.000)
+paso 8: Play
+  toast: Info: Insertado en 00:00:00.000
+paso 9: Wait { ms: 1500 }
+  toast: Info: Insertado en 00:00:00.000
+paso 10: Assert { clips: None, layers: None, items: None, revision: None, playing: Some(true), rate: Some(1.0), position: Some([1.2, 1.9]), tracks: None }
+assert OK (clips 2, capas 0, items 0, rev 2, pos 1.380, rate 1, playing true)
+  toast: Info: Insertado en 00:00:00.000
+paso 11: Rate { value: 3.0 }
+  toast: Info: ×3 · audio acelerado con tono preservado (atempo)
+paso 12: Wait { ms: 1000 }
+  toast: Info: ×3 · audio acelerado con tono preservado (atempo)
+paso 13: Assert { clips: None, layers: None, items: None, revision: None, playing: Some(true), rate: Some(3.0), position: Some([3.8, 5.5]), tracks: None }
+assert OK (clips 2, capas 0, items 0, rev 2, pos 4.170, rate 3, playing true)
+  toast: Info: ×3 · audio acelerado con tono preservado (atempo)
+paso 14: Rate { value: 4.0 }
+  toast: Info: ×4 · audio acelerado con tono preservado (atempo)
+paso 15: Wait { ms: 1000 }
+  toast: Info: ×4 · audio acelerado con tono preservado (atempo)
+paso 16: Assert { clips: None, layers: None, items: None, revision: None, playing: Some(true), rate: Some(4.0), position: Some([7.5, 10.0]), tracks: None }
+assert OK (clips 2, capas 0, items 0, rev 2, pos 7.910, rate 4, playing true)
+  toast: Info: ×4 · audio acelerado con tono preservado (atempo)
+paso 17: Pause
+  toast: Info: ×4 · audio acelerado con tono preservado (atempo)
+paso 18: Wait { ms: 200 }
+  toast: Info: ×4 · audio acelerado con tono preservado (atempo)
+paso 19: Assert { clips: None, layers: None, items: None, revision: None, playing: Some(false), rate: None, position: None, tracks: None }
+assert OK (clips 2, capas 0, items 0, rev 2, pos 7.900, rate 4, playing false)
+  toast: Info: ×4 · audio acelerado con tono preservado (atempo)
+paso 20: Dump { path: "G:/TODO/transcriptor-v2/implementation/evidence/e2/transporte-01-pausa-tras-4x.json" }
+estado volcado en G:/TODO/transcriptor-v2/implementation/evidence/e2/transporte-01-pausa-tras-4x.json
+  toast: Info: ×4 · audio acelerado con tono preservado (atempo)
+paso 21: Seek { t: 1.0 }
+  toast: Info: ×4 · audio acelerado con tono preservado (atempo)
+paso 22: WaitFrame { ms: 2000 }
+  toast: Info: ×4 · audio acelerado con tono preservado (atempo)
+fotograma presentado: seq 209 (posición 00:00:01.000)
+paso 23: Action { id: "transport.skim" }
+  toast: Info: ×8 · skim de fotogramas clave · sin audio
+paso 24: Wait { ms: 800 }
+  toast: Info: ×8 · skim de fotogramas clave · sin audio
+paso 25: Assert { clips: None, layers: None, items: None, revision: None, playing: Some(true), rate: Some(8.0), position: Some([6.0, 8.5]), tracks: None }
+assert OK (clips 2, capas 0, items 0, rev 2, pos 6.810, rate 8, playing true)
+  toast: Info: ×8 · skim de fotogramas clave · sin audio
+paso 26: Screenshot { path: "G:/TODO/transcriptor-v2/implementation/evidence/e2/transporte-02-skim-8x.png" }
+  toast: Info: ×8 · skim de fotogramas clave · sin audio
+captura guardada en G:/TODO/transcriptor-v2/implementation/evidence/e2/transporte-02-skim-8x.png (1440×900)
+paso 27: Pause
+  toast: Info: ×8 · skim de fotogramas clave · sin audio
+paso 28: Rate { value: 1.0 }
+  toast: Info: ×1 · audio normal
+paso 29: Seek { t: 2.0 }
+  toast: Info: ×1 · audio normal
+paso 30: WaitFrame { ms: 2000 }
+  toast: Info: ×1 · audio normal
+fotograma presentado: seq 388 (posición 00:00:02.000)
+paso 31: AdvanceFrames { frames: 1 }
+  toast: Info: ×1 · audio normal
+paso 32: Wait { ms: 400 }
+  toast: Info: ×1 · audio normal
+paso 33: Assert { clips: None, layers: None, items: None, revision: None, playing: Some(false), rate: None, position: Some([2.0333, 2.0334]), tracks: None }
+assert OK (clips 2, capas 0, items 0, rev 2, pos 2.033, rate 1, playing false)
+  toast: Info: ×1 · audio normal
+paso 34: AdvanceFrames { frames: -10 }
+  toast: Info: ×1 · audio normal
+paso 35: Wait { ms: 400 }
+  toast: Info: ×1 · audio normal
+paso 36: Assert { clips: None, layers: None, items: None, revision: None, playing: Some(false), rate: None, position: Some([1.6999, 1.7001]), tracks: None }
+assert OK (clips 2, capas 0, items 0, rev 2, pos 1.700, rate 1, playing false)
+  toast: Info: ×1 · audio normal
+paso 37: Dump { path: "G:/TODO/transcriptor-v2/implementation/evidence/e2/transporte-03-frame-step.json" }
+estado volcado en G:/TODO/transcriptor-v2/implementation/evidence/e2/transporte-03-frame-step.json
+  toast: Info: ×1 · audio normal
+paso 38: SetLoop { start: 2.0, end: 3.0 }
+  toast: Info: ×1 · audio normal
+paso 39: Seek { t: 2.0 }
+  toast: Info: ×1 · audio normal
+paso 40: WaitFrame { ms: 2000 }
+  toast: Info: ×1 · audio normal
+fotograma presentado: seq 391 (posición 00:00:02.000)
+paso 41: Play
+  toast: Info: ×1 · audio normal
+paso 42: Wait { ms: 2500 }
+  toast: Info: ×1 · audio normal
+paso 43: Assert { clips: None, layers: None, items: None, revision: None, playing: Some(true), rate: None, position: Some([2.0, 3.05]), tracks: None }
+assert OK (clips 2, capas 0, items 0, rev 2, pos 2.150, rate 1, playing true)
+  toast: Info: ×1 · audio normal
+paso 44: Wait { ms: 1200 }
+  toast: Info: ×1 · audio normal
+paso 45: Assert { clips: None, layers: None, items: None, revision: None, playing: Some(true), rate: None, position: Some([2.0, 3.05]), tracks: None }
+assert OK (clips 2, capas 0, items 0, rev 2, pos 2.240, rate 1, playing true)
+  toast: Info: ×1 · audio normal
+paso 46: Screenshot { path: "G:/TODO/transcriptor-v2/implementation/evidence/e2/transporte-04-loop.png" }
+  toast: Info: ×1 · audio normal
+captura guardada en G:/TODO/transcriptor-v2/implementation/evidence/e2/transporte-04-loop.png (1440×900)
+paso 47: Pause
+  toast: Info: ×1 · audio normal
+paso 48: ClearLoop
+  toast: Info: ×1 · audio normal
+paso 49: Seek { t: 11.5 }
+  toast: Info: ×1 · audio normal
+paso 50: WaitFrame { ms: 2000 }
+  toast: Info: ×1 · audio normal
+fotograma presentado: seq 491 (posición 00:00:11.500)
+paso 51: Play
+  toast: Info: ×1 · audio normal
+paso 52: Wait { ms: 1200 }
+  toast: Info: ×1 · audio normal
+paso 53: Assert { clips: None, layers: None, items: None, revision: None, playing: Some(false), rate: None, position: Some([11.9, 12.0]), tracks: None }
+assert OK (clips 2, capas 0, items 0, rev 2, pos 12.000, rate 1, playing false)
+paso 54: Log { text: "al llegar al final la reproducción se detiene en la duración de la secuencia" }
+al llegar al final la reproducción se detiene en la duración de la secuencia
+paso 55: Dump { path: "G:/TODO/transcriptor-v2/implementation/evidence/e2/transporte-05-final.json" }
+estado volcado en G:/TODO/transcriptor-v2/implementation/evidence/e2/transporte-05-final.json
+paso 56: Quit
+quit; fallos=false
+guion terminado; fallos=false

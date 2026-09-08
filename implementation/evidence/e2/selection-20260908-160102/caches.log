@@ -1,0 +1,88 @@
+paso 1: Wait { ms: 500 }
+paso 2: Import { path: "G:/TODO/transcriptor-v2/tests/fixtures/media/fixture-sync.mp4" }
+  toast: Info: Importado fixture-sync.mp4: video · 640×360 · 30.000 fps · h264 · 1 pista(s) de audio 48000 Hz 1 can. · 00:00:12.000
+paso 3: Insert { asset: 0, at: Some(0.0) }
+  toast: Info: Insertado en 00:00:00.000
+paso 4: Action { id: "view.fit" }
+  toast: Info: Insertado en 00:00:00.000
+paso 5: Seek { t: 2.0 }
+  toast: Info: Insertado en 00:00:00.000
+paso 6: WaitFrame { ms: 2000 }
+  toast: Info: Insertado en 00:00:00.000
+fotograma presentado: seq 3 (posición 00:00:02.000)
+paso 7: Wait { ms: 2500 }
+  toast: Info: Insertado en 00:00:00.000
+paso 8: AssertCaches { wave_columns_min: 200, thumb_tiles_min: 5 }
+caches: wave_columns=766, thumb_tiles=20, OK=true
+  toast: Info: Insertado en 00:00:00.000
+paso 9: Screenshot { path: "G:/TODO/transcriptor-v2/implementation/evidence/e2/selection-20260908-160102/caches-sequence.png" }
+  toast: Info: Insertado en 00:00:00.000
+captura guardada en G:/TODO/transcriptor-v2/implementation/evidence/e2/selection-20260908-160102/caches-sequence.png (1920×1080)
+paso 10: Split
+  toast: Info: Insertado en 00:00:00.000
+paso 11: SelectClip { index: 2 }
+  toast: Info: Insertado en 00:00:00.000
+paso 12: Shift { delta: 2.0, tracks: 0, expect_error: None }
+SHIFT resultado=Ok(()), esperado=None, revisión=4
+  toast: Info: Insertado en 00:00:00.000
+paso 13: Assert { markers: None, clips: Some(4), layers: None, items: None, revision: Some(4), playing: None, rate: None, position: None, tracks: None }
+assert OK (clips 4, capas 0, items 0, rev 4, pos 2.000, rate 1, playing false)
+  toast: Info: Insertado en 00:00:00.000
+paso 14: Wait { ms: 700 }
+  toast: Info: Insertado en 00:00:00.000
+paso 15: Screenshot { path: "G:/TODO/transcriptor-v2/implementation/evidence/e2/selection-20260908-160102/caches-split-move.png" }
+  toast: Info: Insertado en 00:00:00.000
+captura guardada en G:/TODO/transcriptor-v2/implementation/evidence/e2/selection-20260908-160102/caches-split-move.png (1920×1080)
+paso 16: View { mode: "source" }
+  toast: Info: Insertado en 00:00:00.000
+paso 17: Wait { ms: 700 }
+  toast: Info: Insertado en 00:00:00.000
+paso 18: AssertCaches { wave_columns_min: 200, thumb_tiles_min: 5 }
+caches: wave_columns=766, thumb_tiles=20, OK=true
+  toast: Info: Insertado en 00:00:00.000
+paso 19: Screenshot { path: "G:/TODO/transcriptor-v2/implementation/evidence/e2/selection-20260908-160102/caches-source.png" }
+  toast: Info: Insertado en 00:00:00.000
+captura guardada en G:/TODO/transcriptor-v2/implementation/evidence/e2/selection-20260908-160102/caches-source.png (1920×1080)
+paso 20: View { mode: "sequence" }
+  toast: Info: Insertado en 00:00:00.000
+paso 21: Seek { t: 3.0 }
+  toast: Info: Insertado en 00:00:00.000
+paso 22: Action { id: "sequence.marker_add" }
+  toast: Info: Insertado en 00:00:00.000
+paso 23: Assert { markers: Some(1), clips: None, layers: None, items: None, revision: Some(5), playing: None, rate: None, position: None, tracks: None }
+assert OK (clips 4, capas 0, items 0, rev 5, pos 3.000, rate 1, playing false)
+  toast: Info: Insertado en 00:00:00.000
+paso 24: Screenshot { path: "G:/TODO/transcriptor-v2/implementation/evidence/e2/selection-20260908-160102/markers-list.png" }
+  toast: Info: Insertado en 00:00:00.000
+captura guardada en G:/TODO/transcriptor-v2/implementation/evidence/e2/selection-20260908-160102/markers-list.png (1920×1080)
+paso 25: Action { id: "sequence.markers" }
+  toast: Info: Insertado en 00:00:00.000
+paso 26: Save { path: "G:/TODO/transcriptor-v2/implementation/evidence/e2/selection-20260908-160102/cache-markers-demo.transcriptor" }
+  toast: Info: Guardado en G:/TODO/transcriptor-v2/implementation/evidence/e2/selection-20260908-160102/cache-markers-demo.transcriptor
+paso 27: NewProject
+  toast: Info: Proyecto nuevo
+paso 28: Open { path: "G:/TODO/transcriptor-v2/implementation/evidence/e2/selection-20260908-160102/cache-markers-demo.transcriptor" }
+  toast: Info: Proyecto «Sin título» abierto (revisión 5)
+paso 29: Assert { markers: Some(1), clips: Some(4), layers: None, items: None, revision: None, playing: None, rate: None, position: None, tracks: None }
+assert OK (clips 4, capas 0, items 0, rev 5, pos 3.000, rate 1, playing false)
+  toast: Info: Proyecto «Sin título» abierto (revisión 5)
+paso 30: Wait { ms: 5500 }
+  toast: Info: Proyecto «Sin título» abierto (revisión 5)
+paso 31: Viewport { width: 1280.0, height: 720.0, zoom: 1.0 }
+paso 32: Wait { ms: 600 }
+paso 33: Action { id: "view.fit" }
+paso 34: Screenshot { path: "G:/TODO/transcriptor-v2/implementation/evidence/e2/selection-20260908-160102/ui-1280-100.png" }
+captura guardada en G:/TODO/transcriptor-v2/implementation/evidence/e2/selection-20260908-160102/ui-1280-100.png (2560×1440)
+paso 35: Viewport { width: 1280.0, height: 720.0, zoom: 1.5 }
+paso 36: Wait { ms: 600 }
+paso 37: Action { id: "view.fit" }
+paso 38: Screenshot { path: "G:/TODO/transcriptor-v2/implementation/evidence/e2/selection-20260908-160102/ui-1280-150.png" }
+captura guardada en G:/TODO/transcriptor-v2/implementation/evidence/e2/selection-20260908-160102/ui-1280-150.png (1280×720)
+paso 39: Viewport { width: 1280.0, height: 720.0, zoom: 2.0 }
+paso 40: Wait { ms: 600 }
+paso 41: Action { id: "view.fit" }
+paso 42: Screenshot { path: "G:/TODO/transcriptor-v2/implementation/evidence/e2/selection-20260908-160102/ui-1280-200.png" }
+captura guardada en G:/TODO/transcriptor-v2/implementation/evidence/e2/selection-20260908-160102/ui-1280-200.png (1920×1080)
+paso 43: Quit
+quit; fallos=false
+guion terminado; fallos=false

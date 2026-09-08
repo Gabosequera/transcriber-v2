@@ -1,0 +1,14 @@
+ffmpeg version 8.0.1-essentials_build-www.gyan.dev Copyright (c) 2000-2025 the FFmpeg developers
+h264-720p: OK mov 1280x720 h264 · aac · 0.8 s · 280772 bytes
+h264-1080p: OK mov 1920x1080 h264 · aac · 1.0 s · 509490 bytes
+h264-2160p: OK mov 3840x2160 h264 · aac · 2.0 s · 1187344 bytes
+h264-vertical: OK mov 1080x1920 h264 · aac · 0.5 s · 251726 bytes
+hevc-1080p: OK mov 1920x1080 hevc · aac · 0.7 s · 348522 bytes
+av1-1080p: OK mov 1920x1080 av1 · aac · 0.8 s · 317568 bytes
+prores-1080p: OK mov 1920x1080 prores · pcm_s16le · 0.7 s · 12188005 bytes
+vp9-webm-1080p: OK matroska 1920x1080 vp9 · opus · 0.7 s · 440904 bytes
+mkv-h264-1080p: OK matroska 1920x1080 h264 · flac · 0.6 s · 541023 bytes
+h264-nvenc-1080p: OK mov 1920x1080 h264 · aac · 0.6 s · 888056 bytes
+wav-pcm: OK wav 0x0  · pcm_s16le · 0.2 s · 192078 bytes
+flac: OK flac 0x0  · flac · 0.2 s · 65371 bytes
+mp3-192: OK mp3 0x0  · mp3 · 0.2 s · 25388 bytes

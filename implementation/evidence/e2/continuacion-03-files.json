@@ -1,0 +1,25 @@
+{
+  "root": "G:\\TODO\\transcriptor-v2",
+  "v1_head": "c3677ba568cfc7d5947ec4695c42fffef6d79e03",
+  "v1_worktree_clean": true,
+  "files": {
+    "crates/media/src/export.rs": "27fb103761cc9e74c40121b8c5e1c031128965485ba11898914fba92c32b5132",
+    "crates/media/src/audio.rs": "daa1bc1555ad39e9a4a9d70316e39d1449ca55f84554355976f5bdfcb1f608cc",
+    "crates/media/src/render.rs": "c157feecbe2b59f5583ce3605dd60f56fb5cd0d30aeab063193746c68244b301",
+    "crates/domain/src/resolve.rs": "538b6ea4c3885773fcdf4bcadce25512eb349a869a914c9b41daa6e0bcc8df40",
+    "apps/desktop/src/app.rs": "a8393ae8c964c692057625129ccd42fdd4747ba77c3f5299d05c77a2cbe58936",
+    "apps/desktop/src/ui_panels.rs": "cfcf66a6a7e040fce78c25d836b30058930af525d66516466150c83d97820730",
+    "apps/desktop/src/scripting.rs": "56e9b04d57ae1bd711dd4cdb749c03d0cca87033634a27efc1da98a4dc531026",
+    "apps/desktop/src/gesture_tests.rs": "da3d6c07354e5272f87a42056503db175343dcb793db9af426791563b6c6ef1d",
+    "packaging/build_windows.py": "38079a511c5b6a6492b66742dc3bd5863c15c33a96c1c3f022ee426313eaf7a9",
+    "tests/scripts/package_smoke.ps1": "d3e52b56012f326782fcebed5ec8fffb3aafe74a0eddaf3f10060ed18ea13f14",
+    "tests/scripts/verify_export.py": "45dcaf7e57537571ac906d3070a5bcc93713fd42471c37e8eaced66983bf7ed2",
+    "tests/scripts/prepare_selection.py": "72854b8fdc3309216bd23a0a029f2f6fb049e7db0bd6c38bd86f9770b49863bc",
+    "implementation/STATUS.md": "35453b320632942a946e6be853946a649af9770c1aa96d37f9ed152acaf4ea1e",
+    "implementation/requirements-matrix.md": "50236cdfb4de87843e728fac00db590f5029af63f0f1ef559a9ec515b6e87da5",
+    "implementation/decisions.md": "6a8e958748fc9f8d016984833508f9642e509ba8edb154802d32f9e2254bd9e1",
+    "implementation/RUN.md": "0ba6b55dc337af9c00dd05f61d73b76244330a3e3bbc75c39c0eeba188a3f6a5",
+    "prompts/00-CONSTRUIR-TRANSCRIPTOR-V2.md": "2c7f9c047d57878015b4b3bce8d723758986624bcf51f0ffde1a1163e0807eb5",
+    "target/release/Transcriptor.exe": "239fda793934af99290dd83f31e3c5a3c9dfff963a810e1ece0bb7f5cf276dfb"
+  }
+}

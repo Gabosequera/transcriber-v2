@@ -1,0 +1,226 @@
+{
+  "schema": "transcriptor-project/1",
+  "project_id": "proj-b2517468eb77",
+  "name": "Sin título",
+  "revision": 5,
+  "created_at": "2026-09-08T10:40:57+00:00",
+  "updated_at": "2026-09-08T10:41:01+00:00",
+  "assets": [
+    {
+      "id": "asset-c220714c6cff",
+      "kind": "video",
+      "name": "fixture-sync.mp4",
+      "path": "G:/TODO/transcriptor-v2/tests/fixtures/media/fixture-sync.mp4",
+      "probe": {
+        "container": "mov",
+        "duration": 8467200000,
+        "start_time": 0,
+        "video": {
+          "stream_index": 0,
+          "codec": "h264",
+          "width": 640,
+          "height": 360,
+          "rotation": 0,
+          "frame_rate": {
+            "num": 30,
+            "den": 1
+          },
+          "avg_frame_rate": {
+            "num": 30,
+            "den": 1
+          },
+          "time_base": {
+            "num": 1,
+            "den": 15360
+          },
+          "start_time": 0,
+          "pix_fmt": "yuv420p",
+          "nb_frames": 360,
+          "duration": 8467200000,
+          "variable_frame_rate": false
+        },
+        "audio": [
+          {
+            "stream_index": 1,
+            "audio_index": 0,
+            "codec": "pcm_s16le",
+            "channels": 1,
+            "channel_layout": "",
+            "sample_rate": 48000,
+            "start_time": 0,
+            "duration": 8467200000,
+            "title": ""
+          }
+        ],
+        "size": 3108660
+      },
+      "fingerprint": {
+        "size": 3108660,
+        "mtime_ns": 1788835263071448100,
+        "hash_muestreado": "2e39c24d3d99a2e04fff451f1a145480a732ee5b3c9cbe958655c8eba5fad316",
+        "inventario_sha256": "ffadf47a0a5d258c7ff2bd9ad4e7a4a6386448451306f514a2cb9b4cab1f1422"
+      },
+      "missing": false
+    }
+  ],
+  "sequences": [
+    {
+      "id": "seq-043fab730943",
+      "name": "Secuencia 1",
+      "frame_rate": {
+        "num": 30,
+        "den": 1
+      },
+      "width": 1920,
+      "height": 1080,
+      "sample_rate": 48000,
+      "tracks": [
+        {
+          "id": "track-b6ac34e5346c",
+          "kind": "video",
+          "name": "V1",
+          "muted": false,
+          "solo": false,
+          "locked": false,
+          "visible": true,
+          "gain_db": 0.0
+        },
+        {
+          "id": "track-97f8799f2edb",
+          "kind": "audio",
+          "name": "A1",
+          "muted": false,
+          "solo": false,
+          "locked": false,
+          "visible": true,
+          "gain_db": 0.0
+        }
+      ],
+      "clips": [
+        {
+          "id": "clip-d04b81cccdea",
+          "track_id": "track-b6ac34e5346c",
+          "asset_id": "asset-c220714c6cff",
+          "source": {
+            "start": 0,
+            "end": 1411200000
+          },
+          "position": 0,
+          "enabled": true,
+          "name": "fixture-sync.mp4",
+          "link_group": "link-278f1133c462",
+          "transform": {
+            "x": 0.0,
+            "y": 0.0,
+            "scale": 1.0,
+            "opacity": 1.0,
+            "fit": "fit"
+          },
+          "gain_db": 0.0,
+          "provenance": {
+            "origin": "user",
+            "created_at": "2026-09-08T10:40:57+00:00"
+          }
+        },
+        {
+          "id": "clip-e4ffebb5b097",
+          "track_id": "track-97f8799f2edb",
+          "asset_id": "asset-c220714c6cff",
+          "source": {
+            "start": 0,
+            "end": 1411200000
+          },
+          "position": 0,
+          "enabled": true,
+          "name": "fixture-sync.mp4",
+          "link_group": "link-278f1133c462",
+          "transform": {
+            "x": 0.0,
+            "y": 0.0,
+            "scale": 1.0,
+            "opacity": 1.0,
+            "fit": "fit"
+          },
+          "gain_db": 0.0,
+          "audio_stream": 0,
+          "provenance": {
+            "origin": "user",
+            "created_at": "2026-09-08T10:40:57+00:00"
+          }
+        },
+        {
+          "id": "clip-d21b3fc21804",
+          "track_id": "track-b6ac34e5346c",
+          "asset_id": "asset-c220714c6cff",
+          "source": {
+            "start": 1411200000,
+            "end": 8467200000
+          },
+          "position": 2822400000,
+          "enabled": true,
+          "name": "fixture-sync.mp4",
+          "link_group": "link-278f1133c462@1411200000",
+          "transform": {
+            "x": 0.0,
+            "y": 0.0,
+            "scale": 1.0,
+            "opacity": 1.0,
+            "fit": "fit"
+          },
+          "gain_db": 0.0,
+          "provenance": {
+            "origin": "split",
+            "parent_clip": "clip-d04b81cccdea",
+            "created_at": "2026-09-08T10:41:00+00:00"
+          }
+        },
+        {
+          "id": "clip-982b5d1537a6",
+          "track_id": "track-97f8799f2edb",
+          "asset_id": "asset-c220714c6cff",
+          "source": {
+            "start": 1411200000,
+            "end": 8467200000
+          },
+          "position": 2822400000,
+          "enabled": true,
+          "name": "fixture-sync.mp4",
+          "link_group": "link-278f1133c462@1411200000",
+          "transform": {
+            "x": 0.0,
+            "y": 0.0,
+            "scale": 1.0,
+            "opacity": 1.0,
+            "fit": "fit"
+          },
+          "gain_db": 0.0,
+          "audio_stream": 0,
+          "provenance": {
+            "origin": "split",
+            "parent_clip": "clip-e4ffebb5b097",
+            "created_at": "2026-09-08T10:41:00+00:00"
+          }
+        }
+      ],
+      "markers": [
+        {
+          "id": "mark-f7fc823f0508",
+          "range": {
+            "start": 2116800000,
+            "end": 2116800000
+          },
+          "label": "Marcador 1",
+          "color": "#e8b55b",
+          "comment": ""
+        }
+      ]
+    }
+  ],
+  "active_sequence": "seq-043fab730943",
+  "layers": [],
+  "layer_order": [],
+  "settings": {
+    "snapping": true,
+    "skip_trims_on_play": false
+  }
+}

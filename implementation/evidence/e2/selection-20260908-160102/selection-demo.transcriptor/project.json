@@ -1,0 +1,243 @@
+{
+  "schema": "transcriptor-project/1",
+  "project_id": "proj-26decbc235cc",
+  "name": "Sin título",
+  "revision": 5,
+  "created_at": "2026-09-08T16:01:23+00:00",
+  "updated_at": "2026-09-08T16:01:27+00:00",
+  "assets": [
+    {
+      "id": "asset-da3ed58803f4",
+      "kind": "video",
+      "name": "fixture-a.mp4",
+      "path": "G:/TODO/transcriptor-v2/tests/fixtures/media/fixture-a.mp4",
+      "probe": {
+        "container": "mov",
+        "duration": 8467200000,
+        "start_time": 0,
+        "video": {
+          "stream_index": 0,
+          "codec": "h264",
+          "width": 640,
+          "height": 360,
+          "rotation": 0,
+          "frame_rate": {
+            "num": 30,
+            "den": 1
+          },
+          "avg_frame_rate": {
+            "num": 30,
+            "den": 1
+          },
+          "time_base": {
+            "num": 1,
+            "den": 15360
+          },
+          "start_time": 0,
+          "pix_fmt": "yuv420p",
+          "nb_frames": 360,
+          "duration": 8467200000,
+          "variable_frame_rate": false
+        },
+        "audio": [
+          {
+            "stream_index": 1,
+            "audio_index": 0,
+            "codec": "aac",
+            "channels": 1,
+            "channel_layout": "mono",
+            "sample_rate": 48000,
+            "start_time": 0,
+            "duration": 8467200000,
+            "title": ""
+          }
+        ],
+        "size": 2245856
+      },
+      "fingerprint": {
+        "size": 2245856,
+        "mtime_ns": 1788816373909680300,
+        "hash_muestreado": "5af6e20946b99936f1b56449a3d5d28f9f6f490a840cf09b5ad59abba5050604",
+        "inventario_sha256": "77aae5a1df8f009ed8f55643e2949f7ff3340026398608631ea992eae8a58d70"
+      },
+      "missing": false
+    }
+  ],
+  "sequences": [
+    {
+      "id": "seq-f463317d4c50",
+      "name": "Secuencia 1",
+      "frame_rate": {
+        "num": 30,
+        "den": 1
+      },
+      "width": 1920,
+      "height": 1080,
+      "sample_rate": 48000,
+      "tracks": [
+        {
+          "id": "track-3df62f0f4336",
+          "kind": "video",
+          "name": "V1",
+          "muted": false,
+          "solo": false,
+          "locked": false,
+          "visible": true,
+          "gain_db": 0.0
+        },
+        {
+          "id": "track-0cb95c882ef1",
+          "kind": "audio",
+          "name": "A1",
+          "muted": false,
+          "solo": false,
+          "locked": false,
+          "visible": true,
+          "gain_db": 0.0
+        }
+      ],
+      "clips": [
+        {
+          "id": "clip-d2f6c8523e7e",
+          "track_id": "track-3df62f0f4336",
+          "asset_id": "asset-da3ed58803f4",
+          "source": {
+            "start": 0,
+            "end": 8467200000
+          },
+          "position": 0,
+          "enabled": true,
+          "name": "fixture-a.mp4",
+          "link_group": "link-0f657ac24551",
+          "transform": {
+            "x": 0.0,
+            "y": 0.0,
+            "scale": 1.0,
+            "opacity": 1.0,
+            "fit": "fit"
+          },
+          "gain_db": 0.0,
+          "provenance": {
+            "origin": "user",
+            "created_at": "2026-09-08T16:01:23+00:00"
+          }
+        },
+        {
+          "id": "clip-e18df54b10d1",
+          "track_id": "track-0cb95c882ef1",
+          "asset_id": "asset-da3ed58803f4",
+          "source": {
+            "start": 0,
+            "end": 8467200000
+          },
+          "position": 0,
+          "enabled": true,
+          "name": "fixture-a.mp4",
+          "link_group": "link-0f657ac24551",
+          "transform": {
+            "x": 0.0,
+            "y": 0.0,
+            "scale": 1.0,
+            "opacity": 1.0,
+            "fit": "fit"
+          },
+          "gain_db": 0.0,
+          "audio_stream": 0,
+          "provenance": {
+            "origin": "user",
+            "created_at": "2026-09-08T16:01:23+00:00"
+          }
+        },
+        {
+          "id": "clip-7d4e0b30ab2f",
+          "track_id": "track-3df62f0f4336",
+          "asset_id": "asset-da3ed58803f4",
+          "source": {
+            "start": 0,
+            "end": 8467200000
+          },
+          "position": 10584000000,
+          "enabled": true,
+          "name": "fixture-a.mp4",
+          "link_group": "link-ef71fbdfe6ba",
+          "transform": {
+            "x": 0.0,
+            "y": 0.0,
+            "scale": 1.0,
+            "opacity": 1.0,
+            "fit": "fit"
+          },
+          "gain_db": 0.0,
+          "provenance": {
+            "origin": "user",
+            "created_at": "2026-09-08T16:01:23+00:00"
+          }
+        },
+        {
+          "id": "clip-a1c9c4b1227c",
+          "track_id": "track-0cb95c882ef1",
+          "asset_id": "asset-da3ed58803f4",
+          "source": {
+            "start": 0,
+            "end": 8467200000
+          },
+          "position": 10584000000,
+          "enabled": true,
+          "name": "fixture-a.mp4",
+          "link_group": "link-ef71fbdfe6ba",
+          "transform": {
+            "x": 0.0,
+            "y": 0.0,
+            "scale": 1.0,
+            "opacity": 1.0,
+            "fit": "fit"
+          },
+          "gain_db": 0.0,
+          "audio_stream": 0,
+          "provenance": {
+            "origin": "user",
+            "created_at": "2026-09-08T16:01:23+00:00"
+          }
+        }
+      ],
+      "markers": []
+    }
+  ],
+  "active_sequence": "seq-f463317d4c50",
+  "layers": [
+    {
+      "layer_id": "layer-50bead3f385d",
+      "kind": "user",
+      "name": "Tramo repetido",
+      "color": "#d09947",
+      "asset_id": "asset-da3ed58803f4",
+      "items": [
+        {
+          "item_id": "item-f783dd3acfec",
+          "label": "Tramo 1",
+          "comment": "",
+          "state": "proposed",
+          "edited": true,
+          "ranges": [
+            {
+              "start": 705600000,
+              "end": 1411200000
+            }
+          ],
+          "origin": "user"
+        }
+      ],
+      "revision": 1,
+      "deleted": false,
+      "visible": true,
+      "locked": false
+    }
+  ],
+  "layer_order": [
+    "layer-50bead3f385d"
+  ],
+  "settings": {
+    "snapping": true,
+    "skip_trims_on_play": false
+  }
+}

@@ -1,0 +1,11 @@
+﻿export: duración 12.000 s (esperada 12.0), streams ['video', 'audio']
+  video h264 1920x1080 30/1 nb_frames=360
+  audio pico -6.787979 dBFS
+  t=0.5s → fuente 0.5s: PSNR 44.0 dB (control 6.5s: 19.9 dB) OK
+  t=11.5s → fuente 11.5s: PSNR 43.5 dB (control 2.5s: 17.8 dB) OK
+  visor vs export t=4.0s: PSNR 30.1 dB (mín 26) OK
+  visor vs export t=7.0s: PSNR 30.3 dB (mín 26) OK
+  visor vs export t=5.2s: PSNR 30.8 dB (mín 26) OK
+  región PiP t=5.2s: PSNR vs fuente base 23.1 dB → PiP ausente (esperado ausente) OK
+  región PiP t=4.0s: PSNR vs fuente base 9.1 dB → PiP presente (esperado presente) OK
+RESULTADO: OK

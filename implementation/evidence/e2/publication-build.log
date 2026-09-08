@@ -1,0 +1,19 @@
+    Finished `release` profile [optimized + debuginfo] target(s) in 7.25s
+{
+  "directory": "G:\\TODO\\transcriptor-v2\\dist\\Transcriptor-v2.0.0-alpha.1-windows-x64-20260908-221131",
+  "archive": "G:\\TODO\\transcriptor-v2\\dist\\Transcriptor-v2.0.0-alpha.1-windows-x64-20260908-221131.zip",
+  "archive_bytes": 12041915,
+  "editor_bytes": 21505536,
+  "package_bytes": 27749431,
+  "sha256": "c31499e5a670c0366b66224d4cc9c7d7cb233f072a1ba374dee19d8ef55be0d4",
+  "schema": "transcriptor-package/1",
+  "build": "20260908-221131",
+  "stage": "E2 provisional",
+  "platform": "windows-x86_64",
+  "version": "2.0.0-alpha.1",
+  "ffmpeg_bundled": false,
+  "license": "Proprietary; third-party licenses separate",
+  "clean_windows_tested": false,
+  "rust_dependencies_inventoried": 293,
+  "dependency_notices_missing": []
+}

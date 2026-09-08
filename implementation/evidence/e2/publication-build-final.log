@@ -1,0 +1,20 @@
+   Compiling transcriptor v2.0.0-alpha.1 (G:\TODO\transcriptor-v2\apps\desktop)
+    Finished `release` profile [optimized + debuginfo] target(s) in 41.63s
+{
+  "directory": "G:\\TODO\\transcriptor-v2\\dist\\Transcriptor-v2.0.0-alpha.1-windows-x64-20260908-221703",
+  "archive": "G:\\TODO\\transcriptor-v2\\dist\\Transcriptor-v2.0.0-alpha.1-windows-x64-20260908-221703.zip",
+  "archive_bytes": 12041211,
+  "editor_bytes": 21505536,
+  "package_bytes": 27749431,
+  "sha256": "6278e97df38597b7f7809bb61c54c9909f9439264ef1a6fe38420ddb8ddab1f5",
+  "schema": "transcriptor-package/1",
+  "build": "20260908-221703",
+  "stage": "E2 provisional",
+  "platform": "windows-x86_64",
+  "version": "2.0.0-alpha.1",
+  "ffmpeg_bundled": false,
+  "license": "Proprietary; third-party licenses separate",
+  "clean_windows_tested": false,
+  "rust_dependencies_inventoried": 293,
+  "dependency_notices_missing": []
+}

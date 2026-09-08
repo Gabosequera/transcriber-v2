@@ -1,0 +1,32 @@
+paso 1: Open { path: "C:\\Users\\gabri\\AppData\\Local\\Temp\\Transcriptor prueba ñ 20260908-115558\\Transcriptor V2 prueba ñ 20260908-155549\\Demo.transcriptor\\project.json" }
+  toast: Info: Proyecto «Demo: cortes, cachés y marcador» abierto (revisión 5)
+paso 2: Assert { markers: Some(1), clips: Some(4), layers: None, items: None, revision: None, playing: None, rate: None, position: None, tracks: None }
+assert OK (clips 4, capas 0, items 0, rev 5, pos 0.000, rate 1, playing false)
+  toast: Info: Proyecto «Demo: cortes, cachés y marcador» abierto (revisión 5)
+paso 3: Action { id: "view.fit" }
+  toast: Info: Proyecto «Demo: cortes, cachés y marcador» abierto (revisión 5)
+paso 4: Seek { t: 5.25 }
+  toast: Info: Proyecto «Demo: cortes, cachés y marcador» abierto (revisión 5)
+paso 5: WaitFrame { ms: 2000 }
+  toast: Info: Proyecto «Demo: cortes, cachés y marcador» abierto (revisión 5)
+fotograma presentado: seq 1 (posición 00:00:05.233)
+paso 6: Wait { ms: 2500 }
+  toast: Info: Proyecto «Demo: cortes, cachés y marcador» abierto (revisión 5)
+paso 7: AssertCaches { wave_columns_min: 1, thumb_tiles_min: 1 }
+caches: wave_columns=648, thumb_tiles=17, OK=true
+  toast: Info: Proyecto «Demo: cortes, cachés y marcador» abierto (revisión 5)
+paso 8: SaveFrame { path: "G:\\TODO\\transcriptor-v2\\implementation\\evidence\\e2\\package-smoke-20260908-115558\\viewer.png" }
+fotograma del visor (00:00:05.233) guardado en G:\TODO\transcriptor-v2\implementation\evidence\e2\package-smoke-20260908-115558\viewer.png
+  toast: Info: Proyecto «Demo: cortes, cachés y marcador» abierto (revisión 5)
+paso 9: Screenshot { path: "G:\\TODO\\transcriptor-v2\\implementation\\evidence\\e2\\package-smoke-20260908-115558\\portable.png" }
+  toast: Info: Proyecto «Demo: cortes, cachés y marcador» abierto (revisión 5)
+captura guardada en G:\TODO\transcriptor-v2\implementation\evidence\e2\package-smoke-20260908-115558\portable.png (1920×1080)
+paso 10: Export { preset: "h264-720p", dest: "G:\\TODO\\transcriptor-v2\\implementation\\evidence\\e2\\package-smoke-20260908-115558\\portable.mp4", range: false }
+  toast: Info: Exportación añadida a la cola (revisión congelada)
+paso 11: WaitExport { ms: 120000 }
+  toast: Info: Exportación añadida a la cola (revisión congelada)
+export OK: G:\TODO\transcriptor-v2\implementation\evidence\e2\package-smoke-20260908-115558\portable.mp4 · 00:00:14.000 · 420 frames · sha256 da3fc904d8d74277762233d8a9e21d11304709ceb98ff4a234e94cc66131e11a
+paso 12: Quit
+quit; fallos=false
+  toast: Info: Exportado G:\TODO\transcriptor-v2\implementation\evidence\e2\package-smoke-20260908-115558\portable.mp4 (00:00:14.000, 420 fotogramas, 2.1 s)
+guion terminado; fallos=false

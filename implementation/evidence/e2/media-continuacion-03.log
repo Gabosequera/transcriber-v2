@@ -1,0 +1,37 @@
+   Compiling tv2-media v2.0.0-alpha.1 (G:\TODO\transcriptor-v2\crates\media)
+    Finished `test` profile [optimized + debuginfo] target(s) in 8.96s
+     Running unittests src\lib.rs (target\debug\deps\tv2_media-23b999262c4e8d1e.exe)
+
+running 23 tests
+test audio::tests::decodes_tone_and_rate_2x_halves_length ... ok
+test audio::tests::atempo_path_keeps_time_alignment_within_tolerance ... ok
+test audio::tests::tempo_chain_matches_v1_policy ... ok
+test audio::tests::delayed_audio_stream_preserves_leading_silence_after_seek_and_rate_change ... ok
+test cache::tests::clear_cancels_workers_without_freeing_their_slots_early ... ok
+test cache::tests::prune_respects_budget ... ok
+test cache::tests::corrupt_cache_version_and_lengths_are_rejected_and_regenerated ... ok
+test cache::tests::thumbnails_coarse_then_fine_indexed_by_time ... ok
+test compositor::tests::fit_letterboxes_and_alpha_blends ... ok
+test cache::tests::waveform_is_progressive_lod_and_persisted ... ok
+test decoder::tests::image_with_alpha_decodes ... ok
+test decoder::tests::decodes_from_exact_offset_outside_keyframe ... ok
+test export::tests::cancel_leaves_no_output_nor_staging ... ok
+test export::tests::decoder_failures_do_not_publish_black_video_or_silent_audio ... ok
+test export::tests::encoder_failure_and_bad_destination_are_explained_without_leftovers ... ok
+test export::tests::exported_flash_and_audio_bursts_remain_synchronized_after_non_keyframe_cut ... ok
+test export::tests::missing_sources_are_checked_at_execution_and_only_for_requested_content ... ok
+test ffmpeg::tests::inventory_json_has_python_shape ... ok
+test ffmpeg::tests::locate_and_probe_fixture ... ok
+test ffmpeg::tests::relink_moved_unicode_fixture_preserves_identity_and_rejects_wrong_media ... ok
+test render::tests::nonzero_container_start_is_not_added_twice_by_the_renderer ... ok
+test render::tests::renders_split_clip_with_overlay_from_real_media ... ok
+test export::tests::format_matrix_every_available_preset_produces_inspectable_output ... ok
+
+test result: ok. 23 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 10.12s
+
+   Doc-tests tv2_media
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+

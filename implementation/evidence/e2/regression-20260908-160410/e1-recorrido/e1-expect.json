@@ -1,0 +1,16 @@
+{
+  "source": "G:/TODO/transcriptor-v2/tests/fixtures/media/fixture-a.mp4",
+  "fps": 30,
+  "duration": 12.0,
+  "tolerance_ms": 80,
+  "checks": [
+    {"t": 0.5, "source_t": 5.5, "wrong_t": 0.5},
+    {"t": 6.5, "source_t": 11.5, "wrong_t": 6.5},
+    {"t": 6.9, "source_t": 11.9, "wrong_t": 6.9},
+    {"t": 7.5, "source_t": 0.5, "wrong_t": 7.5},
+    {"t": 11.5, "source_t": 4.5, "wrong_t": 11.5}
+  ],
+  "overlay_checks": [
+    {"t": 2.5, "source_t": 7.5, "x": 0.5, "y": 0.5, "min_r": 120}
+  ]
+}

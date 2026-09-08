@@ -1,0 +1,105 @@
+{
+  "revision": 15,
+  "view": "Sequence",
+  "playhead_ms": 0,
+  "player": {
+    "position_ms": 0,
+    "playing": false,
+    "rate": 1.0,
+    "generation": 7,
+    "buffering": false,
+    "decode_ms": 65.36070251464844,
+    "audio_available": true
+  },
+  "last_frame": {
+    "position_ms": 0,
+    "w": 732,
+    "h": 412,
+    "generation": 7
+  },
+  "clips": [
+    {
+      "id": "clip-115f89ea7b6e",
+      "track": "V1",
+      "position_ms": 0,
+      "source_start_ms": 0,
+      "source_end_ms": 12000,
+      "enabled": true,
+      "link": "link-fcc06e7cff5e"
+    },
+    {
+      "id": "clip-44646fba56c6",
+      "track": "A1",
+      "position_ms": 0,
+      "source_start_ms": 0,
+      "source_end_ms": 12000,
+      "enabled": true,
+      "link": "link-fcc06e7cff5e"
+    },
+    {
+      "id": "clip-5f90a881cb38",
+      "track": "V2",
+      "position_ms": 3000,
+      "source_start_ms": 0,
+      "source_end_ms": 2000,
+      "enabled": true,
+      "link": "link-76eb93decdf9"
+    },
+    {
+      "id": "clip-d343007ecbaf",
+      "track": "A2",
+      "position_ms": 3000,
+      "source_start_ms": 0,
+      "source_end_ms": 2000,
+      "enabled": true,
+      "link": "link-76eb93decdf9"
+    },
+    {
+      "id": "clip-a631d8f1a611",
+      "track": "V3",
+      "position_ms": 1000,
+      "source_start_ms": 0,
+      "source_end_ms": 5000,
+      "enabled": true,
+      "link": null
+    },
+    {
+      "id": "clip-d9a767e97edc",
+      "track": "A3",
+      "position_ms": 0,
+      "source_start_ms": 0,
+      "source_end_ms": 10000,
+      "enabled": true,
+      "link": null
+    },
+    {
+      "id": "clip-07f76eca0b3e",
+      "track": "V2",
+      "position_ms": 5500,
+      "source_start_ms": 2500,
+      "source_end_ms": 8000,
+      "enabled": true,
+      "link": "link-76eb93decdf9@3528000000@3880800000"
+    },
+    {
+      "id": "clip-1f92d2fb6f6e",
+      "track": "A2",
+      "position_ms": 5500,
+      "source_start_ms": 2500,
+      "source_end_ms": 8000,
+      "enabled": true,
+      "link": "link-76eb93decdf9@3528000000@3880800000"
+    }
+  ],
+  "layers": [],
+  "toasts": [
+    "Exportado G:/TODO/transcriptor-v2/implementation/evidence/e2/regression-20260908-160410/e2-escenario1/escenario1-1080p.mp4 (00:00:12.000, 360 fotogramas, 6.0 s)",
+    "Exportación añadida a la cola (revisión congelada)",
+    "Exportado G:/TODO/transcriptor-v2/implementation/evidence/e2/regression-20260908-160410/e2-escenario1/escenario1-vertical.mp4 (00:00:12.000, 360 fotogramas, 3.2 s)",
+    "Exportación añadida a la cola (revisión congelada)",
+    "Exportado G:/TODO/transcriptor-v2/implementation/evidence/e2/regression-20260908-160410/e2-escenario1/escenario1-audio.wav (00:00:12.000, 0 fotogramas, 0.3 s)",
+    "Exportación añadida a la cola (revisión congelada)",
+    "Exportado G:/TODO/transcriptor-v2/implementation/evidence/e2/regression-20260908-160410/e2-escenario1/escenario1-inout-720p.mp4 (00:00:02.000, 60 fotogramas, 0.8 s)"
+  ],
+  "undo": null
+}

@@ -1,0 +1,14 @@
+paso 1: Import { path: "G:\\TODO\\transcriptor-v2\\tests\\fixtures\\media\\fixture-a.mp4" }
+  toast: Info: Importado fixture-a.mp4: video · 640×360 · 30.000 fps · h264 · 1 pista(s) de audio 48000 Hz 1 can. · 00:00:12.000
+paso 2: Insert { asset: 0, at: Some(0.0) }
+  toast: Info: Insertado en 00:00:00.000
+paso 3: Export { preset: "h264-2160p", dest: "G:\\TODO\\transcriptor-v2\\implementation\\evidence\\e2\\shutdown-20260908-173501\\active.mp4", range: false, selection: None }
+  toast: Info: Exportación añadida a la cola (revisión congelada)
+paso 4: Export { preset: "h264-2160p", dest: "G:\\TODO\\transcriptor-v2\\implementation\\evidence\\e2\\shutdown-20260908-173501\\queued.mp4", range: false, selection: None }
+  toast: Info: Exportación añadida a la cola (revisión congelada)
+paso 5: Wait { ms: 200 }
+  toast: Info: Exportación añadida a la cola (revisión congelada)
+paso 6: Quit
+quit; fallos=false
+  toast: Info: Exportación añadida a la cola (revisión congelada)
+guion terminado; fallos=false

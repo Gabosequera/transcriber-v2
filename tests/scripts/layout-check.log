@@ -1,0 +1,6 @@
+paso 1: Wait { ms: 600 }
+paso 2: Screenshot { path: "G:/TODO/transcriptor-v2/implementation/evidence/e1/layout-check.png" }
+captura guardada en G:/TODO/transcriptor-v2/implementation/evidence/e1/layout-check.png (1440×900)
+paso 3: Quit
+quit; fallos=false
+guion terminado; fallos=false

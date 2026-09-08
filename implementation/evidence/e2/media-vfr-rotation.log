@@ -1,0 +1,77 @@
+   Compiling tv2-media v2.0.0-alpha.1 (G:\TODO\transcriptor-v2\crates\media)
+    Finished `test` profile [optimized + debuginfo] target(s) in 3.82s
+     Running unittests src\lib.rs (target\debug\deps\tv2_media-23b999262c4e8d1e.exe)
+
+running 28 tests
+test audio::tests::tempo_chain_matches_v1_policy ... ok
+test compositor::tests::fit_letterboxes_and_alpha_blends ... ok
+test decoder::tests::image_with_alpha_decodes ... ok
+test cache::tests::clear_cancels_workers_without_freeing_their_slots_early ... ok
+test cache::tests::prune_respects_budget ... ok
+test ffmpeg::tests::inventory_json_has_python_shape ... ok
+test decoder::tests::decodes_from_exact_offset_outside_keyframe ... ok
+test process::tests::cancellation_unblocks_ffmpeg_waiting_for_input ... ok
+test cache::tests::corrupt_cache_version_and_lengths_are_rejected_and_regenerated ... ok
+test audio::tests::decodes_tone_and_rate_2x_halves_length ... ok
+test cache::tests::memory_admission_holds_reservation_until_last_handle_and_retries_after_release ... ok
+test audio::tests::delayed_audio_stream_preserves_leading_silence_after_seek_and_rate_change ... ok
+test cache::tests::waveform_is_progressive_lod_and_persisted ... ok
+test cache::tests::thumbnails_coarse_then_fine_indexed_by_time ... ok
+test ffmpeg::tests::locate_and_probe_fixture ... ok
+test decoder::tests::rotation_matches_explicit_counterclockwise_transform ... ok
+test render::tests::nonzero_container_start_is_not_added_twice_by_the_renderer ... ok
+test export::tests::decoder_failures_do_not_publish_black_video_or_silent_audio ... ok
+test ffmpeg::tests::relink_moved_unicode_fixture_preserves_identity_and_rejects_wrong_media ... ok
+test export::tests::encoder_failure_and_bad_destination_are_explained_without_leftovers ... ok
+rate 1: 12 ráfagas, desvío máximo 0.1 ms
+rate 2: 12 ráfagas, desvío máximo 14.5 ms
+rate 3: 12 ráfagas, desvío máximo 25.9 ms
+rate 4: 12 ráfagas, desvío máximo 19.8 ms
+rate 2 desde 2,5 s: primera ráfaga a 0.244 s (esperado 0,250), desvío 5.9 ms
+test render::tests::renders_split_clip_with_overlay_from_real_media ... ok
+test audio::tests::atempo_path_keeps_time_alignment_within_tolerance ... ok
+test export::tests::cancel_leaves_no_output_nor_staging ... ok
+test export::tests::missing_sources_are_checked_at_execution_and_only_for_requested_content ... ok
+mix: 12000 frames, gain=0.75, max_error=0.000015258789
+test decoder::tests::vfr_seek_preserves_presented_frame_against_native_pts ... ok
+mute: 12000 frames, gain=0.25, max_error=0.000015258789
+solo: 12000 frames, gain=0.25, max_error=0.000015258789
+silence: 12000 frames, gain=0, max_error=0
+test export::tests::mute_solo_and_gain_match_preview_and_pcm_export ... ok
+ffmpeg version 8.0.1-essentials_build-www.gyan.dev Copyright (c) 2000-2025 the FFmpeg developers
+Preset h264-720p; fuente [0.5,10.5); revisión 42; 300 frames; tolerancia A/V 50 ms, audio 20 ms, video 1 frame
+pulso 0: video=0.500000s audio=0.500104s delta=0.104ms
+pulso 1: video=1.500000s audio=1.500104s delta=0.104ms
+pulso 2: video=2.500000s audio=2.500104s delta=0.104ms
+pulso 3: video=3.500000s audio=3.500104s delta=0.104ms
+pulso 4: video=4.500000s audio=4.500104s delta=0.104ms
+pulso 5: video=5.500000s audio=5.500104s delta=0.104ms
+pulso 6: video=6.500000s audio=6.500104s delta=0.104ms
+pulso 7: video=7.500000s audio=7.500104s delta=0.104ms
+pulso 8: video=8.500000s audio=8.500104s delta=0.104ms
+pulso 9: video=9.500000s audio=9.500104s delta=0.104ms
+
+test export::tests::exported_flash_and_audio_bursts_remain_synchronized_after_non_keyframe_cut ... ok
+h264-720p: OK mov 1280x720 h264 · aac · 0.7 s · 280772 bytes
+h264-1080p: OK mov 1920x1080 h264 · aac · 0.9 s · 509490 bytes
+h264-2160p: OK mov 3840x2160 h264 · aac · 2.0 s · 1187344 bytes
+h264-vertical: OK mov 1080x1920 h264 · aac · 0.4 s · 251726 bytes
+hevc-1080p: OK mov 1920x1080 hevc · aac · 0.7 s · 348522 bytes
+av1-1080p: OK mov 1920x1080 av1 · aac · 0.7 s · 317568 bytes
+prores-1080p: OK mov 1920x1080 prores · pcm_s16le · 0.6 s · 12188005 bytes
+vp9-webm-1080p: OK matroska 1920x1080 vp9 · opus · 0.6 s · 440904 bytes
+mkv-h264-1080p: OK matroska 1920x1080 h264 · flac · 0.6 s · 541023 bytes
+h264-nvenc-1080p: OK mov 1920x1080 h264 · aac · 0.6 s · 888056 bytes
+wav-pcm: OK wav 0x0  · pcm_s16le · 0.2 s · 192078 bytes
+flac: OK flac 0x0  · flac · 0.2 s · 65371 bytes
+mp3-192: OK mp3 0x0  · mp3 · 0.2 s · 25388 bytes
+test export::tests::format_matrix_every_available_preset_produces_inspectable_output ... ok
+
+test result: ok. 28 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 8.90s
+
+   Doc-tests tv2_media
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+

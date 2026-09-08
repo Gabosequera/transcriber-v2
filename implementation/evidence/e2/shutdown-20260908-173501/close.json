@@ -1,0 +1,28 @@
+[
+  {
+    "op": "import",
+    "path": "G:\\TODO\\transcriptor-v2\\tests\\fixtures\\media\\fixture-a.mp4"
+  },
+  {
+    "op": "insert",
+    "asset": 0,
+    "at": 0
+  },
+  {
+    "op": "export",
+    "dest": "G:\\TODO\\transcriptor-v2\\implementation\\evidence\\e2\\shutdown-20260908-173501\\active.mp4",
+    "preset": "h264-2160p"
+  },
+  {
+    "op": "export",
+    "dest": "G:\\TODO\\transcriptor-v2\\implementation\\evidence\\e2\\shutdown-20260908-173501\\queued.mp4",
+    "preset": "h264-2160p"
+  },
+  {
+    "op": "wait",
+    "ms": 200
+  },
+  {
+    "op": "quit"
+  }
+]

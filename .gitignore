@@ -1,0 +1,35 @@
+/target/
+/dist/
+/packaging/out/
+/packaging/third-party/ffmpeg/*.exe
+**/*.tmp
+/tests/fixtures/media/*.mp4
+/tests/fixtures/media/*.wav
+/implementation/evidence/**/*.png
+/implementation/evidence/**/*.mp4
+/implementation/evidence/**/*.wav
+
+# Local references, build/model caches and credentials are not product sources.
+/references/
+/.local/
+**/__pycache__/
+**/.venv/
+**/.env
+**/.env.*
+**/*.pdb
+**/*.partial
+/tests/fixtures/media/**/*.mp4
+/tests/fixtures/media/**/*.wav
+/tests/fixtures/media/**/*.ts
+/implementation/evidence/**/cache*/
+/implementation/evidence/**/config*/
+/implementation/evidence/**/logs*/
+/implementation/evidence/**/*.zip
+/implementation/evidence/**/*.ts
+/implementation/evidence/**/*.rgba
+/implementation/evidence/**/*.pcm
+/workers/**/models/
+
+# Synthetic demo project is required by the package builder.
+!/implementation/evidence/e2/cache-markers-demo.transcriptor/
+!/implementation/evidence/e2/cache-markers-demo.transcriptor/project.json

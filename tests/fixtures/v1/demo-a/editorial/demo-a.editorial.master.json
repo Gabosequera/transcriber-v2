@@ -1,0 +1,191 @@
+{
+  "schema": "editorial-master/1",
+  "generated_at": "2026-09-07T00:00:00+00:00",
+  "project": {
+    "name": "demo-a",
+    "profile": "editorial_voz"
+  },
+  "media": {
+    "path": "../../media/fixture-a.mp4",
+    "duration": 12.0,
+    "t0": 0.0,
+    "fingerprint": {
+      "size": 2245856,
+      "mtime_ns": 1788816373909680300,
+      "hash_muestreado": "5af6e20946b99936f1b56449a3d5d28f9f6f490a840cf09b5ad59abba5050604",
+      "inventario_sha256": "77aae5a1df8f009ed8f55643e2949f7ff3340026398608631ea992eae8a58d70"
+    }
+  },
+  "transcription": {
+    "model": "fixture"
+  },
+  "tracks": {
+    "A": {
+      "track_id": "A",
+      "label": "Gabriel",
+      "words": [
+        {
+          "word_id": "A-w-000100",
+          "track_id": "A",
+          "t_ini": 1.0,
+          "t_fin": 1.4,
+          "text": "hola"
+        },
+        {
+          "word_id": "A-w-000150",
+          "track_id": "A",
+          "t_ini": 1.5,
+          "t_fin": 1.9,
+          "text": "mundo"
+        },
+        {
+          "word_id": "A-w-000500",
+          "track_id": "A",
+          "t_ini": 5.0,
+          "t_fin": 5.4,
+          "text": "bien"
+        },
+        {
+          "word_id": "A-w-001000",
+          "track_id": "A",
+          "t_ini": 10.0,
+          "t_fin": 10.5,
+          "text": "fin"
+        }
+      ],
+      "utterances": [
+        {
+          "utterance_id": "A-u-000001",
+          "track_id": "A",
+          "t_ini": 1.0,
+          "t_fin": 1.9,
+          "text": "hola mundo",
+          "word_ids": [
+            "A-w-000100",
+            "A-w-000150"
+          ],
+          "signals": {}
+        },
+        {
+          "utterance_id": "A-u-000002",
+          "track_id": "A",
+          "t_ini": 5.0,
+          "t_fin": 5.4,
+          "text": "bien",
+          "word_ids": [
+            "A-w-000500"
+          ],
+          "signals": {}
+        },
+        {
+          "utterance_id": "A-u-000003",
+          "track_id": "A",
+          "t_ini": 10.0,
+          "t_fin": 10.5,
+          "text": "fin",
+          "word_ids": [
+            "A-w-001000"
+          ],
+          "signals": {}
+        }
+      ],
+      "laughter": [],
+      "arousal": []
+    },
+    "B": {
+      "track_id": "B",
+      "label": "Amigo",
+      "words": [
+        {
+          "word_id": "B-w-000300",
+          "track_id": "B",
+          "t_ini": 3.0,
+          "t_fin": 3.3,
+          "text": "sí"
+        }
+      ],
+      "utterances": [
+        {
+          "utterance_id": "B-u-000001",
+          "track_id": "B",
+          "t_ini": 3.0,
+          "t_fin": 3.3,
+          "text": "sí",
+          "word_ids": [
+            "B-w-000300"
+          ],
+          "signals": {}
+        }
+      ],
+      "laughter": [
+        {
+          "event_id": "B-laugh-00001",
+          "track_id": "B",
+          "t_ini": 6.0,
+          "t_fin": 7.0,
+          "conf": 0.9,
+          "max_conf": 0.9
+        }
+      ],
+      "arousal": []
+    }
+  },
+  "conversation": {
+    "utterances": [
+      {
+        "utterance_id": "A-u-000001",
+        "track_id": "A",
+        "t_ini": 1.0,
+        "t_fin": 1.9,
+        "text": "hola mundo",
+        "word_ids": [
+          "A-w-000100",
+          "A-w-000150"
+        ],
+        "signals": {}
+      },
+      {
+        "utterance_id": "B-u-000001",
+        "track_id": "B",
+        "t_ini": 3.0,
+        "t_fin": 3.3,
+        "text": "sí",
+        "word_ids": [
+          "B-w-000300"
+        ],
+        "signals": {}
+      },
+      {
+        "utterance_id": "A-u-000002",
+        "track_id": "A",
+        "t_ini": 5.0,
+        "t_fin": 5.4,
+        "text": "bien",
+        "word_ids": [
+          "A-w-000500"
+        ],
+        "signals": {}
+      },
+      {
+        "utterance_id": "A-u-000003",
+        "track_id": "A",
+        "t_ini": 10.0,
+        "t_fin": 10.5,
+        "text": "fin",
+        "word_ids": [
+          "A-w-001000"
+        ],
+        "signals": {}
+      }
+    ],
+    "clean_utterance_ids": [
+      "A-u-000001",
+      "B-u-000001",
+      "A-u-000002",
+      "A-u-000003"
+    ],
+    "overlap_groups": [],
+    "duplicate_groups": []
+  },
+  "chunks": []
+}

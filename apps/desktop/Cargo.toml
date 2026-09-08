@@ -1,0 +1,36 @@
+[package]
+name = "transcriptor"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license-file.workspace = true
+description = "Transcriptor V2: editor multimedia y editorial de escritorio."
+default-run = "Transcriptor"
+
+[[bin]]
+name = "Transcriptor"
+path = "src/main.rs"
+
+[dependencies]
+tv2-domain = { path = "../../crates/domain" }
+tv2-application = { path = "../../crates/application" }
+tv2-media = { path = "../../crates/media" }
+tv2-v1compat = { path = "../../crates/v1compat" }
+eframe = { workspace = true }
+egui = { workspace = true }
+egui_extras = { workspace = true }
+rfd = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+anyhow = { workspace = true }
+tracing = { workspace = true }
+tracing-subscriber = { workspace = true }
+parking_lot = { workspace = true }
+crossbeam-channel = { workspace = true }
+image = { workspace = true }
+
+[build-dependencies]
+
+[dev-dependencies]
+tempfile = { workspace = true }
+egui_kittest = { version = "0.36.1", default-features = false, features = ["eframe"] }

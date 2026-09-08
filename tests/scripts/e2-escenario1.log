@@ -1,0 +1,177 @@
+paso 1: Log { text: "E2 escenario 1: editor sin ML — dos videos + PNG con alfa + dos audios; componer, cortar fuera de keyframe, mover, undo/redo, guardar/reabrir, exportar en dos resoluciones y comparar visor/salida" }
+E2 escenario 1: editor sin ML — dos videos + PNG con alfa + dos audios; componer, cortar fuera de keyframe, mover, undo/redo, guardar/reabrir, exportar en dos resoluciones y comparar visor/salida
+paso 2: Wait { ms: 500 }
+paso 3: Import { path: "G:/TODO/transcriptor-v2/tests/fixtures/media/fixture-a.mp4" }
+  toast: Info: Importado fixture-a.mp4: video · 640×360 · 30.000 fps · h264 · 1 pista(s) de audio 48000 Hz 1 can. · 00:00:12.000
+paso 4: Import { path: "G:/TODO/transcriptor-v2/tests/fixtures/media/fixture-b.mp4" }
+  toast: Info: Importado fixture-b.mp4: video · 640×360 · 30.000 fps · h264 · 1 pista(s) de audio 48000 Hz 1 can. · 00:00:08.000
+paso 5: Import { path: "G:/TODO/transcriptor-v2/tests/fixtures/media/overlay-alpha.png" }
+  toast: Info: Importado overlay-alpha.png: imagen · 320×180 · png
+paso 6: Import { path: "G:/TODO/transcriptor-v2/tests/fixtures/media/tone-220.wav" }
+  toast: Info: Importado tone-220.wav: audio · 1 pista(s) de audio 48000 Hz 2 can. · 00:00:10.000
+paso 7: Insert { asset: 0, at: Some(0.0) }
+  toast: Info: Insertado en 00:00:00.000
+paso 8: Insert { asset: 1, at: Some(3.0) }
+  toast: Info: Insertado en 00:00:03.000
+paso 9: Log { text: "fixture-b (8 s) en 3 s: colisiona con V1/A1 → pistas V2/A2 nuevas" }
+fixture-b (8 s) en 3 s: colisiona con V1/A1 → pistas V2/A2 nuevas
+  toast: Info: Insertado en 00:00:03.000
+paso 10: Assert { clips: Some(4), layers: None, items: None, revision: None, playing: None, rate: None, position: None, tracks: Some(4) }
+assert OK (clips 4, capas 0, items 0, rev 6, pos 0.000, rate 1, playing false)
+  toast: Info: Insertado en 00:00:03.000
+paso 11: Insert { asset: 2, at: Some(1.0) }
+  toast: Info: Insertado en 00:00:01.000
+paso 12: Insert { asset: 3, at: Some(0.0) }
+  toast: Info: Insertado en 00:00:00.000
+paso 13: Assert { clips: Some(6), layers: None, items: None, revision: None, playing: None, rate: None, position: None, tracks: Some(6) }
+assert OK (clips 6, capas 0, items 0, rev 8, pos 0.000, rate 1, playing false)
+  toast: Info: Insertado en 00:00:00.000
+paso 14: Action { id: "view.fit" }
+  toast: Info: Insertado en 00:00:00.000
+paso 15: ClipProps { clip: 4, scale: Some(0.45), x: Some(0.25), y: Some(-0.2), opacity: None, gain_db: None }
+  toast: Info: Insertado en 00:00:00.000
+paso 16: Log { text: "fixture-b como PiP (escala 0,45 arriba a la derecha) sobre fixture-a; overlay PNG 1–6 s; tono 220 Hz mezclado en A3" }
+fixture-b como PiP (escala 0,45 arriba a la derecha) sobre fixture-a; overlay PNG 1–6 s; tono 220 Hz mezclado en A3
+  toast: Info: Insertado en 00:00:00.000
+paso 17: TrackProps { track: "A3", muted: None, solo: None, visible: None, gain_db: Some(-12.0) }
+  toast: Info: Insertado en 00:00:00.000
+paso 18: Seek { t: 4.0 }
+  toast: Info: Insertado en 00:00:00.000
+paso 19: WaitFrame { ms: 2000 }
+  toast: Info: Insertado en 00:00:00.000
+fotograma presentado: seq 6 (posición 00:00:04.000)
+paso 20: Wait { ms: 300 }
+  toast: Info: Insertado en 00:00:00.000
+paso 21: SaveFrame { path: "G:/TODO/transcriptor-v2/implementation/evidence/e2/viewer-4000ms.png" }
+fotograma del visor (00:00:04.000) guardado en G:/TODO/transcriptor-v2/implementation/evidence/e2/viewer-4000ms.png
+  toast: Info: Insertado en 00:00:00.000
+paso 22: Screenshot { path: "G:/TODO/transcriptor-v2/implementation/evidence/e2/01-composicion-4000ms.png" }
+  toast: Info: Insertado en 00:00:00.000
+captura guardada en G:/TODO/transcriptor-v2/implementation/evidence/e2/01-composicion-4000ms.png (1440×900)
+paso 23: Seek { t: 5.0 }
+  toast: Info: Insertado en 00:00:00.000
+paso 24: WaitFrame { ms: 2000 }
+  toast: Info: Insertado en 00:00:00.000
+fotograma presentado: seq 7 (posición 00:00:05.000)
+paso 25: SelectClip { index: 4 }
+  toast: Info: Insertado en 00:00:00.000
+paso 26: Log { text: "índices ordenados por (posición, pista): 0 V1 a, 1 A1 a, 2 A3 wav, 3 V3 png, 4 V2 b, 5 A2 b" }
+índices ordenados por (posición, pista): 0 V1 a, 1 A1 a, 2 A3 wav, 3 V3 png, 4 V2 b, 5 A2 b
+  toast: Info: Insertado en 00:00:00.000
+paso 27: Split
+  toast: Info: Insertado en 00:00:00.000
+paso 28: Log { text: "corte de fixture-b (video+audio enlazados) en secuencia 5 s = fuente 2 s (keyframe); segundo corte en 5,5 s = fuente 2,5 s, fuera de keyframe (GOP 2 s)" }
+corte de fixture-b (video+audio enlazados) en secuencia 5 s = fuente 2 s (keyframe); segundo corte en 5,5 s = fuente 2,5 s, fuera de keyframe (GOP 2 s)
+  toast: Info: Insertado en 00:00:00.000
+paso 29: Assert { clips: Some(8), layers: None, items: None, revision: None, playing: None, rate: None, position: None, tracks: None }
+assert OK (clips 8, capas 0, items 0, rev 11, pos 5.000, rate 1, playing false)
+  toast: Info: Insertado en 00:00:00.000
+paso 30: Seek { t: 5.5 }
+  toast: Info: Insertado en 00:00:00.000
+paso 31: WaitFrame { ms: 2000 }
+  toast: Info: Insertado en 00:00:00.000
+fotograma presentado: seq 8 (posición 00:00:05.500)
+paso 32: SelectClip { index: 6 }
+  toast: Info: Insertado en 00:00:00.000
+paso 33: Split
+  toast: Info: Insertado en 00:00:00.000
+paso 34: Assert { clips: Some(10), layers: None, items: None, revision: None, playing: None, rate: None, position: None, tracks: None }
+assert OK (clips 10, capas 0, items 0, rev 12, pos 5.500, rate 1, playing false)
+  toast: Info: Insertado en 00:00:00.000
+paso 35: SelectClip { index: 6 }
+  toast: Info: Insertado en 00:00:00.000
+paso 36: Action { id: "edit.delete" }
+  toast: Info: Insertado en 00:00:00.000
+paso 37: Log { text: "borrado sin ripple del tramo 5,0–5,5 s de fixture-b (video+audio enlazados): queda un hueco en V2/A2" }
+borrado sin ripple del tramo 5,0–5,5 s de fixture-b (video+audio enlazados): queda un hueco en V2/A2
+  toast: Info: Insertado en 00:00:00.000
+paso 38: Assert { clips: Some(8), layers: None, items: None, revision: None, playing: None, rate: None, position: None, tracks: None }
+assert OK (clips 8, capas 0, items 0, rev 13, pos 5.500, rate 1, playing false)
+  toast: Info: Insertado en 00:00:00.000
+paso 39: Undo
+  toast: Info: Deshacer Eliminar clip
+paso 40: Assert { clips: Some(10), layers: None, items: None, revision: None, playing: None, rate: None, position: None, tracks: None }
+assert OK (clips 10, capas 0, items 0, rev 14, pos 5.500, rate 1, playing false)
+  toast: Info: Deshacer Eliminar clip
+paso 41: Redo
+  toast: Info: Rehacer Eliminar clip
+paso 42: Assert { clips: Some(8), layers: None, items: None, revision: None, playing: None, rate: None, position: None, tracks: None }
+assert OK (clips 8, capas 0, items 0, rev 15, pos 5.500, rate 1, playing false)
+  toast: Info: Rehacer Eliminar clip
+paso 43: Seek { t: 7.0 }
+  toast: Info: Rehacer Eliminar clip
+paso 44: WaitFrame { ms: 2000 }
+  toast: Info: Rehacer Eliminar clip
+fotograma presentado: seq 9 (posición 00:00:07.000)
+paso 45: Wait { ms: 300 }
+  toast: Info: Rehacer Eliminar clip
+paso 46: SaveFrame { path: "G:/TODO/transcriptor-v2/implementation/evidence/e2/viewer-7000ms.png" }
+fotograma del visor (00:00:07.000) guardado en G:/TODO/transcriptor-v2/implementation/evidence/e2/viewer-7000ms.png
+  toast: Info: Rehacer Eliminar clip
+paso 47: Screenshot { path: "G:/TODO/transcriptor-v2/implementation/evidence/e2/02-tras-corte-7000ms.png" }
+  toast: Info: Rehacer Eliminar clip
+captura guardada en G:/TODO/transcriptor-v2/implementation/evidence/e2/02-tras-corte-7000ms.png (1440×900)
+paso 48: Seek { t: 5.2 }
+  toast: Info: Rehacer Eliminar clip
+paso 49: WaitFrame { ms: 2000 }
+  toast: Info: Rehacer Eliminar clip
+fotograma presentado: seq 10 (posición 00:00:05.200)
+paso 50: Wait { ms: 300 }
+  toast: Info: Rehacer Eliminar clip
+paso 51: SaveFrame { path: "G:/TODO/transcriptor-v2/implementation/evidence/e2/viewer-5200ms.png" }
+fotograma del visor (00:00:05.200) guardado en G:/TODO/transcriptor-v2/implementation/evidence/e2/viewer-5200ms.png
+  toast: Info: Rehacer Eliminar clip
+paso 52: Screenshot { path: "G:/TODO/transcriptor-v2/implementation/evidence/e2/03-hueco-5200ms.png" }
+  toast: Info: Rehacer Eliminar clip
+captura guardada en G:/TODO/transcriptor-v2/implementation/evidence/e2/03-hueco-5200ms.png (1440×900)
+paso 53: Dump { path: "G:/TODO/transcriptor-v2/implementation/evidence/e2/03-estado.json" }
+estado volcado en G:/TODO/transcriptor-v2/implementation/evidence/e2/03-estado.json
+  toast: Info: Rehacer Eliminar clip
+paso 54: Save { path: "G:/TODO/transcriptor-v2/implementation/evidence/e2/escenario1.transcriptor" }
+  toast: Info: Guardado en G:/TODO/transcriptor-v2/implementation/evidence/e2/escenario1.transcriptor
+paso 55: NewProject
+  toast: Info: Proyecto nuevo
+paso 56: Open { path: "G:/TODO/transcriptor-v2/implementation/evidence/e2/escenario1.transcriptor/project.json" }
+  toast: Info: Proyecto «Sin título» abierto (revisión 15)
+paso 57: Assert { clips: Some(8), layers: None, items: None, revision: None, playing: None, rate: None, position: None, tracks: Some(6) }
+assert OK (clips 8, capas 0, items 0, rev 15, pos 5.200, rate 1, playing false)
+  toast: Info: Proyecto «Sin título» abierto (revisión 15)
+paso 58: Export { preset: "h264-720p", dest: "G:/TODO/transcriptor-v2/implementation/evidence/e2/escenario1-720p.mp4", range: false }
+  toast: Info: Exportación iniciada (revisión congelada)
+paso 59: WaitExport { ms: 120000 }
+  toast: Info: Exportación iniciada (revisión congelada)
+export OK: G:/TODO/transcriptor-v2/implementation/evidence/e2/escenario1-720p.mp4 · 00:00:12.000 · 360 frames · sha256 81195c47a3475ff7e9b5ed9a10c8805ecd2897cdce4ed7d19df5e4e062e46b77
+paso 60: Export { preset: "h264-1080p", dest: "G:/TODO/transcriptor-v2/implementation/evidence/e2/escenario1-1080p.mp4", range: false }
+  toast: Info: Exportación iniciada (revisión congelada)
+paso 61: WaitExport { ms: 120000 }
+  toast: Info: Exportación iniciada (revisión congelada)
+export OK: G:/TODO/transcriptor-v2/implementation/evidence/e2/escenario1-1080p.mp4 · 00:00:12.000 · 360 frames · sha256 625a4a74b487c1649aaa8373ed991387fc043fd49de9a0a98042fd781a59edd7
+paso 62: Export { preset: "h264-vertical", dest: "G:/TODO/transcriptor-v2/implementation/evidence/e2/escenario1-vertical.mp4", range: false }
+  toast: Info: Exportación iniciada (revisión congelada)
+paso 63: WaitExport { ms: 120000 }
+  toast: Info: Exportación iniciada (revisión congelada)
+export OK: G:/TODO/transcriptor-v2/implementation/evidence/e2/escenario1-vertical.mp4 · 00:00:12.000 · 360 frames · sha256 2de2c150428a41d074f06408a9f81d24b92c09a03f855eee5a1ae6f63d9542ee
+paso 64: Export { preset: "wav-pcm", dest: "G:/TODO/transcriptor-v2/implementation/evidence/e2/escenario1-audio.wav", range: false }
+  toast: Info: Exportación iniciada (revisión congelada)
+paso 65: WaitExport { ms: 120000 }
+  toast: Info: Exportación iniciada (revisión congelada)
+export OK: G:/TODO/transcriptor-v2/implementation/evidence/e2/escenario1-audio.wav · 00:00:12.000 · 0 frames · sha256 61bac25135c997681d1069235ba2160d884837eae59d4cfd94db6cc4121f31d6
+paso 66: SetIn { t: 2.0 }
+  toast: Info: Exportado G:/TODO/transcriptor-v2/implementation/evidence/e2/escenario1-audio.wav (00:00:12.000, 0 fotogramas, 0.4 s)
+paso 67: SetOut { t: 4.0 }
+  toast: Info: Exportado G:/TODO/transcriptor-v2/implementation/evidence/e2/escenario1-audio.wav (00:00:12.000, 0 fotogramas, 0.4 s)
+paso 68: Export { preset: "h264-720p", dest: "G:/TODO/transcriptor-v2/implementation/evidence/e2/escenario1-inout-720p.mp4", range: true }
+  toast: Info: Exportación iniciada (revisión congelada)
+paso 69: WaitExport { ms: 120000 }
+  toast: Info: Exportación iniciada (revisión congelada)
+export OK: G:/TODO/transcriptor-v2/implementation/evidence/e2/escenario1-inout-720p.mp4 · 00:00:02.000 · 60 frames · sha256 ef425750aff31065bfd9bd1a9ab24813af9e9e3d528956cc1e7f867ba97b1fdb
+paso 70: Screenshot { path: "G:/TODO/transcriptor-v2/implementation/evidence/e2/04-exportado.png" }
+  toast: Info: Exportado G:/TODO/transcriptor-v2/implementation/evidence/e2/escenario1-inout-720p.mp4 (00:00:02.000, 60 fotogramas, 0.9 s)
+captura guardada en G:/TODO/transcriptor-v2/implementation/evidence/e2/04-exportado.png (1440×900)
+paso 71: Dump { path: "G:/TODO/transcriptor-v2/implementation/evidence/e2/04-estado-final.json" }
+estado volcado en G:/TODO/transcriptor-v2/implementation/evidence/e2/04-estado-final.json
+  toast: Info: Exportado G:/TODO/transcriptor-v2/implementation/evidence/e2/escenario1-inout-720p.mp4 (00:00:02.000, 60 fotogramas, 0.9 s)
+paso 72: Quit
+quit; fallos=false
+  toast: Info: Exportado G:/TODO/transcriptor-v2/implementation/evidence/e2/escenario1-inout-720p.mp4 (00:00:02.000, 60 fotogramas, 0.9 s)
+guion terminado; fallos=false

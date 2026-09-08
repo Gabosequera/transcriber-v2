@@ -1,0 +1,12 @@
+ffmpeg version 8.0.1-essentials_build-www.gyan.dev Copyright (c) 2000-2025 the FFmpeg developers
+Preset h264-720p; fuente [0.5,10.5); revisión 42; 300 frames; tolerancia A/V 50 ms, audio 20 ms, video 1 frame
+pulso 0: video=0.500000s audio=0.500104s delta=0.104ms
+pulso 1: video=1.500000s audio=1.500104s delta=0.104ms
+pulso 2: video=2.500000s audio=2.500104s delta=0.104ms
+pulso 3: video=3.500000s audio=3.500104s delta=0.104ms
+pulso 4: video=4.500000s audio=4.500104s delta=0.104ms
+pulso 5: video=5.500000s audio=5.500104s delta=0.104ms
+pulso 6: video=6.500000s audio=6.500104s delta=0.104ms
+pulso 7: video=7.500000s audio=7.500104s delta=0.104ms
+pulso 8: video=8.500000s audio=8.500104s delta=0.104ms
+pulso 9: video=9.500000s audio=9.500104s delta=0.104ms

@@ -1,0 +1,15 @@
+{
+  "schema": "transcriptor-v2-repositories-lock/1",
+  "consulted_at": "2026-09-07T15:21:28-04:00",
+  "clone_policy": "git clone --depth 1 --filter=blob:none",
+  "repositories": [
+    {"name":"Gausian Native Editor","path":"references/rust-editors/gausian-native-editor","url":"https://github.com/gausian-AI/Gausian_native_editor","branch":"main","commit":"2e173a0d9ad60ad662a7b858e2141a8540567d70","commit_date":"2026-07-01T17:40:22+09:00","license_evidence":"LICENSE is Apache-2.0; README.md separately says core MPL-2.0 and pro features commercial; unresolved conflict blocks copying"},
+    {"name":"OpenCut","path":"references/rust-editors/opencut","url":"https://github.com/waterblower/opencut","branch":"main","commit":"fee06cc8765f4205acc7f288e7399b9dfe87672c","commit_date":"2026-09-06T11:16:40+08:00","license_evidence":"README and repository require legal review; no permissive license was relied on for reuse"},
+    {"name":"Cutlass","path":"references/rust-editors/cutlass","url":"https://github.com/1mrnewton/cutlass","branch":"main","commit":"22437e2837340c7c57d62e438117f9a0fb4096d2","commit_date":"2026-07-22T20:59:31Z","license_evidence":"LICENSE-MIT and LICENSE-APACHE"},
+    {"name":"Kerf","path":"references/rust-editors/kerf","url":"https://github.com/OrellBuehler/kerf","branch":"main","commit":"5fc1db875bdc1a267000fe6d45afa84719610d5b","commit_date":"2026-09-05T12:20:48+02:00","license_evidence":"LICENSE.md: PolyForm Noncommercial; copyright retained by author"},
+    {"name":"GStreamer Rust bindings","path":"references/media-engines/gstreamer","url":"https://gitlab.freedesktop.org/gstreamer/gstreamer-rs","branch":"main","commit":"b13e8e067896cf28959ac0aa63056f783c2a160c","commit_date":"2026-09-05T11:27:40+02:00","license_evidence":"LICENSE-MIT and LICENSE-APACHE; GES bindings document upstream LGPL API"},
+    {"name":"MLT Framework","path":"references/media-engines/mlt","url":"https://github.com/mltframework/mlt","branch":"master","commit":"0f8244a125872544fb34b88125ee18a88b4d0b85","commit_date":"2026-09-07T11:48:21-07:00","license_evidence":"COPYING, GPL and GPLv3 files"},
+    {"name":"Kdenlive","path":"references/mature-editors/kdenlive","url":"https://invent.kde.org/multimedia/kdenlive","branch":"master","commit":"d108f804bb53c8ee55d23d8c894828b016576c64","commit_date":"2026-09-07T13:32:30+02:00","license_evidence":"COPYING, LICENSES, REUSE.toml; GPL project"},
+    {"name":"Shotcut","path":"references/mature-editors/shotcut","url":"https://github.com/mltframework/shotcut","branch":"master","commit":"ca58e53633308b9f8db7fb29c393f5aca3cd8d1e","commit_date":"2026-09-07T12:05:55-07:00","license_evidence":"COPYING; GPL project"}
+  ]
+}

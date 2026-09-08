@@ -1,0 +1,26 @@
+{
+  "source": "G:\\TODO\\transcriptor-v2\\tests\\fixtures\\media\\fixture-a.mp4",
+  "duration": 24,
+  "checks": [
+    {
+      "t": 0.5,
+      "source_t": 0.5,
+      "wrong_t": 6.5
+    },
+    {
+      "t": 11.9,
+      "source_t": 11.9,
+      "wrong_t": 3.9
+    },
+    {
+      "t": 12.5,
+      "source_t": 0.5,
+      "wrong_t": 6.5
+    },
+    {
+      "t": 23.9,
+      "source_t": 11.9,
+      "wrong_t": 3.9
+    }
+  ]
+}

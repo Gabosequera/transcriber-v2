@@ -1,0 +1,95 @@
+[
+  {
+    "op": "import",
+    "path": "G:\\TODO\\transcriptor-v2\\tests\\fixtures\\media\\fixture-a.mp4"
+  },
+  {
+    "op": "insert",
+    "asset": 0,
+    "at": 0
+  },
+  {
+    "op": "insert",
+    "asset": 0,
+    "at": 15
+  },
+  {
+    "op": "assert",
+    "clips": 4
+  },
+  {
+    "op": "select_clips",
+    "indices": [
+      0,
+      1,
+      2,
+      3
+    ]
+  },
+  {
+    "op": "export",
+    "selection": "clips",
+    "preset": "h264-720p",
+    "dest": "G:\\TODO\\transcriptor-v2\\implementation\\evidence\\e2\\selection-20260908-160102\\clips.mp4"
+  },
+  {
+    "op": "wait_export"
+  },
+  {
+    "op": "view",
+    "mode": "source"
+  },
+  {
+    "op": "new_layer",
+    "name": "Tramo repetido"
+  },
+  {
+    "op": "set_in",
+    "t": 1
+  },
+  {
+    "op": "set_out",
+    "t": 2
+  },
+  {
+    "op": "add_range"
+  },
+  {
+    "op": "assert",
+    "layers": 1,
+    "items": 1
+  },
+  {
+    "op": "view",
+    "mode": "sequence"
+  },
+  {
+    "op": "select_item",
+    "layer": 0,
+    "index": 0
+  },
+  {
+    "op": "export",
+    "selection": "items",
+    "preset": "h264-720p",
+    "dest": "G:\\TODO\\transcriptor-v2\\implementation\\evidence\\e2\\selection-20260908-160102\\items.mp4"
+  },
+  {
+    "op": "wait_export"
+  },
+  {
+    "op": "action",
+    "id": "montage.export"
+  },
+  {
+    "op": "screenshot",
+    "path": "G:\\TODO\\transcriptor-v2\\implementation\\evidence\\e2\\selection-20260908-160102\\export-selection.png"
+  },
+  {
+    "op": "save",
+    "path": "G:\\TODO\\transcriptor-v2\\implementation\\evidence\\e2\\selection-20260908-160102\\selection-demo.transcriptor"
+  },
+  {
+    "op": "quit"
+  }
+]

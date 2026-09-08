@@ -1,0 +1,22 @@
+   Compiling winnow v1.0.4
+   Compiling tv2-domain v2.0.0-alpha.1 (G:\TODO\transcriptor-v2\crates\domain)
+   Compiling serde_spanned v1.1.1
+   Compiling toml_datetime v1.1.1+spec-1.1.0
+   Compiling kittest v0.4.0
+   Compiling toml_parser v1.1.3+spec-1.1.0
+   Compiling toml v1.1.5+spec-1.1.0
+   Compiling egui_kittest v0.36.1
+   Compiling tv2-application v2.0.0-alpha.1 (G:\TODO\transcriptor-v2\crates\application)
+   Compiling tv2-v1compat v2.0.0-alpha.1 (G:\TODO\transcriptor-v2\crates\v1compat)
+   Compiling tv2-media v2.0.0-alpha.1 (G:\TODO\transcriptor-v2\crates\media)
+   Compiling transcriptor v2.0.0-alpha.1 (G:\TODO\transcriptor-v2\apps\desktop)
+    Finished `release` profile [optimized + debuginfo] target(s) in 34.59s
+     Running unittests src\main.rs (target\release\deps\Transcriptor-5b34cd279cc5d4f6.exe)
+
+running 1 test
+BENCH clips=10000 frames=200 cold_ms=5.663 p50_ms=0.298 p95_ms=0.424 p99_ms=0.499 max_ms=0.569 visited=74
+BENCH clips=100000 frames=200 cold_ms=80.983 p50_ms=0.363 p95_ms=0.433 p99_ms=0.744 max_ms=1.740 visited=82
+test gesture_tests::dense_ui_benchmark ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 16 filtered out; finished in 0.67s
+

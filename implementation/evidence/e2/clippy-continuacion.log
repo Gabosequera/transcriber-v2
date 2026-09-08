@@ -1,0 +1,16 @@
+    Checking tv2-domain v2.0.0-alpha.1 (G:\TODO\transcriptor-v2\crates\domain)
+    Checking tv2-media v2.0.0-alpha.1 (G:\TODO\transcriptor-v2\crates\media)
+    Checking tv2-v1compat v2.0.0-alpha.1 (G:\TODO\transcriptor-v2\crates\v1compat)
+    Checking tv2-application v2.0.0-alpha.1 (G:\TODO\transcriptor-v2\crates\application)
+error: using `chunks_exact` with a constant chunk size
+   --> crates\media\src\export.rs:777:50
+    |
+777 |             for frame in samples[..n * CHANNELS].chunks_exact(CHANNELS) {
+    |                                                  ^^^^^^^^^^^^^^^^^^^^^^ help: consider using `as_chunks` instead: `as_chunks::<CHANNELS>().0`
+    |
+    = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.98.0/index.html#chunks_exact_to_as_chunks
+    = note: `-D clippy::chunks-exact-to-as-chunks` implied by `-D warnings`
+    = help: to override `-D warnings` add `#[allow(clippy::chunks_exact_to_as_chunks)]`
+
+error: could not compile `tv2-media` (lib test) due to 1 previous error
+warning: build failed, waiting for other jobs to finish...

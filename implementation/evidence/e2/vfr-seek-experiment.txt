@@ -1,0 +1,12 @@
+{"seek": 0.05, "noaccurate": false, "expected_previous_pts": 0.0, "actual_pts": 0.1, "error": 0}
+{"seek": 0.05, "noaccurate": true, "expected_previous_pts": 0.0, "actual_pts": 0.0, "error": 0}
+{"seek": 0.15, "noaccurate": false, "expected_previous_pts": 0.1, "actual_pts": 0.2, "error": 0}
+{"seek": 0.15, "noaccurate": true, "expected_previous_pts": 0.1, "actual_pts": 0.1, "error": 0}
+{"seek": 1.05, "noaccurate": false, "expected_previous_pts": 1.0, "actual_pts": 1.1, "error": 0}
+{"seek": 1.05, "noaccurate": true, "expected_previous_pts": 1.0, "actual_pts": 1.0, "error": 0}
+{"seek": 1.11, "noaccurate": false, "expected_previous_pts": 1.1, "actual_pts": 1.166667, "error": 0}
+{"seek": 1.11, "noaccurate": true, "expected_previous_pts": 1.1, "actual_pts": 1.1, "error": 0}
+{"seek": 2.233333, "noaccurate": false, "expected_previous_pts": 2.2, "actual_pts": 2.3, "error": 0}
+{"seek": 2.233333, "noaccurate": true, "expected_previous_pts": 2.2, "actual_pts": 2.2, "error": 0}
+{"seek": 4.15, "noaccurate": false, "expected_previous_pts": 4.1, "actual_pts": 4.2, "error": 0}
+{"seek": 4.15, "noaccurate": true, "expected_previous_pts": 4.1, "actual_pts": 4.1, "error": 0}

@@ -1,0 +1,111 @@
+[
+  {
+    "op": "new_project"
+  },
+  {
+    "op": "import",
+    "path": "G:/TODO/transcriptor-v2/tests/fixtures/media/fixture-vfr.mp4"
+  },
+  {
+    "op": "insert",
+    "asset": 0,
+    "at": 0
+  },
+  {
+    "op": "action",
+    "id": "view.fit"
+  },
+  {
+    "op": "seek",
+    "t": 1.1
+  },
+  {
+    "op": "wait_frame",
+    "ms": 5000
+  },
+  {
+    "op": "save_frame",
+    "path": "G:/TODO/transcriptor-v2/implementation/evidence/e2/vfr-rotation-20260908-215336/vfr-viewer-1.1.png"
+  },
+  {
+    "op": "seek",
+    "t": 2.2
+  },
+  {
+    "op": "wait_frame",
+    "ms": 5000
+  },
+  {
+    "op": "save_frame",
+    "path": "G:/TODO/transcriptor-v2/implementation/evidence/e2/vfr-rotation-20260908-215336/vfr-viewer-2.2.png"
+  },
+  {
+    "op": "screenshot",
+    "path": "G:/TODO/transcriptor-v2/implementation/evidence/e2/vfr-rotation-20260908-215336/vfr.png"
+  },
+  {
+    "op": "export",
+    "preset": "h264-720p",
+    "dest": "G:/TODO/transcriptor-v2/implementation/evidence/e2/vfr-rotation-20260908-215336/vfr.mp4"
+  },
+  {
+    "op": "wait_export",
+    "ms": 120000
+  },
+  {
+    "op": "new_project"
+  },
+  {
+    "op": "import",
+    "path": "G:/TODO/transcriptor-v2/tests/fixtures/media/fixture-rot90.mp4"
+  },
+  {
+    "op": "insert",
+    "asset": 0,
+    "at": 0
+  },
+  {
+    "op": "action",
+    "id": "view.fit"
+  },
+  {
+    "op": "seek",
+    "t": 1.1
+  },
+  {
+    "op": "wait_frame",
+    "ms": 5000
+  },
+  {
+    "op": "save_frame",
+    "path": "G:/TODO/transcriptor-v2/implementation/evidence/e2/vfr-rotation-20260908-215336/rot90-viewer-1.1.png"
+  },
+  {
+    "op": "seek",
+    "t": 2.2
+  },
+  {
+    "op": "wait_frame",
+    "ms": 5000
+  },
+  {
+    "op": "save_frame",
+    "path": "G:/TODO/transcriptor-v2/implementation/evidence/e2/vfr-rotation-20260908-215336/rot90-viewer-2.2.png"
+  },
+  {
+    "op": "screenshot",
+    "path": "G:/TODO/transcriptor-v2/implementation/evidence/e2/vfr-rotation-20260908-215336/rot90.png"
+  },
+  {
+    "op": "export",
+    "preset": "h264-720p",
+    "dest": "G:/TODO/transcriptor-v2/implementation/evidence/e2/vfr-rotation-20260908-215336/rot90.mp4"
+  },
+  {
+    "op": "wait_export",
+    "ms": 120000
+  },
+  {
+    "op": "quit"
+  }
+]

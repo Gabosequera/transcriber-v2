@@ -1,0 +1,19 @@
+{
+  "source": "G:/TODO/transcriptor-v2/tests/fixtures/media/fixture-a.mp4",
+  "fps": 30,
+  "duration": 12.0,
+  "tolerance_ms": 80,
+  "checks": [
+    {"t": 0.5, "source_t": 0.5, "wrong_t": 6.5},
+    {"t": 11.5, "source_t": 11.5, "wrong_t": 2.5}
+  ],
+  "viewer_checks": [
+    {"t": 4.0, "viewer": "G:/TODO/transcriptor-v2/implementation/evidence/e2/regression-20260908-215404/e2-escenario1/viewer-4000ms.png", "min_psnr": 26},
+    {"t": 7.0, "viewer": "G:/TODO/transcriptor-v2/implementation/evidence/e2/regression-20260908-215404/e2-escenario1/viewer-7000ms.png", "min_psnr": 26},
+    {"t": 5.2, "viewer": "G:/TODO/transcriptor-v2/implementation/evidence/e2/regression-20260908-215404/e2-escenario1/viewer-5200ms.png", "min_psnr": 26}
+  ],
+  "gap_checks": [
+    {"t": 5.2, "pip_region": [0.55, 0.05, 0.95, 0.35], "expect_pip": false},
+    {"t": 4.0, "pip_region": [0.55, 0.05, 0.95, 0.35], "expect_pip": true}
+  ]
+}

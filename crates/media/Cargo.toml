@@ -1,0 +1,23 @@
+[package]
+name = "tv2-media"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license-file.workspace = true
+description = "Servicios multimedia de Transcriptor V2: ffprobe/fingerprint, decodificación por procesos FFmpeg, compositor, mezcla, reproductor y exportación."
+
+[dependencies]
+tv2-domain = { path = "../domain" }
+serde = { workspace = true }
+serde_json = { workspace = true }
+thiserror = { workspace = true }
+tracing = { workspace = true }
+sha2 = { workspace = true }
+hex = { workspace = true }
+crossbeam-channel = { workspace = true }
+parking_lot = { workspace = true }
+cpal = { workspace = true }
+image = { workspace = true }
+tempfile = { workspace = true }
+
+[dev-dependencies]

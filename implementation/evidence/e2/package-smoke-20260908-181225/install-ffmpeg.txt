@@ -1,0 +1,2 @@
+Descargando FFmpeg GPLv3 desde https://github.com/GyanD/codexffmpeg/releases/download/8.0.1/ffmpeg-8.0.1-essentials_build.zip
+FFmpeg 8.0.1 instalado. Licencia GPLv3 y procedencia conservadas. Abre Transcriptor.exe.

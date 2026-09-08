@@ -1,0 +1,51 @@
+paso 1: Viewport { width: 1280.0, height: 720.0, zoom: 1.0 }
+paso 2: Import { path: "G:\\TODO\\transcriptor-v2\\tests\\fixtures\\media\\fixture-a.mp4" }
+  toast: Info: Importado fixture-a.mp4: video · 640×360 · 30.000 fps · h264 · 1 pista(s) de audio 48000 Hz 1 can. · 00:00:12.000
+paso 3: Insert { asset: 0, at: Some(0.0) }
+  toast: Info: Insertado en 00:00:00.000
+paso 4: Insert { asset: 0, at: Some(15.0) }
+  toast: Info: Insertado en 00:00:15.000
+paso 5: Assert { markers: None, clips: Some(4), layers: None, items: None, revision: None, playing: None, rate: None, position: None, tracks: None }
+assert OK (clips 4, capas 0, items 0, rev 3, pos 0.000, rate 1, playing false)
+  toast: Info: Insertado en 00:00:15.000
+paso 6: SelectClips { indices: [0, 1, 2, 3] }
+  toast: Info: Insertado en 00:00:15.000
+paso 7: Export { preset: "h264-720p", dest: "G:\\TODO\\transcriptor-v2\\implementation\\evidence\\e2\\selection-20260908-160410\\clips.mp4", range: false, selection: Some(Clips) }
+  toast: Info: Exportación añadida a la cola (revisión congelada)
+paso 8: WaitExport { ms: 120000 }
+  toast: Info: Exportación añadida a la cola (revisión congelada)
+export OK: G:\TODO\transcriptor-v2\implementation\evidence\e2\selection-20260908-160410\clips.mp4 · 00:00:24.000 · 720 frames · sha256 6c274c875773ba0726b82a7c23212404b86cf37a3ec7a0a1861e987cd8f46cf6
+paso 9: View { mode: "source" }
+  toast: Info: Exportado G:\TODO\transcriptor-v2\implementation\evidence\e2\selection-20260908-160410\clips.mp4 (00:00:24.000, 720 fotogramas, 3.4 s)
+paso 10: NewLayer { name: "Tramo repetido" }
+  toast: Info: Exportado G:\TODO\transcriptor-v2\implementation\evidence\e2\selection-20260908-160410\clips.mp4 (00:00:24.000, 720 fotogramas, 3.4 s)
+paso 11: SetIn { t: 1.0 }
+  toast: Info: Exportado G:\TODO\transcriptor-v2\implementation\evidence\e2\selection-20260908-160410\clips.mp4 (00:00:24.000, 720 fotogramas, 3.4 s)
+paso 12: SetOut { t: 2.0 }
+  toast: Info: Exportado G:\TODO\transcriptor-v2\implementation\evidence\e2\selection-20260908-160410\clips.mp4 (00:00:24.000, 720 fotogramas, 3.4 s)
+paso 13: AddRange
+  toast: Info: Exportado G:\TODO\transcriptor-v2\implementation\evidence\e2\selection-20260908-160410\clips.mp4 (00:00:24.000, 720 fotogramas, 3.4 s)
+paso 14: Assert { markers: None, clips: None, layers: Some(1), items: Some(1), revision: None, playing: None, rate: None, position: None, tracks: None }
+assert OK (clips 4, capas 1, items 1, rev 5, pos 0.000, rate 1, playing false)
+  toast: Info: Exportado G:\TODO\transcriptor-v2\implementation\evidence\e2\selection-20260908-160410\clips.mp4 (00:00:24.000, 720 fotogramas, 3.4 s)
+paso 15: View { mode: "sequence" }
+  toast: Info: Exportado G:\TODO\transcriptor-v2\implementation\evidence\e2\selection-20260908-160410\clips.mp4 (00:00:24.000, 720 fotogramas, 3.4 s)
+paso 16: SelectItem { layer: 0, index: 0 }
+  toast: Info: Exportado G:\TODO\transcriptor-v2\implementation\evidence\e2\selection-20260908-160410\clips.mp4 (00:00:24.000, 720 fotogramas, 3.4 s)
+paso 17: Export { preset: "h264-720p", dest: "G:\\TODO\\transcriptor-v2\\implementation\\evidence\\e2\\selection-20260908-160410\\items.mp4", range: false, selection: Some(Items) }
+  toast: Info: Exportación añadida a la cola (revisión congelada)
+paso 18: WaitExport { ms: 120000 }
+  toast: Info: Exportación añadida a la cola (revisión congelada)
+export OK: G:\TODO\transcriptor-v2\implementation\evidence\e2\selection-20260908-160410\items.mp4 · 00:00:02.000 · 60 frames · sha256 f6f42124196020386e7364d035c4f41ec83c905a2385c07a67aba5aa39f143a6
+paso 19: Action { id: "montage.export" }
+  toast: Info: Exportado G:\TODO\transcriptor-v2\implementation\evidence\e2\selection-20260908-160410\items.mp4 (00:00:02.000, 60 fotogramas, 0.6 s)
+paso 20: Wait { ms: 5500 }
+  toast: Info: Exportado G:\TODO\transcriptor-v2\implementation\evidence\e2\selection-20260908-160410\items.mp4 (00:00:02.000, 60 fotogramas, 0.6 s)
+paso 21: Screenshot { path: "G:\\TODO\\transcriptor-v2\\implementation\\evidence\\e2\\selection-20260908-160410\\export-selection.png" }
+captura guardada en G:\TODO\transcriptor-v2\implementation\evidence\e2\selection-20260908-160410\export-selection.png (2560×1440)
+paso 22: Save { path: "G:\\TODO\\transcriptor-v2\\implementation\\evidence\\e2\\selection-20260908-160410\\selection-demo.transcriptor" }
+  toast: Info: Guardado en G:\TODO\transcriptor-v2\implementation\evidence\e2\selection-20260908-160410\selection-demo.transcriptor
+paso 23: Quit
+quit; fallos=false
+  toast: Info: Guardado en G:\TODO\transcriptor-v2\implementation\evidence\e2\selection-20260908-160410\selection-demo.transcriptor
+guion terminado; fallos=false

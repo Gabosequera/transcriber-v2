@@ -1,0 +1,63 @@
+paso 1: Log { text: "E2 importador V1: carpeta editorial generada por los módulos de V1 (capas, recortes, montaje) aparece en el timeline" }
+E2 importador V1: carpeta editorial generada por los módulos de V1 (capas, recortes, montaje) aparece en el timeline
+paso 2: Wait { ms: 500 }
+paso 3: ImportV1 { path: "G:/TODO/transcriptor-v2/tests/fixtures/v1/demo-a", media: Some("G:/TODO/transcriptor-v2/tests/fixtures/media/fixture-a.mp4") }
+  toast: Info: V1 importado: 2 capas, 2 carriles de recortes, 5 tramos de montaje (5 comandos)
+paso 4: Wait { ms: 300 }
+  toast: Info: V1 importado: 2 capas, 2 carriles de recortes, 5 tramos de montaje (5 comandos)
+paso 5: Assert { clips: None, layers: Some(4), items: Some(7), revision: None, playing: None, rate: None, position: None, tracks: None }
+assert OK (clips 10, capas 4, items 7, rev 2, pos 0.000, rate 1, playing false)
+  toast: Info: V1 importado: 2 capas, 2 carriles de recortes, 5 tramos de montaje (5 comandos)
+paso 6: Log { text: "capas: Temas (2 items), Notas manuales (2), recortes main (2), recortes ai (1); tombstone item-borrado conservado" }
+capas: Temas (2 items), Notas manuales (2), recortes main (2), recortes ai (1); tombstone item-borrado conservado
+  toast: Info: V1 importado: 2 capas, 2 carriles de recortes, 5 tramos de montaje (5 comandos)
+paso 7: Seek { t: 2.5 }
+  toast: Info: V1 importado: 2 capas, 2 carriles de recortes, 5 tramos de montaje (5 comandos)
+paso 8: WaitFrame { ms: 2000 }
+  toast: Info: V1 importado: 2 capas, 2 carriles de recortes, 5 tramos de montaje (5 comandos)
+fotograma presentado: seq 3 (posición 00:00:02.500)
+paso 9: Wait { ms: 300 }
+  toast: Info: V1 importado: 2 capas, 2 carriles de recortes, 5 tramos de montaje (5 comandos)
+paso 10: Screenshot { path: "G:/TODO/transcriptor-v2/implementation/evidence/e2/import-v1-01-secuencia.png" }
+  toast: Info: V1 importado: 2 capas, 2 carriles de recortes, 5 tramos de montaje (5 comandos)
+captura guardada en G:/TODO/transcriptor-v2/implementation/evidence/e2/import-v1-01-secuencia.png (1440×900)
+paso 11: Dump { path: "G:/TODO/transcriptor-v2/implementation/evidence/e2/import-v1-01-estado.json" }
+estado volcado en G:/TODO/transcriptor-v2/implementation/evidence/e2/import-v1-01-estado.json
+  toast: Info: V1 importado: 2 capas, 2 carriles de recortes, 5 tramos de montaje (5 comandos)
+paso 12: View { mode: "source" }
+  toast: Info: V1 importado: 2 capas, 2 carriles de recortes, 5 tramos de montaje (5 comandos)
+paso 13: Seek { t: 2.2 }
+  toast: Info: V1 importado: 2 capas, 2 carriles de recortes, 5 tramos de montaje (5 comandos)
+paso 14: WaitFrame { ms: 2000 }
+  toast: Info: V1 importado: 2 capas, 2 carriles de recortes, 5 tramos de montaje (5 comandos)
+fotograma presentado: seq 4 (posición 00:00:02.200)
+paso 15: Wait { ms: 300 }
+  toast: Info: V1 importado: 2 capas, 2 carriles de recortes, 5 tramos de montaje (5 comandos)
+paso 16: Screenshot { path: "G:/TODO/transcriptor-v2/implementation/evidence/e2/import-v1-02-fuente-capas.png" }
+  toast: Info: V1 importado: 2 capas, 2 carriles de recortes, 5 tramos de montaje (5 comandos)
+captura guardada en G:/TODO/transcriptor-v2/implementation/evidence/e2/import-v1-02-fuente-capas.png (1440×900)
+paso 17: SelectItem { layer: 0, index: 1 }
+  toast: Info: V1 importado: 2 capas, 2 carriles de recortes, 5 tramos de montaje (5 comandos)
+paso 18: Action { id: "edit.accept" }
+  toast: Info: V1 importado: 2 capas, 2 carriles de recortes, 5 tramos de montaje (5 comandos)
+paso 19: SelectItem { layer: 2, index: 0 }
+  toast: Info: V1 importado: 2 capas, 2 carriles de recortes, 5 tramos de montaje (5 comandos)
+paso 20: Action { id: "edit.toggle" }
+  toast: Info: V1 importado: 2 capas, 2 carriles de recortes, 5 tramos de montaje (5 comandos)
+paso 21: Dump { path: "G:/TODO/transcriptor-v2/implementation/evidence/e2/import-v1-02-estado.json" }
+estado volcado en G:/TODO/transcriptor-v2/implementation/evidence/e2/import-v1-02-estado.json
+  toast: Info: V1 importado: 2 capas, 2 carriles de recortes, 5 tramos de montaje (5 comandos)
+paso 22: View { mode: "sequence" }
+  toast: Info: V1 importado: 2 capas, 2 carriles de recortes, 5 tramos de montaje (5 comandos)
+paso 23: Export { preset: "h264-720p", dest: "G:/TODO/transcriptor-v2/implementation/evidence/e2/import-v1-montaje-720p.mp4", range: false }
+  toast: Info: Exportación iniciada (revisión congelada)
+paso 24: WaitExport { ms: 120000 }
+  toast: Info: Exportación iniciada (revisión congelada)
+export OK: G:/TODO/transcriptor-v2/implementation/evidence/e2/import-v1-montaje-720p.mp4 · 00:00:07.000 · 210 frames · sha256 405c43b762bc39e26f76b4d0e8d832c317d354a94cc18e5296be09c91c389c9c
+paso 25: Screenshot { path: "G:/TODO/transcriptor-v2/implementation/evidence/e2/import-v1-03-exportado.png" }
+  toast: Info: Exportado G:/TODO/transcriptor-v2/implementation/evidence/e2/import-v1-montaje-720p.mp4 (00:00:07.000, 210 fotogramas, 1.7 s)
+captura guardada en G:/TODO/transcriptor-v2/implementation/evidence/e2/import-v1-03-exportado.png (1440×900)
+paso 26: Quit
+quit; fallos=false
+  toast: Info: Exportado G:/TODO/transcriptor-v2/implementation/evidence/e2/import-v1-montaje-720p.mp4 (00:00:07.000, 210 fotogramas, 1.7 s)
+guion terminado; fallos=false

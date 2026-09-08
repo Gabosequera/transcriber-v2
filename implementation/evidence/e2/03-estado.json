@@ -1,0 +1,108 @@
+{
+  "revision": 15,
+  "view": "Sequence",
+  "playhead_ms": 5200,
+  "player": {
+    "position_ms": 5200,
+    "playing": false,
+    "rate": 1.0,
+    "generation": 5,
+    "buffering": false,
+    "decode_ms": 84.2998046875,
+    "audio_available": true
+  },
+  "last_frame": {
+    "position_ms": 5200,
+    "w": 790,
+    "h": 444,
+    "generation": 5
+  },
+  "clips": [
+    {
+      "id": "clip-c775427115f5",
+      "track": "V1",
+      "position_ms": 0,
+      "source_start_ms": 0,
+      "source_end_ms": 12000,
+      "enabled": true,
+      "link": "link-a8a438752271"
+    },
+    {
+      "id": "clip-45952f35ec51",
+      "track": "A1",
+      "position_ms": 0,
+      "source_start_ms": 0,
+      "source_end_ms": 12000,
+      "enabled": true,
+      "link": "link-a8a438752271"
+    },
+    {
+      "id": "clip-f10bb1d5f580",
+      "track": "V2",
+      "position_ms": 3000,
+      "source_start_ms": 0,
+      "source_end_ms": 2000,
+      "enabled": true,
+      "link": "link-f5c7bda1fec0"
+    },
+    {
+      "id": "clip-dc9b556476ea",
+      "track": "A2",
+      "position_ms": 3000,
+      "source_start_ms": 0,
+      "source_end_ms": 2000,
+      "enabled": true,
+      "link": "link-f5c7bda1fec0"
+    },
+    {
+      "id": "clip-a6228a1575d5",
+      "track": "V3",
+      "position_ms": 1000,
+      "source_start_ms": 0,
+      "source_end_ms": 5000,
+      "enabled": true,
+      "link": null
+    },
+    {
+      "id": "clip-f20cee453675",
+      "track": "A3",
+      "position_ms": 0,
+      "source_start_ms": 0,
+      "source_end_ms": 10000,
+      "enabled": true,
+      "link": null
+    },
+    {
+      "id": "clip-56ceb9c5e6b7",
+      "track": "V2",
+      "position_ms": 5500,
+      "source_start_ms": 2500,
+      "source_end_ms": 8000,
+      "enabled": true,
+      "link": "link-f5c7bda1fec0@3528000000@3880800000"
+    },
+    {
+      "id": "clip-5e92d7240c10",
+      "track": "A2",
+      "position_ms": 5500,
+      "source_start_ms": 2500,
+      "source_end_ms": 8000,
+      "enabled": true,
+      "link": "link-f5c7bda1fec0@3528000000@3880800000"
+    }
+  ],
+  "layers": [],
+  "toasts": [
+    "Importado fixture-a.mp4: video · 640×360 · 30.000 fps · h264 · 1 pista(s) de audio 48000 Hz 1 can. · 00:00:12.000",
+    "Importado fixture-b.mp4: video · 640×360 · 30.000 fps · h264 · 1 pista(s) de audio 48000 Hz 1 can. · 00:00:08.000",
+    "Importado overlay-alpha.png: imagen · 320×180 · png",
+    "Importado tone-220.wav: audio · 1 pista(s) de audio 48000 Hz 2 can. · 00:00:10.000",
+    "Insertado en 00:00:00.000",
+    "Insertado en 00:00:03.000",
+    "Insertado en 00:00:01.000",
+    "Insertado en 00:00:00.000",
+    "Deshacer Eliminar clip",
+    "Rehacer Eliminar clip"
+  ],
+  "undo": "Eliminar clip"
+}

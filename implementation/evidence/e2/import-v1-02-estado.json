@@ -1,0 +1,223 @@
+{
+  "revision": 4,
+  "view": "Source",
+  "playhead_ms": 2200,
+  "player": {
+    "position_ms": 2200,
+    "playing": false,
+    "rate": 1.0,
+    "generation": 4,
+    "buffering": false,
+    "decode_ms": 80.8240966796875,
+    "audio_available": true
+  },
+  "last_frame": {
+    "position_ms": 2200,
+    "w": 790,
+    "h": 444,
+    "generation": 4
+  },
+  "clips": [
+    {
+      "id": "clip-000001-0",
+      "track": "V1",
+      "position_ms": 0,
+      "source_start_ms": 1000,
+      "source_end_ms": 3000,
+      "enabled": true,
+      "link": "link-v1-clip-000001-0"
+    },
+    {
+      "id": "clip-000001-0-a0",
+      "track": "A1",
+      "position_ms": 0,
+      "source_start_ms": 1000,
+      "source_end_ms": 3000,
+      "enabled": true,
+      "link": "link-v1-clip-000001-0"
+    },
+    {
+      "id": "clip-000003-1",
+      "track": "V1",
+      "position_ms": 2000,
+      "source_start_ms": 6000,
+      "source_end_ms": 7000,
+      "enabled": true,
+      "link": "link-v1-clip-000003-1"
+    },
+    {
+      "id": "clip-000003-1-a0",
+      "track": "A1",
+      "position_ms": 2000,
+      "source_start_ms": 6000,
+      "source_end_ms": 7000,
+      "enabled": true,
+      "link": "link-v1-clip-000003-1"
+    },
+    {
+      "id": "clip-000001-2",
+      "track": "V1",
+      "position_ms": 3000,
+      "source_start_ms": 4000,
+      "source_end_ms": 5000,
+      "enabled": true,
+      "link": "link-v1-clip-000001-2"
+    },
+    {
+      "id": "clip-000001-2-a0",
+      "track": "A1",
+      "position_ms": 3000,
+      "source_start_ms": 4000,
+      "source_end_ms": 5000,
+      "enabled": true,
+      "link": "link-v1-clip-000001-2"
+    },
+    {
+      "id": "clip-000002-3",
+      "track": "V1",
+      "position_ms": 4000,
+      "source_start_ms": 9000,
+      "source_end_ms": 11000,
+      "enabled": true,
+      "link": "link-v1-clip-000002-3"
+    },
+    {
+      "id": "clip-000002-3-a0",
+      "track": "A1",
+      "position_ms": 4000,
+      "source_start_ms": 9000,
+      "source_end_ms": 11000,
+      "enabled": true,
+      "link": "link-v1-clip-000002-3"
+    },
+    {
+      "id": "clip-000004-4",
+      "track": "V1",
+      "position_ms": 6000,
+      "source_start_ms": 1000,
+      "source_end_ms": 2000,
+      "enabled": true,
+      "link": "link-v1-clip-000004-4"
+    },
+    {
+      "id": "clip-000004-4-a0",
+      "track": "A1",
+      "position_ms": 6000,
+      "source_start_ms": 1000,
+      "source_end_ms": 2000,
+      "enabled": true,
+      "link": "link-v1-clip-000004-4"
+    }
+  ],
+  "layers": [
+    {
+      "id": "layer-demo-notas",
+      "name": "Notas manuales",
+      "items": [
+        {
+          "id": "item-breve",
+          "label": "Breve",
+          "state": "proposed",
+          "ranges": [
+            [
+              7.25,
+              7.5
+            ]
+          ]
+        },
+        {
+          "id": "item-off",
+          "label": "Descartado",
+          "state": "accepted",
+          "ranges": [
+            [
+              8.0,
+              9.0
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "id": "layer-demo-topics",
+      "name": "Temas",
+      "items": [
+        {
+          "id": "item-tema-1",
+          "label": "Saludo",
+          "state": "accepted",
+          "ranges": [
+            [
+              0.5,
+              4.0
+            ],
+            [
+              9.0,
+              11.0
+            ]
+          ]
+        },
+        {
+          "id": "item-sub-1",
+          "label": "Presentación",
+          "state": "proposed",
+          "ranges": [
+            [
+              1.0,
+              2.0
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "id": "trims-main",
+      "name": "Recortes",
+      "items": [
+        {
+          "id": "cut-000001",
+          "label": "cut-000001",
+          "state": "disabled",
+          "ranges": [
+            [
+              2.0,
+              2.5
+            ]
+          ]
+        },
+        {
+          "id": "cut-000003",
+          "label": "cut-000003",
+          "state": "disabled",
+          "ranges": [
+            [
+              8.5,
+              9.0
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "id": "trims-ai",
+      "name": "Cortes sugeridos (AI)",
+      "items": [
+        {
+          "id": "cut-000002",
+          "label": "cut-000002",
+          "state": "proposed",
+          "ranges": [
+            [
+              4.0,
+              4.8
+            ]
+          ]
+        }
+      ]
+    }
+  ],
+  "toasts": [
+    "V1 importado: 2 capas, 2 carriles de recortes, 5 tramos de montaje (5 comandos)"
+  ],
+  "undo": "Desactivar"
+}

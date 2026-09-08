@@ -1,0 +1,487 @@
+{
+  "schema": "transcriptor-project/1",
+  "project_id": "proj-e953348b81b5",
+  "name": "Sin título",
+  "revision": 15,
+  "created_at": "2026-09-08T16:04:52+00:00",
+  "updated_at": "2026-09-08T16:04:54+00:00",
+  "assets": [
+    {
+      "id": "asset-62ee49102637",
+      "kind": "video",
+      "name": "fixture-a.mp4",
+      "path": "G:/TODO/transcriptor-v2/tests/fixtures/media/fixture-a.mp4",
+      "probe": {
+        "container": "mov",
+        "duration": 8467200000,
+        "start_time": 0,
+        "video": {
+          "stream_index": 0,
+          "codec": "h264",
+          "width": 640,
+          "height": 360,
+          "rotation": 0,
+          "frame_rate": {
+            "num": 30,
+            "den": 1
+          },
+          "avg_frame_rate": {
+            "num": 30,
+            "den": 1
+          },
+          "time_base": {
+            "num": 1,
+            "den": 15360
+          },
+          "start_time": 0,
+          "pix_fmt": "yuv420p",
+          "nb_frames": 360,
+          "duration": 8467200000,
+          "variable_frame_rate": false
+        },
+        "audio": [
+          {
+            "stream_index": 1,
+            "audio_index": 0,
+            "codec": "aac",
+            "channels": 1,
+            "channel_layout": "mono",
+            "sample_rate": 48000,
+            "start_time": 0,
+            "duration": 8467200000,
+            "title": ""
+          }
+        ],
+        "size": 2245856
+      },
+      "fingerprint": {
+        "size": 2245856,
+        "mtime_ns": 1788816373909680300,
+        "hash_muestreado": "5af6e20946b99936f1b56449a3d5d28f9f6f490a840cf09b5ad59abba5050604",
+        "inventario_sha256": "77aae5a1df8f009ed8f55643e2949f7ff3340026398608631ea992eae8a58d70"
+      },
+      "missing": false
+    },
+    {
+      "id": "asset-c8008dfbc335",
+      "kind": "video",
+      "name": "fixture-b.mp4",
+      "path": "G:/TODO/transcriptor-v2/tests/fixtures/media/fixture-b.mp4",
+      "probe": {
+        "container": "mov",
+        "duration": 5644800000,
+        "start_time": 0,
+        "video": {
+          "stream_index": 0,
+          "codec": "h264",
+          "width": 640,
+          "height": 360,
+          "rotation": 0,
+          "frame_rate": {
+            "num": 30,
+            "den": 1
+          },
+          "avg_frame_rate": {
+            "num": 30,
+            "den": 1
+          },
+          "time_base": {
+            "num": 1,
+            "den": 15360
+          },
+          "start_time": 0,
+          "pix_fmt": "yuv420p",
+          "nb_frames": 240,
+          "duration": 5644800000,
+          "variable_frame_rate": false
+        },
+        "audio": [
+          {
+            "stream_index": 1,
+            "audio_index": 0,
+            "codec": "aac",
+            "channels": 1,
+            "channel_layout": "mono",
+            "sample_rate": 48000,
+            "start_time": 0,
+            "duration": 5644800000,
+            "title": ""
+          }
+        ],
+        "size": 205003
+      },
+      "fingerprint": {
+        "size": 205003,
+        "mtime_ns": 1788816420184678600,
+        "hash_muestreado": "d1102e25b082ea2e94b40031ea6372d502f2590d5c08f36d9d12a3b5925c01f6",
+        "inventario_sha256": "71fee23ad1c080eb531b23b3414333927bed1a2ebc26326e8bd60b14e93f4026"
+      },
+      "missing": false
+    },
+    {
+      "id": "asset-5783683abf98",
+      "kind": "image",
+      "name": "overlay-alpha.png",
+      "path": "G:/TODO/transcriptor-v2/tests/fixtures/media/overlay-alpha.png",
+      "probe": {
+        "container": "png_pipe",
+        "duration": 0,
+        "start_time": 0,
+        "video": {
+          "stream_index": 0,
+          "codec": "png",
+          "width": 320,
+          "height": 180,
+          "rotation": 0,
+          "frame_rate": {
+            "num": 25,
+            "den": 1
+          },
+          "avg_frame_rate": {
+            "num": 25,
+            "den": 1
+          },
+          "time_base": {
+            "num": 1,
+            "den": 25
+          },
+          "start_time": 0,
+          "pix_fmt": "rgba",
+          "nb_frames": 1,
+          "variable_frame_rate": false
+        },
+        "audio": [],
+        "size": 4861
+      },
+      "fingerprint": {
+        "size": 4861,
+        "mtime_ns": 1788818684436748400,
+        "hash_muestreado": "948f609d573657dd3ed5cfd6a682511cc79ff9741837f4d5bce5835b9a780990",
+        "inventario_sha256": "5b53ddc84f9ab273bbef6c197cbcf3f4970c23da93fecb3dbdc155525bd064e6"
+      },
+      "image_duration": 3528000000,
+      "missing": false
+    },
+    {
+      "id": "asset-495dab85af1f",
+      "kind": "audio",
+      "name": "tone-220.wav",
+      "path": "G:/TODO/transcriptor-v2/tests/fixtures/media/tone-220.wav",
+      "probe": {
+        "container": "wav",
+        "duration": 7056000000,
+        "start_time": 0,
+        "audio": [
+          {
+            "stream_index": 0,
+            "audio_index": 0,
+            "codec": "pcm_s16le",
+            "channels": 2,
+            "channel_layout": "",
+            "sample_rate": 48000,
+            "start_time": 0,
+            "duration": 7056000000,
+            "title": ""
+          }
+        ],
+        "size": 1920078
+      },
+      "fingerprint": {
+        "size": 1920078,
+        "mtime_ns": 1788816344524115400,
+        "hash_muestreado": "de7ba8d84b1d34304ef4ea11c1fd068f053a1cfe003ab51afd89357ec0ba57e8",
+        "inventario_sha256": "bff391991ae6bd594b3e3a7d3431cfd95ab589be39eb1e848ec2dd99d0e812bb"
+      },
+      "missing": false
+    }
+  ],
+  "sequences": [
+    {
+      "id": "seq-c6a437f868e7",
+      "name": "Secuencia 1",
+      "frame_rate": {
+        "num": 30,
+        "den": 1
+      },
+      "width": 1920,
+      "height": 1080,
+      "sample_rate": 48000,
+      "tracks": [
+        {
+          "id": "track-4b9b71f81968",
+          "kind": "video",
+          "name": "V1",
+          "muted": false,
+          "solo": false,
+          "locked": false,
+          "visible": true,
+          "gain_db": 0.0
+        },
+        {
+          "id": "track-264fffc73180",
+          "kind": "video",
+          "name": "V2",
+          "muted": false,
+          "solo": false,
+          "locked": false,
+          "visible": true,
+          "gain_db": 0.0
+        },
+        {
+          "id": "track-b6c752bd7ecc",
+          "kind": "video",
+          "name": "V3",
+          "muted": false,
+          "solo": false,
+          "locked": false,
+          "visible": true,
+          "gain_db": 0.0
+        },
+        {
+          "id": "track-7da904a0b4ba",
+          "kind": "audio",
+          "name": "A1",
+          "muted": false,
+          "solo": false,
+          "locked": false,
+          "visible": true,
+          "gain_db": 0.0
+        },
+        {
+          "id": "track-0a0e815efb33",
+          "kind": "audio",
+          "name": "A2",
+          "muted": false,
+          "solo": false,
+          "locked": false,
+          "visible": true,
+          "gain_db": 0.0
+        },
+        {
+          "id": "track-b0e203a45b53",
+          "kind": "audio",
+          "name": "A3",
+          "muted": false,
+          "solo": false,
+          "locked": false,
+          "visible": true,
+          "gain_db": -12.0
+        }
+      ],
+      "clips": [
+        {
+          "id": "clip-115f89ea7b6e",
+          "track_id": "track-4b9b71f81968",
+          "asset_id": "asset-62ee49102637",
+          "source": {
+            "start": 0,
+            "end": 8467200000
+          },
+          "position": 0,
+          "enabled": true,
+          "name": "fixture-a.mp4",
+          "link_group": "link-fcc06e7cff5e",
+          "transform": {
+            "x": 0.0,
+            "y": 0.0,
+            "scale": 1.0,
+            "opacity": 1.0,
+            "fit": "fit"
+          },
+          "gain_db": 0.0,
+          "provenance": {
+            "origin": "user",
+            "created_at": "2026-09-08T16:04:53+00:00"
+          }
+        },
+        {
+          "id": "clip-44646fba56c6",
+          "track_id": "track-7da904a0b4ba",
+          "asset_id": "asset-62ee49102637",
+          "source": {
+            "start": 0,
+            "end": 8467200000
+          },
+          "position": 0,
+          "enabled": true,
+          "name": "fixture-a.mp4",
+          "link_group": "link-fcc06e7cff5e",
+          "transform": {
+            "x": 0.0,
+            "y": 0.0,
+            "scale": 1.0,
+            "opacity": 1.0,
+            "fit": "fit"
+          },
+          "gain_db": 0.0,
+          "audio_stream": 0,
+          "provenance": {
+            "origin": "user",
+            "created_at": "2026-09-08T16:04:53+00:00"
+          }
+        },
+        {
+          "id": "clip-5f90a881cb38",
+          "track_id": "track-264fffc73180",
+          "asset_id": "asset-c8008dfbc335",
+          "source": {
+            "start": 0,
+            "end": 1411200000
+          },
+          "position": 2116800000,
+          "enabled": true,
+          "name": "fixture-b.mp4",
+          "link_group": "link-76eb93decdf9",
+          "transform": {
+            "x": 0.25,
+            "y": -0.2,
+            "scale": 0.45,
+            "opacity": 1.0,
+            "fit": "fit"
+          },
+          "gain_db": 0.0,
+          "provenance": {
+            "origin": "user",
+            "created_at": "2026-09-08T16:04:53+00:00"
+          }
+        },
+        {
+          "id": "clip-d343007ecbaf",
+          "track_id": "track-0a0e815efb33",
+          "asset_id": "asset-c8008dfbc335",
+          "source": {
+            "start": 0,
+            "end": 1411200000
+          },
+          "position": 2116800000,
+          "enabled": true,
+          "name": "fixture-b.mp4",
+          "link_group": "link-76eb93decdf9",
+          "transform": {
+            "x": 0.0,
+            "y": 0.0,
+            "scale": 1.0,
+            "opacity": 1.0,
+            "fit": "fit"
+          },
+          "gain_db": 0.0,
+          "audio_stream": 0,
+          "provenance": {
+            "origin": "user",
+            "created_at": "2026-09-08T16:04:53+00:00"
+          }
+        },
+        {
+          "id": "clip-a631d8f1a611",
+          "track_id": "track-b6c752bd7ecc",
+          "asset_id": "asset-5783683abf98",
+          "source": {
+            "start": 0,
+            "end": 3528000000
+          },
+          "position": 705600000,
+          "enabled": true,
+          "name": "overlay-alpha.png",
+          "transform": {
+            "x": 0.0,
+            "y": 0.0,
+            "scale": 1.0,
+            "opacity": 1.0,
+            "fit": "fit"
+          },
+          "gain_db": 0.0,
+          "provenance": {
+            "origin": "user",
+            "created_at": "2026-09-08T16:04:53+00:00"
+          }
+        },
+        {
+          "id": "clip-d9a767e97edc",
+          "track_id": "track-b0e203a45b53",
+          "asset_id": "asset-495dab85af1f",
+          "source": {
+            "start": 0,
+            "end": 7056000000
+          },
+          "position": 0,
+          "enabled": true,
+          "name": "tone-220.wav",
+          "transform": {
+            "x": 0.0,
+            "y": 0.0,
+            "scale": 1.0,
+            "opacity": 1.0,
+            "fit": "fit"
+          },
+          "gain_db": 0.0,
+          "audio_stream": 0,
+          "provenance": {
+            "origin": "user",
+            "created_at": "2026-09-08T16:04:53+00:00"
+          }
+        },
+        {
+          "id": "clip-07f76eca0b3e",
+          "track_id": "track-264fffc73180",
+          "asset_id": "asset-c8008dfbc335",
+          "source": {
+            "start": 1764000000,
+            "end": 5644800000
+          },
+          "position": 3880800000,
+          "enabled": true,
+          "name": "fixture-b.mp4",
+          "link_group": "link-76eb93decdf9@3528000000@3880800000",
+          "transform": {
+            "x": 0.25,
+            "y": -0.2,
+            "scale": 0.45,
+            "opacity": 1.0,
+            "fit": "fit"
+          },
+          "gain_db": 0.0,
+          "provenance": {
+            "origin": "split",
+            "parent_clip": "clip-4b7a68a66e42",
+            "created_at": "2026-09-08T16:04:54+00:00"
+          }
+        },
+        {
+          "id": "clip-1f92d2fb6f6e",
+          "track_id": "track-0a0e815efb33",
+          "asset_id": "asset-c8008dfbc335",
+          "source": {
+            "start": 1764000000,
+            "end": 5644800000
+          },
+          "position": 3880800000,
+          "enabled": true,
+          "name": "fixture-b.mp4",
+          "link_group": "link-76eb93decdf9@3528000000@3880800000",
+          "transform": {
+            "x": 0.0,
+            "y": 0.0,
+            "scale": 1.0,
+            "opacity": 1.0,
+            "fit": "fit"
+          },
+          "gain_db": 0.0,
+          "audio_stream": 0,
+          "provenance": {
+            "origin": "split",
+            "parent_clip": "clip-44467d673a5c",
+            "created_at": "2026-09-08T16:04:54+00:00"
+          }
+        }
+      ],
+      "markers": []
+    }
+  ],
+  "active_sequence": "seq-c6a437f868e7",
+  "layers": [],
+  "layer_order": [],
+  "settings": {
+    "snapping": true,
+    "skip_trims_on_play": false
+  }
+}

@@ -1,0 +1,99 @@
+{
+  "revision": 11,
+  "view": "Sequence",
+  "playhead_ms": 2500,
+  "player": {
+    "position_ms": 2500,
+    "playing": false,
+    "rate": 1.0,
+    "generation": 8,
+    "buffering": false,
+    "decode_ms": 55.359100341796875,
+    "audio_available": true
+  },
+  "last_frame": {
+    "position_ms": 2500,
+    "w": 732,
+    "h": 412,
+    "generation": 8
+  },
+  "clips": [
+    {
+      "id": "clip-1e58535c6055",
+      "track": "V1",
+      "position_ms": 7000,
+      "source_start_ms": 0,
+      "source_end_ms": 5000,
+      "enabled": true,
+      "link": "link-d9448e8c39c4"
+    },
+    {
+      "id": "clip-013c4b02d38d",
+      "track": "A1",
+      "position_ms": 0,
+      "source_start_ms": 0,
+      "source_end_ms": 5000,
+      "enabled": true,
+      "link": "link-d9448e8c39c4"
+    },
+    {
+      "id": "clip-39c720657482",
+      "track": "A1",
+      "position_ms": 5000,
+      "source_start_ms": 5000,
+      "source_end_ms": 12000,
+      "enabled": true,
+      "link": "link-d9448e8c39c4@3528000000"
+    },
+    {
+      "id": "clip-e5e593710ce5",
+      "track": "V1",
+      "position_ms": 0,
+      "source_start_ms": 5000,
+      "source_end_ms": 12000,
+      "enabled": true,
+      "link": "link-d9448e8c39c4@3528000000"
+    },
+    {
+      "id": "clip-f7121f3a9d23",
+      "track": "V2",
+      "position_ms": 1000,
+      "source_start_ms": 0,
+      "source_end_ms": 5000,
+      "enabled": true,
+      "link": null
+    }
+  ],
+  "layers": [
+    {
+      "id": "layer-ebef24d14e60",
+      "name": "Notas manuales",
+      "items": [
+        {
+          "id": "item-c356c8d6eb43",
+          "label": "Tramo 1",
+          "state": "accepted",
+          "ranges": [
+            [
+              2.0,
+              4.0
+            ]
+          ]
+        }
+      ]
+    }
+  ],
+  "toasts": [
+    "×1 · audio normal",
+    "el clip se solaparía con «fixture-a.mp4» (clip-1e58535c6055) · elige otra posición, otra pista o usa sobrescribir",
+    "Insertado en 00:00:01.000",
+    "Deshacer Aceptar",
+    "Rehacer Aceptar",
+    "Guardado en G:/TODO/transcriptor-v2/implementation/evidence/e2/regression-20260908-160410/e1-recorrido/demo-e1.transcriptor",
+    "Proyecto nuevo",
+    "Proyecto «Sin título» abierto (revisión 11)",
+    "Exportación añadida a la cola (revisión congelada)",
+    "Exportado G:/TODO/transcriptor-v2/implementation/evidence/e2/regression-20260908-160410/e1-recorrido/export-e1-720p.mp4 (00:00:12.000, 360 fotogramas, 2.0 s)"
+  ],
+  "undo": null
+}

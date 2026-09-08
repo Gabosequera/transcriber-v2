@@ -1,0 +1,162 @@
+[
+  {
+    "package": "accesskit",
+    "licenses": [
+      "LICENSE-MIT",
+      "LICENSE-APACHE"
+    ]
+  },
+  {
+    "package": "accesskit_consumer",
+    "licenses": [
+      "LICENSE-MIT",
+      "LICENSE-APACHE"
+    ]
+  },
+  {
+    "package": "accesskit_windows",
+    "licenses": [
+      "LICENSE-MIT",
+      "LICENSE-APACHE"
+    ]
+  },
+  {
+    "package": "accesskit_winit",
+    "licenses": [
+      "LICENSE-MIT",
+      "LICENSE-APACHE"
+    ]
+  },
+  {
+    "package": "clipboard-win",
+    "licenses": [
+      "LICENSE"
+    ]
+  },
+  {
+    "package": "dasp_sample",
+    "licenses": [
+      "LICENSE-MIT",
+      "LICENSE-APACHE"
+    ]
+  },
+  {
+    "package": "ecolor",
+    "licenses": [
+      "LICENSE-MIT",
+      "LICENSE-APACHE"
+    ]
+  },
+  {
+    "package": "eframe",
+    "licenses": [
+      "LICENSE-MIT",
+      "LICENSE-APACHE"
+    ]
+  },
+  {
+    "package": "egui",
+    "licenses": [
+      "LICENSE-MIT",
+      "LICENSE-APACHE"
+    ]
+  },
+  {
+    "package": "egui-wgpu",
+    "licenses": [
+      "LICENSE-MIT",
+      "LICENSE-APACHE"
+    ]
+  },
+  {
+    "package": "egui-winit",
+    "licenses": [
+      "LICENSE-MIT",
+      "LICENSE-APACHE"
+    ]
+  },
+  {
+    "package": "egui_extras",
+    "licenses": [
+      "LICENSE-MIT",
+      "LICENSE-APACHE"
+    ]
+  },
+  {
+    "package": "egui_glow",
+    "licenses": [
+      "LICENSE-MIT",
+      "LICENSE-APACHE"
+    ]
+  },
+  {
+    "package": "egui_kittest",
+    "licenses": [
+      "LICENSE-MIT",
+      "LICENSE-APACHE"
+    ]
+  },
+  {
+    "package": "ehttp",
+    "licenses": [
+      "LICENSE-MIT",
+      "LICENSE-APACHE"
+    ]
+  },
+  {
+    "package": "emath",
+    "licenses": [
+      "LICENSE-MIT",
+      "LICENSE-APACHE"
+    ]
+  },
+  {
+    "package": "enum-map",
+    "licenses": []
+  },
+  {
+    "package": "enum-map-derive",
+    "licenses": []
+  },
+  {
+    "package": "epaint",
+    "licenses": [
+      "LICENSE-MIT",
+      "LICENSE-APACHE"
+    ]
+  },
+  {
+    "package": "epaint_default_fonts",
+    "licenses": [
+      "LICENSE-MIT",
+      "LICENSE-APACHE",
+      "OFL.txt",
+      "UFL.txt"
+    ]
+  },
+  {
+    "package": "gl_generator",
+    "licenses": [
+      "LICENSE"
+    ]
+  },
+  {
+    "package": "khronos_api",
+    "licenses": [
+      "LICENSE"
+    ]
+  },
+  {
+    "package": "profiling",
+    "licenses": [
+      "LICENSE-MIT",
+      "LICENSE-APACHE"
+    ]
+  },
+  {
+    "package": "spirv",
+    "licenses": [
+      "LICENSE"
+    ]
+  }
+]

@@ -1,0 +1,98 @@
+{
+  "revision": 11,
+  "view": "Sequence",
+  "playhead_ms": 2500,
+  "player": {
+    "position_ms": 2500,
+    "playing": false,
+    "rate": 1.0,
+    "generation": 8,
+    "buffering": false,
+    "decode_ms": 76.05059814453125,
+    "audio_available": true
+  },
+  "last_frame": {
+    "position_ms": 2500,
+    "w": 790,
+    "h": 444,
+    "generation": 8
+  },
+  "clips": [
+    {
+      "id": "clip-1aa33be2dda9",
+      "track": "V1",
+      "position_ms": 7000,
+      "source_start_ms": 0,
+      "source_end_ms": 5000,
+      "enabled": true,
+      "link": "link-95e24e8baa8d"
+    },
+    {
+      "id": "clip-b30b18b20dac",
+      "track": "A1",
+      "position_ms": 0,
+      "source_start_ms": 0,
+      "source_end_ms": 5000,
+      "enabled": true,
+      "link": "link-95e24e8baa8d"
+    },
+    {
+      "id": "clip-34d3116d6624",
+      "track": "A1",
+      "position_ms": 5000,
+      "source_start_ms": 5000,
+      "source_end_ms": 12000,
+      "enabled": true,
+      "link": "link-95e24e8baa8d@3528000000"
+    },
+    {
+      "id": "clip-08e8dedfa6a3",
+      "track": "V1",
+      "position_ms": 0,
+      "source_start_ms": 5000,
+      "source_end_ms": 12000,
+      "enabled": true,
+      "link": "link-95e24e8baa8d@3528000000"
+    },
+    {
+      "id": "clip-c92535301c61",
+      "track": "V2",
+      "position_ms": 1000,
+      "source_start_ms": 0,
+      "source_end_ms": 5000,
+      "enabled": true,
+      "link": null
+    }
+  ],
+  "layers": [
+    {
+      "id": "layer-f7d970337998",
+      "name": "Notas manuales",
+      "items": [
+        {
+          "id": "item-4147870adba6",
+          "label": "Tramo 1",
+          "state": "accepted",
+          "ranges": [
+            [
+              2.0,
+              4.0
+            ]
+          ]
+        }
+      ]
+    }
+  ],
+  "toasts": [
+    "×2 · audio acelerado con tono preservado (atempo)",
+    "×1 · audio normal",
+    "el clip se solaparía con clip-1aa33be2dda9",
+    "Insertado en 00:00:01.000",
+    "Deshacer Aceptar",
+    "Rehacer Aceptar",
+    "Guardado en G:/TODO/transcriptor-v2/implementation/evidence/e1/demo-e1.transcriptor",
+    "Proyecto nuevo",
+    "Proyecto «Sin título» abierto (revisión 11)"
+  ],
+  "undo": null
+}

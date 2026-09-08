@@ -1,0 +1,50 @@
+[
+  {
+    "path": "C:\\Users\\gabri\\AppData\\Local\\Temp\\Transcriptor prueba ñ 20260908-065502\\Transcriptor V2 prueba ñ 20260908-105323\\Demo.transcriptor\\project.json",
+    "op": "open"
+  },
+  {
+    "op": "assert",
+    "markers": 1,
+    "clips": 4
+  },
+  {
+    "id": "view.fit",
+    "op": "action"
+  },
+  {
+    "t": 2,
+    "op": "seek"
+  },
+  {
+    "op": "wait_frame"
+  },
+  {
+    "ms": 2500,
+    "op": "wait"
+  },
+  {
+    "op": "assert_caches",
+    "wave_columns_min": 1,
+    "thumb_tiles_min": 1
+  },
+  {
+    "path": "G:\\TODO\\transcriptor-v2\\implementation\\evidence\\e2\\package-smoke-20260908-065502\\viewer.png",
+    "op": "save_frame"
+  },
+  {
+    "path": "G:\\TODO\\transcriptor-v2\\implementation\\evidence\\e2\\package-smoke-20260908-065502\\portable.png",
+    "op": "screenshot"
+  },
+  {
+    "op": "export",
+    "dest": "G:\\TODO\\transcriptor-v2\\implementation\\evidence\\e2\\package-smoke-20260908-065502\\portable.mp4",
+    "preset": "h264-720p"
+  },
+  {
+    "op": "wait_export"
+  },
+  {
+    "op": "quit"
+  }
+]

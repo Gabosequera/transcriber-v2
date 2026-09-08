@@ -1,0 +1,14 @@
+   Compiling tv2-domain v2.0.0-alpha.1 (G:\TODO\transcriptor-v2\crates\domain)
+   Compiling tv2-media v2.0.0-alpha.1 (G:\TODO\transcriptor-v2\crates\media)
+    Finished `test` profile [optimized + debuginfo] target(s) in 7.28s
+     Running unittests src\lib.rs (target\debug\deps\tv2_media-23b999262c4e8d1e.exe)
+
+running 5 tests
+test cache::tests::clear_cancels_workers_without_freeing_their_slots_early ... ok
+test cache::tests::prune_respects_budget ... ok
+test cache::tests::corrupt_cache_version_and_lengths_are_rejected_and_regenerated ... ok
+test cache::tests::waveform_is_progressive_lod_and_persisted ... ok
+test cache::tests::thumbnails_coarse_then_fine_indexed_by_time ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 20 filtered out; finished in 0.22s
+

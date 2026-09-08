@@ -1,0 +1,27 @@
+{
+  "checks": [
+    {
+      "source_t": 1.2,
+      "wrong_t": 4.5,
+      "t": 1.2
+    },
+    {
+      "source_t": 3.2,
+      "wrong_t": 8.5,
+      "t": 5.2
+    }
+  ],
+  "source": "G:\\TODO\\transcriptor-v2\\tests\\fixtures\\media\\fixture-sync.mp4",
+  "duration": 14,
+  "viewer_checks": [
+    {
+      "viewer": "G:\\TODO\\transcriptor-v2\\implementation\\evidence\\e2\\package-smoke-20260908-181823\\viewer.png",
+      "t": 5.2
+    }
+  ],
+  "black_checks": [
+    {
+      "t": 3
+    }
+  ]
+}

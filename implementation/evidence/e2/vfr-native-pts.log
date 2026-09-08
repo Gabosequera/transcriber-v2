@@ -1,0 +1,19 @@
+   Compiling tv2-media v2.0.0-alpha.1 (G:\TODO\transcriptor-v2\crates\media)
+    Finished `test` profile [optimized + debuginfo] target(s) in 1.90s
+     Running unittests src\lib.rs (target\debug\deps\tv2_media-23b999262c4e8d1e.exe)
+
+running 1 test
+
+thread 'decoder::tests::vfr_seek_preserves_presented_frame_against_native_pts' (4940) panicked at crates\media\src\decoder.rs:265:102:
+EOF seek=5.8 frame=4: 
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+test decoder::tests::vfr_seek_preserves_presented_frame_against_native_pts ... FAILED
+
+failures:
+
+failures:
+    decoder::tests::vfr_seek_preserves_presented_frame_against_native_pts
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 26 filtered out; finished in 0.62s
+
+error: test failed, to rerun pass `-p tv2-media --lib`

@@ -1,0 +1,10 @@
+   Compiling tv2-media v2.0.0-alpha.1 (G:\TODO\transcriptor-v2\crates\media)
+   Compiling transcriptor v2.0.0-alpha.1 (G:\TODO\transcriptor-v2\apps\desktop)
+    Finished `test` profile [optimized + debuginfo] target(s) in 10.70s
+     Running unittests src\main.rs (target\debug\deps\Transcriptor-1dfbd5641c6af1b7.exe)
+
+running 1 test
+test gesture_tests::async_import_applies_once_preserves_concurrent_edits_and_rejects_old_project ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 17 filtered out; finished in 0.33s
+

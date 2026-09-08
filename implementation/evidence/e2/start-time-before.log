@@ -1,0 +1,19 @@
+   Compiling tv2-media v2.0.0-alpha.1 (G:\TODO\transcriptor-v2\crates\media)
+    Finished `test` profile [optimized + debuginfo] target(s) in 3.79s
+     Running unittests src\lib.rs (target\debug\deps\tv2_media-23b999262c4e8d1e.exe)
+
+running 1 test
+
+thread 'render::tests::nonzero_container_start_is_not_added_twice_by_the_renderer' (32260) panicked at crates\media\src\render.rs:253:9:
+offset del contenedor aplicado dos veces: MAE=8.137
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+test render::tests::nonzero_container_start_is_not_added_twice_by_the_renderer ... FAILED
+
+failures:
+
+failures:
+    render::tests::nonzero_container_start_is_not_added_twice_by_the_renderer
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 18 filtered out; finished in 0.18s
+
+error: test failed, to rerun pass `-p tv2-media --lib`

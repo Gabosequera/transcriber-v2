@@ -1,0 +1,96 @@
+{
+ "fingerprint": {
+  "size": 2245856,
+  "mtime_ns": 1788816373909680300,
+  "hash_muestreado": "5af6e20946b99936f1b56449a3d5d28f9f6f490a840cf09b5ad59abba5050604",
+  "inventario_sha256": "77aae5a1df8f009ed8f55643e2949f7ff3340026398608631ea992eae8a58d70"
+ },
+ "info": {
+  "path": "G:\\TODO\\transcriptor-v2\\tests\\fixtures\\media\\fixture-a.mp4",
+  "size": 2245856,
+  "mtime_ns": 1788816373909680300,
+  "duracion": 12.0,
+  "t0": 0.0,
+  "video": {
+   "width": 640,
+   "height": 360,
+   "display_width": 640,
+   "display_height": 360,
+   "rotacion": 0,
+   "fps": 30.0,
+   "codec": "h264",
+   "pix_fmt": "yuv420p"
+  },
+  "pistas": [
+   {
+    "idx": 0,
+    "codec": "aac",
+    "canales": 1,
+    "layout": "mono",
+    "sample_rate": 48000,
+    "start_time": 0.0,
+    "delta": 0.0,
+    "duracion": 12.0,
+    "titulo": ""
+   }
+  ]
+ },
+ "source_master_digest": "58a30dd2b24020896dd3b1903fb4ba128c3d0c1bc221a4a2b0d030e6103241db",
+ "trims_enabled_intervals": [
+  [
+   2.0,
+   2.5
+  ],
+  [
+   4.0,
+   4.8
+  ]
+ ],
+ "montaje_flatten": [
+  {
+   "seq_ini": 0.0,
+   "seq_fin": 2.0,
+   "clip_id": "clip-000001",
+   "track_id": "V1",
+   "source_ini": 1.0,
+   "source_fin": 3.0
+  },
+  {
+   "seq_ini": 2.0,
+   "seq_fin": 3.0,
+   "clip_id": "clip-000003",
+   "track_id": "V2",
+   "source_ini": 6.0,
+   "source_fin": 7.0
+  },
+  {
+   "seq_ini": 3.0,
+   "seq_fin": 4.0,
+   "clip_id": "clip-000001",
+   "track_id": "V1",
+   "source_ini": 4.0,
+   "source_fin": 5.0
+  },
+  {
+   "seq_ini": 4.0,
+   "seq_fin": 6.0,
+   "clip_id": "clip-000002",
+   "track_id": "V1",
+   "source_ini": 9.0,
+   "source_fin": 11.0
+  },
+  {
+   "seq_ini": 6.0,
+   "seq_fin": 7.0,
+   "clip_id": "clip-000004",
+   "track_id": "V1",
+   "source_ini": 1.0,
+   "source_fin": 2.0
+  }
+ ],
+ "montaje_total_seconds": 7.0,
+ "source_to_seq_1_5": [
+  0.5,
+  6.5
+ ]
+}

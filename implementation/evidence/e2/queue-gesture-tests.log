@@ -1,0 +1,17 @@
+   Compiling transcriptor v2.0.0-alpha.1 (G:\TODO\transcriptor-v2\apps\desktop)
+    Finished `test` profile [optimized + debuginfo] target(s) in 8.15s
+     Running unittests src\main.rs (target\debug\deps\Transcriptor-1dfbd5641c6af1b7.exe)
+
+running 9 tests
+test gesture_tests::autoscroll_move_keeps_pointer_mapping_and_commits_once ... ok
+test gesture_tests::ruler_scrub_moves_playhead_and_pauses ... ok
+test gesture_tests::markers_snap_drag_and_undo_insert_keeps_linked_audio ... ok
+test gesture_tests::escape_cancels_drag_without_residue ... ok
+test gesture_tests::keyboard_split_does_not_fire_while_typing ... ok
+test gesture_tests::export_queue_cancels_and_freezes_each_revision_before_concurrent_edit ... ok
+test gesture_tests::trim_end_handle_shrinks_source_range ... ok
+test gesture_tests::visible_media_cache_draws_in_source_and_sequence_without_editing_project ... ok
+test gesture_tests::drag_moves_linked_clips_in_one_transaction_and_snaps_to_frames ... ok
+
+test result: ok. 9 passed; 0 failed; 0 ignored; 0 measured; 4 filtered out; finished in 0.72s
+

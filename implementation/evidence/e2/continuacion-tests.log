@@ -1,0 +1,68 @@
+   Compiling tv2-media v2.0.0-alpha.1 (G:\TODO\transcriptor-v2\crates\media)
+   Compiling transcriptor v2.0.0-alpha.1 (G:\TODO\transcriptor-v2\apps\desktop)
+    Finished `test` profile [optimized + debuginfo] target(s) in 6.22s
+     Running unittests src\main.rs (target\debug\deps\Transcriptor-1687dd72d6d62c20.exe)
+
+running 12 tests
+test keymap::tests::chords_normalize_like_v1 ... ok
+test keymap::tests::altgr_on_windows_is_plain_key ... ok
+test keymap::tests::overrides_apply_and_conflicts_reported ... ok
+test keymap::tests::defaults_have_no_conflicts_and_keep_v1_ids ... ok
+test gesture_tests::drag_moves_linked_clips_in_one_transaction_and_snaps_to_frames ... ok
+test gesture_tests::ruler_scrub_moves_playhead_and_pauses ... ok
+test gesture_tests::markers_snap_drag_and_undo_insert_keeps_linked_audio ... ok
+test gesture_tests::trim_end_handle_shrinks_source_range ... ok
+test gesture_tests::escape_cancels_drag_without_residue ... ok
+test gesture_tests::autoscroll_move_keeps_pointer_mapping_and_commits_once ... ok
+test gesture_tests::visible_media_cache_draws_in_source_and_sequence_without_editing_project ... ok
+test gesture_tests::keyboard_split_does_not_fire_while_typing ... ok
+
+test result: ok. 12 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.68s
+
+     Running unittests src\lib.rs (target\debug\deps\tv2_media-bcc3652250239297.exe)
+
+running 17 tests
+test audio::tests::tempo_chain_matches_v1_policy ... ok
+test compositor::tests::fit_letterboxes_and_alpha_blends ... ok
+test decoder::tests::image_with_alpha_decodes ... ok
+test cache::tests::prune_respects_budget ... ok
+test cache::tests::clear_cancels_workers_without_freeing_their_slots_early ... ok
+test ffmpeg::tests::inventory_json_has_python_shape ... ok
+test decoder::tests::decodes_from_exact_offset_outside_keyframe ... ok
+test cache::tests::waveform_is_progressive_lod_and_persisted ... ok
+test cache::tests::thumbnails_coarse_then_fine_indexed_by_time ... ok
+test cache::tests::corrupt_cache_version_and_lengths_are_rejected_and_regenerated ... ok
+test ffmpeg::tests::locate_and_probe_fixture ... ok
+test audio::tests::decodes_tone_and_rate_2x_halves_length ... ok
+test render::tests::renders_split_clip_with_overlay_from_real_media ... ok
+rate 1: 12 ráfagas, desvío máximo 0.1 ms
+rate 2: 12 ráfagas, desvío máximo 14.5 ms
+rate 3: 12 ráfagas, desvío máximo 25.9 ms
+rate 4: 12 ráfagas, desvío máximo 19.8 ms
+rate 2 desde 2,5 s: primera ráfaga a 0.244 s (esperado 0,250), desvío 5.9 ms
+test audio::tests::atempo_path_keeps_time_alignment_within_tolerance ... ok
+test export::tests::cancel_leaves_no_output_nor_staging ... ok
+test export::tests::encoder_failure_and_bad_destination_are_explained_without_leftovers ... ok
+h264-720p: OK mov 1280x720 h264 · aac · 0.6 s · 280772 bytes
+h264-1080p: OK mov 1920x1080 h264 · aac · 0.7 s · 509490 bytes
+h264-2160p: OK mov 3840x2160 h264 · aac · 2.2 s · 1187344 bytes
+h264-vertical: OK mov 1080x1920 h264 · aac · 0.5 s · 251726 bytes
+hevc-1080p: OK mov 1920x1080 hevc · aac · 0.8 s · 348522 bytes
+av1-1080p: OK mov 1920x1080 av1 · aac · 0.8 s · 317568 bytes
+prores-1080p: OK mov 1920x1080 prores · pcm_s16le · 0.7 s · 12188005 bytes
+vp9-webm-1080p: OK matroska 1920x1080 vp9 · opus · 0.7 s · 440904 bytes
+mkv-h264-1080p: OK matroska 1920x1080 h264 · flac · 0.7 s · 541023 bytes
+h264-nvenc-1080p: OK mov 1920x1080 h264 · aac · 0.7 s · 888056 bytes
+wav-pcm: OK wav 0x0  · pcm_s16le · 0.2 s · 192078 bytes
+flac: OK flac 0x0  · flac · 0.2 s · 65371 bytes
+mp3-192: OK mp3 0x0  · mp3 · 0.3 s · 25388 bytes
+test export::tests::format_matrix_every_available_preset_produces_inspectable_output ... ok
+
+test result: ok. 17 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 9.91s
+
+   Doc-tests tv2_media
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+

@@ -1,0 +1,1977 @@
+//! Estado de la aplicación y bucle de UI. La GUI presenta estado y emite
+//! intenciones: todo cambio de proyecto pasa por `ProjectSession::execute`.
+
+use crate::console::{ConsoleLine, ConsoleSink};
+use crate::keymap::{Keymap, chord_from_egui};
+use crossbeam_channel::Receiver;
+use std::collections::{HashMap, HashSet, VecDeque};
+use std::path::{Path, PathBuf};
+use std::sync::Arc;
+use std::sync::atomic::AtomicBool;
+use std::time::Instant;
+use tv2_application::{Actor, CommandEnvelope, ProjectSession, ProjectStore};
+use tv2_domain::asset::AssetKind;
+use tv2_domain::error::DomainError;
+use tv2_domain::ids::{AssetId, ClipId, ItemId, LayerId, TrackId};
+use tv2_domain::layers::{ItemState, LayerKind, SemanticItem};
+use tv2_domain::project::Project;
+use tv2_domain::resolve::ResolvedTimeline;
+use tv2_domain::time::{Rational, Ticks, TimeRange};
+use tv2_domain::timeline::{Sequence, Track, TrackKind};
+use tv2_domain::{ClipEdge, Command, MovePolicy};
+use tv2_media::export::{ExportPreset, ExportProgress, ExportRequest, ExportResult};
+use tv2_media::ffmpeg::FfmpegTools;
+use tv2_media::player::{PlayerCommand, PlayerHandle, PlayerSnapshot, PresentedFrame, SPEEDS};
+use tv2_media::render::AssetSource;
+
+#[derive(Clone, Copy, PartialEq, Eq, Debug, Default)]
+pub enum ViewMode {
+    Source,
+    #[default]
+    Sequence,
+}
+
+#[derive(Clone, Copy, PartialEq, Eq, Debug, Default)]
+pub enum Tool {
+    #[default]
+    Select,
+    Cut,
+}
+
+#[derive(Clone, Debug, Default)]
+pub struct Selection {
+    pub clips: Vec<ClipId>,
+    pub items: Vec<(LayerId, ItemId)>,
+    pub layer: Option<LayerId>,
+    pub asset: Option<AssetId>,
+}
+
+impl Selection {
+    pub fn clear(&mut self) {
+        self.clips.clear();
+        self.items.clear();
+    }
+}
+
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub enum Severity {
+    Info,
+    Warn,
+    Error,
+}
+
+#[derive(Clone, Debug)]
+pub struct Toast {
+    pub at: Instant,
+    pub severity: Severity,
+    pub text: String,
+}
+
+#[derive(Clone, Debug, serde::Serialize, serde::Deserialize)]
+pub struct UiState {
+    pub library_width: f32,
+    pub inspector_width: f32,
+    pub timeline_height: f32,
+    pub console_open: bool,
+    pub console_height: f32,
+    pub last_project: Option<String>,
+    pub last_media_dir: Option<String>,
+    pub last_export_dir: Option<String>,
+    pub snapping: bool,
+    pub follow_playhead: bool,
+    pub track_heights: HashMap<String, f32>,
+    pub zoom_px_per_s: f32,
+}
+
+impl Default for UiState {
+    fn default() -> Self {
+        UiState {
+            library_width: 260.0,
+            inspector_width: 300.0,
+            timeline_height: 320.0,
+            console_open: false,
+            console_height: 160.0,
+            last_project: None,
+            last_media_dir: None,
+            last_export_dir: None,
+            snapping: true,
+            follow_playhead: true,
+            track_heights: HashMap::new(),
+            zoom_px_per_s: 40.0,
+        }
+    }
+}
+
+pub struct ExportState {
+    pub open: bool,
+    pub preset_idx: usize,
+    pub destination: String,
+    pub range_mode: usize, // 0 todo, 1 IN/OUT, 2 clips, 3 items/bloques
+    pub running: Option<RunningExport>,
+    pub last_result: Option<Result<ExportResult, DomainError>>,
+    pub pending: VecDeque<ExportRequest>,
+    pub history: Vec<(PathBuf, u64, Result<ExportResult, DomainError>)>,
+}
+
+pub struct RunningExport {
+    pub progress: Arc<parking_lot::Mutex<ExportProgress>>,
+    pub cancel: Arc<AtomicBool>,
+    pub rx: Receiver<Result<ExportResult, DomainError>>,
+    pub started: Instant,
+    pub destination: PathBuf,
+    pub revision: u64,
+    pub thread: Option<std::thread::JoinHandle<()>>,
+}
+
+impl Drop for RunningExport {
+    fn drop(&mut self) {
+        self.cancel.store(true, std::sync::atomic::Ordering::Release);
+        if let Some(thread) = self.thread.take() {
+            let _ = thread.join();
+        }
+    }
+}
+
+pub struct TranscriptorApp {
+    pub session: ProjectSession,
+    pub store: Option<ProjectStore>,
+    pub tools: Result<FfmpegTools, String>,
+    pub player: Option<PlayerHandle>,
+    pub media_view: Option<crate::ui_media::MediaView>,
+    pub keymap: Keymap,
+    pub ui: UiState,
+    pub view: ViewMode,
+    pub tool: Tool,
+    pub selection: Selection,
+    pub playhead: Ticks,
+    pub player_snapshot: PlayerSnapshot,
+    pub texture: Option<egui::TextureHandle>,
+    pub frame_seen: u64,
+    pub last_frame: Option<PresentedFrame>,
+    pub viewer_size: (u32, u32),
+    pub in_point: Option<Ticks>,
+    pub out_point: Option<Ticks>,
+    pub loop_range: Option<TimeRange>,
+    pub toasts: Vec<Toast>,
+    pub console_lines: Vec<ConsoleLine>,
+    pub console_rx: Receiver<ConsoleLine>,
+    pub console_filter: tracing::Level,
+    pub _console_sink: ConsoleSink,
+    pub export: ExportState,
+    pub imports: crate::import_jobs::ImportJobs,
+    pub timeline_view: crate::ui_timeline::TimelineView,
+    pub resolved: Arc<ResolvedTimeline>,
+    pub resolved_revision: Option<(u64, ViewMode, Option<AssetId>)>,
+    pub clipboard: Vec<tv2_domain::timeline::Clip>,
+    pub new_layer_dialog: Option<String>,
+    pub rename_dialog: Option<(String, RenameTarget)>,
+    pub goto_dialog: Option<String>,
+    pub about_open: bool,
+    pub shortcuts_open: bool,
+    pub shortcut_search: String,
+    pub pending_close: bool,
+    pub source_asset: Option<AssetId>,
+    pub last_autosave: Instant,
+    pub dirty_title: bool,
+    pub script: Option<crate::scripting::ScriptRunner>,
+    pub frame_count: u64,
+    pub markers_open: bool,
+    pub marker_editor: Option<tv2_domain::timeline::Marker>,
+}
+
+#[derive(Clone, Debug)]
+#[allow(dead_code)] // `Project` se usa desde pruebas y desde el inspector en E3
+pub enum RenameTarget {
+    Clip(ClipId),
+    Layer(LayerId),
+    Item(LayerId, ItemId),
+    Track(TrackId),
+    Project,
+}
+
+pub fn load_icon() -> Option<egui::IconData> {
+    // icono procedural: cuadro naranja con barra de timeline
+    let size = 64u32;
+    let mut rgba = vec![0u8; (size * size * 4) as usize];
+    for y in 0..size {
+        for x in 0..size {
+            let i = ((y * size + x) * 4) as usize;
+            let bar = (20..30).contains(&y) || (38..44).contains(&y) && x > 10 && x < 40;
+            let (r, g, b) = if bar { (255, 255, 255) } else { (208, 153, 71) };
+            rgba[i] = r;
+            rgba[i + 1] = g;
+            rgba[i + 2] = b;
+            rgba[i + 3] = 255;
+        }
+    }
+    Some(egui::IconData { rgba, width: size, height: size })
+}
+
+impl TranscriptorApp {
+    pub fn new(cc: &eframe::CreationContext<'_>, console_sink: ConsoleSink, console_rx: Receiver<ConsoleLine>) -> Self {
+        configure_style(&cc.egui_ctx);
+        let ui: UiState = std::fs::read_to_string(crate::paths::ui_state_file()).ok().and_then(|t| serde_json::from_str(&t).ok()).unwrap_or_default();
+        let tools = FfmpegTools::locate().map_err(|e| e.to_string());
+        match &tools {
+            Ok(t) => tracing::info!("FFmpeg: {} ({})", t.version, t.origin),
+            Err(e) => tracing::error!("FFmpeg no disponible: {e}"),
+        }
+        let player = tools.as_ref().ok().map(|t| {
+            let ctx = cc.egui_ctx.clone();
+            tv2_media::player::spawn(t.clone(), Arc::new(move || ctx.request_repaint()))
+        });
+        let keymap = Keymap::load();
+        let media_view = tools.as_ref().ok().map(|t| crate::ui_media::MediaView::new(t.clone(), cc.egui_ctx.clone()));
+        for w in &keymap.warnings {
+            tracing::warn!("keymap: {w}");
+        }
+        for (chord, winner, loser) in &keymap.conflicts {
+            tracing::warn!("keymap: «{chord}» está en {winner} y {loser}; gana {winner}");
+        }
+        let project = Project::new("Sin título");
+        let session = ProjectSession::new(project);
+        let mut app = TranscriptorApp {
+            markers_open: false,
+            marker_editor: None,
+            session,
+            store: None,
+            tools,
+            player,
+            media_view,
+            keymap,
+            timeline_view: crate::ui_timeline::TimelineView::new(ui.zoom_px_per_s),
+            ui,
+            view: ViewMode::Sequence,
+            tool: Tool::Select,
+            selection: Selection::default(),
+            playhead: Ticks::ZERO,
+            player_snapshot: PlayerSnapshot { rate: 1.0, ..Default::default() },
+            texture: None,
+            frame_seen: 0,
+            last_frame: None,
+            viewer_size: (640, 360),
+            in_point: None,
+            out_point: None,
+            loop_range: None,
+            toasts: Vec::new(),
+            console_lines: Vec::new(),
+            console_rx,
+            console_filter: tracing::Level::INFO,
+            _console_sink: console_sink,
+            imports: Default::default(),
+            export: ExportState {
+                open: false,
+                preset_idx: 1,
+                destination: String::new(),
+                range_mode: 0,
+                running: None,
+                last_result: None,
+                pending: VecDeque::new(),
+                history: Vec::new(),
+            },
+            resolved: Arc::new(ResolvedTimeline {
+                frame_rate: Rational::new(30, 1),
+                width: 1920,
+                height: 1080,
+                sample_rate: 48000,
+                duration: Ticks::ZERO,
+                pieces: vec![],
+            }),
+            resolved_revision: None,
+            clipboard: Vec::new(),
+            new_layer_dialog: None,
+            rename_dialog: None,
+            goto_dialog: None,
+            about_open: false,
+            shortcuts_open: false,
+            shortcut_search: String::new(),
+            pending_close: false,
+            source_asset: None,
+            last_autosave: Instant::now(),
+            dirty_title: true,
+            script: None,
+            frame_count: 0,
+        };
+        let args: Vec<String> = std::env::args().skip(1).collect();
+        let mut i = 0;
+        while i < args.len() {
+            if args[i] == "--script" && i + 1 < args.len() {
+                match crate::scripting::ScriptRunner::load(&args[i + 1]) {
+                    Ok(r) => app.script = Some(r),
+                    Err(e) => tracing::error!("guion: {e}"),
+                }
+                i += 2;
+                continue;
+            }
+            let path = PathBuf::from(&args[i]);
+            if path.exists() {
+                app.open_project_path(&path);
+            }
+            i += 1;
+        }
+        app
+    }
+
+    // ---------- helpers de proyecto ----------
+
+    pub fn project(&self) -> &Project {
+        self.session.project()
+    }
+
+    pub fn sequence(&self) -> Option<&Sequence> {
+        self.project().active()
+    }
+
+    pub fn frame_rate(&self) -> Rational {
+        self.sequence().map(|s| s.frame_rate).unwrap_or_default()
+    }
+
+    /// Duración del contenido visible (secuencia o fuente).
+    pub fn duration(&self) -> Ticks {
+        match self.view {
+            ViewMode::Sequence => self.sequence().map(|s| s.extent()).unwrap_or(Ticks::ZERO),
+            ViewMode::Source => self.source_asset.as_ref().and_then(|a| self.project().asset(a)).map(|a| a.duration()).unwrap_or(Ticks::ZERO),
+        }
+    }
+
+    pub fn toast(&mut self, severity: Severity, text: impl Into<String>) {
+        let text = text.into();
+        match severity {
+            Severity::Info => tracing::info!("{text}"),
+            Severity::Warn => tracing::warn!("{text}"),
+            Severity::Error => tracing::error!("{text}"),
+        }
+        self.toasts.push(Toast { at: Instant::now(), severity, text });
+    }
+
+    pub fn report(&mut self, err: DomainError) {
+        let mut text = err.message.clone();
+        if let Some(a) = &err.action {
+            text.push_str(" · ");
+            text.push_str(a);
+        }
+        let sev = match err.code {
+            tv2_domain::ErrorCode::Overlap
+            | tv2_domain::ErrorCode::NotAvailable
+            | tv2_domain::ErrorCode::Precondition
+            | tv2_domain::ErrorCode::OutOfRange
+            | tv2_domain::ErrorCode::Empty => Severity::Warn,
+            _ => Severity::Error,
+        };
+        tracing::debug!(code = ?err.code, context = ?err.context, "{}", err.message);
+        self.toast(sev, text);
+    }
+
+    /// Ejecuta un comando humano. Devuelve `true` si se aplicó.
+    pub fn exec(&mut self, command: Command) -> bool {
+        self.exec_checked(command).is_ok()
+    }
+
+    /// Mismo recorrido humano, conservando el error tipado para los guiones.
+    pub fn exec_checked(&mut self, command: Command) -> Result<(), DomainError> {
+        match self.session.execute(CommandEnvelope::human(command)) {
+            Ok(r) => {
+                tracing::debug!(rev = r.new_revision, "{}: {}", r.effect.label, r.diff.human());
+                self.after_change();
+                Ok(())
+            }
+            Err(e) => {
+                self.report(e.clone());
+                Err(e)
+            }
+        }
+    }
+
+    pub fn undo(&mut self) {
+        match self.session.undo(Actor::Human) {
+            Ok(r) => {
+                self.toast(Severity::Info, r.effect.label);
+                self.after_change();
+            }
+            Err(e) => self.report(e),
+        }
+    }
+
+    pub fn redo(&mut self) {
+        match self.session.redo(Actor::Human) {
+            Ok(r) => {
+                self.toast(Severity::Info, r.effect.label);
+                self.after_change();
+            }
+            Err(e) => self.report(e),
+        }
+    }
+
+    fn after_change(&mut self) {
+        // podar selección
+        let clips: HashSet<ClipId> = self.project().sequences.iter().flat_map(|s| s.clips.iter().map(|c| c.id.clone())).collect();
+        let items_ok: Vec<bool> = self.selection.items.iter().map(|(l, i)| self.project().layer(l).and_then(|l| l.item(i)).is_some()).collect();
+        self.selection.clips.retain(|c| clips.contains(c));
+        let mut idx = 0;
+        self.selection.items.retain(|_| {
+            let keep = items_ok[idx];
+            idx += 1;
+            keep
+        });
+        let layer_gone = self.selection.layer.as_ref().is_some_and(|l| self.project().layer(l).is_none_or(|l| l.deleted));
+        if layer_gone {
+            self.selection.layer = None;
+        }
+        self.dirty_title = true;
+        if let Some(store) = &self.store {
+            let events = self.session.drain_journal();
+            if let Err(e) = store.append_journal(&events) {
+                tracing::warn!("journal: {e}");
+            }
+        }
+    }
+
+    /// Timeline resuelta del modo actual; se recalcula solo si cambió la revisión o el modo.
+    pub fn refresh_resolved(&mut self) {
+        let key = (self.session.revision(), self.view, self.source_asset.clone());
+        if self.resolved_revision.as_ref() == Some(&key) {
+            return;
+        }
+        let project = self.project();
+        let resolved = match self.view {
+            ViewMode::Sequence => project.active().map(|s| ResolvedTimeline::resolve(project, s)),
+            ViewMode::Source => self.source_asset.as_ref().and_then(|a| project.asset(a)).map(|asset| {
+                // secuencia virtual: el medio completo con todas sus pistas
+                let mut seq = Sequence::new(
+                    "fuente",
+                    asset.frame_rate().unwrap_or(Rational::new(30, 1)),
+                    asset.probe.video.as_ref().map(|v| v.display_size().0).unwrap_or(1920),
+                    asset.probe.video.as_ref().map(|v| v.display_size().1).unwrap_or(1080),
+                    48000,
+                );
+                if asset.has_video() {
+                    let t = Track::new(TrackKind::Video, "V");
+                    let mut c =
+                        tv2_domain::timeline::Clip::new(t.id.clone(), asset.id.clone(), TimeRange::new(Ticks::ZERO, asset.duration()), Ticks::ZERO);
+                    c.name = asset.name.clone();
+                    seq.tracks.push(t);
+                    seq.clips.push(c);
+                }
+                for (i, _) in asset.probe.audio.iter().enumerate() {
+                    let t = Track::new(TrackKind::Audio, format!("A{}", i + 1));
+                    let mut c =
+                        tv2_domain::timeline::Clip::new(t.id.clone(), asset.id.clone(), TimeRange::new(Ticks::ZERO, asset.duration()), Ticks::ZERO);
+                    c.audio_stream = Some(i as u32);
+                    seq.tracks.push(t);
+                    seq.clips.push(c);
+                }
+                let mut p2 = Project::new("fuente");
+                p2.assets = vec![asset.clone()];
+                ResolvedTimeline::resolve(&p2, &seq)
+            }),
+        };
+        let resolved = Arc::new(resolved.unwrap_or(ResolvedTimeline {
+            frame_rate: self.frame_rate(),
+            width: 1920,
+            height: 1080,
+            sample_rate: 48000,
+            duration: Ticks::ZERO,
+            pieces: vec![],
+        }));
+        self.resolved = resolved.clone();
+        self.resolved_revision = Some(key);
+        let assets = Arc::new(self.asset_sources());
+        if let Some(pl) = &self.player {
+            pl.send(PlayerCommand::SetTimeline { timeline: resolved, assets });
+        }
+    }
+
+    pub fn asset_sources(&self) -> HashMap<AssetId, AssetSource> {
+        let p = self.project();
+        p.assets.iter().map(|a| (a.id.clone(), AssetSource::from_asset(a, self.resolve_asset_path(a)))).collect()
+    }
+
+    pub fn resolve_asset_path(&self, asset: &tv2_domain::asset::Asset) -> PathBuf {
+        match &self.store {
+            Some(s) => s.resolve_path(&asset.path),
+            None => PathBuf::from(&asset.path),
+        }
+    }
+
+    // ---------- proyecto: abrir / guardar ----------
+
+    pub fn open_project_path(&mut self, path: &Path) {
+        self.imports.cancel();
+        let store = ProjectStore::from_user_path(path);
+        match store.load() {
+            Ok(mut project) => {
+                // comprobar medios presentes
+                for a in &mut project.assets {
+                    let p = store.resolve_path(&a.path);
+                    a.missing = !p.exists();
+                    if a.missing {
+                        tracing::warn!("medio ausente: {}", a.path);
+                    }
+                }
+                let name = project.name.clone();
+                self.session = ProjectSession::new(project);
+                self.marker_editor = None;
+                if let Some(media) = &mut self.media_view {
+                    media.clear();
+                }
+                self.store = Some(store.clone());
+                self.ui.last_project = Some(store.root.to_string_lossy().to_string());
+                self.selection = Selection::default();
+                self.playhead = Ticks::ZERO;
+                self.seek(Ticks::ZERO);
+                self.resolved_revision = None;
+                self.source_asset = self.project().assets.first().map(|a| a.id.clone());
+                self.toast(Severity::Info, format!("Proyecto «{name}» abierto (revisión {})", self.session.revision()));
+            }
+            Err(e) => self.report(e),
+        }
+    }
+
+    pub fn save_project(&mut self, save_as: bool) -> bool {
+        if self.store.is_none() || save_as {
+            let mut dlg =
+                rfd::FileDialog::new().set_title("Guardar proyecto").set_file_name(format!("{}.transcriptor", tv2_slug(&self.project().name)));
+            if let Some(d) = &self.ui.last_project
+                && let Some(parent) = Path::new(d).parent()
+            {
+                dlg = dlg.set_directory(parent);
+            }
+            let Some(p) = dlg.save_file() else { return false };
+            self.store = Some(ProjectStore::from_user_path(&p));
+        }
+        let store = self.store.clone().unwrap();
+        // re-relativizar rutas de assets respecto a la carpeta del proyecto
+        let mut project = self.project().clone();
+        for a in &mut project.assets {
+            let abs = self.resolve_asset_path(a);
+            a.path = store.portable_path(&abs);
+        }
+        match store.save(&project) {
+            Ok(()) => {
+                self.session.replace_project(project, true);
+                self.session.mark_clean();
+                let events = self.session.drain_journal();
+                let _ = store.append_journal(&events);
+                self.ui.last_project = Some(store.root.to_string_lossy().to_string());
+                self.toast(Severity::Info, format!("Guardado en {}", store.root.display()));
+                self.dirty_title = true;
+                true
+            }
+            Err(e) => {
+                self.report(e);
+                false
+            }
+        }
+    }
+
+    pub fn open_project_dialog(&mut self) {
+        let mut dlg = rfd::FileDialog::new().set_title("Abrir proyecto").add_filter("Proyecto Transcriptor", &["json"]);
+        if let Some(d) = &self.ui.last_project
+            && let Some(parent) = Path::new(d).parent()
+        {
+            dlg = dlg.set_directory(parent);
+        }
+        if let Some(p) = dlg.pick_file() {
+            self.open_project_path(&p);
+        }
+    }
+
+    pub fn new_project(&mut self) {
+        self.imports.cancel();
+        self.marker_editor = None;
+        if let Some(media) = &mut self.media_view {
+            media.clear();
+        }
+        self.session = ProjectSession::new(Project::new("Sin título"));
+        self.store = None;
+        self.selection = Selection::default();
+        self.source_asset = None;
+        self.resolved_revision = None;
+        self.seek(Ticks::ZERO);
+        self.toast(Severity::Info, "Proyecto nuevo");
+    }
+
+    // ---------- medios ----------
+
+    pub fn import_dialog(&mut self) {
+        let mut dlg = rfd::FileDialog::new().set_title("Importar medios").add_filter(
+            "Medios",
+            &["mp4", "mkv", "mov", "webm", "avi", "m4v", "wav", "mp3", "flac", "m4a", "aac", "ogg", "opus", "png", "jpg", "jpeg", "webp", "bmp"],
+        );
+        if let Some(d) = &self.ui.last_media_dir {
+            dlg = dlg.set_directory(d);
+        }
+        if let Some(files) = dlg.pick_files() {
+            self.import_paths(&files);
+        }
+    }
+
+    pub fn import_paths(&mut self, files: &[PathBuf]) {
+        if let Err(e) = &self.tools {
+            self.toast(Severity::Error, format!("No se puede importar sin FFmpeg: {e}"));
+            return;
+        }
+        for f in files {
+            if self.imports.pending.len() >= 64 {
+                self.toast(Severity::Warn, "Cola de importación llena (64 pendientes); espera antes de añadir más medios");
+                break;
+            }
+            if let Some(parent) = f.parent() {
+                self.ui.last_media_dir = Some(parent.to_string_lossy().into_owned());
+            }
+            let abs = std::path::absolute(f).unwrap_or_else(|_| f.clone());
+            self.imports.pending.push_back((self.project().project_id.clone(), abs));
+        }
+        self.poll_import();
+    }
+
+    pub fn poll_import(&mut self) {
+        let result = self.imports.running.as_ref().and_then(|job| match job.result.try_recv() {
+            Ok(value) => Some(value),
+            Err(crossbeam_channel::TryRecvError::Empty) => None,
+            Err(crossbeam_channel::TryRecvError::Disconnected) => Some(Err(DomainError::process("el worker de importación terminó sin resultado"))),
+        });
+        if let Some(value) = result {
+            let job = self.imports.running.take().unwrap();
+            if job.project == self.project().project_id && !job.cancel.load(std::sync::atomic::Ordering::Acquire) {
+                match value {
+                    Ok(mut asset) => {
+                        asset.path = self.store.as_ref().map(|s| s.portable_path(&job.path)).unwrap_or(asset.path);
+                        if let Some(existing) = self.project().assets.iter().find(|a| a.fingerprint.same_identity(&asset.fingerprint)) {
+                            self.toast(Severity::Warn, format!("«{}» ya está en la biblioteca como «{}»", asset.name, existing.name));
+                        } else {
+                            let id = asset.id.clone();
+                            let message = format!("Importado {}: {}", asset.name, describe_asset(&asset));
+                            if self.exec(Command::ImportAsset { asset }) {
+                                self.toast(Severity::Info, message);
+                                if self.source_asset.is_none() {
+                                    self.source_asset = Some(id.clone());
+                                }
+                                self.selection.asset = Some(id);
+                            }
+                        }
+                    }
+                    Err(e) => {
+                        if let Some(script) = &mut self.script {
+                            script.failed = true;
+                        }
+                        self.report(e);
+                    }
+                }
+            }
+        }
+        if self.imports.running.is_none()
+            && let Some((project, path)) = self.imports.pending.pop_front()
+        {
+            match crate::import_jobs::RunningImport::start(project, path, self.tools.as_ref().unwrap().clone()) {
+                Ok(job) => self.imports.running = Some(job),
+                Err(e) => self.report(DomainError::process(format!("no se pudo iniciar importación: {e}"))),
+            }
+        }
+    }
+
+    /// Inserta un asset (o su rango) en la secuencia en el playhead.
+    pub fn insert_asset_at_playhead(&mut self, asset_id: AssetId, source: Option<TimeRange>) {
+        let pos = if self.view == ViewMode::Sequence { self.playhead } else { self.sequence().map(|s| s.extent()).unwrap_or(Ticks::ZERO) };
+        let pos = pos.floor_to_frame(self.frame_rate());
+        if self.exec(Command::InsertAssetLinked { asset_id, position: pos, video_track: None, source }) {
+            self.toast(Severity::Info, format!("Insertado en {}", pos.timecode_ms()));
+        }
+    }
+
+    // ---------- importación V1 ----------
+
+    /// Importa una carpeta `editorial/` de V1: capas, recortes y montaje (perfil V1
+    /// aplanado). Si ningún medio del proyecto coincide con el master, intenta el
+    /// `media.path` del master (absoluto o relativo a la carpeta) y una ruta sugerida.
+    pub fn import_v1_folder(&mut self, root: &Path, media_hint: Option<PathBuf>) {
+        let master_path = match tv2_v1compat::import::find_master(root) {
+            Some(p) => p,
+            None => {
+                self.toast(Severity::Error, format!("No hay *.editorial.master.json en {}", root.display()));
+                return;
+            }
+        };
+        let master = match tv2_v1compat::master::V1Master::load(&master_path) {
+            Ok(m) => m,
+            Err(e) => {
+                self.toast(Severity::Error, format!("Master V1 ilegible: {e}"));
+                return;
+            }
+        };
+        let mut asset = self.project().assets.iter().find(|a| a.fingerprint.same_identity(&master.fingerprint)).cloned();
+        if asset.is_none() {
+            let mut candidates: Vec<PathBuf> = Vec::new();
+            if let Some(h) = media_hint {
+                candidates.push(h);
+            }
+            let mp = PathBuf::from(&master.media_path);
+            if mp.is_absolute() {
+                candidates.push(mp.clone());
+            }
+            let mut bases: Vec<PathBuf> = vec![root.to_path_buf()];
+            if let Some(p) = master_path.parent() {
+                bases.push(p.to_path_buf());
+            }
+            if let Some(p) = root.parent() {
+                bases.push(p.to_path_buf());
+            }
+            for base in bases {
+                candidates.push(base.join(&mp));
+                if let Some(name) = mp.file_name() {
+                    candidates.push(base.join(name));
+                }
+            }
+            let Ok(tools) = self.tools.clone() else {
+                self.toast(Severity::Error, "FFmpeg no disponible");
+                return;
+            };
+            for c in candidates.into_iter().filter(|c| c.is_file()) {
+                let abs = std::path::absolute(&c).unwrap_or(c.clone());
+                let portable = match &self.store {
+                    Some(s) => s.portable_path(&abs),
+                    None => abs.to_string_lossy().replace('\\', "/"),
+                };
+                if let Ok(a) = tools.import(&abs, portable)
+                    && a.fingerprint.same_identity(&master.fingerprint)
+                {
+                    if self.exec(Command::ImportAsset { asset: a.clone() }) {
+                        asset = Some(a);
+                    }
+                    break;
+                }
+            }
+        }
+        let Some(asset) = asset else {
+            self.toast(
+                Severity::Warn,
+                format!("Ningún medio coincide con la identidad del master ({}). Importa el video original y repite.", master.media_path),
+            );
+            return;
+        };
+        let import = match tv2_v1compat::import::read_v1_editorial(root, &asset) {
+            Ok(i) => i,
+            Err(e) => {
+                self.toast(Severity::Error, format!("Importación V1: {e}"));
+                return;
+            }
+        };
+        for w in &import.report.warnings {
+            self.toast(Severity::Warn, format!("V1: {w}"));
+        }
+        let commands = tv2_v1compat::import::import_commands(&import, self.project(), &asset.id);
+        if commands.is_empty() {
+            self.toast(Severity::Warn, "La carpeta V1 no contiene capas, recortes ni montaje");
+            return;
+        }
+        let n = commands.len();
+        if self.exec(Command::Batch { label: "Importar proyecto V1".into(), commands }) {
+            self.source_asset = Some(asset.id.clone());
+            self.resolved_revision = None;
+            let r = &import.report;
+            self.toast(
+                Severity::Info,
+                format!(
+                    "V1 importado: {} capas, {} carriles de recortes, {} tramos de montaje ({n} comandos)",
+                    r.layers, r.trims_layers, r.montage_pieces
+                ),
+            );
+            if import.sequence.is_some() {
+                self.view = ViewMode::Sequence;
+                self.refresh_resolved();
+                let d = self.duration();
+                self.timeline_view.fit(d);
+                self.seek(Ticks::ZERO);
+            }
+        }
+    }
+
+    pub fn import_v1_dialog(&mut self) {
+        let mut dlg = rfd::FileDialog::new().set_title("Carpeta editorial de V1 (contiene *.editorial.master.json)");
+        if let Some(d) = &self.ui.last_media_dir {
+            dlg = dlg.set_directory(d);
+        }
+        if let Some(p) = dlg.pick_folder() {
+            self.import_v1_folder(&p, None);
+        }
+    }
+
+    // ---------- transporte ----------
+
+    pub fn seek(&mut self, t: Ticks) {
+        let t = t.clamp(Ticks::ZERO, self.duration().max(Ticks::ZERO));
+        self.playhead = t;
+        if let Some(p) = &self.player {
+            p.send(PlayerCommand::Seek(t));
+        }
+    }
+
+    pub fn scrub(&mut self, t: Ticks) {
+        let t = t.clamp(Ticks::ZERO, self.duration().max(Ticks::ZERO));
+        self.playhead = t;
+        if let Some(p) = &self.player {
+            p.send(PlayerCommand::Scrub(t));
+        }
+    }
+
+    pub fn player_send(&self, c: PlayerCommand) {
+        if let Some(p) = &self.player {
+            p.send(c);
+        }
+    }
+
+    pub fn set_rate(&mut self, rate: f64) {
+        self.player_send(PlayerCommand::SetRate(rate));
+        self.toast(Severity::Info, format!("×{} · {}", rate, tv2_media::player::audio_policy(rate)));
+    }
+
+    fn rate_step(&mut self, delta: i32) {
+        let snap = &self.player_snapshot;
+        let idx = SPEEDS.iter().position(|s| (*s - snap.rate).abs() < 1e-6).unwrap_or(0) as i32;
+        if delta > 0 {
+            if !snap.playing {
+                self.player_send(PlayerCommand::SetRate(1.0));
+                self.player_send(PlayerCommand::Play);
+                return;
+            }
+            let ni = (idx + 1).min(SPEEDS.len() as i32 - 1);
+            self.set_rate(SPEEDS[ni as usize]);
+        } else {
+            if idx == 0 {
+                self.player_send(PlayerCommand::Pause);
+                return;
+            }
+            self.set_rate(SPEEDS[(idx - 1) as usize]);
+        }
+    }
+
+    // ---------- acciones (un solo registro) ----------
+
+    pub fn dispatch(&mut self, action: &str) {
+        let fr = self.frame_rate();
+        let fd = fr.frame_duration();
+        match action {
+            "transport.play_pause" => self.player_send(PlayerCommand::TogglePlay),
+            "transport.pause" => self.player_send(PlayerCommand::Pause),
+            "transport.faster" => self.rate_step(1),
+            "transport.slower" => self.rate_step(-1),
+            "transport.rate_1" => self.set_rate(1.0),
+            "transport.rate_2" => self.set_rate(2.0),
+            "transport.rate_3" => self.set_rate(3.0),
+            "transport.rate_4" => self.set_rate(4.0),
+            "transport.skim" => {
+                self.set_rate(8.0);
+                if !self.player_snapshot.playing {
+                    self.player_send(PlayerCommand::Play);
+                }
+            }
+            "transport.play_from_item" => {
+                let start = self.selected_item_range().map(|r| r.start).or(self.in_point);
+                if let Some(s) = start {
+                    self.seek(s);
+                    self.player_send(PlayerCommand::Play);
+                } else {
+                    self.toast(Severity::Warn, "No hay item seleccionado ni IN");
+                }
+            }
+            "nav.frame_prev" => self.player_send(PlayerCommand::StepFrames(-1)),
+            "nav.frame_next" => self.player_send(PlayerCommand::StepFrames(1)),
+            "nav.frame_prev_10" => self.player_send(PlayerCommand::StepFrames(-10)),
+            "nav.frame_next_10" => self.player_send(PlayerCommand::StepFrames(10)),
+            "nav.step_prev" => self.seek(self.playhead - Ticks::from_millis(500)),
+            "nav.step_next" => self.seek(self.playhead + Ticks::from_millis(500)),
+            "nav.step_prev_5" => self.seek(self.playhead - Ticks::from_seconds(5)),
+            "nav.step_next_5" => self.seek(self.playhead + Ticks::from_seconds(5)),
+            "nav.home" => self.seek(Ticks::ZERO),
+            "nav.end" => self.seek(self.duration()),
+            "nav.prev_edge" | "nav.next_edge" => {
+                let edges = self.edges();
+                let t = self.playhead;
+                let target = if action == "nav.prev_edge" {
+                    edges.iter().rev().find(|e| **e < t - fd / 2).copied()
+                } else {
+                    edges.iter().find(|e| **e > t + fd / 2).copied()
+                };
+                match target {
+                    Some(e) => self.seek(e),
+                    None => self.toast(Severity::Info, "No hay más bordes en esa dirección"),
+                }
+            }
+            "nav.prev_silence" | "nav.next_silence" => self.toast(Severity::Warn, "Navegar por silencios requiere una capa de silencios (E5)"),
+            "nav.goto" => self.goto_dialog = Some(self.playhead.timecode_ms()),
+            "nav.sel_start" => {
+                if let Some(r) = self.selected_range() {
+                    self.seek(r.start)
+                }
+            }
+            "nav.sel_end" => {
+                if let Some(r) = self.selected_range() {
+                    self.seek(r.end)
+                }
+            }
+            "edit.split" => self.split_at_playhead(),
+            "edit.trim_start" | "edit.trim_end" => {
+                let edge = if action == "edit.trim_start" { ClipEdge::Start } else { ClipEdge::End };
+                let t = self.playhead;
+                let ids = self.selection.clips.clone();
+                if ids.is_empty() {
+                    self.toast(Severity::Warn, "Selecciona un clip para recortar");
+                }
+                for id in ids {
+                    self.exec(Command::TrimClip { clip_id: id, edge, new_time: t });
+                }
+            }
+            "edit.nudge_prev" => self.nudge(-fd, 0),
+            "edit.nudge_next" => self.nudge(fd, 0),
+            "edit.nudge_prev_10" => self.nudge(fd * -10, 0),
+            "edit.nudge_next_10" => self.nudge(fd * 10, 0),
+            "edit.item_prev" | "edit.item_next" => self.select_neighbor(if action == "edit.item_next" { 1 } else { -1 }),
+            "edit.accept" | "edit.accept_next" => {
+                self.set_selected_items_state(ItemState::Accepted);
+                if action == "edit.accept_next" {
+                    self.select_neighbor(1);
+                }
+            }
+            "edit.toggle" => {
+                if !self.selection.items.is_empty() {
+                    self.set_selected_items_state(ItemState::Disabled);
+                } else if !self.selection.clips.is_empty() {
+                    let ids = self.selection.clips.clone();
+                    self.exec(Command::SetClipEnabled { clip_ids: ids, enabled: false });
+                } else {
+                    self.toast(Severity::Warn, "Nada seleccionado");
+                }
+            }
+            "edit.activate" => {
+                if !self.selection.items.is_empty() {
+                    self.set_selected_items_state(ItemState::Proposed);
+                } else if !self.selection.clips.is_empty() {
+                    let ids = self.selection.clips.clone();
+                    self.exec(Command::SetClipEnabled { clip_ids: ids, enabled: true });
+                } else {
+                    self.toast(Severity::Warn, "Nada seleccionado");
+                }
+            }
+            "edit.delete" => self.delete_selection(false),
+            "edit.delete_ripple" => self.delete_selection(true),
+            "edit.edit" => self.open_rename_for_selection(),
+            "edit.deselect" => {
+                self.selection.clear();
+                self.timeline_view.cancel_gesture();
+            }
+            "edit.undo" => self.undo(),
+            "edit.redo" => self.redo(),
+            "edit.copy" => self.copy_selection(),
+            "edit.cut" => {
+                self.copy_selection();
+                self.delete_selection(false);
+            }
+            "edit.paste" => self.paste_at_playhead(),
+            "edit.duplicate" => {
+                let ids = self.selection.clips.clone();
+                let mut new_sel = Vec::new();
+                for id in ids {
+                    let Some(c) = self.sequence().and_then(|s| s.clip(&id)).cloned() else { continue };
+                    match self.session.execute(CommandEnvelope::human(Command::DuplicateClip { clip_id: id, position: c.end(), track_id: None })) {
+                        Ok(r) => {
+                            new_sel.extend(r.effect.created.iter().map(|s| ClipId::new(s.clone())));
+                            self.after_change();
+                        }
+                        Err(e) => self.report(e),
+                    }
+                }
+                if !new_sel.is_empty() {
+                    self.selection.clips = new_sel;
+                }
+            }
+            "tools.select" => self.tool = Tool::Select,
+            "tools.cut" => self.tool = Tool::Cut,
+            "tools.select_all" => {
+                if let Some(seq) = self.sequence() {
+                    let track = self.selection.clips.first().and_then(|c| seq.clip(c)).map(|c| c.track_id.clone());
+                    self.selection.clips =
+                        seq.clips.iter().filter(|c| track.as_ref().is_none_or(|t| &c.track_id == t)).map(|c| c.id.clone()).collect();
+                }
+            }
+            "layers.new_lane" => self.new_layer_dialog = Some("Nueva capa".into()),
+            "layers.add_range" => self.add_range_to_layer(),
+            "view.zoom_in" => self.timeline_view.zoom_by(1.25, None),
+            "view.zoom_out" => self.timeline_view.zoom_by(0.8, None),
+            "view.fit" => self.timeline_view.fit(self.duration()),
+            "view.zoom_sel" => {
+                if let Some(r) = self.selected_range() {
+                    self.timeline_view.zoom_to(r);
+                } else {
+                    self.timeline_view.fit(self.duration());
+                }
+            }
+            "view.follow" => {
+                self.ui.follow_playhead = !self.ui.follow_playhead;
+                let on = self.ui.follow_playhead;
+                self.toast(Severity::Info, if on { "Seguir al playhead: sí" } else { "Seguir al playhead: no" });
+            }
+            "view.center" => self.timeline_view.center_on(self.playhead),
+            "view.skip_trims" => self.toast(Severity::Warn, "Saltar recortes al reproducir llega con las capas de recortes V1 (E3)"),
+            "loop.set_in" => self.set_loop_edge(true),
+            "loop.set_out" => self.set_loop_edge(false),
+            "loop.clear" => {
+                self.loop_range = None;
+                self.player_send(PlayerCommand::SetLoop(None));
+            }
+            "view.mode_montage" => self.toggle_view(),
+            "montage.add_selection" => self.add_selection_to_sequence(),
+            "montage.add_topic" => self.toast(Severity::Warn, "Añadir tema completo requiere capas de temas (E3)"),
+            "montage.reveal_source" => self.reveal_in_source(),
+            "montage.move_up" => self.nudge(Ticks::ZERO, 1),
+            "montage.move_down" => self.nudge(Ticks::ZERO, -1),
+            "montage.export" => self.open_export_dialog(),
+            "sequence.markers" => self.markers_open = !self.markers_open,
+            "sequence.marker_add" => {
+                if self.view != ViewMode::Sequence {
+                    self.toast(Severity::Warn, "Los marcadores pertenecen a la secuencia; cambia a Vista: Secuencia");
+                } else {
+                    self.exec(Command::AddMarker {
+                        range: TimeRange::new(self.playhead, self.playhead),
+                        label: format!("Marcador {}", self.sequence().map(|s| s.markers.len() + 1).unwrap_or(1)),
+                        color: "#e8b55b".into(),
+                        marker_id: None,
+                    });
+                    self.markers_open = true;
+                }
+            }
+            "sequence.insert_selection" => {
+                let ids = self.linked_selection();
+                if self.view == ViewMode::Sequence
+                    && let Some(lead) = ids.first().and_then(|id| self.sequence().and_then(|s| s.clip(id)))
+                {
+                    let delta = self.playhead - lead.position;
+                    self.exec(Command::ShiftClips { clip_ids: ids, delta, track_delta: 0, policy: MovePolicy::Insert });
+                } else {
+                    self.toast(Severity::Warn, "Selecciona clips en la secuencia");
+                }
+            }
+            "marks.point" => self.add_point_mark(),
+            "marks.in" => {
+                self.in_point = Some(self.playhead);
+                if let Some(o) = self.out_point
+                    && o <= self.playhead
+                {
+                    self.out_point = None;
+                }
+            }
+            "marks.out" => {
+                self.out_point = Some(self.playhead);
+                if let Some(i) = self.in_point
+                    && i >= self.playhead
+                {
+                    self.in_point = None;
+                }
+            }
+            "file.open" => self.open_project_dialog(),
+            "file.save" => {
+                self.save_project(false);
+            }
+            "file.import" => self.import_dialog(),
+            other => self.toast(Severity::Warn, format!("Acción sin implementar: {other}")),
+        }
+    }
+
+    fn edges(&self) -> Vec<Ticks> {
+        let mut edges: Vec<Ticks> = match self.view {
+            ViewMode::Sequence => self.sequence().map(|s| s.clip_edges()).unwrap_or_default(),
+            ViewMode::Source => Vec::new(),
+        };
+        // bordes de items semánticos visibles del asset fuente
+        if let Some(asset) = self.current_layer_asset() {
+            for l in self.project().ordered_layers().iter().filter(|l| l.asset_id == asset && l.visible) {
+                for it in &l.items {
+                    for r in &it.ranges {
+                        let (a, b) = self.layer_range_to_view(r, &asset);
+                        edges.push(a);
+                        edges.push(b);
+                    }
+                }
+            }
+        }
+        edges.push(Ticks::ZERO);
+        edges.push(self.duration());
+        edges.sort();
+        edges.dedup();
+        edges
+    }
+
+    /// Asset cuyas capas se muestran: en Fuente el asset fuente; en Secuencia,
+    /// el asset del clip seleccionado o el primer video.
+    pub fn current_layer_asset(&self) -> Option<AssetId> {
+        match self.view {
+            ViewMode::Source => self.source_asset.clone(),
+            ViewMode::Sequence => self
+                .selection
+                .clips
+                .first()
+                .and_then(|c| self.sequence().and_then(|s| s.clip(c)).map(|c| c.asset_id.clone()))
+                .or_else(|| self.source_asset.clone())
+                .or_else(|| self.project().assets.first().map(|a| a.id.clone())),
+        }
+    }
+
+    /// En Secuencia, un rango fuente se muestra en cada clip que lo contiene
+    /// (aquí solo el primero, para bordes de navegación).
+    fn layer_range_to_view(&self, r: &TimeRange, asset: &AssetId) -> (Ticks, Ticks) {
+        match self.view {
+            ViewMode::Source => (r.start, r.end),
+            ViewMode::Sequence => {
+                if let Some(seq) = self.sequence() {
+                    for c in seq.clips.iter().filter(|c| &c.asset_id == asset) {
+                        if let Some(i) = c.source.intersection(r) {
+                            return (c.position + (i.start - c.source.start), c.position + (i.end - c.source.start));
+                        }
+                    }
+                }
+                (r.start, r.end)
+            }
+        }
+    }
+
+    pub fn selected_range(&self) -> Option<TimeRange> {
+        if let (Some(i), Some(o)) = (self.in_point, self.out_point)
+            && i < o
+        {
+            return Some(TimeRange::new(i, o));
+        }
+        if let Some(r) = self.selected_item_range() {
+            return Some(r);
+        }
+        let seq = self.sequence()?;
+        let clips: Vec<&tv2_domain::timeline::Clip> = self.selection.clips.iter().filter_map(|c| seq.clip(c)).collect();
+        if clips.is_empty() {
+            return None;
+        }
+        let start = clips.iter().map(|c| c.position).min()?;
+        let end = clips.iter().map(|c| c.end()).max()?;
+        Some(TimeRange::new(start, end))
+    }
+
+    fn selected_item_range(&self) -> Option<TimeRange> {
+        let (l, i) = self.selection.items.first()?;
+        let layer = self.project().layer(l)?;
+        let item = layer.item(i)?;
+        let (a, b) = self.layer_range_to_view(&TimeRange::new(item.start(), item.end()), &layer.asset_id);
+        Some(TimeRange::new(a, b))
+    }
+
+    pub fn split_at_playhead(&mut self) {
+        if self.view != ViewMode::Sequence {
+            self.toast(Severity::Warn, "Dividir actúa en la secuencia (Ctrl+M)");
+            return;
+        }
+        let t = self.playhead.floor_to_frame(self.frame_rate());
+        let linked = self.linked_selection();
+        let Some(seq) = self.sequence() else { return };
+        let mut targets: Vec<ClipId> = linked.iter().filter(|c| seq.clip(c).is_some_and(|c| c.range().contains(t))).cloned().collect();
+        if targets.is_empty() {
+            targets = seq.clips.iter().filter(|c| c.range().contains(t) && c.position < t && t < c.end()).map(|c| c.id.clone()).collect();
+        }
+        if targets.is_empty() {
+            self.toast(Severity::Warn, "No hay clip bajo el playhead");
+            return;
+        }
+        let commands: Vec<Command> = targets.iter().map(|id| Command::SplitClip { clip_id: id.clone(), at: t }).collect();
+        let cmd = if commands.len() == 1 { commands.into_iter().next().unwrap() } else { Command::Batch { label: "Dividir clips".into(), commands } };
+        self.exec(cmd);
+    }
+
+    fn nudge(&mut self, delta: Ticks, track_delta: i32) {
+        let ids = self.linked_selection();
+        if ids.is_empty() {
+            self.toast(Severity::Warn, "Selecciona un clip");
+            return;
+        }
+        self.exec(Command::ShiftClips { clip_ids: ids, delta, track_delta, policy: MovePolicy::Reject });
+    }
+
+    /// Selección ampliada con los clips enlazados (audio/video).
+    pub fn linked_selection(&self) -> Vec<ClipId> {
+        let Some(seq) = self.sequence() else { return Vec::new() };
+        let mut out: Vec<ClipId> = self.selection.clips.clone();
+        let groups: HashSet<String> = self.selection.clips.iter().filter_map(|c| seq.clip(c)).filter_map(|c| c.link_group.clone()).collect();
+        for c in &seq.clips {
+            if let Some(g) = &c.link_group
+                && groups.contains(g)
+                && !out.contains(&c.id)
+            {
+                out.push(c.id.clone());
+            }
+        }
+        out
+    }
+
+    fn set_selected_items_state(&mut self, state: ItemState) {
+        if self.selection.items.is_empty() {
+            self.toast(Severity::Warn, "Selecciona un tramo de una capa");
+            return;
+        }
+        let mut by_layer: HashMap<LayerId, Vec<ItemId>> = HashMap::new();
+        for (l, i) in &self.selection.items {
+            by_layer.entry(l.clone()).or_default().push(i.clone());
+        }
+        for (l, ids) in by_layer {
+            self.exec(Command::SetItemState { layer_id: l, item_ids: ids, state });
+        }
+    }
+
+    fn select_neighbor(&mut self, dir: i32) {
+        // items del carril seleccionado en orden temporal
+        let Some(layer_id) = self.selection.items.first().map(|(l, _)| l.clone()).or(self.selection.layer.clone()) else {
+            self.toast(Severity::Warn, "Selecciona una capa o un tramo");
+            return;
+        };
+        let Some(layer) = self.project().layer(&layer_id).cloned() else { return };
+        let mut items: Vec<&SemanticItem> = layer.items.iter().collect();
+        items.sort_by_key(|i| (i.start(), i.item_id.clone()));
+        if items.is_empty() {
+            return;
+        }
+        let cur = self.selection.items.first().and_then(|(_, i)| items.iter().position(|x| &x.item_id == i));
+        let next = match cur {
+            Some(p) => (p as i32 + dir).clamp(0, items.len() as i32 - 1) as usize,
+            None => {
+                if dir > 0 {
+                    0
+                } else {
+                    items.len() - 1
+                }
+            }
+        };
+        let it = items[next];
+        let id = it.item_id.clone();
+        let start = it.start();
+        self.selection.items = vec![(layer_id.clone(), id)];
+        self.selection.layer = Some(layer_id);
+        let (a, _) = self.layer_range_to_view(&TimeRange::new(start, start), &layer.asset_id);
+        self.seek(a);
+    }
+
+    fn delete_selection(&mut self, ripple: bool) {
+        if !self.selection.items.is_empty() {
+            let mut by_layer: HashMap<LayerId, Vec<ItemId>> = HashMap::new();
+            for (l, i) in &self.selection.items {
+                by_layer.entry(l.clone()).or_default().push(i.clone());
+            }
+            for (l, ids) in by_layer {
+                self.exec(Command::DeleteItems { layer_id: l, item_ids: ids });
+            }
+            self.selection.items.clear();
+            return;
+        }
+        let ids = self.linked_selection();
+        if ids.is_empty() {
+            self.toast(Severity::Warn, "Nada seleccionado");
+            return;
+        }
+        if self.exec(Command::RemoveClips { clip_ids: ids, ripple }) {
+            self.selection.clips.clear();
+        }
+    }
+
+    fn copy_selection(&mut self) {
+        let Some(seq) = self.sequence() else { return };
+        let ids = self.linked_selection();
+        self.clipboard = ids.iter().filter_map(|c| seq.clip(c)).cloned().collect();
+        if self.clipboard.is_empty() {
+            self.toast(Severity::Warn, "Nada que copiar");
+        } else {
+            let n = self.clipboard.len();
+            self.toast(Severity::Info, format!("{n} clip(s) copiados"));
+        }
+    }
+
+    fn paste_at_playhead(&mut self) {
+        if self.clipboard.is_empty() {
+            self.toast(Severity::Warn, "Portapapeles vacío");
+            return;
+        }
+        let base = self.clipboard.iter().map(|c| c.position).min().unwrap();
+        let at = self.playhead.floor_to_frame(self.frame_rate());
+        let group_map: HashMap<String, String> =
+            self.clipboard.iter().filter_map(|c| c.link_group.clone()).map(|g| (g, format!("link-{}", tv2_domain::ids::random_hex12()))).collect();
+        let commands: Vec<Command> = self
+            .clipboard
+            .iter()
+            .map(|c| Command::AddClip {
+                track_id: c.track_id.clone(),
+                asset_id: c.asset_id.clone(),
+                source: c.source,
+                position: at + (c.position - base),
+                policy: MovePolicy::Reject,
+                clip_id: None,
+                link_group: c.link_group.as_ref().and_then(|g| group_map.get(g).cloned()),
+                audio_stream: c.audio_stream,
+                provenance: Some(tv2_domain::timeline::Provenance {
+                    origin: "paste".into(),
+                    parent_clip: Some(c.id.clone()),
+                    v1_clip_id: None,
+                    created_at: Some(tv2_domain::project::now_iso()),
+                }),
+            })
+            .collect();
+        match self.session.execute(CommandEnvelope::human(Command::Batch { label: "Pegar".into(), commands })) {
+            Ok(r) => {
+                self.selection.clips = r.effect.created.iter().map(|s| ClipId::new(s.clone())).collect();
+                self.after_change();
+            }
+            Err(e) => self.report(e),
+        }
+    }
+
+    fn open_rename_for_selection(&mut self) {
+        if let Some((l, i)) = self.selection.items.first().cloned() {
+            let label = self.project().layer(&l).and_then(|l| l.item(&i)).map(|i| i.label.clone()).unwrap_or_default();
+            self.rename_dialog = Some((label, RenameTarget::Item(l, i)));
+        } else if let Some(c) = self.selection.clips.first().cloned() {
+            let name = self.sequence().and_then(|s| s.clip(&c)).map(|c| c.name.clone()).unwrap_or_default();
+            self.rename_dialog = Some((name, RenameTarget::Clip(c)));
+        } else if let Some(l) = self.selection.layer.clone() {
+            let name = self.project().layer(&l).map(|l| l.name.clone()).unwrap_or_default();
+            self.rename_dialog = Some((name, RenameTarget::Layer(l)));
+        } else {
+            self.toast(Severity::Warn, "Nada seleccionado para editar");
+        }
+    }
+
+    pub fn apply_rename(&mut self, text: String, target: RenameTarget) {
+        match target {
+            RenameTarget::Clip(c) => {
+                self.exec(Command::SetClipProps { clip_id: c, name: Some(text), gain_db: None, transform: None });
+            }
+            RenameTarget::Layer(l) => {
+                self.exec(Command::SetLayerProps { layer_id: l, name: Some(text), color: None, visible: None, locked: None });
+            }
+            RenameTarget::Item(l, i) => {
+                self.exec(Command::SetItemProps { layer_id: l, item_id: i, label: Some(text), comment: None, ranges: None });
+            }
+            RenameTarget::Track(t) => {
+                self.exec(Command::SetTrackProps {
+                    track_id: t,
+                    name: Some(text),
+                    muted: None,
+                    solo: None,
+                    locked: None,
+                    visible: None,
+                    gain_db: None,
+                    height: None,
+                });
+            }
+            RenameTarget::Project => {
+                self.exec(Command::RenameProject { name: text });
+            }
+        }
+    }
+
+    fn set_loop_edge(&mut self, is_in: bool) {
+        let t = self.playhead;
+        let mut r = self.loop_range.unwrap_or(TimeRange::new(Ticks::ZERO, self.duration()));
+        if is_in {
+            r.start = t;
+            if r.end <= t {
+                r.end = self.duration();
+            }
+        } else {
+            r.end = t;
+            if r.start >= t {
+                r.start = Ticks::ZERO;
+            }
+        }
+        self.loop_range = Some(r);
+        self.player_send(PlayerCommand::SetLoop(Some(r)));
+    }
+
+    pub fn toggle_view(&mut self) {
+        self.view = match self.view {
+            ViewMode::Sequence => ViewMode::Source,
+            ViewMode::Source => ViewMode::Sequence,
+        };
+        if self.view == ViewMode::Source && self.source_asset.is_none() {
+            self.source_asset = self.current_layer_asset();
+        }
+        self.selection.clips.clear();
+        self.player_send(PlayerCommand::Pause);
+        self.resolved_revision = None;
+        self.refresh_resolved();
+        let d = self.duration();
+        self.seek(self.playhead.min(d));
+        self.timeline_view.fit(d);
+    }
+
+    pub fn set_source_asset(&mut self, id: AssetId) {
+        self.source_asset = Some(id);
+        if self.view == ViewMode::Source {
+            self.resolved_revision = None;
+            self.refresh_resolved();
+            self.seek(Ticks::ZERO);
+            self.timeline_view.fit(self.duration());
+        }
+    }
+
+    /// «Revelar en fuente»: lleva a la posición fuente exacta del clip seleccionado bajo el playhead.
+    fn reveal_in_source(&mut self) {
+        let Some(seq) = self.sequence() else { return };
+        let clip =
+            self.selection.clips.first().and_then(|c| seq.clip(c)).or_else(|| seq.clips.iter().find(|c| c.range().contains(self.playhead))).cloned();
+        let Some(clip) = clip else {
+            self.toast(Severity::Warn, "Selecciona un clip");
+            return;
+        };
+        let src_t = clip.seq_to_source(self.playhead).unwrap_or(clip.source.start);
+        self.view = ViewMode::Source;
+        self.source_asset = Some(clip.asset_id.clone());
+        self.selection.clips.clear();
+        self.player_send(PlayerCommand::Pause);
+        self.resolved_revision = None;
+        self.refresh_resolved();
+        self.in_point = Some(clip.source.start);
+        self.out_point = Some(clip.source.end);
+        self.seek(src_t);
+        self.timeline_view.center_on(src_t);
+        self.toast(Severity::Info, format!("Fuente {} en {}", clip.name, src_t.timecode_ms()));
+    }
+
+    /// Ctrl+Shift+A: añade el rango IN/OUT (o el item seleccionado) de la fuente al final de la secuencia.
+    fn add_selection_to_sequence(&mut self) {
+        let Some(asset) = self.current_layer_asset() else {
+            self.toast(Severity::Warn, "No hay medio fuente");
+            return;
+        };
+        let range = if self.view == ViewMode::Source {
+            match (self.in_point, self.out_point) {
+                (Some(i), Some(o)) if i < o => Some(TimeRange::new(i, o)),
+                _ => self
+                    .selection
+                    .items
+                    .first()
+                    .and_then(|(l, i)| self.project().layer(l).and_then(|l| l.item(i)).map(|it| TimeRange::new(it.start(), it.end()))),
+            }
+        } else {
+            self.selection
+                .items
+                .first()
+                .and_then(|(l, i)| self.project().layer(l).and_then(|l| l.item(i)).map(|it| TimeRange::new(it.start(), it.end())))
+        };
+        let Some(range) = range else {
+            self.toast(Severity::Warn, "Marca IN/OUT (I/O) o selecciona un tramo");
+            return;
+        };
+        let pos = self.sequence().map(|s| s.extent()).unwrap_or(Ticks::ZERO);
+        if self.exec(Command::InsertAssetLinked { asset_id: asset, position: pos, video_track: None, source: Some(range) }) {
+            self.toast(Severity::Info, format!("Añadido a la secuencia en {}", pos.timecode_ms()));
+        }
+    }
+
+    fn add_point_mark(&mut self) {
+        let Some(layer_id) = self.ensure_author_layer() else { return };
+        let asset = self.project().layer(&layer_id).map(|l| l.asset_id.clone()).unwrap();
+        let Some(t) = self.view_time_to_source(self.playhead, &asset) else {
+            self.toast(Severity::Warn, "El playhead no está sobre un clip de ese medio");
+            return;
+        };
+        let mut item = SemanticItem::new(TimeRange::new(t, t), "Marca");
+        item.state = ItemState::Proposed;
+        let id = item.item_id.clone();
+        if self.exec(Command::AddItem { layer_id: layer_id.clone(), item }) {
+            self.selection.items = vec![(layer_id, id)];
+        }
+    }
+
+    /// Capa «Marcas del autor» del asset actual (se crea si falta).
+    fn ensure_author_layer(&mut self) -> Option<LayerId> {
+        let asset = self.current_layer_asset()?;
+        if let Some(l) = self.project().layers.iter().find(|l| l.asset_id == asset && l.kind == LayerKind::Author && !l.deleted) {
+            return Some(l.layer_id.clone());
+        }
+        match self.session.execute(CommandEnvelope::human(Command::CreateLayer {
+            asset_id: asset,
+            kind: LayerKind::Author,
+            name: "Marcas del autor".into(),
+            color: Some("#d09947".into()),
+            layer_id: None,
+        })) {
+            Ok(r) => {
+                self.after_change();
+                Some(LayerId::new(r.effect.created[0].clone()))
+            }
+            Err(e) => {
+                self.report(e);
+                None
+            }
+        }
+    }
+
+    /// Convierte un tiempo de la vista actual a tiempo fuente del asset.
+    pub fn view_time_to_source(&self, t: Ticks, asset: &AssetId) -> Option<Ticks> {
+        match self.view {
+            ViewMode::Source => Some(t),
+            ViewMode::Sequence => self.sequence()?.clips.iter().filter(|c| &c.asset_id == asset && c.enabled).find_map(|c| c.seq_to_source(t)),
+        }
+    }
+
+    pub fn add_range_to_layer(&mut self) {
+        let Some(layer_id) = self.selection.layer.clone() else {
+            self.toast(Severity::Warn, "Selecciona una capa (clic en su nombre) y marca IN/OUT");
+            return;
+        };
+        let (Some(i), Some(o)) = (self.in_point, self.out_point) else {
+            self.toast(Severity::Warn, "Marca IN (I) y OUT (O) antes de añadir el tramo");
+            return;
+        };
+        if i >= o {
+            self.toast(Severity::Warn, "IN debe ser anterior a OUT");
+            return;
+        }
+        let asset = self.project().layer(&layer_id).map(|l| l.asset_id.clone()).unwrap();
+        let (Some(a), Some(b)) = (self.view_time_to_source(i, &asset), self.view_time_to_source(o - Ticks(1), &asset).map(|t| t + Ticks(1))) else {
+            self.toast(Severity::Warn, "IN/OUT deben caer sobre clips de ese medio");
+            return;
+        };
+        let n = self.project().layer(&layer_id).map(|l| l.items.len() + 1).unwrap_or(1);
+        let item = SemanticItem::new(TimeRange::new(a.min(b), a.max(b)), format!("Tramo {n}"));
+        let id = item.item_id.clone();
+        if self.exec(Command::AddItem { layer_id: layer_id.clone(), item }) {
+            self.selection.items = vec![(layer_id, id)];
+            self.in_point = None;
+            self.out_point = None;
+        }
+    }
+
+    pub fn create_layer(&mut self, name: String) {
+        let Some(asset) = self.current_layer_asset() else {
+            self.toast(Severity::Warn, "Importa un medio antes de crear capas");
+            return;
+        };
+        match self.session.execute(CommandEnvelope::human(Command::CreateLayer {
+            asset_id: asset,
+            kind: LayerKind::User,
+            name,
+            color: None,
+            layer_id: None,
+        })) {
+            Ok(r) => {
+                self.selection.layer = Some(LayerId::new(r.effect.created[0].clone()));
+                self.after_change();
+            }
+            Err(e) => self.report(e),
+        }
+    }
+
+    // ---------- export ----------
+
+    pub fn open_export_dialog(&mut self) {
+        if self.export.destination.is_empty() {
+            let dir = self
+                .ui
+                .last_export_dir
+                .clone()
+                .or_else(|| self.store.as_ref().and_then(|s| s.root.parent().map(|p| p.to_string_lossy().to_string())))
+                .unwrap_or_else(|| std::env::var("USERPROFILE").unwrap_or_else(|_| ".".into()));
+            self.export.destination = format!("{}\\{}-export.mp4", dir.trim_end_matches(['\\', '/']), tv2_slug(&self.project().name));
+        }
+        self.export.open = true;
+    }
+
+    pub fn start_export(&mut self, preset: ExportPreset) {
+        let Ok(_) = &self.tools else {
+            self.toast(Severity::Error, "FFmpeg no disponible");
+            return;
+        };
+        if self.view != ViewMode::Sequence {
+            self.toast(Severity::Warn, "La exportación usa la secuencia; cambia a Secuencia (Ctrl+M)");
+            return;
+        }
+        let Some(seq) = self.sequence() else { return };
+        let mut resolved = Arc::new(ResolvedTimeline::resolve(self.project(), seq));
+        if resolved.duration.0 <= 0 {
+            self.toast(Severity::Warn, "La secuencia está vacía");
+            return;
+        }
+        let range = if self.export.range_mode == 1 {
+            match (self.in_point, self.out_point) {
+                (Some(i), Some(o)) if i < o => Some(TimeRange::new(i, o)),
+                _ => {
+                    self.toast(Severity::Warn, "No hay IN/OUT válidos");
+                    return;
+                }
+            }
+        } else {
+            None
+        };
+        if self.export.range_mode >= 2 {
+            let ranges: Vec<TimeRange> = if self.export.range_mode == 2 {
+                self.selection.clips.iter().filter_map(|id| seq.clip(id)).filter(|c| c.enabled).map(|c| c.range()).collect()
+            } else {
+                self.selection
+                    .items
+                    .iter()
+                    .flat_map(|(layer_id, item_id)| {
+                        let Some(layer) = self.project().layer(layer_id).filter(|l| !l.deleted) else { return Vec::new() };
+                        let Some(item) = layer.item(item_id) else { return Vec::new() };
+                        seq.clips
+                            .iter()
+                            .filter(|c| c.enabled && c.asset_id == layer.asset_id)
+                            .flat_map(|clip| {
+                                item.ranges
+                                    .iter()
+                                    .filter_map(|r| clip.source.intersection(r))
+                                    .map(|r| TimeRange::new(clip.position + r.start - clip.source.start, clip.position + r.end - clip.source.start))
+                            })
+                            .collect::<Vec<_>>()
+                    })
+                    .collect()
+            };
+            match resolved.extract_ranges(&ranges) {
+                Ok(extracted) => resolved = Arc::new(extracted),
+                Err(error) => {
+                    self.toast(Severity::Warn, error.to_string());
+                    return;
+                }
+            }
+        }
+        let dest = PathBuf::from(&self.export.destination);
+        if self.export.pending.len() >= 16 {
+            self.toast(Severity::Warn, "La cola está llena (16 pendientes). Espera o cancela un trabajo");
+            return;
+        }
+        if self.export.pending.iter().any(|r| r.destination == dest) || self.export.running.as_ref().is_some_and(|r| r.destination == dest) {
+            self.toast(Severity::Warn, "Ese destino ya está en la cola; elige otro nombre");
+            return;
+        }
+        if let Some(parent) = dest.parent() {
+            self.ui.last_export_dir = Some(parent.to_string_lossy().to_string());
+        }
+        let req = ExportRequest {
+            timeline: resolved,
+            assets: Arc::new(self.asset_sources()),
+            preset,
+            range,
+            destination: dest.clone(),
+            project_revision: self.session.revision(),
+        };
+        self.export.pending.push_back(req);
+        self.launch_next_export();
+        self.toast(Severity::Info, "Exportación añadida a la cola (revisión congelada)");
+    }
+
+    fn launch_next_export(&mut self) {
+        if self.export.running.is_some() {
+            return;
+        }
+        let Some(req) = self.export.pending.pop_front() else {
+            return;
+        };
+        let destination = req.destination.clone();
+        let revision = req.project_revision;
+        let Ok(tools) = self.tools.clone() else {
+            let error = Err(DomainError::unsupported("FFmpeg no disponible"));
+            self.export.history.push((destination, revision, error.clone()));
+            self.export.last_result = Some(error);
+            return;
+        };
+        let progress = Arc::new(parking_lot::Mutex::new(ExportProgress::default()));
+        let cancel = Arc::new(AtomicBool::new(false));
+        let (tx, rx) = crossbeam_channel::bounded(1);
+        let (p2, c2) = (progress.clone(), cancel.clone());
+        let spawned = std::thread::Builder::new().name("export".into()).spawn(move || {
+            let r = tv2_media::export::ExportJob::run(&tools, &req, &c2, |p| *p2.lock() = p);
+            let _ = tx.send(r);
+        });
+        match spawned {
+            Ok(thread) => {
+                self.export.running =
+                    Some(RunningExport { progress, cancel, rx, started: Instant::now(), destination, revision, thread: Some(thread) })
+            }
+            Err(e) => {
+                let error = Err(DomainError::process(format!("No se pudo iniciar exportación: {e}")));
+                self.export.history.push((destination, revision, error.clone()));
+                self.export.last_result = Some(error);
+            }
+        }
+    }
+
+    pub fn cancel_queued_export(&mut self, index: usize) {
+        if let Some(req) = self.export.pending.remove(index) {
+            self.export.history.push((
+                req.destination,
+                req.project_revision,
+                Err(DomainError::new(tv2_domain::error::ErrorCode::Cancelled, "Cancelado antes de iniciar")),
+            ));
+        }
+    }
+
+    fn poll_export(&mut self) {
+        let done = self.export.running.as_ref().and_then(|r| match r.rx.try_recv() {
+            Ok(result) => Some(result),
+            Err(crossbeam_channel::TryRecvError::Empty) => None,
+            Err(crossbeam_channel::TryRecvError::Disconnected) => Some(Err(DomainError::process("El worker de exportación terminó sin resultado"))),
+        });
+        if let Some(result) = done {
+            match &result {
+                Ok(r) => {
+                    let msg = format!(
+                        "Exportado {} ({}, {} fotogramas, {:.1} s)",
+                        r.path.display(),
+                        r.duration.timecode_ms(),
+                        r.frames_written,
+                        r.elapsed_s
+                    );
+                    self.toast(Severity::Info, msg);
+                }
+                Err(e) => self.report(e.clone()),
+            }
+            if let Some(r) = self.export.running.take() {
+                self.export.history.push((r.destination.clone(), r.revision, result.clone()));
+            }
+            self.export.last_result = Some(result);
+        }
+        if self.export.history.len() > 32 {
+            self.export.history.drain(..self.export.history.len() - 32);
+        }
+        self.launch_next_export();
+    }
+
+    // ---------- teclado ----------
+
+    fn handle_keys(&mut self, ctx: &egui::Context) {
+        if ctx.egui_wants_keyboard_input() {
+            return; // un campo de texto tiene el foco: las teclas de edición no disparan
+        }
+        let events: Vec<(egui::Key, egui::Modifiers)> = ctx.input(|i| {
+            i.events
+                .iter()
+                .filter_map(|e| match e {
+                    egui::Event::Key { key, pressed: true, modifiers, .. } => Some((*key, *modifiers)),
+                    _ => None,
+                })
+                .collect()
+        });
+        for (key, modifiers) in events {
+            let Some(chord) = chord_from_egui(key, modifiers) else { continue };
+            if let Some(action) = self.keymap.resolve(&chord) {
+                let action = action.to_string();
+                self.dispatch(&action);
+            }
+        }
+    }
+
+    fn poll_player(&mut self) {
+        let Some(p) = &self.player else { return };
+        self.player_snapshot = p.snapshot();
+        if self.player_snapshot.playing {
+            self.playhead = self.player_snapshot.position;
+            if self.ui.follow_playhead {
+                self.timeline_view.ensure_visible(self.playhead);
+            }
+        } else if let Some(f) = &self.last_frame
+            && self.player_snapshot.generation == f.generation
+        {
+            // en pausa el playhead lo manda la GUI
+        }
+        if let Some(e) = self.player_snapshot.last_error.take() {
+            self.toast(Severity::Error, e);
+        }
+    }
+
+    fn poll_console(&mut self) {
+        while let Ok(line) = self.console_rx.try_recv() {
+            self.console_lines.push(line);
+        }
+        if self.console_lines.len() > 2000 {
+            let n = self.console_lines.len() - 2000;
+            self.console_lines.drain(..n);
+        }
+    }
+
+    fn autosave(&mut self) {
+        if self.last_autosave.elapsed().as_secs() < 60 || !self.session.is_dirty() {
+            return;
+        }
+        self.last_autosave = Instant::now();
+        if let Some(store) = &self.store {
+            let path = store.root.join("autosave.json");
+            if let Ok(text) = serde_json::to_string_pretty(self.project()) {
+                if let Err(e) = tv2_application::store::atomic_write(&path, text.as_bytes()) {
+                    tracing::warn!("autosave: {e}");
+                } else {
+                    tracing::debug!("autosave en {}", path.display());
+                }
+            }
+        }
+    }
+
+    pub fn save_ui_state(&self) {
+        let mut ui = self.ui.clone();
+        ui.zoom_px_per_s = self.timeline_view.px_per_s;
+        if let Ok(text) = serde_json::to_string_pretty(&ui) {
+            let path = crate::paths::ui_state_file();
+            let _ = std::fs::create_dir_all(path.parent().unwrap());
+            let _ = std::fs::write(path, text);
+        }
+    }
+}
+
+impl eframe::App for TranscriptorApp {
+    fn ui(&mut self, root: &mut egui::Ui, frame: &mut eframe::Frame) {
+        let ctx = &root.ctx().clone();
+        self.poll_console();
+        self.poll_player();
+        self.poll_export();
+        self.poll_import();
+        self.refresh_resolved();
+        // archivos soltados sobre la ventana
+        let dropped: Vec<PathBuf> = ctx.input(|i| i.raw.dropped_files.iter().map(|f| f.path().to_path_buf()).collect());
+        if !dropped.is_empty() {
+            self.import_paths(&dropped);
+        }
+        self.handle_keys(ctx);
+        // fotograma nuevo del reproductor
+        if let Some(p) = &self.player
+            && let Some(pf) = p.take_frame(&mut self.frame_seen)
+        {
+            let img = egui::ColorImage::from_rgba_unmultiplied([pf.frame.width as usize, pf.frame.height as usize], &pf.frame.rgba);
+            match &mut self.texture {
+                Some(t) => t.set(img, egui::TextureOptions::LINEAR),
+                None => self.texture = Some(ctx.load_texture("visor", img, egui::TextureOptions::LINEAR)),
+            }
+            if !self.player_snapshot.playing {
+                self.playhead = pf.position;
+            }
+            self.last_frame = Some(pf);
+        }
+        if self.dirty_title {
+            let title = format!("{}{} — Transcriptor V2", self.project().name, if self.session.is_dirty() { " *" } else { "" });
+            ctx.send_viewport_cmd(egui::ViewportCommand::Title(title));
+            self.dirty_title = false;
+        }
+        if let Some(media) = &mut self.media_view {
+            media.begin_frame();
+        }
+        crate::ui_panels::draw(self, root);
+        if let Some(media) = &mut self.media_view {
+            media.end_frame();
+        }
+        self.frame_count += 1;
+        self.script_tick(ctx);
+        self.autosave();
+        // toasts caducan
+        self.toasts.retain(|t| t.at.elapsed().as_secs_f32() < if t.severity == Severity::Error { 10.0 } else { 5.0 });
+        if ctx.input(|i| i.viewport().close_requested()) && self.session.is_dirty() && !self.pending_close {
+            self.pending_close = true;
+            ctx.send_viewport_cmd(egui::ViewportCommand::CancelClose);
+        }
+        if self.imports.busy() || self.player_snapshot.playing || self.export.running.is_some() || !self.toasts.is_empty() {
+            ctx.request_repaint_after(std::time::Duration::from_millis(16));
+        }
+        let _ = frame;
+    }
+
+    fn save(&mut self, _storage: &mut dyn eframe::Storage) {
+        self.save_ui_state();
+    }
+
+    fn on_exit(&mut self) {
+        self.save_ui_state();
+        self.shutdown_workers();
+    }
+}
+
+impl TranscriptorApp {
+    pub fn shutdown_workers(&mut self) {
+        self.imports.cancel();
+        self.imports.running.take();
+        self.export.pending.clear();
+        if let Some(job) = &self.export.running {
+            job.cancel.store(true, std::sync::atomic::Ordering::Release);
+        }
+        if let Some(media) = &mut self.media_view {
+            media.clear();
+        }
+        self.export.running.take();
+        self.media_view.take();
+        self.player.take();
+    }
+}
+
+impl Drop for TranscriptorApp {
+    fn drop(&mut self) {
+        self.shutdown_workers();
+    }
+}
+
+pub fn describe_asset(a: &tv2_domain::asset::Asset) -> String {
+    let mut parts = Vec::new();
+    match a.kind {
+        AssetKind::Video => parts.push("video".to_string()),
+        AssetKind::Audio => parts.push("audio".to_string()),
+        AssetKind::Image => parts.push("imagen".to_string()),
+    }
+    if let Some(v) = &a.probe.video {
+        let (w, h) = v.display_size();
+        parts.push(format!("{w}×{h}"));
+        if a.kind == AssetKind::Video {
+            parts.push(format!("{:.3} fps{}", v.frame_rate.as_f64(), if v.variable_frame_rate { " (VFR)" } else { "" }));
+        }
+        parts.push(v.codec.clone());
+        if v.rotation != 0 {
+            parts.push(format!("rot {}°", v.rotation));
+        }
+    }
+    if !a.probe.audio.is_empty() {
+        let s = &a.probe.audio[0];
+        parts.push(format!("{} pista(s) de audio {} Hz {} can.", a.probe.audio.len(), s.sample_rate, s.channels));
+    }
+    if a.kind != AssetKind::Image {
+        parts.push(a.probe.duration.timecode_ms());
+    }
+    if a.probe.start_time != Ticks::ZERO {
+        parts.push(format!("start {}", a.probe.start_time.as_seconds_f64()));
+    }
+    parts.join(" · ")
+}
+
+pub fn tv2_slug(name: &str) -> String {
+    let s: String = name.chars().map(|c| if c.is_alphanumeric() || c == '-' || c == '_' { c } else { '-' }).collect();
+    let s = s.trim_matches('-').to_lowercase();
+    if s.is_empty() { "proyecto".into() } else { s }
+}
+
+fn configure_style(ctx: &egui::Context) {
+    let mut style = (*ctx.global_style()).clone();
+    style.visuals = egui::Visuals::dark();
+    style.visuals.window_corner_radius = egui::CornerRadius::same(6);
+    style.visuals.widgets.noninteractive.bg_fill = egui::Color32::from_rgb(28, 29, 33);
+    style.visuals.panel_fill = egui::Color32::from_rgb(28, 29, 33);
+    style.visuals.extreme_bg_color = egui::Color32::from_rgb(18, 18, 21);
+    style.visuals.selection.bg_fill = egui::Color32::from_rgb(208, 153, 71).linear_multiply(0.35);
+    style.visuals.selection.stroke = egui::Stroke::new(1.5, egui::Color32::from_rgb(240, 190, 90));
+    style.spacing.item_spacing = egui::vec2(6.0, 4.0);
+    style.spacing.button_padding = egui::vec2(8.0, 4.0);
+    ctx.set_global_style(style);
+}
+
+pub mod colors {
+    use egui::Color32;
+    pub const ACCENT: Color32 = Color32::from_rgb(208, 153, 71);
+    pub const VIDEO_CLIP: Color32 = Color32::from_rgb(66, 110, 170);
+    pub const AUDIO_CLIP: Color32 = Color32::from_rgb(60, 140, 110);
+    pub const IMAGE_CLIP: Color32 = Color32::from_rgb(140, 90, 170);
+    pub const DISABLED: Color32 = Color32::from_rgb(80, 80, 86);
+    pub const PLAYHEAD: Color32 = Color32::from_rgb(255, 80, 80);
+    pub const INOUT: Color32 = Color32::from_rgb(120, 200, 255);
+    pub const LOOP: Color32 = Color32::from_rgb(255, 210, 100);
+    pub const RULER_BG: Color32 = Color32::from_rgb(36, 37, 42);
+    pub const LANE_BG: Color32 = Color32::from_rgb(32, 33, 38);
+    pub const LANE_ALT: Color32 = Color32::from_rgb(38, 39, 45);
+    pub const HEADER_BG: Color32 = Color32::from_rgb(44, 45, 52);
+    pub const TEXT: Color32 = Color32::from_rgb(225, 225, 228);
+    pub const TEXT_DIM: Color32 = Color32::from_rgb(150, 150, 158);
+    pub const OK: Color32 = Color32::from_rgb(90, 200, 120);
+    pub const WARN: Color32 = Color32::from_rgb(240, 180, 60);
+    pub const ERR: Color32 = Color32::from_rgb(240, 90, 90);
+}

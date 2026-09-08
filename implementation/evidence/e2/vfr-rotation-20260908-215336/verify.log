@@ -1,0 +1,7 @@
+vfr: 178 frames; native PTS oracle min PSNR=43.355 dB
+vfr: viewer t=1.1 PSNR=31.645 dB
+vfr: viewer t=2.2 PSNR=31.564 dB
+rot90: 120 frames; native PTS oracle min PSNR=30.843 dB
+rot90: viewer t=1.1 PSNR=46.318 dB
+rot90: viewer t=2.2 PSNR=46.155 dB
+RESULTADO: OK

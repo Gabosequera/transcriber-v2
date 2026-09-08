@@ -1,0 +1,189 @@
+paso 1: Log { text: "E1: recorrido importar → reproducir → dividir → mover → capa → guardar → reabrir → exportar" }
+E1: recorrido importar → reproducir → dividir → mover → capa → guardar → reabrir → exportar
+paso 2: Wait { ms: 800 }
+paso 3: Screenshot { path: "G:/TODO/transcriptor-v2/implementation/evidence/e2/regression-20260908-105213/e1-recorrido/01-vacio.png" }
+captura guardada en G:/TODO/transcriptor-v2/implementation/evidence/e2/regression-20260908-105213/e1-recorrido/01-vacio.png (1920×1080)
+paso 4: Import { path: "G:/TODO/transcriptor-v2/tests/fixtures/media/fixture-a.mp4" }
+  toast: Info: Importado fixture-a.mp4: video · 640×360 · 30.000 fps · h264 · 1 pista(s) de audio 48000 Hz 1 can. · 00:00:12.000
+paso 5: Import { path: "G:/TODO/transcriptor-v2/tests/fixtures/media/overlay-alpha.png" }
+  toast: Info: Importado overlay-alpha.png: imagen · 320×180 · png
+paso 6: Assert { markers: None, clips: Some(0), layers: Some(0), items: None, revision: None, playing: None, rate: None, position: None, tracks: None }
+assert OK (clips 0, capas 0, items 0, rev 2, pos 0.000, rate 1, playing false)
+  toast: Info: Importado overlay-alpha.png: imagen · 320×180 · png
+paso 7: Insert { asset: 0, at: Some(0.0) }
+  toast: Info: Insertado en 00:00:00.000
+paso 8: Assert { markers: None, clips: Some(2), layers: None, items: None, revision: None, playing: None, rate: None, position: None, tracks: None }
+assert OK (clips 2, capas 0, items 0, rev 3, pos 0.000, rate 1, playing false)
+  toast: Info: Insertado en 00:00:00.000
+paso 9: Action { id: "view.fit" }
+  toast: Info: Insertado en 00:00:00.000
+paso 10: Seek { t: 1.5 }
+  toast: Info: Insertado en 00:00:00.000
+paso 11: WaitFrame { ms: 2000 }
+  toast: Info: Insertado en 00:00:00.000
+fotograma presentado: seq 5 (posición 00:00:01.500)
+paso 12: Wait { ms: 400 }
+  toast: Info: Insertado en 00:00:00.000
+paso 13: Screenshot { path: "G:/TODO/transcriptor-v2/implementation/evidence/e2/regression-20260908-105213/e1-recorrido/02-importado-seek-1500ms.png" }
+  toast: Info: Insertado en 00:00:00.000
+captura guardada en G:/TODO/transcriptor-v2/implementation/evidence/e2/regression-20260908-105213/e1-recorrido/02-importado-seek-1500ms.png (1920×1080)
+paso 14: Dump { path: "G:/TODO/transcriptor-v2/implementation/evidence/e2/regression-20260908-105213/e1-recorrido/02-estado.json" }
+estado volcado en G:/TODO/transcriptor-v2/implementation/evidence/e2/regression-20260908-105213/e1-recorrido/02-estado.json
+  toast: Info: Insertado en 00:00:00.000
+paso 15: Play
+  toast: Info: Insertado en 00:00:00.000
+paso 16: Wait { ms: 2500 }
+  toast: Info: Insertado en 00:00:00.000
+paso 17: Assert { markers: None, clips: None, layers: None, items: None, revision: None, playing: Some(true), rate: None, position: None, tracks: None }
+assert OK (clips 2, capas 0, items 0, rev 3, pos 3.960, rate 1, playing true)
+  toast: Info: Insertado en 00:00:00.000
+paso 18: Screenshot { path: "G:/TODO/transcriptor-v2/implementation/evidence/e2/regression-20260908-105213/e1-recorrido/03-reproduciendo-1x.png" }
+  toast: Info: Insertado en 00:00:00.000
+captura guardada en G:/TODO/transcriptor-v2/implementation/evidence/e2/regression-20260908-105213/e1-recorrido/03-reproduciendo-1x.png (1920×1080)
+paso 19: Dump { path: "G:/TODO/transcriptor-v2/implementation/evidence/e2/regression-20260908-105213/e1-recorrido/03-estado-play-1x.json" }
+estado volcado en G:/TODO/transcriptor-v2/implementation/evidence/e2/regression-20260908-105213/e1-recorrido/03-estado-play-1x.json
+  toast: Info: Insertado en 00:00:00.000
+paso 20: Rate { value: 2.0 }
+  toast: Info: ×2 · audio acelerado con tono preservado (atempo)
+paso 21: Wait { ms: 2500 }
+  toast: Info: ×2 · audio acelerado con tono preservado (atempo)
+paso 22: Dump { path: "G:/TODO/transcriptor-v2/implementation/evidence/e2/regression-20260908-105213/e1-recorrido/04-estado-play-2x.json" }
+estado volcado en G:/TODO/transcriptor-v2/implementation/evidence/e2/regression-20260908-105213/e1-recorrido/04-estado-play-2x.json
+  toast: Info: ×2 · audio acelerado con tono preservado (atempo)
+paso 23: Screenshot { path: "G:/TODO/transcriptor-v2/implementation/evidence/e2/regression-20260908-105213/e1-recorrido/04-reproduciendo-2x.png" }
+  toast: Info: ×2 · audio acelerado con tono preservado (atempo)
+captura guardada en G:/TODO/transcriptor-v2/implementation/evidence/e2/regression-20260908-105213/e1-recorrido/04-reproduciendo-2x.png (1920×1080)
+paso 24: Pause
+  toast: Info: ×2 · audio acelerado con tono preservado (atempo)
+paso 25: Rate { value: 1.0 }
+  toast: Info: ×1 · audio normal
+paso 26: Wait { ms: 300 }
+  toast: Info: ×1 · audio normal
+paso 27: Seek { t: 5.0 }
+  toast: Info: ×1 · audio normal
+paso 28: WaitFrame { ms: 2000 }
+  toast: Info: ×1 · audio normal
+fotograma presentado: seq 229 (posición 00:00:05.000)
+paso 29: SelectClip { index: 0 }
+  toast: Info: ×1 · audio normal
+paso 30: Split
+  toast: Info: ×1 · audio normal
+paso 31: Assert { markers: None, clips: Some(4), layers: None, items: None, revision: None, playing: None, rate: None, position: None, tracks: None }
+assert OK (clips 4, capas 0, items 0, rev 4, pos 5.000, rate 1, playing false)
+  toast: Info: ×1 · audio normal
+paso 32: Log { text: "dividido en 5 s: 4 clips (video+audio enlazados × 2)" }
+dividido en 5 s: 4 clips (video+audio enlazados × 2)
+  toast: Info: ×1 · audio normal
+paso 33: SelectClip { index: 2 }
+  toast: Info: ×1 · audio normal
+paso 34: Shift { delta: -5.0, tracks: 0, expect_error: Some(Overlap) }
+SHIFT resultado=Err(DomainError { code: Overlap, message: "el clip se solaparía con «fixture-a.mp4» (clip-e38175865b49)", context: [("other", "clip-e38175865b49")], action: Some("elige otra posición, otra pista o usa sobrescribir") }), esperado=Some(Overlap), revisión=4
+  toast: Warn: el clip se solaparía con «fixture-a.mp4» (clip-e38175865b49) · elige otra posición, otra pista o usa sobrescribir
+paso 35: Log { text: "intento de solapar el segundo tramo sobre el primero: debe fallar con E_OVERLAP" }
+intento de solapar el segundo tramo sobre el primero: debe fallar con E_OVERLAP
+  toast: Warn: el clip se solaparía con «fixture-a.mp4» (clip-e38175865b49) · elige otra posición, otra pista o usa sobrescribir
+paso 36: Dump { path: "G:/TODO/transcriptor-v2/implementation/evidence/e2/regression-20260908-105213/e1-recorrido/05-estado-overlap-rechazado.json" }
+estado volcado en G:/TODO/transcriptor-v2/implementation/evidence/e2/regression-20260908-105213/e1-recorrido/05-estado-overlap-rechazado.json
+  toast: Warn: el clip se solaparía con «fixture-a.mp4» (clip-e38175865b49) · elige otra posición, otra pista o usa sobrescribir
+paso 37: Move { clip: 2, to: 0.0, policy: Some("insert") }
+  toast: Warn: el clip se solaparía con «fixture-a.mp4» (clip-e38175865b49) · elige otra posición, otra pista o usa sobrescribir
+paso 38: Log { text: "mover el segundo tramo (5–12 s fuente) al inicio con insert: ahora la secuencia empieza en fuente 5 s" }
+mover el segundo tramo (5–12 s fuente) al inicio con insert: ahora la secuencia empieza en fuente 5 s
+  toast: Warn: el clip se solaparía con «fixture-a.mp4» (clip-e38175865b49) · elige otra posición, otra pista o usa sobrescribir
+paso 39: Seek { t: 2.5 }
+  toast: Warn: el clip se solaparía con «fixture-a.mp4» (clip-e38175865b49) · elige otra posición, otra pista o usa sobrescribir
+paso 40: WaitFrame { ms: 2000 }
+  toast: Warn: el clip se solaparía con «fixture-a.mp4» (clip-e38175865b49) · elige otra posición, otra pista o usa sobrescribir
+fotograma presentado: seq 230 (posición 00:00:02.500)
+paso 41: Wait { ms: 400 }
+  toast: Warn: el clip se solaparía con «fixture-a.mp4» (clip-e38175865b49) · elige otra posición, otra pista o usa sobrescribir
+paso 42: Screenshot { path: "G:/TODO/transcriptor-v2/implementation/evidence/e2/regression-20260908-105213/e1-recorrido/06-movido-seek-2500ms.png" }
+  toast: Warn: el clip se solaparía con «fixture-a.mp4» (clip-e38175865b49) · elige otra posición, otra pista o usa sobrescribir
+captura guardada en G:/TODO/transcriptor-v2/implementation/evidence/e2/regression-20260908-105213/e1-recorrido/06-movido-seek-2500ms.png (1920×1080)
+paso 43: Dump { path: "G:/TODO/transcriptor-v2/implementation/evidence/e2/regression-20260908-105213/e1-recorrido/06-estado-movido.json" }
+estado volcado en G:/TODO/transcriptor-v2/implementation/evidence/e2/regression-20260908-105213/e1-recorrido/06-estado-movido.json
+  toast: Warn: el clip se solaparía con «fixture-a.mp4» (clip-e38175865b49) · elige otra posición, otra pista o usa sobrescribir
+paso 44: Insert { asset: 1, at: Some(1.0) }
+  toast: Info: Insertado en 00:00:01.000
+paso 45: Log { text: "imagen con alfa insertada en 1 s (pista de video nueva por colisión)" }
+imagen con alfa insertada en 1 s (pista de video nueva por colisión)
+  toast: Info: Insertado en 00:00:01.000
+paso 46: Seek { t: 2.5 }
+  toast: Info: Insertado en 00:00:01.000
+paso 47: WaitFrame { ms: 2000 }
+  toast: Info: Insertado en 00:00:01.000
+fotograma presentado: seq 230 (posición 00:00:02.500)
+paso 48: Wait { ms: 400 }
+  toast: Info: Insertado en 00:00:01.000
+paso 49: Screenshot { path: "G:/TODO/transcriptor-v2/implementation/evidence/e2/regression-20260908-105213/e1-recorrido/07-overlay-en-visor.png" }
+  toast: Info: Insertado en 00:00:01.000
+captura guardada en G:/TODO/transcriptor-v2/implementation/evidence/e2/regression-20260908-105213/e1-recorrido/07-overlay-en-visor.png (1920×1080)
+paso 50: NewLayer { name: "Notas manuales" }
+  toast: Info: Insertado en 00:00:01.000
+paso 51: SetIn { t: 2.0 }
+  toast: Info: Insertado en 00:00:01.000
+paso 52: SetOut { t: 4.0 }
+  toast: Info: Insertado en 00:00:01.000
+paso 53: AddRange
+  toast: Info: Insertado en 00:00:01.000
+paso 54: Assert { markers: None, clips: None, layers: Some(1), items: Some(1), revision: None, playing: None, rate: None, position: None, tracks: None }
+assert OK (clips 5, capas 1, items 1, rev 8, pos 2.500, rate 1, playing false)
+  toast: Info: Insertado en 00:00:01.000
+paso 55: SelectItem { layer: 0, index: 0 }
+  toast: Info: Insertado en 00:00:01.000
+paso 56: Action { id: "edit.accept" }
+  toast: Info: Insertado en 00:00:01.000
+paso 57: Screenshot { path: "G:/TODO/transcriptor-v2/implementation/evidence/e2/regression-20260908-105213/e1-recorrido/08-capa-manual-aceptada.png" }
+  toast: Info: Insertado en 00:00:01.000
+captura guardada en G:/TODO/transcriptor-v2/implementation/evidence/e2/regression-20260908-105213/e1-recorrido/08-capa-manual-aceptada.png (1920×1080)
+paso 58: Undo
+  toast: Info: Deshacer Aceptar
+paso 59: Redo
+  toast: Info: Rehacer Aceptar
+paso 60: Dump { path: "G:/TODO/transcriptor-v2/implementation/evidence/e2/regression-20260908-105213/e1-recorrido/08-estado-capa.json" }
+estado volcado en G:/TODO/transcriptor-v2/implementation/evidence/e2/regression-20260908-105213/e1-recorrido/08-estado-capa.json
+  toast: Info: Rehacer Aceptar
+paso 61: Save { path: "G:/TODO/transcriptor-v2/implementation/evidence/e2/regression-20260908-105213/e1-recorrido/demo-e1.transcriptor" }
+  toast: Info: Guardado en G:/TODO/transcriptor-v2/implementation/evidence/e2/regression-20260908-105213/e1-recorrido/demo-e1.transcriptor
+paso 62: NewProject
+  toast: Info: Proyecto nuevo
+paso 63: Assert { markers: None, clips: Some(0), layers: Some(0), items: None, revision: None, playing: None, rate: None, position: None, tracks: None }
+assert OK (clips 0, capas 0, items 0, rev 0, pos 2.500, rate 1, playing false)
+  toast: Info: Proyecto nuevo
+paso 64: Open { path: "G:/TODO/transcriptor-v2/implementation/evidence/e2/regression-20260908-105213/e1-recorrido/demo-e1.transcriptor/project.json" }
+  toast: Info: Proyecto «Sin título» abierto (revisión 11)
+paso 65: Assert { markers: None, clips: Some(5), layers: Some(1), items: Some(1), revision: None, playing: None, rate: None, position: None, tracks: None }
+assert OK (clips 5, capas 1, items 1, rev 11, pos 0.000, rate 1, playing false)
+  toast: Info: Proyecto «Sin título» abierto (revisión 11)
+paso 66: Action { id: "view.fit" }
+  toast: Info: Proyecto «Sin título» abierto (revisión 11)
+paso 67: Seek { t: 2.5 }
+  toast: Info: Proyecto «Sin título» abierto (revisión 11)
+paso 68: WaitFrame { ms: 2000 }
+  toast: Info: Proyecto «Sin título» abierto (revisión 11)
+fotograma presentado: seq 233 (posición 00:00:02.500)
+paso 69: Wait { ms: 400 }
+  toast: Info: Proyecto «Sin título» abierto (revisión 11)
+paso 70: Screenshot { path: "G:/TODO/transcriptor-v2/implementation/evidence/e2/regression-20260908-105213/e1-recorrido/09-reabierto.png" }
+  toast: Info: Proyecto «Sin título» abierto (revisión 11)
+captura guardada en G:/TODO/transcriptor-v2/implementation/evidence/e2/regression-20260908-105213/e1-recorrido/09-reabierto.png (1920×1080)
+paso 71: Dump { path: "G:/TODO/transcriptor-v2/implementation/evidence/e2/regression-20260908-105213/e1-recorrido/09-estado-reabierto.json" }
+estado volcado en G:/TODO/transcriptor-v2/implementation/evidence/e2/regression-20260908-105213/e1-recorrido/09-estado-reabierto.json
+  toast: Info: Proyecto «Sin título» abierto (revisión 11)
+paso 72: Export { preset: "h264-720p", dest: "G:/TODO/transcriptor-v2/implementation/evidence/e2/regression-20260908-105213/e1-recorrido/export-e1-720p.mp4", range: false }
+  toast: Info: Exportación añadida a la cola (revisión congelada)
+paso 73: WaitExport { ms: 120000 }
+  toast: Info: Exportación añadida a la cola (revisión congelada)
+export OK: G:/TODO/transcriptor-v2/implementation/evidence/e2/regression-20260908-105213/e1-recorrido/export-e1-720p.mp4 · 00:00:12.000 · 360 frames · sha256 f84e177d9ce2a82b829f4c1bc94b90873d95b0ace859c4791951620c1ec85655
+paso 74: Wait { ms: 500 }
+  toast: Info: Exportado G:/TODO/transcriptor-v2/implementation/evidence/e2/regression-20260908-105213/e1-recorrido/export-e1-720p.mp4 (00:00:12.000, 360 fotogramas, 2.0 s)
+paso 75: Screenshot { path: "G:/TODO/transcriptor-v2/implementation/evidence/e2/regression-20260908-105213/e1-recorrido/10-exportado.png" }
+  toast: Info: Exportado G:/TODO/transcriptor-v2/implementation/evidence/e2/regression-20260908-105213/e1-recorrido/export-e1-720p.mp4 (00:00:12.000, 360 fotogramas, 2.0 s)
+captura guardada en G:/TODO/transcriptor-v2/implementation/evidence/e2/regression-20260908-105213/e1-recorrido/10-exportado.png (1920×1080)
+paso 76: Dump { path: "G:/TODO/transcriptor-v2/implementation/evidence/e2/regression-20260908-105213/e1-recorrido/10-estado-final.json" }
+estado volcado en G:/TODO/transcriptor-v2/implementation/evidence/e2/regression-20260908-105213/e1-recorrido/10-estado-final.json
+  toast: Info: Exportado G:/TODO/transcriptor-v2/implementation/evidence/e2/regression-20260908-105213/e1-recorrido/export-e1-720p.mp4 (00:00:12.000, 360 fotogramas, 2.0 s)
+paso 77: Quit
+quit; fallos=false
+  toast: Info: Exportado G:/TODO/transcriptor-v2/implementation/evidence/e2/regression-20260908-105213/e1-recorrido/export-e1-720p.mp4 (00:00:12.000, 360 fotogramas, 2.0 s)
+guion terminado; fallos=false
