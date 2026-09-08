@@ -1,9 +1,13 @@
 """Experimento acotado: identificar por píxeles el PTS nativo elegido por -ss/fps."""
 import json, subprocess
 from pathlib import Path
+import sys
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+from support import media_tool
+
 ROOT=Path(__file__).resolve().parents[2]
-FF=str(ROOT/'packaging/third-party/ffmpeg/ffmpeg.exe')
-FP=str(ROOT/'packaging/third-party/ffmpeg/ffprobe.exe')
+FF=media_tool("ffmpeg")
+FP=media_tool("ffprobe")
 source=str(ROOT/'tests/fixtures/media/fixture-vfr.mp4')
 frames=json.loads(subprocess.check_output([FP,'-v','error','-select_streams','v:0','-show_frames','-show_entries','frame=best_effort_timestamp_time','-of','json',source]))['frames']
 pts=[float(f['best_effort_timestamp_time']) for f in frames]

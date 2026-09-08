@@ -127,7 +127,6 @@ pub struct KeymapFile {
     pub bindings: HashMap<String, Vec<String>>,
 }
 
-#[allow(dead_code)] // `overrides` y `save_overrides` se usan en Ajustes → Atajos (E3)
 pub struct Keymap {
     pub actions: Vec<Action>,
     chords: HashMap<&'static str, Vec<String>>,
@@ -172,7 +171,8 @@ impl Keymap {
             let mut clean = Vec::new();
             for c in list {
                 match normalize_chord(c) {
-                    Some(n) => clean.push(n),
+                    Some(n) if !clean.contains(&n) => clean.push(n),
+                    Some(_) => {}
                     None => warnings.push(format!("{id}: acorde inválido «{c}»")),
                 }
             }
@@ -197,6 +197,34 @@ impl Keymap {
 
     pub fn resolve(&self, chord: &str) -> Option<&'static str> {
         self.bindings.get(chord).copied()
+    }
+
+    /// Build a complete candidate without mutating the live shortcuts.
+    pub fn edited(&self, id: &str, text: Option<&str>) -> Result<Self, String> {
+        if !self.actions.iter().any(|a| a.id == id) {
+            return Err(format!("acción desconocida: {id}"));
+        }
+        let mut overrides = self.overrides.clone();
+        match text {
+            None => {
+                overrides.remove(id);
+            }
+            Some(text) => {
+                let mut chords = Vec::new();
+                for raw in text.split(';').map(str::trim).filter(|s| !s.is_empty()) {
+                    let chord = normalize_chord(raw).ok_or_else(|| format!("combinación inválida: {raw}"))?;
+                    if !chords.contains(&chord) {
+                        chords.push(chord);
+                    }
+                }
+                overrides.insert(id.to_owned(), chords);
+            }
+        }
+        let candidate = Self::with_overrides(overrides);
+        if let Some((chord, first, second)) = candidate.conflicts.first() {
+            return Err(format!("{chord} está asignado a {first} y {second}. Libera esa combinación primero."));
+        }
+        Ok(candidate)
     }
 
     pub fn chords(&self, id: &str) -> &[String] {
@@ -309,6 +337,41 @@ pub fn normalize_chord(text: &str) -> Option<String> {
         }
     }
     let key = key?;
+    let named = [
+        "space",
+        "Escape",
+        "Return",
+        "Delete",
+        "BackSpace",
+        "Tab",
+        "plus",
+        "minus",
+        "equal",
+        "comma",
+        "period",
+        "bracketleft",
+        "bracketright",
+        "Up",
+        "Down",
+        "Left",
+        "Right",
+        "Home",
+        "End",
+        "Prior",
+        "Next",
+        "Insert",
+        "KP_Add",
+        "KP_Subtract",
+        "semicolon",
+        "slash",
+        "backslash",
+        "apostrophe",
+        "grave",
+    ];
+    let function_key = key.strip_prefix('F').and_then(|s| s.parse::<u8>().ok()).is_some_and(|n| (1..=35).contains(&n));
+    if !named.contains(&key.as_str()) && !function_key && !(key.len() == 1 && key.chars().all(|c| c.is_ascii_alphanumeric())) {
+        return None;
+    }
     let ordered: Vec<&str> = MODS.iter().copied().filter(|m| mods.contains(m)).collect();
     let mut out = ordered.join("+");
     if !out.is_empty() {
@@ -433,20 +496,37 @@ fn build(key: &str, modifiers: egui::Modifiers) -> Option<String> {
     Some(out)
 }
 
-#[allow(dead_code)]
 pub fn save_overrides(overrides: &HashMap<String, Vec<String>>) -> std::io::Result<()> {
     let path = crate::paths::keymap_file();
-    std::fs::create_dir_all(path.parent().unwrap())?;
     let file = KeymapFile { schema: SCHEMA.into(), bindings: overrides.clone() };
     let text = serde_json::to_string_pretty(&file)?;
-    let tmp = path.with_extension("json.tmp");
-    std::fs::write(&tmp, text + "\n")?;
-    std::fs::rename(tmp, path)
+    tv2_application::store::atomic_write(&path, (text + "\n").as_bytes()).map_err(std::io::Error::other)
+}
+
+#[derive(Default)]
+pub struct ShortcutEditor {
+    pub action: String,
+    pub text: String,
+    pub capturing: bool,
+    pub error: Option<String>,
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn editing_shortcuts_is_transactional_and_can_disable_and_restore() {
+        let original = Keymap::with_overrides(HashMap::new());
+        assert!(original.edited("edit.split", Some("E")).is_err());
+        assert_eq!(original.resolve("S"), Some("edit.split"));
+        let disabled = original.edited("edit.split", Some("")).unwrap();
+        assert!(disabled.resolve("S").is_none());
+        let custom = disabled.edited("edit.split", Some("Ctrl+F12; Ctrl+F12")).unwrap();
+        assert_eq!(custom.chords("edit.split"), &["Ctrl+F12"]);
+        assert_eq!(custom.edited("edit.split", None).unwrap().resolve("S"), Some("edit.split"));
+        assert!(custom.edited("edit.split", Some("Ctrl+not-a-key")).is_err());
+    }
 
     #[test]
     fn chords_normalize_like_v1() {

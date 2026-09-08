@@ -1,0 +1,26 @@
+   Compiling tv2-application v2.0.0-alpha.2 (C:\Users\gabri\Todo\transcriber-v2\crates\application)
+    Finished `test` profile [optimized + debuginfo] target(s) in 17.42s
+     Running unittests src\lib.rs (target\debug\deps\tv2_application-d8e28be026bd4a6e.exe)
+
+running 13 tests
+test session::tests::undo_after_external_change_is_rejected_not_applied ... ok
+test session::tests::explicit_recovery_can_be_undone_without_rewinding_revision ... ok
+test session::tests::failed_batch_leaves_project_untouched_and_dry_run_does_not_commit ... ok
+test session::tests::revisions_grow_and_undo_creates_new_revision ... ok
+test session::tests::digest_checks_dry_run_and_apply_and_revision_cannot_overflow ... ok
+test session::tests::stale_base_is_rejected_and_idempotent_retry_replays ... ok
+test session::tests::idempotency_rejects_changed_request_and_wrong_project_before_replay ... ok
+test store::tests::journal_is_append_only_and_tolerates_truncated_tail ... ok
+test store::tests::invalid_external_json_is_never_overwritten_and_lock_is_enforced ... ok
+test store::tests::compare_and_save_rejects_second_instance_and_preserves_external_content ... ok
+test session::tests::multiple_undo_redo_preserves_content_and_monotonic_revision ... ok
+test store::tests::save_load_round_trip_and_atomic_replace ... ok
+test store::tests::recovery_requires_matching_identity_and_newer_revision ... ok
+
+test result: ok. 13 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.07s
+
+   Doc-tests tv2_application
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s

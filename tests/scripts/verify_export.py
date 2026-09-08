@@ -11,10 +11,14 @@ mayor y superar 28 dB. No exige hashes idénticos (codec con pérdida).
 """
 import json, math, os, subprocess, sys
 
+from pathlib import Path
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+from support import media_tool
+
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.abspath(os.path.join(HERE, "..", ".."))
-FF = os.path.join(ROOT, "packaging", "third-party", "ffmpeg", "ffmpeg.exe")
-FP = os.path.join(ROOT, "packaging", "third-party", "ffmpeg", "ffprobe.exe")
+FF = media_tool("ffmpeg")
+FP = media_tool("ffprobe")
 W, H = 320, 180
 
 

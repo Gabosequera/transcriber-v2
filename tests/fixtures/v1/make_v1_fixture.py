@@ -18,16 +18,18 @@ import sys
 import tempfile
 from pathlib import Path
 
+sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
+from support import media_tool
+
 HERE = Path(__file__).resolve().parent
 ROOT = HERE.parents[2]
-V1 = Path(sys.argv[1]) if len(sys.argv) > 1 else Path(r"G:\TODO\transcriptor-installer-v0.2.0")
+V1 = Path(sys.argv[1]) if len(sys.argv) > 1 else Path(os.environ.get("TRANSCRIPTOR_V1_DIR", ROOT.parent / "transcriber"))
 MEDIA = ROOT / "tests" / "fixtures" / "media" / "fixture-a.mp4"
 OUT = HERE / "demo-a"
-FFDIR = ROOT / "packaging" / "third-party" / "ffmpeg"
+FFDIR = Path(media_tool("ffmpeg")).parent
 
 GENERATOR = r'''
 import json, os, sys
-from pathlib import Path
 import medios, editorial_layers, editorial_trims, editorial_montaje, editorial_io, editorial_chunks
 
 media = Path(sys.argv[1]); out = Path(sys.argv[2])

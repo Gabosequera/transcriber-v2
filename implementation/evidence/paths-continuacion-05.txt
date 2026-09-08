@@ -1,0 +1,2 @@
+Python syntax: OK. All JSON templates expand in a Unicode/spaced output path: OK. FFmpeg resolves: C:\Users\gabri\AppData\Local\Microsoft\WinGet\Packages\Gyan.FFmpeg_Microsoft.Winget.Source_8wekyb3d8bbwe\ffmpeg-8.1.2-full_build\bin\ffmpeg.exe
+No media or UI was executed.

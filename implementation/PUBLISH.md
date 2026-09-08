@@ -1,3 +1,11 @@
+# Publicación de continuación 5 — alpha.2
+
+El usuario autorizó commit/push/prerelease al cortar por contexto. Se prepara `v2.0.0-alpha.2` como **checkpoint de fuentes**, con avances parciales E3 y rutas portables. E4 pendiente. No incluye nuevo paquete Windows ni ejecutable probado; los source archives serán los de GitHub. Clippy/formato y pruebas unitarias dirigidas no sustituyen testing real, aplazado expresamente. Resultado remoto se registra al publicar.
+
+El contenido restante describe la publicación **histórica alpha.1**. Sus hashes/binarios no corresponden a alpha.2 y su orden de parar fue reemplazada por el encargo actual hasta E4.
+
+---
+
 # Publicación solicitada — 2026-09-08
 
 El usuario pidió detener implementación y guardar el traspaso; después autorizó commit/push/release de ambas versiones. Confirmó: V2 todos los derechos reservados; V1 conserva PolyForm Noncommercial. Versiones previstas: V1 v0.4.0 (VERSION existente), V2 v2.0.0-alpha.1 (Cargo existente). Repositorio V1 https://github.com/Gabosequera/transcriber; nuevo V2 público https://github.com/Gabosequera/transcriber-v2.

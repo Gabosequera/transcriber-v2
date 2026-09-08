@@ -63,6 +63,8 @@ pub struct CommandEnvelope {
     pub base_revision: Option<Revision>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub idempotency_key: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub precondition_digest: Option<String>,
     pub command: Command,
 }
 
@@ -83,6 +85,7 @@ impl CommandEnvelope {
             project_id: None,
             base_revision: None,
             idempotency_key: None,
+            precondition_digest: None,
             command,
         }
     }
@@ -128,6 +131,10 @@ pub struct DryRunResult {
 
 #[derive(Clone, PartialEq, Eq, Debug, Default, Serialize, Deserialize)]
 pub struct DiffSummary {
+    #[serde(default)]
+    pub project_changed: bool,
+    #[serde(default)]
+    pub sequences_changed: usize,
     pub clips_added: usize,
     pub clips_removed: usize,
     pub clips_changed: usize,
@@ -142,7 +149,18 @@ pub struct DiffSummary {
 
 impl DiffSummary {
     pub fn compute(before: &Project, after: &Project) -> DiffSummary {
-        let mut d = DiffSummary::default();
+        let mut d = DiffSummary {
+            project_changed: before.name != after.name
+                || before.settings != after.settings
+                || before.extra != after.extra
+                || before.active_sequence != after.active_sequence
+                || before.layer_order != after.layer_order,
+            sequences_changed: after.sequences.iter().filter(|s| before.sequence(&s.id).is_none_or(|old| old != *s)).count()
+                + before.sequences.iter().filter(|s| after.sequence(&s.id).is_none()).count(),
+            layers_changed: before.layers.iter().filter(|l| after.layer(&l.layer_id).is_none()).count(),
+            items_removed: before.layers.iter().filter(|l| after.layer(&l.layer_id).is_none()).map(|l| l.items.len()).sum(),
+            ..Default::default()
+        };
         let b_clips: HashMap<_, _> = before.sequences.iter().flat_map(|s| s.clips.iter()).map(|c| (&c.id, c)).collect();
         let a_clips: HashMap<_, _> = after.sequences.iter().flat_map(|s| s.clips.iter()).map(|c| (&c.id, c)).collect();
         for (id, c) in &a_clips {
@@ -195,6 +213,9 @@ impl DiffSummary {
 
     pub fn human(&self) -> String {
         let mut parts = Vec::new();
+        if self.project_changed {
+            parts.push("propiedades del proyecto".into());
+        }
         let push = |parts: &mut Vec<String>, n: usize, what: &str| {
             if n > 0 {
                 parts.push(format!("{n} {what}"));
@@ -210,6 +231,9 @@ impl DiffSummary {
         push(&mut parts, self.items_removed, "tramos borrados");
         push(&mut parts, self.items_changed, "tramos modificados");
         push(&mut parts, self.markers_changed, "marcadores");
+        if parts.is_empty() {
+            push(&mut parts, self.sequences_changed, "secuencias");
+        }
         if parts.is_empty() { "sin cambios".into() } else { parts.join(", ") }
     }
 }
@@ -246,7 +270,7 @@ pub struct ProjectSession {
     project: Project,
     undo: VecDeque<HistoryEntry>,
     redo: VecDeque<HistoryEntry>,
-    idempotency: HashMap<String, CommandResult>,
+    idempotency: HashMap<String, (CommandEnvelope, CommandResult)>,
     journal: Vec<JournalEvent>,
     dirty: bool,
 }
@@ -272,6 +296,46 @@ impl ProjectSession {
         self.dirty = false;
     }
 
+    pub fn pending_journal(&self) -> &[JournalEvent] {
+        &self.journal
+    }
+
+    /// Explicit human recovery; preserve the saved snapshot as one undo step.
+    pub fn recover(&mut self, mut candidate: Project) -> DomainResult<()> {
+        if candidate.project_id != self.project.project_id {
+            return Err(DomainError::precondition("autosave pertenece a otro proyecto"));
+        }
+        let base = self.revision();
+        candidate.revision = base.max(candidate.revision).checked_add(1).ok_or_else(|| DomainError::out_of_range("revisión agotada"))?;
+        candidate.updated_at = now_iso();
+        let command_id = new_command_id();
+        self.journal.push(JournalEvent {
+            at: candidate.updated_at.clone(),
+            command_id: command_id.clone(),
+            actor: Actor::Human,
+            kind: "recovery".into(),
+            label: "Recuperar autosave".into(),
+            base_revision: base,
+            new_revision: candidate.revision,
+            idempotency_key: None,
+            diff: DiffSummary::compute(&self.project, &candidate),
+            command: None,
+        });
+        self.undo.clear();
+        self.redo.clear();
+        self.undo.push_back(HistoryEntry {
+            label: "Recuperar autosave".into(),
+            actor: Actor::Human,
+            command_id,
+            before: self.project.clone(),
+            after: candidate.clone(),
+            expect: candidate.revision,
+        });
+        self.project = candidate;
+        self.dirty = true;
+        Ok(())
+    }
+
     pub fn can_undo(&self) -> bool {
         !self.undo.is_empty()
     }
@@ -293,9 +357,14 @@ impl ProjectSession {
         std::mem::take(&mut self.journal)
     }
 
-    /// Reemplaza el proyecto por una versión reconciliada externamente (recarga
-    /// desde disco). Sube la revisión y vacía el historial que ya no aplica.
+    /// Sustituye un snapshot sin generar revisión ni auditoría. El llamador
+    /// administra la reconciliación; un cambio de identidad invalida el historial.
     pub fn replace_project(&mut self, project: Project, keep_history: bool) {
+        let keep_history = keep_history && self.project.project_id == project.project_id;
+        if !keep_history {
+            self.idempotency.clear();
+            self.journal.clear();
+        }
         self.project = project;
         if !keep_history {
             self.undo.clear();
@@ -305,10 +374,32 @@ impl ProjectSession {
     }
 
     fn check_base(&self, envelope: &CommandEnvelope) -> DomainResult<()> {
+        self.check_identity(envelope)?;
         if let Some(base) = envelope.base_revision
             && base != self.project.revision
         {
             return Err(DomainError::stale(base, self.project.revision));
+        }
+        if let Some(expected) = &envelope.precondition_digest
+            && expected != &self.digest()?
+        {
+            return Err(DomainError::new(ErrorCode::ExternalConflict, "el contenido del proyecto cambió desde la consulta"));
+        }
+        Ok(())
+    }
+
+    pub fn digest(&self) -> DomainResult<String> {
+        Ok(tv2_domain::digest::digest_json(&serde_json::to_value(&self.project)?))
+    }
+
+    fn check_identity(&self, envelope: &CommandEnvelope) -> DomainResult<()> {
+        if envelope.protocol != PROTOCOL_VERSION {
+            return Err(DomainError::unsupported(format!("protocolo desconocido: {}", envelope.protocol)));
+        }
+        if let Some(key) = &envelope.idempotency_key
+            && (key.is_empty() || key.len() > 256)
+        {
+            return Err(DomainError::invalid("idempotency_key debe tener entre 1 y 256 bytes"));
         }
         if let Some(pid) = &envelope.project_id
             && pid != &self.project.project_id
@@ -327,19 +418,29 @@ impl ProjectSession {
     }
 
     pub fn execute(&mut self, envelope: CommandEnvelope) -> DomainResult<CommandResult> {
+        self.check_identity(&envelope)?;
         if let Some(key) = &envelope.idempotency_key
-            && let Some(prev) = self.idempotency.get(key)
+            && let Some((request, prev)) = self.idempotency.get(key)
         {
+            // command_id identifies an attempt; every other field identifies its intent.
+            let mut retry = envelope.clone();
+            retry.command_id.clone_from(&request.command_id);
+            if &retry != request {
+                return Err(DomainError::precondition("idempotency_key ya usada para otra solicitud"));
+            }
             let mut r = prev.clone();
             r.replayed = true;
             return Ok(r);
         }
         self.check_base(&envelope)?;
+        if envelope.idempotency_key.is_some() && self.idempotency.len() >= 10_000 {
+            return Err(DomainError::not_available("límite de solicitudes idempotentes de la sesión; guarda y reabre el proyecto"));
+        }
         let before = self.project.clone();
         let mut after = self.project.clone();
         let effect = envelope.command.apply(&mut after)?;
         let base = before.revision;
-        after.revision = base + 1;
+        after.revision = base.checked_add(1).ok_or_else(|| DomainError::out_of_range("revisión agotada"))?;
         after.updated_at = now_iso();
         let diff = DiffSummary::compute(&before, &after);
         let result = CommandResult {
@@ -377,13 +478,14 @@ impl ProjectSession {
         });
         self.project = after;
         self.dirty = true;
-        if let Some(key) = envelope.idempotency_key {
-            self.idempotency.insert(key, result.clone());
+        if let Some(key) = &envelope.idempotency_key {
+            self.idempotency.insert(key.clone(), (envelope, result.clone()));
         }
         Ok(result)
     }
 
     pub fn undo(&mut self, actor: Actor) -> DomainResult<CommandResult> {
+        self.revision().checked_add(1).ok_or_else(|| DomainError::out_of_range("revisión agotada"))?;
         let entry = self.undo.pop_back().ok_or_else(|| DomainError::new(ErrorCode::Empty, "nada que deshacer"))?;
         if entry.expect != self.project.revision {
             let err = DomainError::stale(entry.expect, self.project.revision)
@@ -391,6 +493,9 @@ impl ProjectSession {
             return Err(err);
         }
         let result = self.restore(&entry.before, format!("Deshacer {}", entry.label), &actor, &entry.command_id);
+        if let Some(previous) = self.undo.back_mut() {
+            previous.expect = self.project.revision;
+        }
         let mut entry = entry;
         entry.expect = self.project.revision;
         self.redo.push_back(entry);
@@ -398,11 +503,15 @@ impl ProjectSession {
     }
 
     pub fn redo(&mut self, actor: Actor) -> DomainResult<CommandResult> {
+        self.revision().checked_add(1).ok_or_else(|| DomainError::out_of_range("revisión agotada"))?;
         let entry = self.redo.pop_back().ok_or_else(|| DomainError::new(ErrorCode::Empty, "nada que rehacer"))?;
         if entry.expect != self.project.revision {
             return Err(DomainError::stale(entry.expect, self.project.revision));
         }
         let result = self.restore(&entry.after, format!("Rehacer {}", entry.label), &actor, &entry.command_id);
+        if let Some(next) = self.redo.back_mut() {
+            next.expect = self.project.revision;
+        }
         let mut entry = entry;
         entry.expect = self.project.revision;
         self.undo.push_back(entry);
@@ -451,6 +560,73 @@ mod tests {
 
     fn s(n: i64) -> Ticks {
         Ticks::from_seconds(n)
+    }
+
+    #[test]
+    fn multiple_undo_redo_preserves_content_and_monotonic_revision() {
+        let mut session = ProjectSession::new(Project::new("start"));
+        for name in ["one", "two", "three"] {
+            session.execute(CommandEnvelope::human(Command::RenameProject { name: name.into() })).unwrap();
+        }
+        for name in ["two", "one", "start"] {
+            session.undo(Actor::Human).unwrap();
+            assert_eq!(session.project().name, name);
+        }
+        for name in ["one", "two", "three"] {
+            session.redo(Actor::Human).unwrap();
+            assert_eq!(session.project().name, name);
+        }
+        assert_eq!(session.revision(), 9);
+    }
+
+    #[test]
+    fn idempotency_rejects_changed_request_and_wrong_project_before_replay() {
+        let mut session = ProjectSession::new(Project::new("start"));
+        let request = CommandEnvelope::human(Command::RenameProject { name: "one".into() }).with_idempotency("key");
+        session.execute(request.clone()).unwrap();
+        let mut changed = request.clone();
+        changed.command = Command::RenameProject { name: "two".into() };
+        assert_eq!(session.execute(changed).unwrap_err().code, ErrorCode::Precondition);
+        let mut wrong_project = request.clone();
+        wrong_project.project_id = Some("different".into());
+        assert!(session.execute(wrong_project).is_err());
+        let mut bad_protocol = request.clone();
+        bad_protocol.protocol = "unknown".into();
+        assert_eq!(session.execute(bad_protocol).unwrap_err().code, ErrorCode::Unsupported);
+        assert!(session.execute(request).unwrap().replayed);
+        assert_eq!(session.revision(), 1);
+    }
+
+    #[test]
+    fn digest_checks_dry_run_and_apply_and_revision_cannot_overflow() {
+        let mut session = ProjectSession::new(Project::new("start"));
+        let mut request = CommandEnvelope::human(Command::RenameProject { name: "one".into() });
+        request.precondition_digest = Some("stale".into());
+        assert!(session.dry_run(&request).is_err());
+        assert!(session.execute(request.clone()).is_err());
+        request.precondition_digest = Some(session.digest().unwrap());
+        session.execute(request).unwrap();
+        let mut project = session.project().clone();
+        project.revision = u64::MAX;
+        session.replace_project(project.clone(), false);
+        assert!(session.execute(CommandEnvelope::human(Command::RenameProject { name: "overflow".into() })).is_err());
+        assert_eq!(session.project(), &project);
+    }
+
+    #[test]
+    fn explicit_recovery_can_be_undone_without_rewinding_revision() {
+        let saved = Project::new("saved");
+        let mut session = ProjectSession::new(saved.clone());
+        let mut recovery = saved;
+        recovery.name = "recovered".into();
+        recovery.revision = 7;
+        session.recover(recovery).unwrap();
+        assert_eq!(session.project().name, "recovered");
+        assert_eq!(session.revision(), 8);
+        assert!(session.is_dirty());
+        session.undo(Actor::Human).unwrap();
+        assert_eq!(session.project().name, "saved");
+        assert_eq!(session.revision(), 9);
     }
 
     fn session() -> (ProjectSession, TrackId) {

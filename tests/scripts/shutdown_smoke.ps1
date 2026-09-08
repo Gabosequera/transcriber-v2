@@ -15,7 +15,7 @@ $scriptPath=Join-Path $evidence 'close.json'
 $steps | ConvertTo-Json -Depth 6 | Set-Content -Encoding UTF8 -LiteralPath $scriptPath
 $env:TRANSCRIPTOR_CONFIG_DIR = Join-Path $evidence 'config'
 $env:TRANSCRIPTOR_CACHE_DIR = Join-Path $evidence 'cache'
-$process = Start-Process -FilePath (Join-Path $workspace 'target/release/Transcriptor.exe') -ArgumentList '--script',$scriptPath -WorkingDirectory $env:TEMP -WindowStyle Hidden -PassThru
+$process = Start-Process -FilePath (Join-Path $workspace 'target/release/Transcriptor.exe') -ArgumentList @('--script', ('"' + $scriptPath + '"')) -WorkingDirectory $env:TEMP -WindowStyle Hidden -PassThru
 $owned = @{}
 $owned[[int]$process.Id] = $true
 $children = @{}

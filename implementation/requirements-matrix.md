@@ -1,5 +1,19 @@
 # Matriz de requisitos
 
+**Actualización continuación 5:** implementación hasta E4 autorizada; testing real y revisión general aplazados por el usuario. E3 parcial/E4 pendiente. Se conservan las filas/evidencia histórica debajo. Nuevos alcances:
+
+| ID | Incremento alpha.2 | Estado y evidencia |
+|---|---|---|
+| UI-03/UI-04 | Captura/edición/restauración de atajos; rechazo de conflictos; persistencia atómica | Implementado; keymap compilado, ejecución bloqueada por Windows 4551; interacción real pendiente |
+| DAT-02 | Recuperación explícita con undo; guardado CAS+lock | Parcial; store/session unitarios; crash/multidocumento/journal/migraciones pendientes |
+| DAT-03 | Detectar escritura externa al guardar y rechazar sin pisarla | Parcial; dos stores/JSON incompleto/lock en unitarios; watcher/diff/reconcile pendientes |
+| DAT-04 | Historial multistep y rutas estables tras Save As | Parcial; session unitarios; flujo real pendiente |
+| AI-01/02/03 | Validación protocolo/proyecto/digest, identidad de retry, diff ampliado, límites | Base interna implementada; permisos/MCP/propuestas/cliente E4 pendientes |
+| OPS-01/PKG-01 | Wrapper MSVC portable y templates de guiones | Compilación/expansión controladas; release de fuentes, sin nuevo paquete probado |
+
+Detalles y logs exactos: `evidence/continuacion-05.md`. No reclasificar las pruebas físicas históricamente pendientes como completadas.
+
+
 Estados: `pendiente`, `implementado-sin-verificar`, `verificado`, `fallo`, `bloqueado`, `opcional-no-incluido`. «Verificado» exige comando/build/caso identificables y artefacto en `implementation/evidence/`.
 
 Build de referencia: `cargo build --release --locked -p transcriptor` (Rust1.98.1, egui0.36.1), 2026-09-08. Workspace inicialmente sin Git; repositorio público inicializado por autorización posterior (ver PUBLISH). Host: `evidence/e0/initial-state.md`. Checkpoint continuación4: evidencia `evidence/e2/continuacion-04.md`; E2 abierta. latest-regression.json apunta a JSON215404 preparados, NO ejecutados; última regresión aceptada160410.

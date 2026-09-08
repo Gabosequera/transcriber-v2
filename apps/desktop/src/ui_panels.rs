@@ -926,23 +926,65 @@ fn dialogs(app: &mut TranscriptorApp, ctx: &egui::Context) {
                         continue;
                     }
                     ui.label(RichText::new(group).strong());
-                    egui::Grid::new(format!("km-{group}")).num_columns(3).striped(true).show(ui, |ui| {
+                    egui::Grid::new(format!("km-{group}")).num_columns(4).striped(true).show(ui, |ui| {
                         for (id, label, chords) in rows {
-                            ui.label(RichText::new(id).size(10.5).color(colors::TEXT_DIM));
+                            ui.label(RichText::new(&id).size(10.5).color(colors::TEXT_DIM));
                             ui.label(label);
                             ui.label(RichText::new(if chords.is_empty() { "—".into() } else { chords }).monospace());
+                            if ui.button("Editar").clicked() {
+                                app.shortcut_editor =
+                                    Some(crate::keymap::ShortcutEditor { text: app.keymap.chords(&id).join("; "), action: id, ..Default::default() });
+                            }
                             ui.end_row();
                         }
                     });
                 }
             });
-            ui.label(
-                RichText::new("La captura de combinaciones y la edición en esta ventana llegan en E3; el archivo keymap/1 ya se respeta.")
-                    .size(10.5)
-                    .color(colors::TEXT_DIM),
-            );
+            if let Some(mut editor) = app.shortcut_editor.take() {
+                ui.separator();
+                ui.label(app.keymap.label(&editor.action));
+                ui.label("Separa combinaciones con ;. Vacío deja la acción sin atajo.");
+                ui.text_edit_singleline(&mut editor.text);
+                let mut close = false;
+                let mut candidate = None;
+                ui.horizontal(|ui| {
+                    if ui.button(if editor.capturing { "Pulsa una combinación…" } else { "Capturar tecla" }).clicked() {
+                        editor.capturing = !editor.capturing;
+                    }
+                    if ui.button("Guardar").clicked() {
+                        candidate = Some(app.keymap.edited(&editor.action, Some(&editor.text)));
+                    }
+                    if ui.button("Restaurar predeterminado").clicked() {
+                        candidate = Some(app.keymap.edited(&editor.action, None));
+                    }
+                    if ui.button("Cancelar").clicked() {
+                        close = true;
+                    }
+                });
+                if let Some(result) = candidate {
+                    match result {
+                        Ok(keymap) => match crate::keymap::save_overrides(&keymap.overrides) {
+                            Ok(()) => {
+                                app.keymap = keymap;
+                                close = true;
+                            }
+                            Err(error) => editor.error = Some(error.to_string()),
+                        },
+                        Err(error) => editor.error = Some(error),
+                    }
+                }
+                if let Some(error) = &editor.error {
+                    ui.colored_label(colors::WARN, error);
+                }
+                if !close {
+                    app.shortcut_editor = Some(editor);
+                }
+            }
         });
         app.shortcuts_open = open;
+        if !open {
+            app.shortcut_editor = None;
+        }
     }
     if app.about_open {
         let mut open = true;
@@ -960,6 +1002,36 @@ fn dialogs(app: &mut TranscriptorApp, ctx: &egui::Context) {
             );
         });
         app.about_open = open;
+    }
+    if let Some(candidate) = &app.recovery {
+        let revision = candidate.revision;
+        egui::Window::new("Recuperación disponible").collapsible(false).resizable(false).show(ctx, |ui| {
+            ui.label(format!("Hay un autosave más reciente (revisión {revision})."));
+            ui.label("Recuperarlo conserva la versión guardada como un paso de Deshacer.");
+            ui.horizontal(|ui| {
+                if ui.button("Recuperar cambios").clicked()
+                    && let Some(mut candidate) = app.recovery.take()
+                {
+                    if let Some(store) = &app.store {
+                        for asset in &mut candidate.assets {
+                            let path = store.resolve_path(&asset.path);
+                            asset.missing = !path.exists();
+                            asset.path = path.to_string_lossy().to_string();
+                        }
+                    }
+                    match app.session.recover(candidate) {
+                        Ok(()) => {
+                            app.resolved_revision = None;
+                            app.selection.clear();
+                        }
+                        Err(e) => app.report(e),
+                    }
+                }
+                if ui.button("Usar versión guardada").clicked() {
+                    app.recovery = None;
+                }
+            });
+        });
     }
     // cierre con cambios sin guardar
     if app.pending_close {

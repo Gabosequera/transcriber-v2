@@ -169,7 +169,9 @@ pub struct TranscriptorApp {
     pub about_open: bool,
     pub shortcuts_open: bool,
     pub shortcut_search: String,
+    pub shortcut_editor: Option<crate::keymap::ShortcutEditor>,
     pub pending_close: bool,
+    pub recovery: Option<Project>,
     pub source_asset: Option<AssetId>,
     pub last_autosave: Instant,
     pub dirty_title: bool,
@@ -285,7 +287,9 @@ impl TranscriptorApp {
             about_open: false,
             shortcuts_open: false,
             shortcut_search: String::new(),
+            shortcut_editor: None,
             pending_close: false,
+            recovery: None,
             source_asset: None,
             last_autosave: Instant::now(),
             dirty_title: true,
@@ -500,10 +504,20 @@ impl TranscriptorApp {
         let store = ProjectStore::from_user_path(path);
         match store.load() {
             Ok(mut project) => {
+                self.recovery = match store.recovery_candidate(&project) {
+                    Ok(candidate) => candidate,
+                    Err(e) => {
+                        self.report(e.with_action("autosave inválido; se abre la última versión guardada"));
+                        None
+                    }
+                };
                 // comprobar medios presentes
                 for a in &mut project.assets {
                     let p = store.resolve_path(&a.path);
                     a.missing = !p.exists();
+                    // Keep session/history paths absolute. Only saved snapshots
+                    // are relativized, so Save As cannot retarget old undo entries.
+                    a.path = p.to_string_lossy().to_string();
                     if a.missing {
                         tracing::warn!("medio ausente: {}", a.path);
                     }
@@ -528,7 +542,7 @@ impl TranscriptorApp {
     }
 
     pub fn save_project(&mut self, save_as: bool) -> bool {
-        if self.store.is_none() || save_as {
+        let store = if self.store.is_none() || save_as {
             let mut dlg =
                 rfd::FileDialog::new().set_title("Guardar proyecto").set_file_name(format!("{}.transcriptor", tv2_slug(&self.project().name)));
             if let Some(d) = &self.ui.last_project
@@ -537,9 +551,10 @@ impl TranscriptorApp {
                 dlg = dlg.set_directory(parent);
             }
             let Some(p) = dlg.save_file() else { return false };
-            self.store = Some(ProjectStore::from_user_path(&p));
-        }
-        let store = self.store.clone().unwrap();
+            ProjectStore::from_user_path(&p)
+        } else {
+            self.store.clone().unwrap()
+        };
         // re-relativizar rutas de assets respecto a la carpeta del proyecto
         let mut project = self.project().clone();
         for a in &mut project.assets {
@@ -548,10 +563,13 @@ impl TranscriptorApp {
         }
         match store.save(&project) {
             Ok(()) => {
-                self.session.replace_project(project, true);
+                self.store = Some(store.clone());
                 self.session.mark_clean();
-                let events = self.session.drain_journal();
-                let _ = store.append_journal(&events);
+                if let Err(e) = store.append_journal(self.session.pending_journal()) {
+                    self.report(e.with_action("el proyecto se guardó, pero no se pudo completar la auditoría"));
+                } else {
+                    self.session.drain_journal();
+                }
                 self.ui.last_project = Some(store.root.to_string_lossy().to_string());
                 self.toast(Severity::Info, format!("Guardado en {}", store.root.display()));
                 self.dirty_title = true;
@@ -1739,6 +1757,23 @@ impl TranscriptorApp {
     // ---------- teclado ----------
 
     fn handle_keys(&mut self, ctx: &egui::Context) {
+        if self.shortcuts_open {
+            if let Some(editor) = &mut self.shortcut_editor
+                && editor.capturing
+            {
+                let captured = ctx.input(|i| {
+                    i.events.iter().find_map(|event| match event {
+                        egui::Event::Key { key, modifiers, pressed: true, repeat: false, .. } => chord_from_egui(*key, *modifiers),
+                        _ => None,
+                    })
+                });
+                if let Some(chord) = captured {
+                    editor.text = chord;
+                    editor.capturing = false;
+                }
+            }
+            return;
+        }
         if ctx.egui_wants_keyboard_input() {
             return; // un campo de texto tiene el foco: las teclas de edición no disparan
         }

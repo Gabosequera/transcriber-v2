@@ -2,6 +2,22 @@
 
 Registro breve de decisiones rutinarias y reversibles. Las que cambian GUI, motor, persistencia o compatibilidad enlazan un ADR. Formato: ID, fecha, decisión, alternativas, riesgo, prueba que lo demuestra.
 
+## D-0026 · 2026-09-08 · Reanudación en otro equipo y alcance hasta E4
+
+El usuario aplaza testing real/revisión general y autoriza implementación hasta E4. Las fases distinguen implementación de aceptación. Preparadores materializan `${WORKSPACE}`/`${OUTPUT}` en carpetas nuevas; evidencia histórica no se reescribe. MSVC se descubre con vswhere y Developer PowerShell; conservar lock/versiones del proyecto. Prueba dirigida de expansión en Unicode y compilación; medios reales diferidos.
+
+## D-0027 · 2026-09-08 · Identidad de reintentos e historial
+
+Un retry conserva protocolo/actor/proyecto/base/digest/comando; solo puede cambiar command_id. Otra solicitud con la misma clave se rechaza. Catálogo de 10 000 claves por sesión: no evictar para evitar duplicados silenciosos, rechazar nuevas claves al llenarse. Digest del snapshot incluye revisión. Undo/redo actualiza la revisión esperada de la próxima entrada; overflow rechazado. Todavía no hay persistencia de idempotencia entre sesiones ni permisos de transporte E4. Tests en session.rs.
+
+## D-0028 · 2026-09-08 · Guardado y recuperación incremental E3
+
+ProjectStore comparte observación de digest entre clones, serializa escritores con lock de SO y compara archivo actual antes de reemplazar. Lock liberado al crash; ningún borrado de lock por adivinación de PID. Rutas absolutas dentro de sesión/historial y relativas solo en snapshots persistidos eliminan retargeting tras Save As. Recuperación explícita conserva guardado como undo. Alternativa de sobrescribir silenciosamente descartada por pérdida de datos. Límite: escritores externos no cooperativos y commit multidocumento/journal siguen pendientes; esto no cierra DAT-02/03.
+
+## D-0029 · 2026-09-08 · Atajos editables con candidato completo
+
+Validar mapa completo antes de guardar; conflictos explicados y rechazados. Vacío desasigna, None restaura defaults. Captura y texto usan normalización común; se acepta memoria nueva solo si la escritura atómica termina. Interacción real/AltGr/IME permanece para la siguiente iteración.
+
 ## D-0025 · 2026-09-08 · Import de medios fuera de la UI (MED-01/PERF-01)
 
 - Un worker cancelable, cola64, aplica ImportAsset en UI tras comprobar proyecto/token/identidad actuales. La ruta portable se calcula contra store vigente al completar. Se preservan cambios concurrentes sin descartar una import válida por cualquier revisión nueva. Nuevo/abrir cancela los pendientes; cierre espera al worker. Guion espera la cola. Evidencia: async-import.log y recorrido nativo VFR/rotación. El importador editorial V1 sigue síncrono; completar en E3.

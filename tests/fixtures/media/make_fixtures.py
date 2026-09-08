@@ -18,15 +18,37 @@ import shutil
 import subprocess
 import sys
 
+from pathlib import Path
+sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
+from support import media_tool
+
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.abspath(os.path.join(HERE, "..", "..", ".."))
-FF = os.path.join(ROOT, "packaging", "third-party", "ffmpeg", "ffmpeg.exe")
-FONT = "C\\:/Windows/Fonts/arial.ttf"
+FF = media_tool("ffmpeg")
+FONT_PATH = Path(os.environ.get("TRANSCRIPTOR_TEST_FONT", str(Path(os.environ.get("WINDIR", "C:/Windows")) / "Fonts/arial.ttf")))
+FONT = FONT_PATH.as_posix().replace(":", "\\:").replace("'", "\\'")
 
 
 def run(args):
     print("  ffmpeg", " ".join(a if " " not in a else repr(a) for a in args))
     subprocess.run([FF, "-hide_banner", "-loglevel", "error", "-y", *args], check=True)
+
+
+def make_base_video(path):
+    name = Path(path).name
+    hd = name == "fixture-hd.mp4"
+    size = "1920x1080" if hd else "640x360"
+    label = "HD" if hd else ("A" if name == "fixture-a.mp4" else "B")
+    tone = "220" if label == "A" else "440"
+    vf = f"drawtext=fontfile='{FONT}':text='{label} %{{n}}':x=20:y=20:fontsize=48:fontcolor=white:box=1:boxcolor=black@0.7"
+    run(["-f", "lavfi", "-i", f"testsrc2=size={size}:rate=30:duration=12",
+         "-f", "lavfi", "-i", f"sine=frequency={tone}:sample_rate=48000:duration=12",
+         "-vf", vf, "-c:v", "libx264", "-preset", "fast", "-crf", "18", "-g", "60",
+         "-pix_fmt", "yuv420p", "-c:a", "aac", "-b:a", "192k", "-shortest", path])
+
+
+def make_tone(path):
+    run(["-f", "lavfi", "-i", "sine=frequency=220:sample_rate=48000:duration=12", "-c:a", "pcm_s16le", path])
 
 
 def make_sync(path):
@@ -85,12 +107,20 @@ def main():
     sys.stdout.reconfigure(encoding="utf-8")
     force = set(sys.argv[2:]) if len(sys.argv) > 2 and sys.argv[1] == "--force" else set()
     targets = {
+        "fixture-a.mp4": make_base_video,
+        "fixture-b.mp4": make_base_video,
+        "fixture-hd.mp4": make_base_video,
+        "tone-220.wav": make_tone,
         "fixture-sync.mp4": make_sync,
         "fixture-rot90.mp4": make_rot90,
         "fixture-vfr.mp4": make_vfr,
         "fixture-start5.ts": make_start5,
         "fixture-audio-delay.mp4": make_audio_delay,
     }
+    if not FONT_PATH.is_file():
+        raise FileNotFoundError("Set TRANSCRIPTOR_TEST_FONT to a local TrueType font")
+    if not os.path.exists(os.path.join(HERE, "fixture-a.mp4")):
+        print("Nueva fixture-a: su fingerprint puede diferir del golden histórico. Regenerar los goldens V1 explícitamente con la copia V1 aislada.")
     for name, fn in targets.items():
         path = os.path.join(HERE, name)
         if os.path.exists(path) and name not in force:

@@ -6,12 +6,14 @@
 //! la frontera atómica. El journal se escribe **después** del rename; si el
 //! proceso muere entre ambos, el proyecto es coherente y el journal solo pierde
 //! la última línea (se reconstruye la revisión desde `project.json`). Los
-//! documentos V1 (E3) usan el mismo escritor atómico por archivo y un manifiesto
-//! de transacción para la atomicidad lógica multidocumento.
+//! documentos V1 todavía requieren un manifiesto transaccional para completar
+//! atomicidad multidocumento en E3. El lock/CAS actual protege escritores V2;
+//! no convierte project.json y journal.jsonl en una transacción única.
 
 use std::fs;
-use std::io::Write;
+use std::io::{Read, Write};
 use std::path::{Path, PathBuf};
+use std::sync::{Arc, Mutex};
 use tv2_domain::error::{DomainError, DomainResult};
 use tv2_domain::project::{PROJECT_SCHEMA, Project};
 
@@ -20,15 +22,17 @@ use crate::session::JournalEvent;
 pub const PROJECT_FILE: &str = "project.json";
 pub const JOURNAL_FILE: &str = "journal.jsonl";
 pub const PROJECT_DIR_SUFFIX: &str = ".transcriptor";
+const MAX_PROJECT_BYTES: u64 = 64 * 1024 * 1024;
 
 #[derive(Clone, Debug)]
 pub struct ProjectStore {
     pub root: PathBuf,
+    observed: Arc<Mutex<Option<String>>>,
 }
 
 impl ProjectStore {
     pub fn at(root: impl Into<PathBuf>) -> Self {
-        ProjectStore { root: root.into() }
+        ProjectStore { root: root.into(), observed: Arc::new(Mutex::new(None)) }
     }
 
     /// Normaliza una ruta elegida por el usuario a la carpeta del proyecto.
@@ -42,7 +46,7 @@ impl ProjectStore {
             s.push(PROJECT_DIR_SUFFIX);
             PathBuf::from(s)
         };
-        ProjectStore { root: p }
+        Self::at(p)
     }
 
     pub fn project_path(&self) -> PathBuf {
@@ -62,18 +66,52 @@ impl ProjectStore {
     }
 
     pub fn save(&self, project: &Project) -> DomainResult<()> {
-        fs::create_dir_all(&self.root).map_err(|e| DomainError::io(format!("no se pudo crear {}: {e}", self.root.display())))?;
         let text = serde_json::to_string_pretty(project)? + "\n";
-        atomic_write(&self.project_path(), text.as_bytes())
+        if text.len() as u64 > MAX_PROJECT_BYTES {
+            return Err(DomainError::invalid("proyecto supera el límite de 64 MiB"));
+        }
+        fs::create_dir_all(&self.root).map_err(|e| DomainError::io(format!("no se pudo crear {}: {e}", self.root.display())))?;
+        // OS lock is released on process exit, including crashes. Cooperating
+        // instances serialize compare-and-replace; arbitrary editors must also
+        // respect this lock to eliminate the final check/write race.
+        let lock = fs::OpenOptions::new().read(true).write(true).create(true).truncate(false).open(self.root.join(".write.lock"))?;
+        lock.try_lock().map_err(|e| DomainError::new(tv2_domain::ErrorCode::ExternalConflict, format!("otro escritor usa el proyecto: {e}")))?;
+        let mut observed = self.observed.lock().map_err(|_| DomainError::io("estado de persistencia no disponible"))?;
+        let disk_digest = match Self::read_project(&self.project_path()) {
+            Ok(disk) => Some(Self::digest(&disk)?),
+            Err(e) if !self.project_path().exists() && e.code == tv2_domain::ErrorCode::Io => None,
+            Err(e) => return Err(e),
+        };
+        if disk_digest != *observed {
+            return Err(DomainError::new(tv2_domain::ErrorCode::ExternalConflict, "el proyecto en disco cambió desde su apertura")
+                .with_action("abre la versión externa o guarda tus cambios en otra carpeta"));
+        }
+        atomic_write(&self.project_path(), text.as_bytes())?;
+        *observed = Some(Self::digest(project)?);
+        Ok(())
     }
 
     pub fn load(&self) -> DomainResult<Project> {
         let path = self.project_path();
-        let bytes = fs::read(&path).map_err(|e| {
+        let project = Self::read_project(&path)?;
+        *self.observed.lock().map_err(|_| DomainError::io("estado de persistencia no disponible"))? = Some(Self::digest(&project)?);
+        Ok(project)
+    }
+
+    fn digest(project: &Project) -> DomainResult<String> {
+        Ok(tv2_domain::digest::digest_json(&serde_json::to_value(project)?))
+    }
+
+    fn read_project(path: &Path) -> DomainResult<Project> {
+        let mut bytes = Vec::new();
+        fs::File::open(path).and_then(|f| f.take(MAX_PROJECT_BYTES + 1).read_to_end(&mut bytes)).map_err(|e| {
             DomainError::io(format!("no se pudo leer {}: {e}", path.display())).with_action("comprueba que la carpeta del proyecto existe")
         })?;
-        let text = String::from_utf8_lossy(&bytes);
-        let text = text.strip_prefix('\u{feff}').unwrap_or(&text);
+        if bytes.len() as u64 > MAX_PROJECT_BYTES {
+            return Err(DomainError::invalid("proyecto supera el límite de 64 MiB"));
+        }
+        let text = std::str::from_utf8(&bytes).map_err(|_| DomainError::invalid("proyecto no es UTF-8 válido"))?;
+        let text = text.strip_prefix('\u{feff}').unwrap_or(text);
         let project: Project =
             serde_json::from_str(text).map_err(|e| DomainError::invalid(format!("{} no es un proyecto válido: {e}", path.display())))?;
         if project.schema != PROJECT_SCHEMA {
@@ -81,6 +119,19 @@ impl ProjectStore {
                 .with_action(format!("este editor entiende {PROJECT_SCHEMA}")));
         }
         Ok(project)
+    }
+
+    /// A recovery snapshot is a candidate, never silently replaces user data.
+    pub fn recovery_candidate(&self, saved: &Project) -> DomainResult<Option<Project>> {
+        let path = self.root.join("autosave.json");
+        if !path.is_file() {
+            return Ok(None);
+        }
+        let candidate = Self::read_project(&path)?;
+        if candidate.project_id != saved.project_id || candidate.revision <= saved.revision {
+            return Ok(None);
+        }
+        Ok(Some(candidate))
     }
 
     pub fn append_journal(&self, events: &[JournalEvent]) -> DomainResult<()> {
@@ -163,6 +214,53 @@ pub fn atomic_write(path: &Path, bytes: &[u8]) -> DomainResult<()> {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn compare_and_save_rejects_second_instance_and_preserves_external_content() {
+        let dir = tempfile::tempdir().unwrap();
+        let first = ProjectStore::at(dir.path().join("proyecto ñ.transcriptor"));
+        let mut project = Project::new("original");
+        first.save(&project).unwrap();
+        let second = ProjectStore::at(first.root.clone());
+        let stale = second.load().unwrap();
+        project.name = "first writer".into();
+        project.revision += 1;
+        first.save(&project).unwrap();
+        assert_eq!(second.save(&stale).unwrap_err().code, tv2_domain::ErrorCode::ExternalConflict);
+        assert_eq!(second.load().unwrap().name, "first writer");
+        assert!(ProjectStore::at(first.root.clone()).save(&stale).is_err(), "unopened destination must not be overwritten");
+    }
+
+    #[test]
+    fn invalid_external_json_is_never_overwritten_and_lock_is_enforced() {
+        let dir = tempfile::tempdir().unwrap();
+        let store = ProjectStore::at(dir.path());
+        let project = Project::new("original");
+        store.save(&project).unwrap();
+        let lock = fs::OpenOptions::new().read(true).write(true).open(store.root.join(".write.lock")).unwrap();
+        lock.lock().unwrap();
+        assert_eq!(store.save(&project).unwrap_err().code, tv2_domain::ErrorCode::ExternalConflict);
+        drop(lock);
+        fs::write(store.project_path(), "{partial").unwrap();
+        assert!(store.save(&project).is_err());
+        assert_eq!(fs::read_to_string(store.project_path()).unwrap(), "{partial");
+    }
+
+    #[test]
+    fn recovery_requires_matching_identity_and_newer_revision() {
+        let dir = tempfile::tempdir().unwrap();
+        let store = ProjectStore::at(dir.path());
+        let saved = Project::new("saved");
+        store.save(&saved).unwrap();
+        let mut candidate = saved.clone();
+        candidate.revision = 3;
+        candidate.name = "recovered".into();
+        atomic_write(&store.root.join("autosave.json"), &serde_json::to_vec(&candidate).unwrap()).unwrap();
+        assert_eq!(store.recovery_candidate(&saved).unwrap(), Some(candidate.clone()));
+        candidate.project_id = "another".into();
+        atomic_write(&store.root.join("autosave.json"), &serde_json::to_vec(&candidate).unwrap()).unwrap();
+        assert!(store.recovery_candidate(&saved).unwrap().is_none());
+    }
 
     #[test]
     fn save_load_round_trip_and_atomic_replace() {

@@ -1,1 +1,1 @@
-[{"op":"wait","ms":600},{"op":"screenshot","path":"G:/TODO/transcriptor-v2/implementation/evidence/e1/layout-check.png"},{"op":"quit"}]
+[{"op":"wait","ms":600},{"op":"screenshot","path":"${OUTPUT}/layout-check.png"},{"op":"quit"}]

@@ -2,9 +2,10 @@
 import json
 from datetime import datetime, timezone
 from pathlib import Path
+from prepare_script import expand_template
 
 ROOT = Path(__file__).resolve().parents[2]
-OUT = ROOT / 'implementation/evidence/e2' / ('selection-' + datetime.now(timezone.utc).strftime('%Y%m%d-%H%M%S'))
+OUT = ROOT / 'implementation/evidence/e2' / ('selection-' + datetime.now(timezone.utc).strftime('%Y%m%d-%H%M%S-%f'))
 OUT.mkdir()
 def write(name, data):
     path = OUT / name
@@ -35,7 +36,6 @@ write('items-expect.json', {'source':source,'duration':2,'checks':[
     {'t':0,'source_t':1,'wrong_t':6}, {'t':0.9,'source_t':1.9,'wrong_t':6.9},
     {'t':1,'source_t':1,'wrong_t':6}, {'t':1.9,'source_t':1.9,'wrong_t':6.9}]})
 caches = (ROOT/'tests/scripts/e2-caches.json').read_text(encoding='utf-8')
-caches = caches.replace('G:/TODO/transcriptor-v2/implementation/evidence/e2', OUT.as_posix())
-write('caches.json', json.loads(caches))
+write('caches.json', expand_template(json.loads(caches), OUT))
 (ROOT/'implementation/evidence/e2/latest-selection.txt').write_text(str(OUT), encoding='utf-8')
 print(OUT)
