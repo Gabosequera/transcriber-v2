@@ -29,7 +29,7 @@ Checkout actual `C:/Users/gabri/Todo/transcriber-v2`, remoto `Gabosequera/transc
 
 Clippy workspace/all-targets con `-D warnings` y formato correctos. Las 13 pruebas application pasaron; el target de tests desktop compiló pero Windows bloqueó su ejecución (Control de aplicaciones, error 4551). Los tests keymap NO se ejecutaron. Resultados unitarios y publicación exactos en `evidence/continuacion-05.md` y `PUBLISH.md`. El primer check encontró dependencias ausentes y después un error de préstamo Rust corregido; logs conservados. No confundir ese log fallido con el Clippy final correcto.
 
-**No hay nuevo paquete ni ejecutable release probado.** La prerelease alpha.2 conserva fuentes y documentación; no redistribuye el binario alpha.1 como si incluyera estos cambios. Los source archives los proporciona GitHub. Goldens/fixtures multimedia originales ausentes: no se regeneraron ni ejecutaron en esta continuación. El puntero histórico `latest-regression.json` sigue apuntando al equipo anterior hasta una nueva preparación explícita.
+**No hay nuevo paquete ni ejecutable release probado.** La [prerelease alpha.2](https://github.com/Gabosequera/transcriber-v2/releases/tag/v2.0.0-alpha.2), publicada y verificada sobre `31d1843`, conserva fuentes y documentación; no redistribuye el binario alpha.1 como si incluyera estos cambios. Los source archives los proporciona GitHub. Goldens/fixtures multimedia originales ausentes: no se regeneraron ni ejecutaron en esta continuación. El puntero histórico `latest-regression.json` sigue apuntando al equipo anterior hasta una nueva preparación explícita.
 
 ## Primera acción al continuar
 

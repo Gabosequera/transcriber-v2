@@ -33,3 +33,7 @@ La validación real, suite multimedia, revisión general y paquete binario se ap
 Persistencia aún tiene ventana project/journal, posible append parcial y sin watcher/reconcile/migraciones/multidocumento. Locks coordinan instancias V2, no escritores externos que ignoren el lock. Recuperación no hace todavía validación integral de invariantes ni autosave para un proyecto sin carpeta. Idempotencia está acotada pero no persiste entre aperturas. Atajos necesitan interacción física/IME. Los medios generados de nuevo no mantienen necesariamente fingerprint de goldens históricos; regenerar con V1 aislado explícitamente.
 
 Se conserva la evidencia del checkpoint anterior sin rebautizar rutas. No se modificó el checkout V1. Corte preventivo por contexto; objetivo global hasta E4 no completado.
+
+## Publicación y parada
+
+Código/contexto: commit `31d18437788fcd1da0155b478b538d1753d1b93d` subido a main. Release `v2.0.0-alpha.2` publicada, no draft, prerelease, tag correcto y sin assets binarios; registro en `publication-alpha2.json`. El commit siguiente solo registra el resultado remoto. V1 observado limpio al finalizar. Parada de esta iteración por contexto; continuar implementación E3/E4 desde STATUS, sin reiniciar E0/E1 ni iniciar E5.
