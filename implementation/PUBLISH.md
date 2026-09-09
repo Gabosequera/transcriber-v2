@@ -1,4 +1,6 @@
-# Publicación en preparación — continuación 11, alpha.8
+# Publicación verificada — continuación 11, alpha.8
+
+Publicado y verificado [v2.0.0-alpha.8](https://github.com/Gabosequera/transcriber-v2/releases/tag/v2.0.0-alpha.8), código/tag `2355655a658cc512ac5ed612c4950275873eef10`, main subido. Prerelease no draft, assets vacíos; registro `evidence/publication-alpha8.json`. Build release 2m21s, no ejecutado. Este commit posterior solo registra publicación; continuar desde main para incluirlo. Objetivo hasta E4 incompleto.
 
 Checkpoint autorizado de fuentes, sin assets binarios nuevos. 47 application tests ejecutados/pasan; Clippy/all-targets compila V1compat/dominio/desktop sin ejecutar ni reintentar Windows4551. Build release local no ejecutado; evidencia en continuacion-11.md y build-alpha8.json. Notas en release-notes-alpha8.md. E2/E3 abiertas, E4 pendiente, E5 no iniciada; objetivo global incompleto. Estado remoto se registra tras verificarlo.
 

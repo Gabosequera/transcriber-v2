@@ -1,0 +1,14 @@
+{
+  "code_commit": "2355655a658cc512ac5ed612c4950275873eef10",
+  "verified_utc": "2026-09-09T17:18:16.7884334Z",
+  "remote_tag": "2355655a658cc512ac5ed612c4950275873eef10\trefs/tags/v2.0.0-alpha.8",
+  "release": {
+    "assets": [],
+    "isDraft": false,
+    "isPrerelease": true,
+    "publishedAt": "2026-09-09T17:18:15Z",
+    "tagName": "v2.0.0-alpha.8",
+    "targetCommitish": "2355655a658cc512ac5ed612c4950275873eef10",
+    "url": "https://github.com/Gabosequera/transcriber-v2/releases/tag/v2.0.0-alpha.8"
+  }
+}

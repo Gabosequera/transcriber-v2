@@ -1,5 +1,7 @@
 # STATUS — continuación 11, fuentes 2.0.0-alpha.8
 
+Checkpoint de fuentes publicado/verificado: [alpha.8](https://github.com/Gabosequera/transcriber-v2/releases/tag/v2.0.0-alpha.8), código/tag `2355655a658cc512ac5ed612c4950275873eef10`, sin assets binarios. Registro en evidence/publication-alpha8.json. Build local OK (2m21s), exe no ejecutado; main incluye después este registro documental.
+
 Continúa el mismo encargo después de alpha.7 publicada. **E2 abierta/E3 parcial/E4 pendiente; objetivo hasta E4 incompleto; E5 no iniciada.** Aceptación física/multimedia/revisión general aplazadas.
 
 Añadido: snapshot inmutable de carpeta V1 (texto compartido; binarios referenciados con SHA-256), exportación por menú/worker con adaptadores y vistas de bloques, archivo de originales/manifests invalidados, publicación recuperable /2 de documentos y binarios por streaming. 47 application tests ejecutados/pasan; V1compat/dominio/desktop solo compilados, sin reintentar Windows4551. Detalle en evidence/continuacion-11.md, D-0052/D-0053. Build/publicación exactos en evidence y PUBLISH.

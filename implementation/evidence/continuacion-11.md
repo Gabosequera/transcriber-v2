@@ -30,3 +30,5 @@ Clippy/all-targets compila los tests nuevos de V1compat; NO ejecutarlos por el W
 Comandos finales: scripts/cargo.ps1 test -p tv2-application --lib --locked; clippy --workspace --all-targets --locked '--' -D warnings; check --workspace --locked; fmt --all --check; build --release --locked -p transcriptor. Logs por comando en esta carpeta; metadata del exe en build-alpha8.json. Exe no ejecutado. Publicación exacta en PUBLISH y publication-alpha8.json cuando se confirme.
 
 Resultado final: Clippy/all-targets OK (8.34s), check/workspace OK (7.12s), fmt/check OK; build release OK (2m21s), sin ejecutar Transcriptor.exe. V1 observado limpio al finalizar. 47 application tests pasan; resto no ejecutado.
+
+Publicado/verificado v2.0.0-alpha.8 sobre 2355655a658cc512ac5ed612c4950275873eef10; tag coincide, prerelease no draft, sin assets. Registro publication-alpha8.json. Main incluye después el commit documental de esta verificación.
