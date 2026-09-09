@@ -1,3 +1,11 @@
+# Publicación de continuación 7 — alpha.4
+
+La prerelease [v2.0.0-alpha.4](https://github.com/Gabosequera/transcriber-v2/releases/tag/v2.0.0-alpha.4) está publicada y verificada sobre `7e050bcee3777924389703db79e87b0ecf381841`, código subido a main. `isPrerelease=true`, `isDraft=false`, `assets=[]`; tag remoto coincide con ese commit. Build release OK (2m51s), 39 tests dirigidos, Clippy y formato. No se ejecutó el exe ni se preparó un paquete nuevo. E2/E3 abiertas y E4 pendiente. Registro remoto: `evidence/publication-alpha4.json`; tamaño/SHA256 local: `evidence/build-alpha4.json`. Main incluye después el commit documental de este resultado.
+
+V1 observado limpio, estrictamente solo lectura. El primer intento de release con SHA corto fue rechazado por GitHub (422, target_commitish inválido); se repitió con SHA completo y se verificaron release y tag remoto. No se creó ninguna release fallida. Checkpoint por contexto autorizado, objetivo global hasta E4 aún incompleto.
+
+---
+
 # Publicación de continuación 6 — alpha.3
 
 Checkpoint autorizado de fuentes, con E2/E3 abiertas y E4 pendiente. Build local Windows completado con `cargo build --release --locked -p transcriptor` en 6m30s; ejecutable no lanzado ni empaquetado. Registro de tamaño/hash en `evidence/build-alpha3.json`. Unitarios alpha.3: 19 application + 13 V1compat pasan. Clippy/all-targets y formato en logs de continuación 6. Tests dominio bloqueados por Windows 4551; desktop/GUI/multimedia/revisión general siguen pendientes.

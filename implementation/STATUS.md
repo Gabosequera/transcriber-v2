@@ -22,7 +22,7 @@ Checkpoint **continuación 7, fuentes `2.0.0-alpha.4`**, desde `main` limpio y s
 
 ## Controles
 
-`evidence/continuacion-07.md`: **24 application + 15 V1compat pasan**, Clippy workspace/all-targets y formato. Tests desktop nuevos (keymap/worker) compilados por Clippy, no ejecutados. No se reintentó ni eludió el bloqueo Windows 4551 de dominio/desktop. Build release y publicación se registran al terminar en la evidencia y PUBLISH; no equivalen a GUI probada ni paquete aceptado.
+`evidence/continuacion-07.md`: **24 application + 15 V1compat pasan**, Clippy workspace/all-targets y formato. Tests desktop nuevos (keymap/worker) compilados por Clippy, no ejecutados. No se reintentó ni eludió el bloqueo Windows 4551 de dominio/desktop. Build release **OK, 2m51s**. Alpha.4 publicada sobre `7e050bc`, verificada sin assets binarios; `evidence/publication-alpha4.json` y PUBLISH. No equivale a GUI probada ni paquete aceptado.
 
 ## Siguiente implementación concreta
 

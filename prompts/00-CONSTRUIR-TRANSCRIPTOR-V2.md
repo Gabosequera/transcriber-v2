@@ -122,7 +122,7 @@ V1 y datos personales estrictamente solo lectura. Preservar evidencia histórica
 
 ## Traspaso vigente — continuación 7 (sustituye al anterior)
 
-Reanudar desde main, no reiniciar E0/E1. Objetivo hasta E4 incompleto; E2 abierta, E3 parcial, E4 pendiente; parar antes de E5. Aceptación física/revisión general siguen aplazadas. Base de este incremento 9287a02; publicar checkpoint alpha.4 según PUBLISH/evidence.
+Reanudar desde main, no reiniciar E0/E1. Objetivo hasta E4 incompleto; E2 abierta, E3 parcial, E4 pendiente; parar antes de E5. Aceptación física/revisión general siguen aplazadas. Base de este incremento 9287a02; alpha.4 publicada/verificada sobre 7e050bc, con código subido a main; consultar PUBLISH/evidence.
 
 Leer STATUS, evidence/continuacion-07.md (y 06 histórico), matriz, RUN, decisiones D-0035–D-0038. Implementado: import editorial worker con revisión capturada y batch total; rechazo de docs reconocidos inválidos; editor persistente texto/comentario/rangos/padre con undo; portapapeles de items/árboles y clips preservando propiedades; cortar condicionado a copia, duplicación enlazada y borrado multicapa atómicos; Ctrl+A editorial; import/export keymap; export documental GUI limitado; original íntegro del montaje conservado; recibos idempotentes durables/reapertura/Save As; autosave auditado en worker.
 

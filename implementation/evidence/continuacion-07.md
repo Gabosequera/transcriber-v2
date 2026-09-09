@@ -32,4 +32,6 @@ Split/trim/nudge de items y ciclo autor, chunks/autor/bloques/trims completo/ord
 
 ## Publicación
 
-Checkpoint de fuentes alpha.4 autorizado por interrupción de contexto; sin assets binarios ni datos personales. Resultado remoto, commit/tag y verificación se registran en PUBLISH y publication-alpha4.json al completar publicación. Main llevará después el commit documental del resultado.
+La prerelease [v2.0.0-alpha.4](https://github.com/Gabosequera/transcriber-v2/releases/tag/v2.0.0-alpha.4) está publicada y verificada sobre `7e050bcee3777924389703db79e87b0ecf381841`, código subido a main. `isPrerelease=true`, `isDraft=false`, `assets=[]`; tag remoto coincide con ese commit. Build release OK (2m51s), 39 tests dirigidos, Clippy y formato. No se ejecutó el exe ni se preparó un paquete nuevo. E2/E3 abiertas y E4 pendiente. Registro remoto: `publication-alpha4.json`; tamaño/SHA256 local: `build-alpha4.json`. Main incluye después el commit documental de este resultado.
+
+Primer intento de publicación rechazado 422 por target SHA corto; creación con SHA completo correcta. Sin assets binarios ni datos personales. V1 limpio al cierre.
