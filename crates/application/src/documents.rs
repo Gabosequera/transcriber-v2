@@ -1,12 +1,14 @@
 //! Recoverable multi-document publication, restricted to V2-owned export folders.
 //! Every base is checked before any publication; recovery never overwrites a third value.
 use serde::{Deserialize, Serialize};
+use sha2::{Digest, Sha256};
 use std::{
     collections::{BTreeMap, HashSet},
     fs,
     io::{Read, Write},
     path::{Component, Path},
 };
+use tv2_domain::evidence::SourceFile;
 use tv2_domain::{DomainError, error::DomainResult};
 const LIMIT: u64 = 128 * 1024 * 1024;
 const OWNER: &str = ".transcriptor-export.json";
@@ -16,6 +18,8 @@ struct Entry {
     path: String,
     before: Option<String>,
     after: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    file: Option<SourceFile>,
 }
 #[derive(Serialize, Deserialize)]
 struct Intent {
@@ -101,6 +105,9 @@ pub fn create(root: &Path) -> DomainResult<()> {
     Ok(())
 }
 pub fn publish(root: &Path, documents: &BTreeMap<String, String>) -> DomainResult<()> {
+    publish_with_files(root, documents, &BTreeMap::new())
+}
+pub fn publish_with_files(root: &Path, documents: &BTreeMap<String, String>, files: &BTreeMap<String, SourceFile>) -> DomainResult<()> {
     let _lock = lock(root)?;
     finish(root, None)?;
     let mut seen = HashSet::new();
@@ -110,9 +117,18 @@ pub fn publish(root: &Path, documents: &BTreeMap<String, String>) -> DomainResul
             return Err(DomainError::invalid("rutas duplicadas en Windows"));
         }
         let target = safe_path(root, path)?;
-        entries.push(Entry { path: path.clone(), before: read(&target)?.map(|text| digest(&text)), after: after.clone() });
+        entries.push(Entry { path: path.clone(), before: read(&target)?.map(|text| digest(&text)), after: after.clone(), file: None });
     }
-    let intent = Intent { schema: "transcriptor-documents/1".into(), id: tv2_domain::ids::random_hex12(), entries };
+    for (path, file) in files {
+        if !seen.insert(path.to_ascii_lowercase()) {
+            return Err(DomainError::invalid("rutas duplicadas en publicación"));
+        }
+        let target = safe_path(root, path)?;
+        verify_source(file)?;
+        entries.push(Entry { path: path.clone(), before: file_digest(&target)?, after: String::new(), file: Some(file.clone()) });
+    }
+    let schema = if files.is_empty() { "transcriptor-documents/1" } else { "transcriptor-documents/2" };
+    let intent = Intent { schema: schema.into(), id: tv2_domain::ids::random_hex12(), entries };
     let bytes = serde_json::to_vec(&intent)?;
     if bytes.len() as u64 > LIMIT {
         return Err(DomainError::invalid("transacción excede 128 MiB"));
@@ -129,7 +145,10 @@ fn finish(root: &Path, stop_after: Option<usize>) -> DomainResult<()> {
         return Ok(());
     };
     let intent: Intent = serde_json::from_str(&raw)?;
-    if intent.schema != "transcriptor-documents/1" || !intent.id.bytes().all(|c| c.is_ascii_hexdigit()) || intent.id.len() != 12 {
+    if !matches!(intent.schema.as_str(), "transcriptor-documents/1" | "transcriptor-documents/2")
+        || !intent.id.bytes().all(|c| c.is_ascii_hexdigit())
+        || intent.id.len() != 12
+    {
         return Err(DomainError::invalid("intención inválida"));
     }
     let mut seen = HashSet::new();
@@ -138,9 +157,14 @@ fn finish(root: &Path, stop_after: Option<usize>) -> DomainResult<()> {
             return Err(DomainError::invalid("rutas repetidas en intención"));
         }
         let target = safe_path(root, &entry.path)?;
-        let disk = read(&target)?.map(|text| digest(&text));
-        if disk != entry.before && disk.as_deref() != Some(digest(&entry.after).as_str()) {
+        let disk = current_digest(entry, &target)?;
+        if disk != entry.before && disk.as_deref() != Some(after_digest(entry).as_str()) {
             return Err(DomainError::precondition(format!("edición externa durante publicación: {}", entry.path)));
+        }
+        if disk.as_deref() != Some(after_digest(entry).as_str())
+            && let Some(file) = &entry.file
+        {
+            verify_source(file)?;
         }
     }
     for (n, entry) in intent.entries.iter().enumerate() {
@@ -148,30 +172,140 @@ fn finish(root: &Path, stop_after: Option<usize>) -> DomainResult<()> {
             return Err(DomainError::io("interrupción sintética"));
         }
         let path = safe_path(root, &entry.path)?;
-        let disk = read(&path)?.map(|text| digest(&text));
-        let after = digest(&entry.after);
+        let disk = current_digest(entry, &path)?;
+        let after = after_digest(entry);
         if disk != entry.before && disk.as_deref() != Some(&after) {
             return Err(DomainError::precondition("el documento cambió antes de publicar"));
         }
         if disk.as_deref() != Some(&after) {
-            crate::store::atomic_write(&path, entry.after.as_bytes())?;
+            if let Some(file) = &entry.file {
+                copy_verified(file, &path, &entry.before)?;
+            } else {
+                crate::store::atomic_write(&path, entry.after.as_bytes())?;
+            }
         }
     }
-    let receipt = serde_json::json!({"schema":"transcriptor-document-receipt/1","id":intent.id,"documents":intent.entries.iter().map(|e|serde_json::json!({"path":e.path,"digest":digest(&e.after)})).collect::<Vec<_>>()});
+    let receipt = serde_json::json!({"schema":"transcriptor-document-receipt/1","id":intent.id,"documents":intent.entries.iter().map(|e|serde_json::json!({"path":e.path,"digest":after_digest(e),"digest_kind":if e.file.is_some(){"sha256-bytes"}else{"canonical-json-string"}})).collect::<Vec<_>>()});
     crate::store::atomic_write(&root.join("receipts").join(format!("{}.json", intent.id)), &serde_json::to_vec(&receipt)?)?;
     fs::remove_file(root.join(INTENT))?;
+    Ok(())
+}
+
+fn file_digest(path: &Path) -> DomainResult<Option<String>> {
+    let mut file = match fs::File::open(path) {
+        Ok(file) => file,
+        Err(e) if e.kind() == std::io::ErrorKind::NotFound => return Ok(None),
+        Err(e) => return Err(e.into()),
+    };
+    let mut hasher = Sha256::new();
+    let mut buffer = [0u8; 65536];
+    loop {
+        let n = file.read(&mut buffer)?;
+        if n == 0 {
+            break;
+        }
+        hasher.update(&buffer[..n]);
+    }
+    Ok(Some(hex::encode(hasher.finalize())))
+}
+fn verify_source(file: &SourceFile) -> DomainResult<()> {
+    let meta = fs::symlink_metadata(&file.source)?;
+    if !meta.is_file() || meta.file_type().is_symlink() || meta.len() != file.size || file_digest(&file.source)?.as_deref() != Some(&file.sha256) {
+        return Err(DomainError::precondition(format!("archivo de origen cambió o no está disponible: {}", file.source.display())));
+    }
+    Ok(())
+}
+fn current_digest(entry: &Entry, path: &Path) -> DomainResult<Option<String>> {
+    if entry.file.is_some() { file_digest(path) } else { Ok(read(path)?.map(|text| digest(&text))) }
+}
+fn after_digest(entry: &Entry) -> String {
+    entry.file.as_ref().map(|f| f.sha256.clone()).unwrap_or_else(|| digest(&entry.after))
+}
+fn copy_verified(file: &SourceFile, target: &Path, before: &Option<String>) -> DomainResult<()> {
+    let parent = target.parent().ok_or_else(|| DomainError::invalid("destino sin carpeta"))?;
+    fs::create_dir_all(parent)?;
+    let mut temporary = tempfile::NamedTempFile::new_in(parent)?;
+    let mut source = fs::File::open(&file.source)?;
+    let mut hasher = Sha256::new();
+    let mut buffer = [0u8; 65536];
+    let mut size = 0u64;
+    loop {
+        let n = source.read(&mut buffer)?;
+        if n == 0 {
+            break;
+        }
+        temporary.write_all(&buffer[..n])?;
+        hasher.update(&buffer[..n]);
+        size += n as u64;
+    }
+    if size != file.size || hex::encode(hasher.finalize()) != file.sha256 {
+        return Err(DomainError::precondition("origen cambió durante la copia"));
+    }
+    temporary.as_file().sync_all()?;
+    let current = file_digest(target)?;
+    if &current != before && current.as_deref() != Some(&file.sha256) {
+        return Err(DomainError::precondition("destino cambió durante la copia"));
+    }
+    temporary.persist(target).map_err(|e| DomainError::io(e.to_string()))?;
     Ok(())
 }
 #[cfg(test)]
 mod tests {
     use super::*;
     #[test]
+    fn binary_publication_recovers_boundaries_and_preserves_changed_sources_and_targets() {
+        let temp = tempfile::tempdir().unwrap();
+        let source = temp.path().join("source.bin");
+        let bytes: Vec<u8> = (0..200000).map(|n| (n % 256) as u8).collect();
+        fs::write(&source, &bytes).unwrap();
+        let file = SourceFile { source: source.clone(), size: bytes.len() as u64, sha256: file_digest(&source).unwrap().unwrap() };
+        for boundary in 0..=2 {
+            let root = temp.path().join(format!("output-{boundary}"));
+            create(&root).unwrap();
+            let intent = Intent {
+                schema: "transcriptor-documents/2".into(),
+                id: "0123456789ab".into(),
+                entries: vec![
+                    Entry { path: "master.json".into(), before: None, after: "{}".into(), file: None },
+                    Entry { path: "tracks/A/audio.bin".into(), before: None, after: String::new(), file: Some(file.clone()) },
+                ],
+            };
+            crate::store::atomic_write(&root.join(INTENT), &serde_json::to_vec(&intent).unwrap()).unwrap();
+            let _ = finish(&root, Some(boundary));
+            recover(&root).unwrap();
+            recover(&root).unwrap();
+            assert_eq!(fs::read(root.join("tracks/A/audio.bin")).unwrap(), bytes);
+            assert!(!root.join(INTENT).exists());
+        }
+        let root = temp.path().join("changed");
+        create(&root).unwrap();
+        fs::write(&source, b"changed source").unwrap();
+        assert!(
+            publish_with_files(&root, &BTreeMap::from([("master.json".into(), "{}".into())]), &BTreeMap::from([("audio.bin".into(), file.clone())]))
+                .is_err()
+        );
+        assert!(!root.join("master.json").exists());
+        assert!(!root.join(INTENT).exists());
+        fs::write(&source, &bytes).unwrap();
+        let intent = Intent {
+            schema: "transcriptor-documents/2".into(),
+            id: "0123456789ab".into(),
+            entries: vec![Entry { path: "audio.bin".into(), before: None, after: String::new(), file: Some(file) }],
+        };
+        crate::store::atomic_write(&root.join(INTENT), &serde_json::to_vec(&intent).unwrap()).unwrap();
+        fs::write(root.join("audio.bin"), b"external edit").unwrap();
+        assert!(recover(&root).is_err());
+        assert_eq!(fs::read(root.join("audio.bin")).unwrap(), b"external edit");
+        assert_eq!(fs::read(&source).unwrap(), bytes);
+    }
+    #[test]
     fn multi_document_recovery_all_boundaries_and_external_conflict() {
         for stop in 0..=3 {
             let temp = tempfile::tempdir().unwrap();
             let root = temp.path().join("output");
             create(&root).unwrap();
-            let entries = (0..3).map(|n| Entry { path: format!("views/{n}.json"), before: None, after: format!("{{\"n\":{n}}}") }).collect();
+            let entries =
+                (0..3).map(|n| Entry { path: format!("views/{n}.json"), before: None, after: format!("{{\"n\":{n}}}"), file: None }).collect();
             let intent = Intent { schema: "transcriptor-documents/1".into(), id: "0123456789ab".into(), entries };
             crate::store::atomic_write(&root.join(INTENT), &serde_json::to_vec(&intent).unwrap()).unwrap();
             let _ = finish(&root, Some(stop));
@@ -189,8 +323,8 @@ mod tests {
             schema: "transcriptor-documents/1".into(),
             id: "0123456789ab".into(),
             entries: vec![
-                Entry { path: "a.json".into(), before: None, after: "new".into() },
-                Entry { path: "b.json".into(), before: None, after: "other".into() },
+                Entry { path: "a.json".into(), before: None, after: "new".into(), file: None },
+                Entry { path: "b.json".into(), before: None, after: "other".into(), file: None },
             ],
         };
         crate::store::atomic_write(&root.join(INTENT), &serde_json::to_vec(&intent).unwrap()).unwrap();

@@ -1,4 +1,18 @@
-# Decisiones de continuación 10
+# Decisiones de continuación 11
+
+## D-0052 · Carpeta fuente como evidencia inmutable
+
+La importación incorpora un bundle inmutable compartido, con texto exacto y referencias SHA-256 a auxiliares binarios; el master original se compara con digest completo cacheado. Exportar aplica adaptadores a una copia nueva, archiva texto original sustituido por hash y registra mapping de inventario. Manifests con resultados ya divergentes se archivan, no se presentan como ejecución vigente. No se omiten desconocidos ni se escribe en origen. La segunda captura evita aceptar un árbol cambiado durante la lectura.
+
+Límite explícito: 32 MiB textuales/20000 entradas y referencias binarias aún dependientes del origen; no constituye portabilidad completa ni migración general. No abrir/resalvar el nuevo bundle con lectores anteriores; proyectos antiguos sin bundle requieren importación nueva para exportación de carpeta. Pendientes de migración y negociación de lector quedan visibles.
+
+## D-0053 · Transacción de documentos y binarios
+
+Intención transcriptor-documents/2 solo cuando incluye archivos binarios; recuperación conserva /1. Preflight, copia en temporal por bloques, SHA/tamaño y nueva comprobación del destino preceden a persistir. La intención queda hasta completar recibo; recovery acepta destinos ya publicados y rechaza una tercera versión. Fuentes binarias siempre solo lectura. Recibos explicitan algoritmo de digest. No se embeben audios auxiliares en historial ni se ejecuta inferencia. Hash repetido y falta de cancelación interna siguen abiertos; no se declara rendimiento global resuelto.
+
+---
+
+# Decisiones históricas de continuación 10
 
 ## D-0047 · Candidatos de autor y adopción explícita
 

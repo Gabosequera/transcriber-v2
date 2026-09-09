@@ -43,21 +43,17 @@ pub struct V1Import {
 pub fn find_master(root: &Path) -> Option<PathBuf> {
     for dir in [root.to_path_buf(), root.join("editorial")] {
         if let Ok(entries) = std::fs::read_dir(&dir) {
-            for e in entries.flatten() {
-                let name = e.file_name().to_string_lossy().to_string();
-                if name.ends_with(".editorial.master.json") {
-                    return Some(e.path());
-                }
+            let paths: Vec<_> =
+                entries.flatten().filter(|e| e.file_name().to_string_lossy().ends_with(".editorial.master.json")).map(|e| e.path()).collect();
+            if paths.len() > 1 {
+                return None;
+            }
+            if let Some(path) = paths.into_iter().next() {
+                return Some(path);
             }
         }
     }
     None
-}
-
-fn read_json(path: &Path) -> V1Result<Value> {
-    let text = std::fs::read_to_string(path)?;
-    let text = text.strip_prefix('\u{feff}').unwrap_or(&text);
-    Ok(serde_json::from_str(text)?)
 }
 
 /// Lee la carpeta V1 y prepara capas y secuencia para `asset` (ya importado en V2 y
@@ -69,7 +65,13 @@ pub fn read_v1_editorial(root: &Path, asset: &Asset) -> V1Result<V1Import> {
 pub fn read_v1_editorial_with_stores(root: &Path, asset: &Asset, stores: &[PathBuf]) -> V1Result<V1Import> {
     let master_path = find_master(root).ok_or_else(|| invalid(format!("no se encontró *.editorial.master.json en {}", root.display())))?;
     let editorial_dir = master_path.parent().map(Path::to_path_buf).unwrap_or_else(|| root.to_path_buf());
-    let master = V1Master::load(&master_path)?;
+    let original = crate::folder::snapshot(&editorial_dir, master_path.file_name().unwrap().to_string_lossy().into_owned())?;
+    let read_json = |path: &Path| -> V1Result<Value> {
+        let relative = path.strip_prefix(&editorial_dir).map_err(|_| invalid("documento fuera de carpeta"))?.to_string_lossy().replace('\\', "/");
+        let text = original.documents().get(&relative).ok_or_else(|| invalid("documento ausente del snapshot"))?;
+        Ok(serde_json::from_str(text.trim_start_matches('\u{feff}'))?)
+    };
+    let master = V1Master::parse(read_json(&master_path)?)?;
     let mut report = V1ImportReport {
         master_path: Some(master_path.clone()),
         master_digest: Some(master.source_master_digest()),
@@ -156,7 +158,13 @@ pub fn read_v1_editorial_with_stores(root: &Path, asset: &Asset, stores: &[PathB
         }
     }
     layers.extend(master.projections(&asset.id)?);
-    Ok(V1Import { master: master.evidence(&asset.id), report, layers, sequence, author_candidates })
+    let final_snapshot = crate::folder::snapshot(&editorial_dir, original.master_path().to_string())?;
+    if original != final_snapshot {
+        return Err(invalid("la carpeta V1 cambió durante la lectura; no se importó"));
+    }
+    let mut evidence = master.evidence(&asset.id);
+    evidence.source_bundle = Some(std::sync::Arc::new(original));
+    Ok(V1Import { master: evidence, report, layers, sequence, author_candidates })
 }
 
 /// Comandos para incorporar la importación a un proyecto (batch todo-o-nada).

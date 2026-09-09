@@ -5,13 +5,55 @@ fn s(n: i64) -> Ticks {
 }
 
 #[test]
+fn source_bundle_survives_history_reopen_and_cannot_be_rewritten() {
+    use std::{collections::BTreeMap, sync::Arc};
+    use tv2_domain::evidence::{EvidenceDocument, MasterEvidence, SourceBundle};
+    let asset = tv2_domain::commands::tests_support::fake_video("a", 30);
+    let raw = serde_json::json!({"schema":"editorial-master/1","media":{"fingerprint":asset.fingerprint,"duration":30.0},"tracks":{}});
+    let document: EvidenceDocument = raw.clone().into();
+    let bundle = Arc::new(SourceBundle::new(
+        "original.editorial.master.json".into(),
+        BTreeMap::from([("original.editorial.master.json".into(), raw.to_string()), ("future.md".into(), "Evidence ñ\r\n".into())]),
+    ));
+    let mut p = Project::new("evidence");
+    p.assets.push(asset.clone());
+    p.masters.push(MasterEvidence {
+        asset_id: asset.id,
+        source_digest: document.source_digest().into(),
+        document,
+        source_bundle: Some(bundle.clone()),
+    });
+    let mut session = ProjectSession::new(p);
+    session.execute(CommandEnvelope::human(Command::RenameProject { name: "edited".into() })).unwrap();
+    assert!(Arc::ptr_eq(session.project().masters[0].source_bundle.as_ref().unwrap(), &bundle));
+    let temp = tempfile::tempdir().unwrap();
+    let store = crate::ProjectStore::at(temp.path());
+    store.save_checkpoint(session.project(), session.pending_journal(), Some(&session.history_snapshot())).unwrap();
+    let mut restored = store.load_session().unwrap();
+    restored.undo(Actor::Human).unwrap();
+    assert_eq!(restored.project().masters[0].source_bundle.as_ref().unwrap().documents()["future.md"], "Evidence ñ\r\n");
+    restored.redo(Actor::Human).unwrap();
+    let mut changed = restored.project().clone();
+    changed.masters[0].source_bundle = None;
+    assert!(crate::protection::check_transition(restored.project(), &changed, &Actor::Human).is_err());
+    let mut serialized = serde_json::to_value(restored.project()).unwrap();
+    serialized["masters"][0]["source_bundle"]["documents"]["original.editorial.master.json"] = serde_json::json!("{}");
+    assert!(serde_json::from_value::<Project>(serialized).unwrap().validate().is_err());
+}
+
+#[test]
 fn prepared_command_keeps_generated_ids_rejects_stale_and_shares_master_evidence() {
     let mut p = Project::new("prepared");
     let asset = tv2_domain::commands::tests_support::fake_video("a", 30);
     p.assets.push(asset.clone());
     let raw = serde_json::json!({"schema":"editorial-master/1","media":{"fingerprint":asset.fingerprint,"duration":30.0},"tracks":{},"chunks":[],"generated_at":"now"});
     let document: tv2_domain::evidence::EvidenceDocument = raw.clone().into();
-    p.masters.push(tv2_domain::evidence::MasterEvidence { asset_id: asset.id, source_digest: document.source_digest().into(), document });
+    p.masters.push(tv2_domain::evidence::MasterEvidence {
+        asset_id: asset.id,
+        source_digest: document.source_digest().into(),
+        document,
+        source_bundle: None,
+    });
     let mut session = ProjectSession::new(p);
     let request = CommandEnvelope::human(Command::CreateLayer {
         asset_id: "a".into(),

@@ -1,4 +1,16 @@
-# Incremento vigente — continuación 10, alpha.7
+# Incremento vigente — continuación 11, alpha.8
+
+| Requisito | Incremento implementado | Estado y límite |
+|---|---|---|
+| DAT-01 / LAY-01 | Snapshot V1, export por adaptadores/vistas, archivo de originales/manifests | Parcial: derivación/requests/passes y portabilidad/límites pendientes |
+| DAT-02 / DAT-03 | Intención /2, copia binaria SHA por streaming, recuperación y recibos | Integrado al menú; tests sintéticos; aceptación física pendiente |
+| PERF / DAT | Bundle compartido, master con digest completo cacheado; binarios fuera del historial | No completo: doble recorrido/hash, serialización textual y límites |
+
+47 application tests ejecutados/pasan; resto compilado sin reintentar Windows4551. E2/E3 abiertas, E4 pendiente, E5 fuera de alcance. Evidencia vigente: evidence/continuacion-11.md.
+
+---
+
+# Histórico — continuación 10, alpha.7
 
 **E2/E3 abiertas; E4 pendiente; E5 fuera de alcance.** Evidencia exacta: `evidence/continuacion-10.md`. Aceptación física aplazada.
 

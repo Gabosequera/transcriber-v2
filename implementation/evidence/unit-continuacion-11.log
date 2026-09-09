@@ -1,0 +1,55 @@
+   Compiling tv2-domain v2.0.0-alpha.8 (C:\Users\gabri\Todo\transcriber-v2\crates\domain)
+   Compiling tv2-application v2.0.0-alpha.8 (C:\Users\gabri\Todo\transcriber-v2\crates\application)
+    Finished `test` profile [optimized + debuginfo] target(s) in 36.52s
+     Running unittests src\lib.rs (target\debug\deps\tv2_application-05461b9e4b2c7029.exe)
+
+running 47 tests
+test reconcile::tests::stable_ids_merge_items_and_conflicting_order_is_rejected ... ok
+test reconcile::tests::merges_independent_changes_and_rejects_same_field_or_wrong_identity ... ok
+test protection::tests::agent_cannot_replace_delete_or_edit_a_human_decision_even_in_a_batch ... ok
+test semantic_tests::author_cycle_converts_point_and_keeps_region_on_return_to_note ... ok
+test semantic_tests::blocks_inspector_edits_both_neighbors_and_invalid_batch_rolls_back ... ok
+test semantic_tests::coalesce_preserves_enabled_groups_actor_identity_and_lane_removal ... ok
+test semantic_tests::agent_edits_do_not_forge_human_review_or_become_human_protected ... ok
+test reconcile::tests::detailed_review_collects_all_conflicts_and_requires_each_choice ... ok
+test semantic_tests::exclusive_trim_end_maps_to_previous_clip_at_cut_and_sequence_end ... ok
+test semantic_tests::layer_order_requires_complete_unique_membership_and_undo ... ok
+test semantic_tests::nudge_moves_descendants_once_clamps_and_failed_trim_batch_is_atomic ... ok
+test semantic_tests::save_acknowledgement_does_not_clean_newer_edits_or_discard_their_audit ... ok
+test semantic_tests::cut_box_union_subtract_metadata_tombstones_and_history ... ok
+test semantic_tests::prepared_command_keeps_generated_ids_rejects_stale_and_shares_master_evidence ... ok
+test session::tests::explicit_recovery_can_be_undone_without_rewinding_revision ... ok
+test semantic_tests::split_partitions_tree_preserves_other_ranges_evidence_and_retry ... ok
+test session::tests::digest_checks_dry_run_and_apply_and_revision_cannot_overflow ... ok
+test session::tests::editorial_structure_validates_children_and_undoes_as_one_change ... ok
+test session::tests::failed_batch_leaves_project_untouched_and_dry_run_does_not_commit ... ok
+test session::tests::multiple_undo_redo_preserves_content_and_monotonic_revision ... ok
+test session::tests::idempotency_rejects_changed_request_and_wrong_project_before_replay ... ok
+test reconcile::tests::explicit_human_resolution_is_required_for_editorial_decisions ... ok
+test session::tests::paste_items_remaps_hierarchy_preserves_multirange_and_is_atomic ... ok
+test session::tests::paste_preserves_clip_properties_and_links_after_cut_and_rolls_back_collisions ... ok
+test session::tests::revisions_grow_and_undo_creates_new_revision ... ok
+test session::tests::stale_base_is_rejected_and_idempotent_retry_replays ... ok
+test session::tests::undo_after_external_change_is_rejected_not_applied ... ok
+test documents::tests::refuses_v1_directories_traversal_reserved_names_and_case_aliases ... ok
+test history_codec::tests::deltas_roundtrip_undo_redo_and_reject_corrupt_base_with_shared_large_evidence ... ok
+test store::tests::invalid_external_json_is_never_overwritten_and_lock_is_enforced ... ok
+test jobs::tests::corrupt_job_and_wrong_digest_are_rejected_without_replacing_record ... ok
+test session::tests::receipts_survive_disk_reopen_and_do_not_repeat_generated_ids ... ok
+test semantic_tests::durable_history_reopens_undo_and_redo_with_receipts_and_rejects_corruption ... ok
+test store::tests::journal_is_append_only_and_tolerates_truncated_tail ... ok
+test semantic_tests::source_bundle_survives_history_reopen_and_cannot_be_rewritten ... ok
+test jobs::tests::durable_jobs_recover_orphans_preserve_payload_and_exclude_live_workers ... ok
+test store::tests::invalid_recovery_does_not_change_observed_base_or_session ... ok
+test store::tests::autosave_publishes_audit_and_receipts_with_content_and_recovers_once ... ok
+test store::tests::compare_and_save_rejects_second_instance_and_preserves_external_content ... ok
+test semantic_tests::recovery_restores_full_undo_and_redo_and_survives_save_reopen ... ok
+test store::tests::recovery_requires_matching_identity_and_newer_revision ... ok
+test store::tests::save_load_round_trip_and_atomic_replace ... ok
+test semantic_tests::autosave_second_instance_preserves_first_recovery_and_rejects_external_save ... ok
+test documents::tests::binary_publication_recovers_boundaries_and_preserves_changed_sources_and_targets ... ok
+test documents::tests::multi_document_recovery_all_boundaries_and_external_conflict ... ok
+test store::tests::recovery_finishes_each_commit_boundary_once_and_rejects_external_writes ... ok
+test store::tests::external_diff_revalidates_both_bases_and_is_undoable_then_saveable ... ok
+
+test result: ok. 47 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.15s

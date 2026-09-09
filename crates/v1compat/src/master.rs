@@ -61,6 +61,7 @@ impl V1Master {
             asset_id: asset_id.clone(),
             source_digest: self.source_master_digest(),
             document: self.raw.clone().into(),
+            source_bundle: None,
         }
     }
 

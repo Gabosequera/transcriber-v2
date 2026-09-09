@@ -1,4 +1,21 @@
-# Continuación 10 — procedimientos preparados (no ejecutar hasta levantar el aplazamiento físico)
+# Continuación 11 — procedimientos preparados, aceptación aplazada
+
+**No ejecutar ahora GUI, medios reales ni revisión general.** Usar scripts/cargo.ps1; application tests permitidos; V1compat/dominio/desktop bloqueados 4551 no se reintentan ni se reubican.
+
+Para aceptación posterior en fixtures/copias aisladas V2:
+
+1. Importar carpeta editorial con master único, layers/trims/bloques/montaje, documentos desconocidos, manifests y auxiliar binario. Guardar/reabrir; comprobar que la fuente no cambia y el bundle persiste.
+2. Editar notas/bloques, Archivo → Exportar carpeta documental V1 → capas. Revisar nueva carpeta, notas moments existentes, vistas regeneradas, originales bajo .work/tv2-original y reporte .work/tv2-exports. No se copia el medio principal, sí auxiliares. Comprobar bytes/SHA de originales y binarios.
+3. Repetir con montaje activo: mismo medio, perfil compatible, original desactivado y mapping editado. Reimportar la carpeta en proyecto nuevo, conservando archivo original sin anidar copias.
+4. Cambiar/mover un auxiliar después de importar: exportación debe rechazarlo antes de publicar datos. No sustituirlo por el nuevo archivo bajo el mismo nombre.
+5. Interrumpir publicación /2 y usar Archivo → Recuperar exportación V1 interrumpida. Con origen disponible termina; con destino ya completo no necesita recopiado. Con una tercera edición externa rechaza sin sobrescribirla.
+6. Confirmar manifest válido por SHA y tamaño y archivo de los obsoletos; requests/passes preservados no equivalen a validados/aplicados.
+
+Límites actuales en evidence/continuacion-11.md. No resalvar nuevos bundles con alpha.7 o anteriores; no recuperan intents /2. Proyectos anteriores sin snapshot no tienen exportación completa de carpeta. Binarios dependen del origen hasta exportarlos; traslado por Save As pendiente.
+
+---
+
+# Histórico — continuación 10
 
 Fuentes alpha.7. Controles permitidos: wrapper `scripts/cargo.ps1`; application tests, check, Clippy/all-targets y formato. **No ejecutar ni reintentar tests V1compat, dominio o desktop bloqueados por Windows 4551.** Las instrucciones históricas de tests desktop debajo no son autorización vigente para ejecutarlos.
 

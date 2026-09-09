@@ -1,3 +1,9 @@
+# Publicación en preparación — continuación 11, alpha.8
+
+Checkpoint autorizado de fuentes, sin assets binarios nuevos. 47 application tests ejecutados/pasan; Clippy/all-targets compila V1compat/dominio/desktop sin ejecutar ni reintentar Windows4551. Build release local no ejecutado; evidencia en continuacion-11.md y build-alpha8.json. Notas en release-notes-alpha8.md. E2/E3 abiertas, E4 pendiente, E5 no iniciada; objetivo global incompleto. Estado remoto se registra tras verificarlo.
+
+---
+
 # Publicación verificada — continuación 10, alpha.7
 
 Publicado [v2.0.0-alpha.7](https://github.com/Gabosequera/transcriber-v2/releases/tag/v2.0.0-alpha.7), código/tag `293556e8ed0a0ac1ceeff602fbc82722aa6c8337`, main subido. Prerelease no draft, sin assets; verificación en `evidence/publication-alpha7.json`. El trabajo continúa con conservación de carpetas documentales E3.

@@ -93,6 +93,24 @@ fn menu_bar(app: &mut TranscriptorApp, root: &mut egui::Ui) {
                     app.export_v1_dialog(false);
                     ui.close();
                 }
+                ui.menu_button("Exportar carpeta documental V1", |ui| {
+                    if ui
+                        .button("Capas del medio seleccionado…")
+                        .on_hover_text("Conserva el montaje original; genera una carpeta nueva con evidencia y documentos auxiliares")
+                        .clicked()
+                    {
+                        app.export_v1_folder_dialog(false);
+                        ui.close();
+                    }
+                    if ui
+                        .button("Capas y montaje activo…")
+                        .on_hover_text("Incluye la conversión del montaje activo; debe corresponder al medio seleccionado")
+                        .clicked()
+                    {
+                        app.export_v1_folder_dialog(true);
+                        ui.close();
+                    }
+                });
                 if ui.button("Importar marcas del autor V1…").clicked() {
                     app.import_author_dialog();
                     ui.close();

@@ -1,4 +1,16 @@
-# Actualización vigente — continuación 10
+# Actualización vigente — continuación 11
+
+| Entrada | Comportamiento conectado | Verificación |
+|---|---|---|
+| Archivo → Exportar carpeta documental V1 → capas | Snapshot inmutable del medio/capas, adaptadores, vistas, originales/manifests, transacción de carpeta nueva | Test adaptador compilado; GUI aplazada |
+| Misma entrada → capas y montaje activo | Añade inversa y comprueba identidad del medio | Inversa compilada; GUI aplazada |
+| Archivo → Recuperar exportación V1 interrumpida | Recupera ahora intents /1 textuales y /2 con binarios verificados | Test application de fronteras/origen/destino ejecutado |
+
+No tienen nuevo atajo por defecto. Comparten núcleo de proyecto/adaptadores/publicación; no crean otro estado editorial. El inventario dinámico completo, contratos padre/hijo/passes y E4 siguen pendientes. V1 solo leído, no ejecutado.
+
+---
+
+# Histórico — continuación 10
 
 La revisión dinámica completa sigue abierta. No se ha ejecutado V1 ni su UI.
 

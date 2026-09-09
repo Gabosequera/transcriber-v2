@@ -1,4 +1,16 @@
-# STATUS — continuación 10, fuentes 2.0.0-alpha.7
+# STATUS — continuación 11, fuentes 2.0.0-alpha.8
+
+Continúa el mismo encargo después de alpha.7 publicada. **E2 abierta/E3 parcial/E4 pendiente; objetivo hasta E4 incompleto; E5 no iniciada.** Aceptación física/multimedia/revisión general aplazadas.
+
+Añadido: snapshot inmutable de carpeta V1 (texto compartido; binarios referenciados con SHA-256), exportación por menú/worker con adaptadores y vistas de bloques, archivo de originales/manifests invalidados, publicación recuperable /2 de documentos y binarios por streaming. 47 application tests ejecutados/pasan; V1compat/dominio/desktop solo compilados, sin reintentar Windows4551. Detalle en evidence/continuacion-11.md, D-0052/D-0053. Build/publicación exactos en evidence y PUBLISH.
+
+No cierra DAT-01/PERF: captura textual limitada a 32 MiB/20000 entradas; límites anteriores de proyecto/autosave/intención; binarios requieren origen hasta exportarlos, sin traslado Save As/cancelación de captura/migración general. Proyectos antiguos sin bundle requieren importación en proyecto nuevo para exportar carpeta; no resalvar bundles con versiones anteriores.
+
+Siguiente contrato: derivación padre/hijo desde mapping de exportación verificada conservando streams/evidencia; el exportador actual mezcla audio. Después requests/proposals/passes, watcher V1, archivado/migraciones/límites y E4 funcional. Son pendientes de implementación; el aplazamiento de pruebas físicas no los impide.
+
+---
+
+# Histórico — continuación 10, fuentes 2.0.0-alpha.7
 
 Base `main` limpia `6997455`; V1 `bb7012c` observado limpio, solo lecturas de fuentes. **Encargo hasta E4 incompleto: E2 abierta, E3 parcial, E4 pendiente, E5 no iniciada.** Este checkpoint no cierra etapas. Aceptación física, multimedia y revisión general aplazadas.
 

@@ -11,10 +11,11 @@ pub struct EvidenceDocument(std::sync::Arc<EvidenceData>);
 struct EvidenceData {
     value: serde_json::Value,
     digest: std::sync::OnceLock<String>,
+    full_digest: std::sync::OnceLock<String>,
 }
 impl From<serde_json::Value> for EvidenceDocument {
     fn from(value: serde_json::Value) -> Self {
-        Self(std::sync::Arc::new(EvidenceData { value, digest: Default::default() }))
+        Self(std::sync::Arc::new(EvidenceData { value, digest: Default::default(), full_digest: Default::default() }))
     }
 }
 impl std::ops::Deref for EvidenceDocument {
@@ -44,6 +45,9 @@ impl<'de> Deserialize<'de> for EvidenceDocument {
     }
 }
 impl EvidenceDocument {
+    pub fn full_digest(&self) -> &str {
+        self.0.full_digest.get_or_init(|| crate::digest::digest_json(&self.0.value))
+    }
     pub fn source_digest(&self) -> &str {
         self.0.digest.get_or_init(|| crate::digest::digest_object_without(&self.0.value, &["generated_at", "chunks"]))
     }
@@ -57,10 +61,66 @@ pub struct MasterEvidence {
     pub asset_id: AssetId,
     pub source_digest: String,
     pub document: EvidenceDocument,
+    /// Immutable source files, shared across edits; absent in legacy projects.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub source_bundle: Option<std::sync::Arc<SourceBundle>>,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct SourceBundle {
+    master_path: String,
+    documents: std::collections::BTreeMap<String, String>,
+    #[serde(default)]
+    files: std::collections::BTreeMap<String, SourceFile>,
+    #[serde(skip)]
+    master: std::sync::OnceLock<Result<EvidenceDocument, String>>,
+}
+#[derive(Clone, PartialEq, Debug, Serialize, Deserialize)]
+pub struct SourceFile {
+    pub source: std::path::PathBuf,
+    pub size: u64,
+    pub sha256: String,
+}
+impl PartialEq for SourceBundle {
+    fn eq(&self, other: &Self) -> bool {
+        std::ptr::eq(self, other) || self.master_path == other.master_path && self.documents == other.documents && self.files == other.files
+    }
+}
+impl SourceBundle {
+    pub fn new(master_path: String, documents: std::collections::BTreeMap<String, String>) -> Self {
+        Self { master_path, documents, files: Default::default(), master: Default::default() }
+    }
+    pub fn with_files(mut self, files: std::collections::BTreeMap<String, SourceFile>) -> Self {
+        self.files = files;
+        self
+    }
+    pub fn files(&self) -> &std::collections::BTreeMap<String, SourceFile> {
+        &self.files
+    }
+    pub fn master_path(&self) -> &str {
+        &self.master_path
+    }
+    pub fn documents(&self) -> &std::collections::BTreeMap<String, String> {
+        &self.documents
+    }
+    fn master_document(&self) -> DomainResult<&EvidenceDocument> {
+        self.master
+            .get_or_init(|| {
+                let raw = self.documents.get(&self.master_path).ok_or_else(|| "carpeta original sin master".to_string())?;
+                serde_json::from_str::<serde_json::Value>(raw.trim_start_matches('\u{feff}')).map(Into::into).map_err(|e| e.to_string())
+            })
+            .as_ref()
+            .map_err(|e| DomainError::invalid(e.clone()))
+    }
 }
 
 impl MasterEvidence {
     pub fn validate(&self, project: &Project) -> DomainResult<()> {
+        if let Some(bundle) = &self.source_bundle
+            && bundle.master_document()?.full_digest() != self.document.full_digest()
+        {
+            return Err(DomainError::precondition("el master de la carpeta original difiere de la evidencia"));
+        }
         let a = project.asset(&self.asset_id).ok_or_else(|| DomainError::not_found("asset", &self.asset_id))?;
         if self.document["schema"] != "editorial-master/1" {
             return Err(DomainError::unsupported("schema de master desconocido"));

@@ -14,6 +14,7 @@ pub mod author;
 pub mod author_candidates;
 pub mod chunks;
 pub mod export;
+pub mod folder;
 pub mod import;
 pub mod layers;
 pub mod master;

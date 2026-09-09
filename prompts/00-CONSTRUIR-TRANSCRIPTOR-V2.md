@@ -169,3 +169,15 @@ Pendientes reales: derivación padre/hijo/mapping/manifests/requests/proposals/p
 Controles: 45 application ejecutados/pasan; Clippy all-targets compila el resto. Windows 4551 **también bloqueó V1compat** en esta sesión, antes de ejecutar su binario; no reintentar ni reubicar/renombrar o cambiar política. Dominio/desktop tampoco se ejecutan. Métrica sintética history: 199436 bytes /2 frente a 7622632 /1 (20 entradas, 190000 caracteres constantes); no prueba rendimiento global. Build/publicación exactos en evidence y PUBLISH. V1 bb7012c solo leído, datos personales intactos.
 
 Un nuevo checkpoint requiere actualizar evidencia/matriz/decisiones/traspaso y commit/push/prerelease autorizado. Esto no equivale a completar el encargo; continuar mientras sea posible dentro del alcance hasta E4.
+
+## Traspaso vigente — continuación 11 (sustituye al anterior)
+
+El mismo encargo hasta E4 sigue incompleto. Continuar main, no reiniciar E0/E1 ni pedir autorización nueva. Alpha.7 publicada; este incremento alpha.8 añade carpeta documental V1 y transacciones binarias. E2 abierta/E3 parcial/E4 pendiente/E5 no iniciada. Aceptación física/multimedia/general aplazada.
+
+Leer STATUS, evidence/continuacion-11.md, matriz, RUN, D-0052/D-0053 y PUBLISH. Se conserva texto original inmutable compartido y auxiliares binarios por ruta/SHA; export por menú/worker aplica adaptadores, regenera vistas de bloques, archiva originales/manifests inválidos y publica texto+binarios con intención /2 recuperable. 47 application pasan; demás tests compilados, no ejecutar/reintentar V1compat/dominio/desktop tras Windows4551. Build local no ejecutado. Fuentes V1/datos personales solo lectura.
+
+Límites no resueltos: 32 MiB textuales/20000 entradas y límites de proyecto/autosave/intención; binarios requieren origen hasta exportación, sin traslado Save As; doble lectura/hash del árbol sin cancelación interna; antiguos sin bundle necesitan nueva importación para export carpeta. No resalvar nuevos bundles con lectores anteriores. No equivale a cierre DAT-01/PERF ni a migración general.
+
+Primera acción concreta: implementar derivación desde mapping de exportación verificada, preservando streams, palabras/intervenciones/procedencia y recalculando overlap/duplicados sin inferencia. Leídos editorial_projects time_map/map_range/derive_master/derive_layers/publish_child, editorial_master _event_average/_overlap_groups/_deduplicate_bleed y editorial_pipeline manifests. El exportador actual mezcla audio: resolver conservación de pistas antes de atribuir evidencia multipista a un hijo. No hay implementación nueva de derivación en alpha.8.
+
+Después completar requests/proposals/passes/manifests de ejecución, watcher/reconcile V1, archivado general/migraciones/límites, inventario/preview y E4 MCP funcional. El testing aplazado no impide ese código. Checkpoint no equivale a completar el encargo. Publicación exacta en evidence/publication-alpha8.json y PUBLISH tras verificarse.

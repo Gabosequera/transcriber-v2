@@ -57,3 +57,5 @@ Incremento propio en dominio/aplicación/GUI y adaptador existente; sin incorpor
 ## Continuación 9
 
 V1 bb7012c: lectura exclusiva de editorial_edits.py, editorial_layers_ui.py, editorial_trims.py, marcas.py, consolidar.py, pipeline.py y editorial_chunks.py para contratos y reglas (mismo titular, autorizada migración). Implementación Rust propia en box_edit/blocks/author/materialize y ampliaciones de núcleo/GUI/persistencia. No se ejecutaron módulos V1 ni se regeneraron goldens; fixtures sintéticas Rust. Sin nuevas dependencias ni copia de references. Licencias vigentes intactas.
+
+Continuación 11: leídos productores de carpeta/manifests y derivación en editorial_projects.py/editorial_master.py/editorial_pipeline.py de V1, solo lectura y sin ejecución Python. Implementación Rust propia de snapshot, archivo y publicación por streaming. Reutiliza sha2/hex ya fijados en workspace para hash de bytes; no nuevos modelos ni runtimes. Derivación leída pero aún no implementada, sin afirmar clean-room.
