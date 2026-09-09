@@ -1,3 +1,25 @@
+# Auditoría vigente — continuación 8
+
+Registro ACTIONS heredado: 69 V1/81 V2, sin IDs V1 ausentes; no se usa como criterio de cierre. Nuevo inventario AST de **140 constructores/bindings** fuera de ACTIONS: `scripts/audit_v1_ui.py` → `evidence/continuacion-08-ui-inventory.json`, con archivo/línea/función/argumentos. No ejecuta V1. No enumera automáticamente todos los controles creados por bucles/helpers; no declara paridad funcional completa.
+
+| Fuente/símbolo V1 | Diferencia encontrada | Implementación actual / prueba | Pendiente |
+|---|---|---|---|
+| editorial_edits.split_layer_item; editorial_layers_ui.split | S solo dividía clips | SplitItem, árbol/multirrango/evidencia; semantic_tests | Snap/materialización del plan |
+| editorial_layers_ui.trim_edge/nudge/nudge_selection | Items sin trim/nudge; multicapa podía aplicar parcial | TrimItem/ShiftItems y batches GUI; semantic_tests | Editor de bloques debe adaptar vecinos también al cambiar varios rangos desde inspector |
+| editor_medios._marca_ciclar/_aplicar_decision | X solo desactivaba marcas | CycleAuthorDecision; punto→región; semantic_tests | Lectura/escritura del sidecar autor |
+| editorial_layers_ui.accept | Shift+E avanzaba aun fallando aceptar; multicapa no atómica | set_selected_items_state devuelve éxito; batch | Aceptación física |
+| editorial_layers_ui.move_lane/new_lane_dialog | Orden no accesible; crear solo User | Biblioteca/cabecera ↑↓; selector de tipos; SetLayerOrder exige totalidad | Borrado/movimiento entre carriles según clase V1 |
+| editorial_layers_ui mouse/EDGE_PX/CLICK_PX | Drag sobre item solo seleccionaba | EditItems con base/rango/borde, guía temporal, release/Escape | Caja Corte unión/resta; preview geométrico completo/autoscroll semántico |
+| editorial_edits.box_add/box_subtract | Falta crear/estirar/fundir/restar con caja Corte | Inventariado, sin implementación | Requiere conservación de propiedades/procedencia en merge |
+| editorial_montaje_ui tool/click | Corte con clic dividía solo una parte A/V | split_at_playhead común a teclado y herramienta | Aceptación física |
+| editorial_layers_ui.persist (trims) | Export de carril descartaría cabecera/otros carriles | Export trims completo, header único normalizado; V1compat tests | Coalescencia V1, documentos antiguos sin cabecera |
+| editorial_layers_ui.persist (bloques) | Plan no importado; bordes independientes rompen cobertura | Plan elegido, cobertura, SplitItem/TrimItem/ShiftItems con vecinos | Snap seguro/evidencia, materialización/derivación |
+| app.py/keymap_ui/toolbar_ui | Controles de ajustes/export/navegación | AST conserva referencias; keymap de alpha.4 conservado | Contrastar recorridos dinámicos, no contar registros como pruebas |
+| automatico_ui.py | Controles de pipeline y requests | AST inventariado; no se ejecuta ni instala backend | Requests E4; modelos/pipeline E5 fuera del alcance |
+
+Las tablas siguientes son históricas y no sustituyen los límites anteriores.
+
+---
 # Auditoría vigente de UI-04 — continuación 7
 
 Lectura estática real de `../transcriber/keymap.py` (AST, sin ejecutar V1) y registro Rust: **69 acciones V1, 81 V2, ninguna V1 ausente**. `montage.export` añade Ctrl+E; el resto conserva defaults. Detalle por ID en `evidence/continuacion-07-action-audit.json`. Registro no implica handler completo ni aceptación GUI.

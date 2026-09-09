@@ -99,6 +99,12 @@ pub fn read_v1_editorial(root: &Path, asset: &Asset) -> V1Result<V1Import> {
         }
     }
     report.layers = layers.len();
+    // Selected plan takes precedence over generated views. Never import both.
+    let selected_plan = editorial_dir.join(".work/chunks.selected.json");
+    let plan_path = if selected_plan.exists() { selected_plan } else { editorial_dir.join("views/chunks.json") };
+    if plan_path.is_file() {
+        layers.push(crate::chunks::from_v1(&read_json(&plan_path)?, &asset.id, asset.duration(), &master.source_master_digest())?);
+    }
     let trims_path = editorial_dir.join("views").join("trims.json");
     if trims_path.is_file() {
         match read_json(&trims_path).and_then(|v| trims_from_v1(&v, &asset.id, Some(&asset.fingerprint))) {

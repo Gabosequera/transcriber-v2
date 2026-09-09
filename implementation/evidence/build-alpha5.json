@@ -1,0 +1,12 @@
+{
+  "version": "2.0.0-alpha.5",
+  "command": "./scripts/cargo.ps1 build --release --locked -p transcriptor",
+  "result": "ok",
+  "elapsed": "2m13s",
+  "utc": "2026-09-09T01:32:37.9028420Z",
+  "executable": "C:\\Users\\gabri\\Todo\\transcriber-v2\\target\\release\\Transcriptor.exe",
+  "bytes": 24222208,
+  "sha256": "6dd1344b05dba07c682c39648988809f6558b1182634860dcf33e3822cc1cda5",
+  "executed": false,
+  "package_created": false
+}

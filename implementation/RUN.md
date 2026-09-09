@@ -1,3 +1,17 @@
+# Continuación 8 — recorridos añadidos
+
+- Selecciona un item y usa S, [ / ], Alt+flechas; el playhead se convierte a tiempo fuente. División jerárquica conserva los demás rangos. Trim que deje hijos fuera falla entero.
+- Arrastra un item o su borde: guía de tiempo, una confirmación al soltar; Escape cancela. Una revisión concurrente obliga a repetir el gesto. La herramienta Corte también divide items y clips enlazados.
+- X sobre marca cicla nota/incluir/excluir; una decisión convierte un punto a región ±2 s. E acepta; P vuelve a nota. Regiones con decisión necesitan 200 ms.
+- Biblioteca/cabecera: subir/bajar carril; seleccionar limpia la selección previa. Nueva capa permite notas/pedidos, recortes, temas y marcas. Bloquear/visibilidad conservados.
+- Archivo → exportar capa V1: sobre recortes exporta **todos los carriles del documento** en `trims.json`; sobre bloques exporta `chunks.selected.json`. Se crea carpeta de salida nueva; no escribe V1. Planes editados con evidencia/snap antiguo se rechazan hasta recalcular. No es export carpeta completa ni inverso de montaje editado.
+- Abrir y guardar trabajan en segundo plano con un slot. Se puede seguir editando al guardar: solo la revisión capturada queda guardada. Guardar y salir espera escritura exitosa. El guion espera el resultado del worker.
+- Reapertura recupera undo/redo desde `history.json`. Save As relocaliza todas las rutas históricas. Versiones antiguas sin history inician pila vacía. Si history existe pero es incoherente se informa error, no se restaura ciegamente.
+- Autosave ajeno más nuevo provoca conflicto; conserva ambos estados. Recuperar o guardar manualmente establece la nueva base. Recovery sigue ofreciendo undo a la versión guardada, pero no repone todavía toda la pila anterior del candidato.
+
+No ejecutar pruebas físicas/GUI/multimedia aplazadas. No eludir Windows 4551. Controles finales y límites en STATUS/evidence/continuacion-08.md.
+
+---
 # Continuación 7 — nuevas operaciones
 
 - Archivo → Importar V1: lectura/probe en worker; Biblioteca permite cancelar. Cambiar proyecto o revisión impide aplicar un resultado viejo. Una carpeta reconocida inválida no modifica el proyecto.

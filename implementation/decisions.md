@@ -178,3 +178,23 @@ Validar mapa completo antes de guardar; conflictos explicados y rechazados. Vac�
 
 - La GUI congela revisión, assets, timeline resuelto y preset al encolar; máximo 16 pendientes y un worker activo. Historial acotado; cancelar un pendiente no escribe salida. Test real cancela activo y pendiente, edita el proyecto y verifica que el job restante conserva la duración de su revisión. Persistencia de trabajos y recuperación quedan para E3.
 - `exec_checked` conserva el error tipado del mismo recorrido usado por `exec`. El paso `shift` del guion puede declarar `expect_error`; exige código exacto y revisión inalterada. E1 declara `OVERLAP` en su prueba negativa. Un fallo inesperado sigue invalidando el recorrido.
+
+## D-0039 · Edición semántica y estados por contexto
+
+SplitItem conserva rangos no afectados del original, divide descendientes cruzados y reasigna hijos íntegros sin perder sus IDs. Trim valida contención; nudge expande descendientes y aplica delta común. Marcas tienen nota/incluir/excluir y decisión solo en región ≥200 ms; un punto se expande ±2 s. Recortes requieren un rango ≥50 ms sin jerarquía. GUI, teclado y gestos construyen estos comandos; estados multicapa/trim enlazado son batch. El actor Agent no puede crear aceptación humana; edited se atribuye a la persona. Tests semantic_tests; GUI compilada, no ejecutada. No equivale a adaptador author sidecar ni permisos E4.
+
+## D-0040 · Historial/1 dentro de la intención recuperable
+
+history.json serializa undo/redo con proyecto/revisión y fronteras comprobadas. La intención de commit contiene proyecto, auditoría e historial; se elimina después de los tres archivos. Cuatro fronteras sintéticas probadas, sin crash físico. Apertura conjunta bajo lock; ausencia de history en proyectos antiguos migra a pila vacía, incoherencia no se ignora. Autosave incluye historial y lo valida; recuperar mantiene todavía un único undo a la versión guardada. Riesgo: snapshots grandes (200 entradas, intención 128 MiB/autosave 64 MiB), sin deltas/archivado. No se promete historial ilimitado ni jobs durables.
+
+## D-0041 · IO de proyecto y conflictos de autosave
+
+Un worker de apertura/guardado por GUI, canal bounded(1), proyecto/revisión congelados. Abrir revalida base al publicar; guardar reconoce solo el prefijo de auditoría capturado y no limpia revisiones nuevas. Save As transforma paths en todos los snapshots. El cierre normal espera escrituras; guardar y salir no marca limpio antes del resultado. Autosave usa el mismo lock y verifica base en disco; identifica writer y no reemplaza un recovery más nuevo de otra instancia. Riesgos restantes: editores ajenos al lock, lecturas bloqueadas, clones iniciales y descubrimiento recovery síncrono. Tests de ACK, dos instancias y store; no ejecución GUI de cierre.
+
+## D-0042 · Documentos V1 normalizados sin colección duplicada
+
+Trims conserva cabecera una sola vez y metadata en cada carril; cuts existen únicamente como items autoritativos normalizados. Export desde cualquier carril emite todos los carriles del medio, conserva extras/aceptación, incrementa revisión por cambios de carril y ajusta next_id. `tv2_label` es extensión explícita para etiqueta (V1 no tiene campo equivalente); IDs nuevos cut-/m numéricos. Proyectos que ya perdieron la cabecera exigen reimportación; no se inventa esa información. Coalescencia y administración de carriles V1 completas siguen pendientes.
+
+Chunks usa el plan seleccionado antes que la view; una cabecera + colección única, cobertura 0..duración/max50min. Split/trim/nudge preservan partición y vecinos. Summary original se conserva como metadata; comment editorial es independiente. `tv2_original_range` permite rechazar export de metadata de bordes/snap desactualizada tras editar. Esta negativa es un límite explícito, no implementación de recalcular evidencia/snap ni materializar master/chunks. Export sigue documental, no carpeta; montaje inverso editado sigue pendiente.
+
+D-0039, frontera temporal: un trim de fin exclusivo consulta el intervalo inmediatamente anterior al corte; trim de inicio consulta el siguiente. Clip::seq_edge_to_source y test application evitan usar el inicio de otra ocurrencia o rechazar el fin de secuencia.

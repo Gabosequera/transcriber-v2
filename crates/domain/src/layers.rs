@@ -67,6 +67,14 @@ pub enum LayerKind {
 }
 
 impl LayerKind {
+    pub fn fresh_item_id(&self) -> ItemId {
+        let hex = crate::ids::random_hex12();
+        match self {
+            LayerKind::Trims => ItemId::new(format!("cut-{:06}", u64::from_str_radix(&hex, 16).unwrap())),
+            LayerKind::Author => ItemId::new(format!("m{:04}", u64::from_str_radix(&hex, 16).unwrap())),
+            _ => ItemId::new(format!("item-{hex}")),
+        }
+    }
     pub fn accepts_acceptance(&self) -> bool {
         self.is_editable() && !matches!(self, LayerKind::Blocks)
     }
@@ -326,6 +334,38 @@ pub fn validate_layer(layer: &SemanticLayer, duration: Ticks) -> DomainResult<()
         return Err(DomainError::invalid(format!("color inválido (#RRGGBB): {}", layer.color)));
     }
     validate_items(&layer.items, duration, layer.kind.allows_points())?;
+    if layer.kind == LayerKind::Author
+        && layer
+            .items
+            .iter()
+            .any(|i| i.ranges.len() != 1 || i.parent_id.is_some() || (i.state != ItemState::Proposed && i.total_duration() < Ticks::from_millis(200)))
+    {
+        return Err(DomainError::invalid("una marca exige un único punto o región; una decisión necesita al menos 200 ms"));
+    }
+    if layer.kind == LayerKind::Trims
+        && layer.items.iter().any(|i| i.ranges.len() != 1 || i.parent_id.is_some() || i.total_duration() < Ticks::from_millis(50))
+    {
+        return Err(DomainError::invalid("un recorte exige un rango de al menos 50 ms y no admite jerarquía"));
+    }
+    if layer.kind == LayerKind::Blocks && layer.extra.contains_key("v1_chunks_header") && !layer.deleted {
+        let mut items: Vec<_> = layer.items.iter().collect();
+        items.sort_by_key(|i| i.start());
+        let mut previous = Ticks::ZERO;
+        for item in items {
+            if item.ranges.len() != 1
+                || item.parent_id.is_some()
+                || item.start() != previous
+                || item.total_duration() > Ticks::from_seconds(3000)
+                || item.state != ItemState::Proposed
+            {
+                return Err(DomainError::invalid("bloques: partición contigua desde cero, sin jerarquía ni aceptación, máximo 50 minutos"));
+            }
+            previous = item.end();
+        }
+        if previous != duration {
+            return Err(DomainError::invalid("los bloques deben cubrir el medio completo"));
+        }
+    }
     let ids: HashSet<&ItemId> = layer.items.iter().map(|i| &i.item_id).collect();
     if let Some(dead) = layer.deleted_item_ids.iter().find(|d| ids.contains(d)) {
         return Err(DomainError::invalid(format!("el item {dead} está a la vez vivo y en deleted_item_ids")));

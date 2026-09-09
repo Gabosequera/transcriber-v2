@@ -10,6 +10,7 @@ mod import_jobs;
 mod item_editor;
 mod keymap;
 mod paths;
+mod persistence_jobs;
 mod scripting;
 mod timeline_index;
 mod ui_markers;

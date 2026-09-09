@@ -1,3 +1,19 @@
+# Incremento vigente — continuación 8, alpha.5
+
+E2/E3 abiertas, E4 pendiente; aceptación física aplazada. Evidencia: `evidence/continuacion-08.md`. Las secciones inferiores son históricas.
+
+| ID | Incremento | Estado / comprobación |
+|---|---|---|
+| UI-03/UI-04/LAY-02 | S/trim/nudge de items, jerarquía, menú/corte/arrastre, estados multicapa atómicos, ciclo autor, orden/selección/tipos de carril | Núcleo verificado por semantic_tests; GUI compilada, sin aceptación física |
+| UI-04 | 140 constructores/bindings fuera del registro ACTIONS en siete fuentes V1 | Inventario AST trazable; handlers dinámicos/recorridos restantes pendientes |
+| LAY-01/LAY-02/DAT-01 | Bloques contiguos, split/bordes/nudge con vecinos; selected-plan antes que view | Parcial; test chunks; snap/evidencia/materialización multidocumento pendientes |
+| DAT-01/LAY-01 | Export completo del documento trims del medio desde un carril; cabecera/metadata/aceptación/IDs; crear pre-master | Tests V1compat; no equivale a export carpeta ni coalescencia V1 completa |
+| DAT-02/DAT-04 | Historial/1 durable junto con proyecto/journal; reabrir undo/redo, continuidad/base; cuatro fronteras recuperables | Tests semantic_tests/store ejecutados. Recuperación de pila autosave y jobs siguen pendientes |
+| DAT-02/DAT-03 | Autosave lock/CAS/propietario de recovery; dos instancias no sobrescriben recovery ajeno | Unitarios sintéticos ejecutados; crash/cierre físico pendientes |
+| PERF-01 | Apertura/guardado/Save As en worker único acotado; GUI espera guardar y salir | Compilado; validación/hash/clones/history grandes y descubrimiento inicial siguen pendientes |
+| AI-01/AI-02 | Actor Agent no produce edited/aceptación humana; comandos semánticos pasan por la misma sesión | Unitarios; permisos/MCP/propuestas/cliente E4 pendientes |
+
+---
 # Incremento vigente — continuación 7, alpha.4
 
 E2/E3 abiertas; E4 pendiente. Aceptación física aplazada no equivale a cierre de implementación. Evidencia exacta: `evidence/continuacion-07.md`.

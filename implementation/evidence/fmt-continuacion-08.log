@@ -1,0 +1,1 @@
+cargo fmt --all --check: sin salida; exit=0 (control final alpha.5)

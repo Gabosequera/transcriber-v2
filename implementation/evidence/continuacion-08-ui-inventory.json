@@ -1,0 +1,1499 @@
+{
+  "method": "AST read-only; static constructors/bindings, not runtime behavior or functional acceptance",
+  "files": [
+    "app.py",
+    "automatico_ui.py",
+    "editor_medios.py",
+    "editorial_layers_ui.py",
+    "editorial_montaje_ui.py",
+    "toolbar_ui.py",
+    "keymap_ui.py"
+  ],
+  "count": 140,
+  "entries": [
+    {
+      "file": "app.py",
+      "line": 165,
+      "function": "__init__",
+      "kind": "CTkButton",
+      "arguments": {
+        "text": "'Volver'",
+        "command": "self._volver_de_ajustes"
+      }
+    },
+    {
+      "file": "app.py",
+      "line": 177,
+      "function": "__init__",
+      "kind": "bind",
+      "arguments": {
+        "binding": [
+          "'<Configure>'",
+          "self._on_resize"
+        ]
+      }
+    },
+    {
+      "file": "app.py",
+      "line": 178,
+      "function": "__init__",
+      "kind": "protocol",
+      "arguments": {
+        "binding": [
+          "'WM_DELETE_WINDOW'",
+          "self._cerrar"
+        ]
+      }
+    },
+    {
+      "file": "app.py",
+      "line": 204,
+      "function": "_build_app_header",
+      "kind": "CTkButton",
+      "arguments": {
+        "text": "'⋮'",
+        "command": "self._toggle_menu"
+      }
+    },
+    {
+      "file": "app.py",
+      "line": 219,
+      "function": "_build_app_header",
+      "kind": "CTkSegmentedButton",
+      "arguments": {
+        "values": "['Automático', 'Manual']",
+        "command": "self._cambiar_modo"
+      }
+    },
+    {
+      "file": "app.py",
+      "line": 228,
+      "function": "_build_app_header",
+      "kind": "CTkButton",
+      "arguments": {
+        "text": "'Ajustes'",
+        "command": "self._abrir_ajustes"
+      }
+    },
+    {
+      "file": "app.py",
+      "line": 244,
+      "function": "_build_app_header",
+      "kind": "CTkButton",
+      "arguments": {
+        "text": "'Buscar actualización'",
+        "command": "self._buscar_actualizacion"
+      }
+    },
+    {
+      "file": "app.py",
+      "line": 428,
+      "function": "_preset_bar",
+      "kind": "CTkOptionMenu",
+      "arguments": {
+        "values": "[NO_PRESET] + presets.names(section)",
+        "command": "lambda n, s=section, f=set_cfg: self._apply_preset(s, n, f)"
+      }
+    },
+    {
+      "file": "app.py",
+      "line": 432,
+      "function": "_preset_bar",
+      "kind": "CTkButton",
+      "arguments": {
+        "text": "'Guardar'",
+        "command": "lambda s=section, g=get_cfg, m=menu: self._save_preset(s, g, m)"
+      }
+    },
+    {
+      "file": "app.py",
+      "line": 435,
+      "function": "_preset_bar",
+      "kind": "CTkButton",
+      "arguments": {
+        "text": "'Eliminar'",
+        "command": "lambda s=section, m=menu: self._delete_preset(s, m)"
+      }
+    },
+    {
+      "file": "app.py",
+      "line": 536,
+      "function": "_build_settings",
+      "kind": "CTkButton",
+      "arguments": {
+        "text": "'↻ Redetectar'",
+        "command": "self._settings_detect"
+      }
+    },
+    {
+      "file": "app.py",
+      "line": 544,
+      "function": "_build_settings",
+      "kind": "CTkCheckBox",
+      "arguments": {
+        "text": "'Usar todos los núcleos/hilos de la CPU (máximo rendimiento)'",
+        "command": "self._on_cpu_max"
+      }
+    },
+    {
+      "file": "app.py",
+      "line": 572,
+      "function": "_build_settings",
+      "kind": "CTkCheckBox",
+      "arguments": {
+        "text": "'Preferir la GPU para todo lo posible  (Whisper + modelos de IA · carril CUDA)'",
+        "command": "self._on_gpu_prefer"
+      }
+    },
+    {
+      "file": "app.py",
+      "line": 585,
+      "function": "_build_settings",
+      "kind": "CTkOptionMenu",
+      "arguments": {
+        "values": "['Automática']",
+        "command": "self._on_llama_dev"
+      }
+    },
+    {
+      "file": "app.py",
+      "line": 602,
+      "function": "_build_settings",
+      "kind": "CTkOptionMenu",
+      "arguments": {
+        "values": "core.MODELS",
+        "command": "self._on_whisper_model"
+      }
+    },
+    {
+      "file": "app.py",
+      "line": 618,
+      "function": "_build_settings",
+      "kind": "CTkButton",
+      "arguments": {
+        "text": "'🧹 Liberar memoria'",
+        "command": "self._free_memory"
+      }
+    },
+    {
+      "file": "app.py",
+      "line": 851,
+      "function": "_build_transcribe",
+      "kind": "CTkSegmentedButton",
+      "arguments": {
+        "values": "opts",
+        "command": "self._on_dev"
+      }
+    },
+    {
+      "file": "app.py",
+      "line": 862,
+      "function": "_build_transcribe",
+      "kind": "CTkButton",
+      "arguments": {
+        "text": "'Importar audio'",
+        "command": "self._pick_audio"
+      }
+    },
+    {
+      "file": "app.py",
+      "line": 868,
+      "function": "_build_transcribe",
+      "kind": "CTkOptionMenu",
+      "arguments": {
+        "values": "core.MODELS"
+      }
+    },
+    {
+      "file": "app.py",
+      "line": 880,
+      "function": "_build_transcribe",
+      "kind": "CTkCheckBox",
+      "arguments": {
+        "text": "'segments.json'"
+      }
+    },
+    {
+      "file": "app.py",
+      "line": 881,
+      "function": "_build_transcribe",
+      "kind": "CTkCheckBox",
+      "arguments": {
+        "text": "'subtítulos .srt'"
+      }
+    },
+    {
+      "file": "app.py",
+      "line": 882,
+      "function": "_build_transcribe",
+      "kind": "CTkCheckBox",
+      "arguments": {
+        "text": "'cues.md'"
+      }
+    },
+    {
+      "file": "app.py",
+      "line": 891,
+      "function": "_build_transcribe",
+      "kind": "CTkCheckBox",
+      "arguments": {
+        "text": "'  Ajustar timestamps con IA de alineación  (recomendado)'"
+      }
+    },
+    {
+      "file": "app.py",
+      "line": 909,
+      "function": "_build_transcribe",
+      "kind": "CTkButton",
+      "arguments": {
+        "text": "'Elegir carpeta'",
+        "command": "self._pick_out"
+      }
+    },
+    {
+      "file": "app.py",
+      "line": 912,
+      "function": "_build_transcribe",
+      "kind": "CTkButton",
+      "arguments": {
+        "text": "'Convertir'",
+        "command": "self._start"
+      }
+    },
+    {
+      "file": "app.py",
+      "line": 1016,
+      "function": "_build_gate",
+      "kind": "CTkButton",
+      "arguments": {
+        "text": "'Importar audio'",
+        "command": "self._g_pick_audio"
+      }
+    },
+    {
+      "file": "app.py",
+      "line": 1023,
+      "function": "_build_gate",
+      "kind": "CTkButton",
+      "arguments": {
+        "text": "'Elegir words.json'",
+        "command": "self._g_pick_words"
+      }
+    },
+    {
+      "file": "app.py",
+      "line": 1036,
+      "function": "_build_gate",
+      "kind": "CTkSegmentedButton",
+      "arguments": {
+        "values": "modes",
+        "command": "lambda _=None: self._on_mode_change()"
+      }
+    },
+    {
+      "file": "app.py",
+      "line": 1043,
+      "function": "_build_gate",
+      "kind": "CTkSwitch",
+      "arguments": {
+        "text": "'Escudo de palabras (protege consonantes) · off = mutea toda respiración'",
+        "command": "self._on_mode_change"
+      }
+    },
+    {
+      "file": "app.py",
+      "line": 1048,
+      "function": "_build_gate",
+      "kind": "CTkSwitch",
+      "arguments": {
+        "text": "'Red de seguridad (aire en pausas) · caza soplidos que la red no ve'",
+        "command": "self._on_mode_change"
+      }
+    },
+    {
+      "file": "app.py",
+      "line": 1093,
+      "function": "_build_gate",
+      "kind": "CTkButton",
+      "arguments": {
+        "text": "'Elegir salida'",
+        "command": "self._g_pick_out"
+      }
+    },
+    {
+      "file": "app.py",
+      "line": 1098,
+      "function": "_build_gate",
+      "kind": "CTkButton",
+      "arguments": {
+        "text": "'Analizar huecos'",
+        "command": "self._g_analyze"
+      }
+    },
+    {
+      "file": "app.py",
+      "line": 1100,
+      "function": "_build_gate",
+      "kind": "CTkButton",
+      "arguments": {
+        "text": "'Limpiar audio'",
+        "command": "self._g_start"
+      }
+    },
+    {
+      "file": "automatico_ui.py",
+      "line": 124,
+      "function": "__init__",
+      "kind": "CTkButton",
+      "arguments": {
+        "text": "'Cancelar'",
+        "command": "self.destroy"
+      }
+    },
+    {
+      "file": "automatico_ui.py",
+      "line": 126,
+      "function": "__init__",
+      "kind": "CTkButton",
+      "arguments": {
+        "text": "'Guardar límites'",
+        "command": "self._save"
+      }
+    },
+    {
+      "file": "automatico_ui.py",
+      "line": 213,
+      "function": "__init__",
+      "kind": "CTkButton",
+      "arguments": {
+        "text": "'Retomar con lo ya hecho'",
+        "command": "lambda: self._pick('resume')"
+      }
+    },
+    {
+      "file": "automatico_ui.py",
+      "line": 216,
+      "function": "__init__",
+      "kind": "CTkButton",
+      "arguments": {
+        "text": "'Empezar de cero (reescribir)'",
+        "command": "lambda: self._pick('rebuild')"
+      }
+    },
+    {
+      "file": "automatico_ui.py",
+      "line": 220,
+      "function": "__init__",
+      "kind": "CTkButton",
+      "arguments": {
+        "text": "'Cancelar'",
+        "command": "lambda: self._pick(None)"
+      }
+    },
+    {
+      "file": "automatico_ui.py",
+      "line": 223,
+      "function": "__init__",
+      "kind": "protocol",
+      "arguments": {
+        "binding": [
+          "'WM_DELETE_WINDOW'",
+          "lambda: self._pick(None)"
+        ]
+      }
+    },
+    {
+      "file": "automatico_ui.py",
+      "line": 295,
+      "function": "_build_project_bar",
+      "kind": "CTkButton",
+      "arguments": {
+        "text": "'Importar video'",
+        "command": "self._pick_media"
+      }
+    },
+    {
+      "file": "automatico_ui.py",
+      "line": 322,
+      "function": "_build_workspace",
+      "kind": "CTkSegmentedButton",
+      "arguments": {
+        "values": "['Selección', 'Corte']",
+        "command": "self._tool_picked"
+      }
+    },
+    {
+      "file": "automatico_ui.py",
+      "line": 341,
+      "function": "_build_workspace",
+      "kind": "CTkSegmentedButton",
+      "arguments": {
+        "values": "['Fuente', 'Montaje']",
+        "command": "self._mode_picked"
+      }
+    },
+    {
+      "file": "automatico_ui.py",
+      "line": 360,
+      "function": "_build_workspace",
+      "kind": "bind",
+      "arguments": {
+        "binding": [
+          "'<Motion>'",
+          "self._hover"
+        ]
+      }
+    },
+    {
+      "file": "automatico_ui.py",
+      "line": 361,
+      "function": "_build_workspace",
+      "kind": "bind",
+      "arguments": {
+        "binding": [
+          "'<Leave>'",
+          "self._leave"
+        ]
+      }
+    },
+    {
+      "file": "automatico_ui.py",
+      "line": 387,
+      "function": "_build_workspace",
+      "kind": "CTkOptionMenu",
+      "arguments": {
+        "values": "hardware.WHISPER_MODELS"
+      }
+    },
+    {
+      "file": "automatico_ui.py",
+      "line": 404,
+      "function": "_build_workspace",
+      "kind": "CTkCheckBox",
+      "arguments": {
+        "text": "label"
+      }
+    },
+    {
+      "file": "automatico_ui.py",
+      "line": 427,
+      "function": "_build_workspace",
+      "kind": "CTkButton",
+      "arguments": {
+        "text": "'Elegir carpeta'",
+        "command": "self._pick_output"
+      }
+    },
+    {
+      "file": "automatico_ui.py",
+      "line": 441,
+      "function": "_build_workspace",
+      "kind": "CTkButton",
+      "arguments": {
+        "text": "'Conversación'",
+        "command": "self._show_conversation"
+      }
+    },
+    {
+      "file": "automatico_ui.py",
+      "line": 447,
+      "function": "_build_workspace",
+      "kind": "CTkButton",
+      "arguments": {
+        "text": "'Revisar bloques'",
+        "command": "self._review_chunks"
+      }
+    },
+    {
+      "file": "automatico_ui.py",
+      "line": 453,
+      "function": "_build_workspace",
+      "kind": "CTkButton",
+      "arguments": {
+        "text": "'Importar JSON de la AI'",
+        "command": "self._import_external_json"
+      }
+    },
+    {
+      "file": "automatico_ui.py",
+      "line": 466,
+      "function": "_build_workspace",
+      "kind": "CTkOptionMenu",
+      "arguments": {
+        "values": "[spec['label'] for spec in podcast_export.FORMATS.values()]",
+        "command": "self._format_changed"
+      }
+    },
+    {
+      "file": "automatico_ui.py",
+      "line": 480,
+      "function": "_build_workspace",
+      "kind": "CTkButton",
+      "arguments": {
+        "text": "'Exportar bloques'",
+        "command": "self._accept_cuts"
+      }
+    },
+    {
+      "file": "automatico_ui.py",
+      "line": 486,
+      "function": "_build_workspace",
+      "kind": "CTkButton",
+      "arguments": {
+        "text": "'Abrir proyecto existente'",
+        "command": "self._open_project"
+      }
+    },
+    {
+      "file": "automatico_ui.py",
+      "line": 492,
+      "function": "_build_workspace",
+      "kind": "CTkButton",
+      "arguments": {
+        "text": "'Procesar pistas de voz'",
+        "command": "self._run_or_cancel"
+      }
+    },
+    {
+      "file": "automatico_ui.py",
+      "line": 500,
+      "function": "_build_workspace",
+      "kind": "CTkButton",
+      "arguments": {
+        "text": "'Capas…'",
+        "command": "self.layers.manage"
+      }
+    },
+    {
+      "file": "automatico_ui.py",
+      "line": 507,
+      "function": "_build_workspace",
+      "kind": "CTkButton",
+      "arguments": {
+        "text": "'Preparar para la AI'",
+        "command": "lambda: self._ai_option(self.AI_DEFAULT)"
+      }
+    },
+    {
+      "file": "automatico_ui.py",
+      "line": 515,
+      "function": "_build_workspace",
+      "kind": "CTkButton",
+      "arguments": {
+        "text": "'▾'",
+        "command": "self._ai_menu"
+      }
+    },
+    {
+      "file": "automatico_ui.py",
+      "line": 549,
+      "function": "_build_workspace",
+      "kind": "CTkButton",
+      "arguments": {
+        "text": "'Exportar montaje'",
+        "command": "self._export_montage"
+      }
+    },
+    {
+      "file": "automatico_ui.py",
+      "line": 664,
+      "function": "_build_sash",
+      "kind": "bind",
+      "arguments": {
+        "binding": [
+          "'<Enter>'",
+          "lambda e: self._sash_grip.configure(fg_color=ACCENT)"
+        ]
+      }
+    },
+    {
+      "file": "automatico_ui.py",
+      "line": 665,
+      "function": "_build_sash",
+      "kind": "bind",
+      "arguments": {
+        "binding": [
+          "'<Leave>'",
+          "self._sash_leave"
+        ]
+      }
+    },
+    {
+      "file": "automatico_ui.py",
+      "line": 666,
+      "function": "_build_sash",
+      "kind": "bind",
+      "arguments": {
+        "binding": [
+          "'<Button-1>'",
+          "self._sash_press"
+        ]
+      }
+    },
+    {
+      "file": "automatico_ui.py",
+      "line": 667,
+      "function": "_build_sash",
+      "kind": "bind",
+      "arguments": {
+        "binding": [
+          "'<B1-Motion>'",
+          "self._sash_move"
+        ]
+      }
+    },
+    {
+      "file": "automatico_ui.py",
+      "line": 668,
+      "function": "_build_sash",
+      "kind": "bind",
+      "arguments": {
+        "binding": [
+          "'<ButtonRelease-1>'",
+          "self._sash_release"
+        ]
+      }
+    },
+    {
+      "file": "automatico_ui.py",
+      "line": 669,
+      "function": "_build_sash",
+      "kind": "bind",
+      "arguments": {
+        "binding": [
+          "'<Double-Button-1>'",
+          "self._sash_reset"
+        ]
+      }
+    },
+    {
+      "file": "automatico_ui.py",
+      "line": 734,
+      "function": "_build_trims_panel",
+      "kind": "CTkButton",
+      "arguments": {
+        "text": "'Analizar silencios'",
+        "command": "self._analyze_silences"
+      }
+    },
+    {
+      "file": "automatico_ui.py",
+      "line": 758,
+      "function": "_build_trims_panel",
+      "kind": "CTkButton",
+      "arguments": {
+        "text": "'Exportar con recortes'",
+        "command": "self._export_trims"
+      }
+    },
+    {
+      "file": "automatico_ui.py",
+      "line": 765,
+      "function": "_build_trims_panel",
+      "kind": "CTkButton",
+      "arguments": {
+        "text": "'Abrir el video recortado'",
+        "command": "self._open_exported_child"
+      }
+    },
+    {
+      "file": "automatico_ui.py",
+      "line": 775,
+      "function": "_build_trims_panel",
+      "kind": "CTkCheckBox",
+      "arguments": {
+        "text": "'Saltar recortes al reproducir'"
+      }
+    },
+    {
+      "file": "automatico_ui.py",
+      "line": 863,
+      "function": "_ai_menu",
+      "kind": "add_command",
+      "arguments": {
+        "label": "label + ('   (por defecto)' if key == self.AI_DEFAULT else '')",
+        "command": "lambda k=key: self._ai_option(k)"
+      }
+    },
+    {
+      "file": "automatico_ui.py",
+      "line": 930,
+      "function": "_build_track_controls",
+      "kind": "CTkCheckBox",
+      "arguments": {
+        "text": "'VOZ'"
+      }
+    },
+    {
+      "file": "automatico_ui.py",
+      "line": 1453,
+      "function": "_choose_discovered",
+      "kind": "CTkButton",
+      "arguments": {
+        "text": "candidate['name'] + ' · ' + candidate['path']",
+        "command": "choose"
+      }
+    },
+    {
+      "file": "editor_medios.py",
+      "line": 166,
+      "function": "__init__",
+      "kind": "bind",
+      "arguments": {
+        "binding": [
+          "'<Configure>'",
+          "lambda e: (self._tl_resize(), self._redibujar())"
+        ]
+      }
+    },
+    {
+      "file": "editor_medios.py",
+      "line": 187,
+      "function": "__init__",
+      "kind": "CTkButton",
+      "arguments": {
+        "text": "'▶'",
+        "command": "self._play"
+      }
+    },
+    {
+      "file": "editor_medios.py",
+      "line": 200,
+      "function": "__init__",
+      "kind": "bind",
+      "arguments": {
+        "binding": [
+          "'<Button-3>'",
+          "lambda e: (self._rate_step(-1), 'break')[1]"
+        ]
+      }
+    },
+    {
+      "file": "editor_medios.py",
+      "line": 211,
+      "function": "__init__",
+      "kind": "bind",
+      "arguments": {
+        "binding": [
+          "'<Button-3>'",
+          "self._menu_contextual"
+        ]
+      }
+    },
+    {
+      "file": "editor_medios.py",
+      "line": 225,
+      "function": "__init__",
+      "kind": "bind",
+      "arguments": {
+        "binding": [
+          "'<Button-1>'",
+          "self._tl_press"
+        ]
+      }
+    },
+    {
+      "file": "editor_medios.py",
+      "line": 226,
+      "function": "__init__",
+      "kind": "bind",
+      "arguments": {
+        "binding": [
+          "'<B1-Motion>'",
+          "self._tl_motion"
+        ]
+      }
+    },
+    {
+      "file": "editor_medios.py",
+      "line": 227,
+      "function": "__init__",
+      "kind": "bind",
+      "arguments": {
+        "binding": [
+          "'<ButtonRelease-1>'",
+          "self._tl_release"
+        ]
+      }
+    },
+    {
+      "file": "editor_medios.py",
+      "line": 228,
+      "function": "__init__",
+      "kind": "bind",
+      "arguments": {
+        "binding": [
+          "'<Double-Button-1>'",
+          "self._tl_doble"
+        ]
+      }
+    },
+    {
+      "file": "editor_medios.py",
+      "line": 230,
+      "function": "__init__",
+      "kind": "bind",
+      "arguments": {
+        "binding": [
+          "'<Button-2>'",
+          "self._tl_pan_ini"
+        ]
+      }
+    },
+    {
+      "file": "editor_medios.py",
+      "line": 231,
+      "function": "__init__",
+      "kind": "bind",
+      "arguments": {
+        "binding": [
+          "'<B2-Motion>'",
+          "self._tl_pan_mov"
+        ]
+      }
+    },
+    {
+      "file": "editor_medios.py",
+      "line": 232,
+      "function": "__init__",
+      "kind": "bind",
+      "arguments": {
+        "binding": [
+          "'<MouseWheel>'",
+          "self._tl_rueda"
+        ]
+      }
+    },
+    {
+      "file": "editor_medios.py",
+      "line": 233,
+      "function": "__init__",
+      "kind": "bind",
+      "arguments": {
+        "binding": [
+          "'<Button-4>'",
+          "self._tl_rueda"
+        ]
+      }
+    },
+    {
+      "file": "editor_medios.py",
+      "line": 234,
+      "function": "__init__",
+      "kind": "bind",
+      "arguments": {
+        "binding": [
+          "'<Button-5>'",
+          "self._tl_rueda"
+        ]
+      }
+    },
+    {
+      "file": "editor_medios.py",
+      "line": 236,
+      "function": "__init__",
+      "kind": "bind",
+      "arguments": {
+        "binding": [
+          "'<Configure>'",
+          "self._tl_resize"
+        ]
+      }
+    },
+    {
+      "file": "editor_medios.py",
+      "line": 239,
+      "function": "__init__",
+      "kind": "bind",
+      "arguments": {
+        "binding": [
+          "'<Button-3>'",
+          "self._tl_press3"
+        ]
+      }
+    },
+    {
+      "file": "editor_medios.py",
+      "line": 240,
+      "function": "__init__",
+      "kind": "bind",
+      "arguments": {
+        "binding": [
+          "'<B3-Motion>'",
+          "self._tl_motion3"
+        ]
+      }
+    },
+    {
+      "file": "editor_medios.py",
+      "line": 241,
+      "function": "__init__",
+      "kind": "bind",
+      "arguments": {
+        "binding": [
+          "'<ButtonRelease-3>'",
+          "self._tl_release3"
+        ]
+      }
+    },
+    {
+      "file": "editor_medios.py",
+      "line": 242,
+      "function": "__init__",
+      "kind": "bind",
+      "arguments": {
+        "binding": [
+          "'<Motion>'",
+          "self._tl_hover_loop"
+        ]
+      }
+    },
+    {
+      "file": "editor_medios.py",
+      "line": 253,
+      "function": "__init__",
+      "kind": "bind",
+      "arguments": {
+        "binding": [
+          "'<Key>'",
+          "self._key_toplevel"
+        ]
+      }
+    },
+    {
+      "file": "editor_medios.py",
+      "line": 255,
+      "function": "__init__",
+      "kind": "bind",
+      "arguments": {
+        "binding": [
+          "'<Button-1>'",
+          "self._click_toplevel"
+        ]
+      }
+    },
+    {
+      "file": "editor_medios.py",
+      "line": 264,
+      "function": "__init__",
+      "kind": "CTkSegmentedButton",
+      "arguments": {
+        "values": "['nota', 'incluir', 'excluir']",
+        "command": "self._marca_decision"
+      }
+    },
+    {
+      "file": "editor_medios.py",
+      "line": 272,
+      "function": "__init__",
+      "kind": "bind",
+      "arguments": {
+        "binding": [
+          "'<Return>'",
+          "lambda e: (self._marca_prompt(), self.tl.focus_set())"
+        ]
+      }
+    },
+    {
+      "file": "editor_medios.py",
+      "line": 273,
+      "function": "__init__",
+      "kind": "bind",
+      "arguments": {
+        "binding": [
+          "'<FocusOut>'",
+          "lambda e: self._marca_prompt()"
+        ]
+      }
+    },
+    {
+      "file": "editor_medios.py",
+      "line": 274,
+      "function": "__init__",
+      "kind": "bind",
+      "arguments": {
+        "binding": [
+          "'<Escape>'",
+          "lambda e: self.tl.focus_set()"
+        ]
+      }
+    },
+    {
+      "file": "editor_medios.py",
+      "line": 275,
+      "function": "__init__",
+      "kind": "CTkButton",
+      "arguments": {
+        "text": "'🗑 Borrar'",
+        "command": "self._marca_borrar"
+      }
+    },
+    {
+      "file": "editor_medios.py",
+      "line": 302,
+      "function": "__init__",
+      "kind": "bind",
+      "arguments": {
+        "binding": [
+          "'<Configure>'",
+          "self._status_wrap"
+        ]
+      }
+    },
+    {
+      "file": "editor_medios.py",
+      "line": 305,
+      "function": "__init__",
+      "kind": "CTkButton",
+      "arguments": {
+        "text": "'Reasociar marcas a este video'",
+        "command": "self._reasociar_click"
+      }
+    },
+    {
+      "file": "editor_medios.py",
+      "line": 313,
+      "function": "__init__",
+      "kind": "CTkButton",
+      "arguments": {
+        "text": "'Adoptar el de esta copia'",
+        "command": "self._adoptar_click"
+      }
+    },
+    {
+      "file": "editor_medios.py",
+      "line": 2052,
+      "function": "_armar_pistas",
+      "kind": "CTkButton",
+      "arguments": {
+        "text": "'M'",
+        "command": "lambda i=i: self._toggle(i, 'mute')"
+      }
+    },
+    {
+      "file": "editor_medios.py",
+      "line": 2055,
+      "function": "_armar_pistas",
+      "kind": "CTkButton",
+      "arguments": {
+        "text": "'S'",
+        "command": "lambda i=i: self._toggle(i, 'solo')"
+      }
+    },
+    {
+      "file": "editorial_layers_ui.py",
+      "line": 77,
+      "function": "__init__",
+      "kind": "bind",
+      "arguments": {
+        "binding": [
+          "'<Configure>'",
+          "lambda e: self._draw()"
+        ]
+      }
+    },
+    {
+      "file": "editorial_layers_ui.py",
+      "line": 1103,
+      "function": "new_lane_dialog",
+      "kind": "CTkSegmentedButton",
+      "arguments": {
+        "values": "['Recortes', 'Pedidos para la AI']"
+      }
+    },
+    {
+      "file": "editorial_layers_ui.py",
+      "line": 1123,
+      "function": "new_lane_dialog",
+      "kind": "CTkButton",
+      "arguments": {
+        "text": "'Crear encima del carril seleccionado'",
+        "command": "create"
+      }
+    },
+    {
+      "file": "editorial_layers_ui.py",
+      "line": 1124,
+      "function": "new_lane_dialog",
+      "kind": "bind",
+      "arguments": {
+        "binding": [
+          "'<Return>'",
+          "create"
+        ]
+      }
+    },
+    {
+      "file": "editorial_layers_ui.py",
+      "line": 1125,
+      "function": "new_lane_dialog",
+      "kind": "bind",
+      "arguments": {
+        "binding": [
+          "'<Escape>'",
+          "lambda e: (win.destroy(), self.w.editor.tl.focus_set())"
+        ]
+      }
+    },
+    {
+      "file": "editorial_layers_ui.py",
+      "line": 1652,
+      "function": "menu_items",
+      "kind": "add_command",
+      "arguments": {
+        "label": "f\"Carril «{layer['name']}»\""
+      }
+    },
+    {
+      "file": "editorial_layers_ui.py",
+      "line": 1653,
+      "function": "menu_items",
+      "kind": "add_command",
+      "arguments": {
+        "label": "'Añadir capa encima…'",
+        "command": "lambda: (self.clear_selection(lid), self.new_lane_dialog())"
+      }
+    },
+    {
+      "file": "editorial_layers_ui.py",
+      "line": 1665,
+      "function": "menu_items",
+      "kind": "add_command",
+      "arguments": {
+        "label": "f'{len(self.selection)} items seleccionados' if many else f\"{layer['name']} · {item['label']}\""
+      }
+    },
+    {
+      "file": "editorial_layers_ui.py",
+      "line": 1667,
+      "function": "menu_items",
+      "kind": "add_command",
+      "arguments": {
+        "label": "'Editar comentario y rangos'",
+        "command": "self.edit_dialog"
+      }
+    },
+    {
+      "file": "editorial_layers_ui.py",
+      "line": 1676,
+      "function": "menu_items",
+      "kind": "add_command",
+      "arguments": {
+        "label": "label",
+        "command": "lambda a=action: editor.ejecutar(a)"
+      }
+    },
+    {
+      "file": "editorial_layers_ui.py",
+      "line": 1679,
+      "function": "menu_items",
+      "kind": "add_command",
+      "arguments": {
+        "label": "'Ir al inicio'",
+        "command": "lambda: editor._mover_playhead(start)"
+      }
+    },
+    {
+      "file": "editorial_layers_ui.py",
+      "line": 1681,
+      "function": "menu_items",
+      "kind": "add_command",
+      "arguments": {
+        "label": "'Reproducir desde aquí'",
+        "command": "lambda: editor._play(reiniciar=True, desde=start)"
+      }
+    },
+    {
+      "file": "editorial_layers_ui.py",
+      "line": 1721,
+      "function": "edit_dialog",
+      "kind": "CTkOptionMenu",
+      "arguments": {
+        "values": "['Propuesto', 'Aceptado / incluir', 'Desactivado / excluir']"
+      }
+    },
+    {
+      "file": "editorial_layers_ui.py",
+      "line": 1750,
+      "function": "edit_dialog",
+      "kind": "CTkButton",
+      "arguments": {
+        "text": "'Guardar (Ctrl+Enter · Esc)'",
+        "command": "save"
+      }
+    },
+    {
+      "file": "editorial_layers_ui.py",
+      "line": 1751,
+      "function": "edit_dialog",
+      "kind": "bind",
+      "arguments": {
+        "binding": [
+          "'<Escape>'",
+          "save"
+        ]
+      }
+    },
+    {
+      "file": "editorial_layers_ui.py",
+      "line": 1752,
+      "function": "edit_dialog",
+      "kind": "bind",
+      "arguments": {
+        "binding": [
+          "'<Control-Return>'",
+          "save"
+        ]
+      }
+    },
+    {
+      "file": "editorial_layers_ui.py",
+      "line": 1753,
+      "function": "edit_dialog",
+      "kind": "protocol",
+      "arguments": {
+        "binding": [
+          "'WM_DELETE_WINDOW'",
+          "save"
+        ]
+      }
+    },
+    {
+      "file": "editorial_layers_ui.py",
+      "line": 1827,
+      "function": "manage",
+      "kind": "CTkButton",
+      "arguments": {
+        "text": "label",
+        "command": "lambda m=mode: action(m)"
+      }
+    },
+    {
+      "file": "editorial_layers_ui.py",
+      "line": 1830,
+      "function": "manage",
+      "kind": "CTkButton",
+      "arguments": {
+        "text": "label",
+        "command": "lambda m=mode: action(m)"
+      }
+    },
+    {
+      "file": "editorial_montaje_ui.py",
+      "line": 756,
+      "function": "menu_items",
+      "kind": "add_command",
+      "arguments": {
+        "label": "f'Pista {track} (montaje)'"
+      }
+    },
+    {
+      "file": "editorial_montaje_ui.py",
+      "line": 766,
+      "function": "menu_items",
+      "kind": "add_command",
+      "arguments": {
+        "label": "f\"{track} · {clip['label'] or clip['clip_id']}\""
+      }
+    },
+    {
+      "file": "editorial_montaje_ui.py",
+      "line": 774,
+      "function": "menu_items",
+      "kind": "add_command",
+      "arguments": {
+        "label": "label",
+        "command": "lambda a=action: editor.ejecutar(a)"
+      }
+    },
+    {
+      "file": "editorial_montaje_ui.py",
+      "line": 797,
+      "function": "edit_dialog",
+      "kind": "CTkOptionMenu",
+      "arguments": {
+        "values": "['Propuesto', 'Aceptado', 'Desactivado']"
+      }
+    },
+    {
+      "file": "editorial_montaje_ui.py",
+      "line": 821,
+      "function": "edit_dialog",
+      "kind": "CTkButton",
+      "arguments": {
+        "text": "'Guardar (Ctrl+Enter · Esc)'",
+        "command": "save"
+      }
+    },
+    {
+      "file": "editorial_montaje_ui.py",
+      "line": 822,
+      "function": "edit_dialog",
+      "kind": "bind",
+      "arguments": {
+        "binding": [
+          "'<Escape>'",
+          "save"
+        ]
+      }
+    },
+    {
+      "file": "editorial_montaje_ui.py",
+      "line": 823,
+      "function": "edit_dialog",
+      "kind": "bind",
+      "arguments": {
+        "binding": [
+          "'<Control-Return>'",
+          "save"
+        ]
+      }
+    },
+    {
+      "file": "editorial_montaje_ui.py",
+      "line": 824,
+      "function": "edit_dialog",
+      "kind": "protocol",
+      "arguments": {
+        "binding": [
+          "'WM_DELETE_WINDOW'",
+          "save"
+        ]
+      }
+    },
+    {
+      "file": "toolbar_ui.py",
+      "line": 29,
+      "function": "__init__",
+      "kind": "bind",
+      "arguments": {
+        "binding": [
+          "'<Enter>'",
+          "self._schedule"
+        ]
+      }
+    },
+    {
+      "file": "toolbar_ui.py",
+      "line": 30,
+      "function": "__init__",
+      "kind": "bind",
+      "arguments": {
+        "binding": [
+          "'<Leave>'",
+          "self.hide"
+        ]
+      }
+    },
+    {
+      "file": "toolbar_ui.py",
+      "line": 31,
+      "function": "__init__",
+      "kind": "bind",
+      "arguments": {
+        "binding": [
+          "'<ButtonPress>'",
+          "self.hide"
+        ]
+      }
+    },
+    {
+      "file": "toolbar_ui.py",
+      "line": 35,
+      "function": "__init__",
+      "kind": "bind",
+      "arguments": {
+        "binding": [
+          "'<Enter>'",
+          "self._schedule"
+        ]
+      }
+    },
+    {
+      "file": "toolbar_ui.py",
+      "line": 36,
+      "function": "__init__",
+      "kind": "bind",
+      "arguments": {
+        "binding": [
+          "'<Leave>'",
+          "self.hide"
+        ]
+      }
+    },
+    {
+      "file": "toolbar_ui.py",
+      "line": 37,
+      "function": "__init__",
+      "kind": "bind",
+      "arguments": {
+        "binding": [
+          "'<ButtonPress>'",
+          "self.hide"
+        ]
+      }
+    },
+    {
+      "file": "toolbar_ui.py",
+      "line": 94,
+      "function": "tool_button",
+      "kind": "CTkButton",
+      "arguments": {
+        "text": "glyph",
+        "command": "lambda: run(action)"
+      }
+    },
+    {
+      "file": "toolbar_ui.py",
+      "line": 120,
+      "function": "build_menu",
+      "kind": "add_command",
+      "arguments": {
+        "label": "label",
+        "command": "lambda a=identifier: run(a)"
+      }
+    },
+    {
+      "file": "keymap_ui.py",
+      "line": 25,
+      "function": "__init__",
+      "kind": "CTkButton",
+      "arguments": {
+        "text": "'Restaurar predeterminados'",
+        "command": "self.restore"
+      }
+    },
+    {
+      "file": "keymap_ui.py",
+      "line": 54,
+      "function": "_build_rows",
+      "kind": "CTkButton",
+      "arguments": {
+        "text": "'Grabar'",
+        "command": "lambda a=action.id: self.record(a)"
+      }
+    },
+    {
+      "file": "keymap_ui.py",
+      "line": 58,
+      "function": "_build_rows",
+      "kind": "CTkButton",
+      "arguments": {
+        "text": "'×'",
+        "command": "lambda a=action.id: self.clear(a)"
+      }
+    },
+    {
+      "file": "keymap_ui.py",
+      "line": 106,
+      "function": "record",
+      "kind": "bind",
+      "arguments": {
+        "binding": [
+          "'<Key>'",
+          "self._capture"
+        ]
+      }
+    }
+  ]
+}

@@ -239,7 +239,7 @@ impl DiffSummary {
     }
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct HistoryEntry {
     pub label: String,
     pub actor: Actor,
@@ -248,6 +248,69 @@ pub struct HistoryEntry {
     pub after: Project,
     /// Revisión que debe tener el proyecto para que la entrada siga siendo válida.
     pub expect: Revision,
+}
+
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+pub struct DurableHistory {
+    pub schema: String,
+    pub project_id: String,
+    pub revision: Revision,
+    pub undo: VecDeque<HistoryEntry>,
+    pub redo: VecDeque<HistoryEntry>,
+}
+
+impl DurableHistory {
+    pub fn validate(&self, project: &Project) -> DomainResult<()> {
+        if self.schema != "transcriptor-history/1" {
+            return Err(DomainError::unsupported("schema de historial desconocido"));
+        }
+        if self.project_id != project.project_id || self.revision != project.revision {
+            return Err(DomainError::precondition("historial de otro proyecto o revisión"));
+        }
+        if self.undo.len() > HISTORY_DEPTH || self.redo.len() > HISTORY_DEPTH {
+            return Err(DomainError::invalid("historial excede profundidad máxima"));
+        }
+        for entry in self.undo.iter().chain(&self.redo) {
+            for p in [&entry.before, &entry.after] {
+                p.validate()?;
+                if p.project_id != self.project_id || p.revision > self.revision {
+                    return Err(DomainError::invalid("snapshot de historial incoherente"));
+                }
+            }
+        }
+        let equivalent = |a: &Project, b: &Project| {
+            let mut a = a.clone();
+            a.revision = b.revision;
+            a.updated_at.clone_from(&b.updated_at);
+            a == *b
+        };
+        if self.undo.back().is_some_and(|e| e.expect != self.revision || !equivalent(&e.after, project))
+            || self.redo.back().is_some_and(|e| e.expect != self.revision || !equivalent(&e.before, project))
+        {
+            return Err(DomainError::invalid("la frontera de historial no coincide con el proyecto"));
+        }
+        for (i, entry) in self.undo.iter().enumerate().skip(1) {
+            if !equivalent(&self.undo[i - 1].after, &entry.before) {
+                return Err(DomainError::invalid("historial undo discontinuo"));
+            }
+        }
+        for (i, entry) in self.redo.iter().enumerate().skip(1) {
+            if !equivalent(&self.redo[i - 1].before, &entry.after) {
+                return Err(DomainError::invalid("historial redo discontinuo"));
+            }
+        }
+        Ok(())
+    }
+
+    pub fn map_paths(&mut self, f: impl Fn(&str) -> String) {
+        for entry in self.undo.iter_mut().chain(&mut self.redo) {
+            for p in [&mut entry.before, &mut entry.after] {
+                for asset in &mut p.assets {
+                    asset.path = f(&asset.path);
+                }
+            }
+        }
+    }
 }
 
 /// Evento de journal (auditoría): una línea JSON por comando confirmado.
@@ -287,6 +350,48 @@ pub struct ProjectSession {
 }
 
 impl ProjectSession {
+    pub fn history_snapshot(&self) -> DurableHistory {
+        DurableHistory {
+            schema: "transcriptor-history/1".into(),
+            project_id: self.project.project_id.clone(),
+            revision: self.revision(),
+            undo: self.undo.clone(),
+            redo: self.redo.clone(),
+        }
+    }
+
+    pub fn restore_history(&mut self, history: DurableHistory) -> DomainResult<()> {
+        history.validate(&self.project)?;
+        self.undo = history.undo;
+        self.redo = history.redo;
+        Ok(())
+    }
+
+    pub fn resolve_paths(&mut self, f: impl Fn(&str) -> String) {
+        for asset in &mut self.project.assets {
+            asset.path = f(&asset.path);
+        }
+        for entry in self.undo.iter_mut().chain(&mut self.redo) {
+            for p in [&mut entry.before, &mut entry.after] {
+                for asset in &mut p.assets {
+                    asset.path = f(&asset.path);
+                }
+            }
+        }
+    }
+
+    pub fn refresh_asset_availability(&mut self, mut exists: impl FnMut(&str) -> bool) {
+        for asset in &mut self.project.assets {
+            asset.missing = !exists(&asset.path);
+        }
+        for entry in self.undo.iter_mut().chain(&mut self.redo) {
+            for p in [&mut entry.before, &mut entry.after] {
+                for asset in &mut p.assets {
+                    asset.missing = !exists(&asset.path);
+                }
+            }
+        }
+    }
     pub fn new(project: Project) -> Self {
         ProjectSession {
             project,
@@ -361,6 +466,13 @@ impl ProjectSession {
 
     pub fn mark_clean(&mut self) {
         self.dirty = false;
+    }
+
+    pub fn acknowledge_save(&mut self, revision: Revision, journal_count: usize) {
+        self.journal.drain(..journal_count.min(self.journal.len()));
+        if self.revision() == revision {
+            self.mark_clean();
+        }
     }
 
     pub fn pending_journal(&self) -> &[JournalEvent] {
@@ -503,6 +615,7 @@ impl ProjectSession {
         self.check_base(envelope)?;
         let mut copy = self.project.clone();
         let effect = envelope.command.apply(&mut copy)?;
+        crate::protection::attribute(&self.project, &mut copy, &envelope.actor)?;
         copy.validate()?;
         crate::protection::check_transition(&self.project, &copy, &envelope.actor)?;
         let diff = DiffSummary::compute(&self.project, &copy);
@@ -534,6 +647,7 @@ impl ProjectSession {
         let before = self.project.clone();
         let mut after = self.project.clone();
         let effect = envelope.command.apply(&mut after)?;
+        crate::protection::attribute(&before, &mut after, &envelope.actor)?;
         after.validate()?;
         crate::protection::check_transition(&before, &after, &envelope.actor)?;
         let base = before.revision;

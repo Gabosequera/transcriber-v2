@@ -10,6 +10,7 @@
 //!   resultado observable es el de V1, no las reglas de composición V2.
 //! - La identidad del medio es la de V1 (`size + hash_muestreado + inventario_sha256`).
 
+pub mod chunks;
 pub mod export;
 pub mod import;
 pub mod layers;
@@ -21,7 +22,7 @@ use tv2_domain::time::Ticks;
 
 /// Segundos V1 (float) → ticks, con el redondeo a milisegundos de V1.
 pub fn secs_to_ticks(v: f64) -> Ticks {
-    Ticks::from_millis((v * 1000.0).round() as i64)
+    Ticks(((v * 1000.0).round() as i64).saturating_mul(tv2_domain::FLICKS_PER_SECOND / 1000))
 }
 
 /// Ticks → segundos V1 (3 decimales).

@@ -245,6 +245,28 @@ pub enum Command {
         parent_id: Option<ItemId>,
         ranges: Vec<TimeRange>,
     },
+    SplitItem {
+        layer_id: LayerId,
+        item_id: ItemId,
+        at: Ticks,
+    },
+    TrimItem {
+        layer_id: LayerId,
+        item_id: ItemId,
+        range_index: usize,
+        edge: ClipEdge,
+        new_time: Ticks,
+    },
+    /// Moves the selection and descendants once, clamped as a group to the asset.
+    ShiftItems {
+        layer_id: LayerId,
+        item_ids: Vec<ItemId>,
+        delta: Ticks,
+    },
+    CycleAuthorDecision {
+        layer_id: LayerId,
+        item_ids: Vec<ItemId>,
+    },
     DeleteItems {
         layer_id: LayerId,
         item_ids: Vec<ItemId>,
@@ -358,6 +380,10 @@ impl Command {
             },
             Command::SetItemProps { .. } => "Editar tramo".into(),
             Command::SetItemStructure { .. } => "Editar rangos y jerarquía".into(),
+            Command::SplitItem { .. } => "Dividir item y descendientes".into(),
+            Command::TrimItem { .. } => "Recortar borde del item".into(),
+            Command::ShiftItems { .. } => "Mover items y descendientes".into(),
+            Command::CycleAuthorDecision { .. } => "Decisión del autor".into(),
             Command::DeleteItems { .. } => "Borrar tramos".into(),
             Command::ReplaceLayer { .. } => "Reemplazar capa".into(),
             Command::AddSequence { sequence, .. } => format!("Añadir secuencia {}", sequence.name),
@@ -997,6 +1023,17 @@ impl Command {
                 if project.layer(&layer.layer_id).is_some() {
                     return Err(DomainError::invalid(format!("la capa {} ya existe", layer.layer_id)));
                 }
+                if *kind == LayerKind::Trims {
+                    layer.lane = Some(format!("lane-{}", crate::ids::random_hex12()));
+                    if !project
+                        .layers
+                        .iter()
+                        .any(|l| l.asset_id == *asset_id && l.kind == LayerKind::Trims && l.extra.contains_key("v1_trims_header"))
+                    {
+                        let asset = project.asset(asset_id).unwrap();
+                        layer.extra.insert("v1_trims_header".into(), serde_json::json!({"schema":"editorial-trims/1", "media":asset.fingerprint, "duration":asset.duration().as_seconds_ms(), "revision":0, "next_id":1}));
+                    }
+                }
                 validate_layer(&layer, Ticks::MAX)?;
                 let id = layer.layer_id.clone();
                 project.layers.push(layer);
@@ -1037,11 +1074,24 @@ impl Command {
                 Ok(CommandEffect::new(self.label()).touch(layer_id))
             }
             Command::SetLayerOrder { layer_ids } => {
+                let unique: std::collections::HashSet<_> = layer_ids.iter().collect();
+                if unique.len() != layer_ids.len() || project.layers.iter().any(|l| !l.deleted && !unique.contains(&l.layer_id)) {
+                    return Err(DomainError::invalid("el orden debe contener todos los carriles vivos exactamente una vez"));
+                }
                 for id in layer_ids {
                     project.layer(id).ok_or_else(|| DomainError::not_found("capa", id))?;
                 }
                 project.layer_order = layer_ids.clone();
                 Ok(CommandEffect::new(self.label()))
+            }
+            Command::SplitItem { layer_id, .. }
+            | Command::TrimItem { layer_id, .. }
+            | Command::ShiftItems { layer_id, .. }
+            | Command::CycleAuthorDecision { layer_id, .. } => {
+                let duration = layer_asset_duration(project, layer_id)?;
+                let layer = project.layer_mut(layer_id).ok_or_else(|| DomainError::not_found("capa", layer_id))?;
+                ensure_layer_editable(layer)?;
+                crate::semantic_edit::apply(self, layer, duration)
             }
             Command::AddItem { layer_id, item } => {
                 let duration = layer_asset_duration(project, layer_id)?;
@@ -1058,6 +1108,11 @@ impl Command {
                 Ok(CommandEffect::new(self.label()).create(&item.item_id))
             }
             Command::SetItemState { layer_id, item_ids, state } => {
+                let author_duration = if project.layer(layer_id).is_some_and(|l| l.kind == LayerKind::Author) {
+                    Some(layer_asset_duration(project, layer_id)?)
+                } else {
+                    None
+                };
                 let l = project.layer_mut(layer_id).ok_or_else(|| DomainError::not_found("capa", layer_id))?;
                 ensure_layer_editable(l)?;
                 if *state == ItemState::Accepted && !l.kind.accepts_acceptance() {
@@ -1077,6 +1132,16 @@ impl Command {
                     if it.state != target {
                         let accepted = it.is_human_accepted() || target == ItemState::Accepted;
                         it.state = target;
+                        if let Some(duration) = author_duration
+                            && it.is_point()
+                            && target != ItemState::Proposed
+                        {
+                            let t = it.start();
+                            it.ranges = vec![TimeRange::new(
+                                (t - Ticks::from_seconds(2)).max(Ticks::ZERO),
+                                Ticks(t.0.saturating_add(Ticks::from_seconds(2).0)).min(duration),
+                            )];
+                        }
                         if trims {
                             it.extra.insert("accepted".into(), serde_json::json!(accepted));
                             it.extra.insert("enabled".into(), serde_json::json!(target.is_enabled()));
@@ -1087,6 +1152,9 @@ impl Command {
                 }
                 if !effect.affected.is_empty() {
                     l.revision = l.revision.checked_add(1).ok_or_else(|| DomainError::out_of_range("revisión de capa agotada"))?;
+                }
+                if let Some(duration) = author_duration {
+                    validate_layer(l, duration)?;
                 }
                 Ok(effect)
             }
@@ -1117,7 +1185,7 @@ impl Command {
                 let layer = project.layer_mut(layer_id).ok_or_else(|| DomainError::not_found("capa", layer_id))?;
                 ensure_layer_editable(layer)?;
                 let base = items.iter().map(SemanticItem::start).min().ok_or_else(|| DomainError::invalid("portapapeles vacío"))?;
-                let mapping: std::collections::HashMap<_, _> = items.iter().map(|i| (i.item_id.clone(), ItemId::random())).collect();
+                let mapping: std::collections::HashMap<_, _> = items.iter().map(|i| (i.item_id.clone(), layer.kind.fresh_item_id())).collect();
                 if mapping.len() != items.len() {
                     return Err(DomainError::invalid("item duplicado en portapapeles"));
                 }

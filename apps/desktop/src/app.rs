@@ -166,6 +166,7 @@ pub struct TranscriptorApp {
     pub item_clipboard: Option<(LayerId, AssetId, Vec<SemanticItem>)>,
     pub clipboard: Vec<tv2_domain::timeline::Clip>,
     pub new_layer_dialog: Option<String>,
+    pub new_layer_kind: LayerKind,
     pub rename_dialog: Option<(String, RenameTarget)>,
     pub goto_dialog: Option<String>,
     pub about_open: bool,
@@ -173,13 +174,15 @@ pub struct TranscriptorApp {
     pub shortcut_search: String,
     pub shortcut_editor: Option<crate::keymap::ShortcutEditor>,
     pub pending_close: bool,
+    pub close_after_save: bool,
     pub recovery: Option<Project>,
     pub recovery_audit: Vec<tv2_application::session::JournalEvent>,
     pub v1_export_job: Option<crossbeam_channel::Receiver<tv2_domain::error::DomainResult<PathBuf>>>,
     pub autosave_job: Option<crossbeam_channel::Receiver<tv2_domain::error::DomainResult<()>>>,
+    pub persistence_job: Option<crate::persistence_jobs::PersistenceJob>,
     pub external: crate::external::ExternalMonitor,
     pub unsaved_recoveries: Vec<PathBuf>,
-    unsaved_store: Option<ProjectStore>,
+    pub(crate) unsaved_store: Option<ProjectStore>,
     pub source_asset: Option<AssetId>,
     pub last_autosave: Instant,
     pub dirty_title: bool,
@@ -293,6 +296,7 @@ impl TranscriptorApp {
             clipboard: Vec::new(),
             item_clipboard: None,
             new_layer_dialog: None,
+            new_layer_kind: LayerKind::User,
             rename_dialog: None,
             goto_dialog: None,
             about_open: false,
@@ -300,9 +304,11 @@ impl TranscriptorApp {
             shortcut_search: String::new(),
             shortcut_editor: None,
             pending_close: false,
+            close_after_save: false,
             recovery: None,
             recovery_audit: Vec::new(),
             autosave_job: None,
+            persistence_job: None,
             v1_export_job: None,
             external: Default::default(),
             unsaved_recoveries: Self::find_unsaved_recoveries(),
@@ -560,64 +566,29 @@ impl TranscriptorApp {
     // ---------- proyecto: abrir / guardar ----------
 
     pub fn open_project_path(&mut self, path: &Path) {
+        if self.persistence_job.is_some() || self.autosave_job.is_some() {
+            self.toast(Severity::Warn, "Espera a que termine la operación de archivos");
+            return;
+        }
         self.imports.cancel();
         if let Some(job) = &self.editorial_job {
             job.cancel.store(true, std::sync::atomic::Ordering::Release);
         }
         let store = ProjectStore::from_user_path(path);
-        match store.load() {
-            Ok(mut project) => {
-                self.recovery_audit.clear();
-                self.recovery = match store.recovery_with_audit(&project) {
-                    Ok(Some((candidate, events))) => {
-                        self.recovery_audit = events;
-                        Some(candidate)
-                    }
-                    Ok(None) => None,
-                    Err(e) => {
-                        self.report(e.with_action("autosave inválido; se abre la última versión guardada"));
-                        None
-                    }
-                };
-                // comprobar medios presentes
-                for a in &mut project.assets {
-                    let p = store.resolve_path(&a.path);
-                    a.missing = !p.exists();
-                    // Keep session/history paths absolute. Only saved snapshots
-                    // are relativized, so Save As cannot retarget old undo entries.
-                    a.path = p.to_string_lossy().to_string();
-                    if a.missing {
-                        tracing::warn!("medio ausente: {}", a.path);
-                    }
-                }
-                let name = project.name.clone();
-                let session = match store.read_journal().and_then(|events| ProjectSession::with_audit(project, &events)) {
-                    Ok(session) => session,
-                    Err(e) => {
-                        self.report(e);
-                        return;
-                    }
-                };
-                self.session = session;
-                self.external = Default::default();
-                self.unsaved_store = None;
-                self.marker_editor = None;
-                if let Some(media) = &mut self.media_view {
-                    media.clear();
-                }
-                self.store = Some(store.clone());
-                self.ui.last_project = Some(store.root.to_string_lossy().to_string());
-                self.selection = Selection::default();
-                self.playhead = Ticks::ZERO;
-                self.seek(Ticks::ZERO);
-                self.resolved_revision = None;
-                self.source_asset = self.project().assets.first().map(|a| a.id.clone());
-                self.toast(Severity::Info, format!("Proyecto «{name}» abierto (revisión {})", self.session.revision()));
+        let (tx, result) = crossbeam_channel::bounded(1);
+        match std::thread::Builder::new().name("project-open".into()).spawn(move || {
+            let _ = tx.send(crate::persistence_jobs::load(store));
+        }) {
+            Ok(_) => {
+                self.persistence_job = Some(crate::persistence_jobs::PersistenceJob {
+                    project_id: self.project().project_id.clone(),
+                    revision: self.session.revision(),
+                    result,
+                })
             }
-            Err(e) => self.report(e),
+            Err(e) => self.report(DomainError::process(format!("No se pudo iniciar apertura: {e}"))),
         }
     }
-
     pub fn save_project(&mut self, save_as: bool) -> bool {
         let store = if self.store.is_none() || save_as {
             let mut dlg =
@@ -632,51 +603,33 @@ impl TranscriptorApp {
         } else {
             self.store.clone().unwrap()
         };
-        // re-relativizar rutas de assets respecto a la carpeta del proyecto
-        let mut project = self.project().clone();
-        for a in &mut project.assets {
-            let abs = self.resolve_asset_path(a);
-            a.path = store.portable_path(&abs);
+        if self.persistence_job.is_some() || self.autosave_job.is_some() {
+            self.toast(Severity::Warn, "Espera a que termine la operación de archivos");
+            return false;
         }
-        let mut events = if let Some(source) = &self.store {
-            if source.root != store.root {
-                match source.read_journal() {
-                    Ok(events) => events,
-                    Err(e) => {
-                        self.report(e);
-                        return false;
-                    }
-                }
-            } else {
-                Vec::new()
-            }
-        } else {
-            Vec::new()
-        };
-        events.extend_from_slice(self.session.pending_journal());
-        match store.save_with_journal(&project, &events) {
-            Ok(()) => {
-                self.store = Some(store.clone());
-                self.session.mark_clean();
-                self.session.drain_journal();
-                if let Some(recovery) = self.unsaved_store.take() {
-                    let resolved = serde_json::json!({"saved_to": store.root, "revision": project.revision});
-                    if let Err(e) = tv2_application::store::atomic_write(&recovery.root.join("resolved.json"), resolved.to_string().as_bytes()) {
-                        self.report(e.with_action("guardado completo; el autosave seguirá apareciendo como recuperable"));
-                    }
-                }
-                self.ui.last_project = Some(store.root.to_string_lossy().to_string());
-                self.toast(Severity::Info, format!("Guardado en {}", store.root.display()));
-                self.dirty_title = true;
+        let project = self.project().clone();
+        let history = self.session.history_snapshot();
+        let pending = self.session.pending_journal().to_vec();
+        let source = self.store.clone().or(self.unsaved_store.clone());
+        let recovery_root = self.unsaved_store.as_ref().map(|s| s.root.clone());
+        let (tx, result) = crossbeam_channel::bounded(1);
+        match std::thread::Builder::new().name("project-save".into()).spawn(move || {
+            let _ = tx.send(crate::persistence_jobs::save(store, source, project, history, pending, recovery_root));
+        }) {
+            Ok(_) => {
+                self.persistence_job = Some(crate::persistence_jobs::PersistenceJob {
+                    project_id: self.project().project_id.clone(),
+                    revision: self.session.revision(),
+                    result,
+                });
                 true
             }
             Err(e) => {
-                self.report(e);
+                self.report(DomainError::process(format!("No se pudo iniciar guardado: {e}")));
                 false
             }
         }
     }
-
     pub fn accept_external(&mut self) {
         if let (Some(store), Some(change)) = (self.store.clone(), self.external.change.take()) {
             match store.accept_external(&mut self.session, change) {
@@ -915,7 +868,13 @@ impl TranscriptorApp {
                     (tv2_v1compat::export::montage_document(&project, &id)?, "montaje.json".to_string())
                 } else {
                     let id = layer.ok_or_else(|| DomainError::invalid("Selecciona una capa manual, de temas o AI"))?;
-                    (tv2_v1compat::export::layer_document(&project, &id)?, format!("{id}.json"))
+                    let kind = &project.layer(&id).ok_or_else(|| DomainError::invalid("Capa inexistente"))?.kind;
+                    let filename = match kind {
+                        LayerKind::Trims => "trims.json".into(),
+                        LayerKind::Blocks => "chunks.selected.json".into(),
+                        _ => format!("{id}.json"),
+                    };
+                    (tv2_v1compat::export::layer_document(&project, &id)?, filename)
                 };
                 let target = directory.join(format!("v1-export-r{}-{}", project.revision, tv2_domain::ids::random_hex12()));
                 // A new directory prevents overwriting any imported V1 document.
@@ -1071,14 +1030,7 @@ impl TranscriptorApp {
             "edit.split" => self.split_at_playhead(),
             "edit.trim_start" | "edit.trim_end" => {
                 let edge = if action == "edit.trim_start" { ClipEdge::Start } else { ClipEdge::End };
-                let t = self.playhead;
-                let ids = self.selection.clips.clone();
-                if ids.is_empty() {
-                    self.toast(Severity::Warn, "Selecciona un clip para recortar");
-                }
-                for id in ids {
-                    self.exec(Command::TrimClip { clip_id: id, edge, new_time: t });
-                }
+                self.trim_selection(edge);
             }
             "edit.nudge_prev" => self.nudge(-fd, 0),
             "edit.nudge_next" => self.nudge(fd, 0),
@@ -1086,14 +1038,21 @@ impl TranscriptorApp {
             "edit.nudge_next_10" => self.nudge(fd * 10, 0),
             "edit.item_prev" | "edit.item_next" => self.select_neighbor(if action == "edit.item_next" { 1 } else { -1 }),
             "edit.accept" | "edit.accept_next" => {
-                self.set_selected_items_state(ItemState::Accepted);
-                if action == "edit.accept_next" {
+                if self.set_selected_items_state(ItemState::Accepted) && action == "edit.accept_next" {
                     self.select_neighbor(1);
                 }
             }
             "edit.toggle" => {
                 if !self.selection.items.is_empty() {
-                    self.set_selected_items_state(ItemState::Disabled);
+                    let mut commands = Vec::new();
+                    for (layer_id, item_id) in &self.selection.items {
+                        commands.push(if self.project().layer(layer_id).is_some_and(|l| l.kind == LayerKind::Author) {
+                            Command::CycleAuthorDecision { layer_id: layer_id.clone(), item_ids: vec![item_id.clone()] }
+                        } else {
+                            Command::SetItemState { layer_id: layer_id.clone(), item_ids: vec![item_id.clone()], state: ItemState::Disabled }
+                        });
+                    }
+                    self.exec(Command::Batch { label: "Desactivar / decisión del autor".into(), commands });
                 } else if !self.selection.clips.is_empty() {
                     let ids = self.selection.clips.clone();
                     self.exec(Command::SetClipEnabled { clip_ids: ids, enabled: false });
@@ -1317,6 +1276,32 @@ impl TranscriptorApp {
     }
 
     pub fn split_at_playhead(&mut self) {
+        if !self.selection.items.is_empty() {
+            let mut commands = Vec::new();
+            for (layer_id, item_id) in &self.selection.items {
+                let Some(layer) = self.project().layer(layer_id) else { return };
+                // A selected descendant is already partitioned by its selected ancestor.
+                let mut parent = layer.item(item_id).and_then(|i| i.parent_id.clone());
+                let mut covered = false;
+                while let Some(id) = parent {
+                    if self.selection.items.contains(&(layer_id.clone(), id.clone())) {
+                        covered = true;
+                        break;
+                    }
+                    parent = layer.item(&id).and_then(|i| i.parent_id.clone());
+                }
+                if covered {
+                    continue;
+                }
+                let Some(at) = self.view_time_to_source(self.playhead, &layer.asset_id) else {
+                    self.toast(Severity::Warn, "El playhead no tiene correspondencia con el medio del item");
+                    return;
+                };
+                commands.push(Command::SplitItem { layer_id: layer_id.clone(), item_id: item_id.clone(), at });
+            }
+            self.exec(Command::Batch { label: "Dividir items seleccionados".into(), commands });
+            return;
+        }
         if self.view != ViewMode::Sequence {
             self.toast(Severity::Warn, "Dividir actúa en la secuencia (Ctrl+M)");
             return;
@@ -1338,6 +1323,15 @@ impl TranscriptorApp {
     }
 
     fn nudge(&mut self, delta: Ticks, track_delta: i32) {
+        if !self.selection.items.is_empty() {
+            if track_delta != 0 {
+                self.toast(Severity::Warn, "Usa el orden de carriles para mover una capa");
+                return;
+            }
+            let command = self.shift_items_command(delta);
+            self.exec(command);
+            return;
+        }
         let ids = self.linked_selection();
         if ids.is_empty() {
             self.toast(Severity::Warn, "Selecciona un clip");
@@ -1362,18 +1356,73 @@ impl TranscriptorApp {
         out
     }
 
-    fn set_selected_items_state(&mut self, state: ItemState) {
+    pub fn shift_items_command(&self, delta: Ticks) -> Command {
+        let mut by_layer: std::collections::BTreeMap<LayerId, Vec<ItemId>> = Default::default();
+        let mut lower = Ticks(i64::MIN);
+        let mut upper = Ticks::MAX;
+        for (l, i) in &self.selection.items {
+            by_layer.entry(l.clone()).or_default().push(i.clone());
+            if let Some(layer) = self.project().layer(l)
+                && let Some(item) = layer.item(i)
+                && let Some(asset) = self.project().asset(&layer.asset_id)
+            {
+                lower = lower.max(-item.start());
+                upper = upper.min(asset.duration() - item.end());
+            }
+        }
+        let delta = delta.clamp(lower, upper);
+        Command::Batch {
+            label: "Mover selección editorial".into(),
+            commands: by_layer.into_iter().map(|(layer_id, item_ids)| Command::ShiftItems { layer_id, item_ids, delta }).collect(),
+        }
+    }
+
+    fn trim_selection(&mut self, edge: ClipEdge) {
+        let mut commands = Vec::new();
+        if !self.selection.items.is_empty() {
+            for (layer_id, item_id) in &self.selection.items {
+                let Some(layer) = self.project().layer(layer_id) else { return };
+                let Some(item) = layer.item(item_id) else { return };
+                let Some(new_time) = self.view_edge_to_source(self.playhead, &layer.asset_id, edge) else {
+                    self.toast(Severity::Warn, "El playhead no tiene correspondencia fuente");
+                    return;
+                };
+                let range_index = item
+                    .ranges
+                    .iter()
+                    .position(|r| r.start <= new_time && new_time <= r.end)
+                    .unwrap_or_else(|| if edge == ClipEdge::Start { 0 } else { item.ranges.len() - 1 });
+                commands.push(Command::TrimItem { layer_id: layer_id.clone(), item_id: item_id.clone(), range_index, edge, new_time });
+            }
+        } else {
+            commands.extend(self.linked_selection().into_iter().map(|clip_id| Command::TrimClip { clip_id, edge, new_time: self.playhead }));
+        }
+        if commands.is_empty() {
+            self.toast(Severity::Warn, "Selecciona un clip o item para recortar");
+            return;
+        }
+        self.exec(Command::Batch { label: "Recortar selección".into(), commands });
+    }
+
+    pub fn move_layer(&mut self, id: &LayerId, delta: i32) {
+        let mut order: Vec<_> = self.project().ordered_layers().iter().map(|l| l.layer_id.clone()).collect();
+        let Some(index) = order.iter().position(|l| l == id) else { return };
+        let target = (index as i32 + delta).clamp(0, order.len() as i32 - 1) as usize;
+        order.swap(index, target);
+        self.exec(Command::SetLayerOrder { layer_ids: order });
+    }
+
+    fn set_selected_items_state(&mut self, state: ItemState) -> bool {
         if self.selection.items.is_empty() {
             self.toast(Severity::Warn, "Selecciona un tramo de una capa");
-            return;
+            return false;
         }
         let mut by_layer: HashMap<LayerId, Vec<ItemId>> = HashMap::new();
         for (l, i) in &self.selection.items {
             by_layer.entry(l.clone()).or_default().push(i.clone());
         }
-        for (l, ids) in by_layer {
-            self.exec(Command::SetItemState { layer_id: l, item_ids: ids, state });
-        }
+        let commands = by_layer.into_iter().map(|(layer_id, item_ids)| Command::SetItemState { layer_id, item_ids, state }).collect();
+        self.exec(Command::Batch { label: "Estado de selección editorial".into(), commands })
     }
 
     fn select_neighbor(&mut self, dir: i32) {
@@ -1751,6 +1800,7 @@ impl TranscriptorApp {
             return;
         };
         let mut item = SemanticItem::new(TimeRange::new(t, t), "Marca");
+        item.item_id = LayerKind::Author.fresh_item_id();
         item.state = ItemState::Proposed;
         let id = item.item_id.clone();
         if self.exec(Command::AddItem { layer_id: layer_id.clone(), item }) {
@@ -1785,8 +1835,17 @@ impl TranscriptorApp {
     /// Convierte un tiempo de la vista actual a tiempo fuente del asset.
     pub fn view_time_to_source(&self, t: Ticks, asset: &AssetId) -> Option<Ticks> {
         match self.view {
-            ViewMode::Source => Some(t),
+            ViewMode::Source => (self.source_asset.as_ref() == Some(asset)).then_some(t),
             ViewMode::Sequence => self.sequence()?.clips.iter().filter(|c| &c.asset_id == asset && c.enabled).find_map(|c| c.seq_to_source(t)),
+        }
+    }
+
+    pub fn view_edge_to_source(&self, t: Ticks, asset: &AssetId, edge: ClipEdge) -> Option<Ticks> {
+        match self.view {
+            ViewMode::Source => self.view_time_to_source(t, asset),
+            ViewMode::Sequence => {
+                self.sequence()?.clips.iter().filter(|c| &c.asset_id == asset && c.enabled).find_map(|c| c.seq_edge_to_source(t, edge))
+            }
         }
     }
 
@@ -1809,7 +1868,10 @@ impl TranscriptorApp {
             return;
         };
         let n = self.project().layer(&layer_id).map(|l| l.items.len() + 1).unwrap_or(1);
-        let item = SemanticItem::new(TimeRange::new(a.min(b), a.max(b)), format!("Tramo {n}"));
+        let mut item = SemanticItem::new(TimeRange::new(a.min(b), a.max(b)), format!("Tramo {n}"));
+        if let Some(layer) = self.project().layer(&layer_id) {
+            item.item_id = layer.kind.fresh_item_id();
+        }
         let id = item.item_id.clone();
         if self.exec(Command::AddItem { layer_id: layer_id.clone(), item }) {
             self.selection.items = vec![(layer_id, id)];
@@ -1825,7 +1887,7 @@ impl TranscriptorApp {
         };
         match self.session.execute(CommandEnvelope::human(Command::CreateLayer {
             asset_id: asset,
-            kind: LayerKind::User,
+            kind: self.new_layer_kind.clone(),
             name,
             color: None,
             layer_id: None,
@@ -2097,7 +2159,7 @@ impl TranscriptorApp {
                 }
             }
         }
-        if self.last_autosave.elapsed().as_secs() < 60 || !self.session.is_dirty() {
+        if self.persistence_job.is_some() || self.last_autosave.elapsed().as_secs() < 60 || !self.session.is_dirty() {
             return;
         }
         self.last_autosave = Instant::now();
@@ -2109,9 +2171,14 @@ impl TranscriptorApp {
         let store = self.store.as_ref().or(self.unsaved_store.as_ref()).unwrap().clone();
         let project = self.project().clone();
         let events = self.session.pending_journal().to_vec();
+        let history = self.session.history_snapshot();
         let (tx, rx) = crossbeam_channel::bounded(1);
         match std::thread::Builder::new().name("project-autosave".into()).spawn(move || {
-            let result = if saved { store.save_autosave(&project, &events) } else { store.save_with_journal(&project, &events) };
+            let result = if saved {
+                store.save_autosave_checkpoint(&project, &events, Some(&history))
+            } else {
+                store.save_checkpoint(&project, &events, Some(&history))
+            };
             let _ = tx.send(result);
         }) {
             Ok(_) => self.autosave_job = Some(rx),
@@ -2139,6 +2206,12 @@ impl eframe::App for TranscriptorApp {
         self.poll_import();
         self.poll_editorial_import();
         self.poll_v1_export();
+        self.poll_persistence();
+        if self.close_after_save && self.persistence_job.is_none() && !self.session.is_dirty() {
+            self.close_after_save = false;
+            self.pending_close = false;
+            ctx.send_viewport_cmd(egui::ViewportCommand::Close);
+        }
         self.external.poll(self.store.as_ref(), self.session.project(), ctx);
         self.refresh_resolved();
         // archivos soltados sobre la ventana
@@ -2182,11 +2255,15 @@ impl eframe::App for TranscriptorApp {
         }
         // toasts caducan
         self.toasts.retain(|t| t.at.elapsed().as_secs_f32() < if t.severity == Severity::Error { 10.0 } else { 5.0 });
-        if ctx.input(|i| i.viewport().close_requested()) && self.session.is_dirty() && !self.pending_close {
+        if ctx.input(|i| i.viewport().close_requested()) && (self.persistence_job.is_some() || self.autosave_job.is_some()) {
+            ctx.send_viewport_cmd(egui::ViewportCommand::CancelClose);
+            self.toast(Severity::Info, "Espera a que termine la escritura antes de cerrar");
+        } else if ctx.input(|i| i.viewport().close_requested()) && self.session.is_dirty() && !self.pending_close {
             self.pending_close = true;
             ctx.send_viewport_cmd(egui::ViewportCommand::CancelClose);
         }
         if self.imports.busy()
+            || self.persistence_job.is_some()
             || self.editorial_job.is_some()
             || self.player_snapshot.playing
             || self.export.running.is_some()

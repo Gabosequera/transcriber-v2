@@ -27,6 +27,8 @@ struct CommitIntent {
     before_digest: Option<String>,
     project: Project,
     events: Vec<JournalEvent>,
+    #[serde(default)]
+    history: Option<crate::session::DurableHistory>,
 }
 
 #[derive(serde::Serialize, serde::Deserialize)]
@@ -34,6 +36,10 @@ struct AutosaveSnapshot {
     schema: String,
     project: Project,
     events: Vec<JournalEvent>,
+    #[serde(default)]
+    history: Option<crate::session::DurableHistory>,
+    #[serde(default)]
+    writer: Option<String>,
 }
 
 #[derive(Clone, Debug)]
@@ -41,11 +47,17 @@ pub struct ProjectStore {
     pub root: PathBuf,
     observed: Arc<Mutex<Option<String>>>,
     baseline: Arc<Mutex<Option<Project>>>,
+    writer: String,
 }
 
 impl ProjectStore {
     pub fn at(root: impl Into<PathBuf>) -> Self {
-        ProjectStore { root: root.into(), observed: Arc::new(Mutex::new(None)), baseline: Arc::new(Mutex::new(None)) }
+        ProjectStore {
+            root: root.into(),
+            observed: Arc::new(Mutex::new(None)),
+            baseline: Arc::new(Mutex::new(None)),
+            writer: tv2_domain::ids::random_hex12(),
+        }
     }
 
     /// Normaliza una ruta elegida por el usuario a la carpeta del proyecto.
@@ -85,7 +97,14 @@ impl ProjectStore {
     /// Logical commit of snapshot and audit. A retry after a crash finishes the
     /// published intent; a conflicting external writer is never overwritten.
     pub fn save_with_journal(&self, project: &Project, events: &[JournalEvent]) -> DomainResult<()> {
+        self.save_checkpoint(project, events, None)
+    }
+
+    pub fn save_checkpoint(&self, project: &Project, events: &[JournalEvent], history: Option<&crate::session::DurableHistory>) -> DomainResult<()> {
         project.validate()?;
+        if let Some(history) = history {
+            history.validate(project)?;
+        }
         let text = serde_json::to_string_pretty(project)? + "\n";
         if text.len() as u64 > MAX_PROJECT_BYTES {
             return Err(DomainError::invalid("proyecto supera el límite de 64 MiB"));
@@ -112,8 +131,13 @@ impl ProjectStore {
         }
         // Validate audit before publishing the intent, including duplicate IDs.
         self.merged_journal(events)?;
-        let intent =
-            CommitIntent { schema: "transcriptor-commit/1".into(), before_digest: disk_digest, project: project.clone(), events: events.to_vec() };
+        let intent = CommitIntent {
+            schema: "transcriptor-commit/1".into(),
+            before_digest: disk_digest,
+            project: project.clone(),
+            events: events.to_vec(),
+            history: history.cloned(),
+        };
         let bytes = serde_json::to_vec(&intent)?;
         if bytes.len() as u64 > MAX_PROJECT_BYTES * 2 {
             return Err(DomainError::invalid("transacción supera el límite de 128 MiB"));
@@ -126,11 +150,32 @@ impl ProjectStore {
     }
 
     pub fn load(&self) -> DomainResult<Project> {
-        if self.root.join(PENDING_FILE).exists() {
-            let lock = fs::OpenOptions::new().read(true).write(true).create(true).truncate(false).open(self.root.join(".write.lock"))?;
-            lock.try_lock().map_err(|e| DomainError::io(format!("proyecto ocupado: {e}")))?;
-            self.finish_pending()?;
+        let lock = self.read_lock()?;
+        self.finish_pending()?;
+        let result = self.load_unlocked();
+        drop(lock);
+        result
+    }
+
+    fn read_lock(&self) -> DomainResult<fs::File> {
+        let lock = fs::OpenOptions::new().read(true).write(true).create(true).truncate(false).open(self.root.join(".write.lock"))?;
+        lock.try_lock().map_err(|e| DomainError::new(tv2_domain::ErrorCode::ExternalConflict, format!("proyecto ocupado: {e}")))?;
+        Ok(lock)
+    }
+
+    pub fn load_session(&self) -> DomainResult<crate::ProjectSession> {
+        let _lock = self.read_lock()?;
+        self.finish_pending()?;
+        let project = self.load_unlocked()?;
+        let history = self.load_history(&project)?;
+        let mut session = crate::ProjectSession::with_audit(project, &self.read_journal()?)?;
+        if let Some(history) = history {
+            session.restore_history(history)?;
         }
+        Ok(session)
+    }
+
+    fn load_unlocked(&self) -> DomainResult<Project> {
         let path = self.project_path();
         let project = Self::read_project(&path)?;
         *self.observed.lock().map_err(|_| DomainError::io("estado de persistencia no disponible"))? = Some(Self::digest(&project)?);
@@ -205,6 +250,9 @@ impl ProjectStore {
             return Err(DomainError::unsupported("schema de transacción desconocido"));
         }
         intent.project.validate()?;
+        if let Some(history) = &intent.history {
+            history.validate(&intent.project)?;
+        }
         let next = Self::digest(&intent.project)?;
         let disk = if self.project_path().exists() { Some(Self::digest(&Self::read_project(&self.project_path())?)?) } else { None };
         if disk != intent.before_digest && disk.as_ref() != Some(&next) {
@@ -219,8 +267,29 @@ impl ProjectStore {
             atomic_write(&self.project_path(), &project_bytes)?;
         }
         atomic_write(&self.journal_path(), &journal)?;
+        // Publish under the same recoverable intent as project + audit.
+        if let Some(history) = &intent.history {
+            atomic_write(&self.root.join("history.json"), &serde_json::to_vec(history)?)?;
+        } else if self.root.join("history.json").exists() {
+            fs::remove_file(self.root.join("history.json"))?;
+        }
         fs::remove_file(path)?;
         Ok(())
+    }
+
+    pub fn load_history(&self, project: &Project) -> DomainResult<Option<crate::session::DurableHistory>> {
+        let path = self.root.join("history.json");
+        if !path.exists() {
+            return Ok(None);
+        } // explicit migration: pre-history projects start empty
+        let mut bytes = Vec::new();
+        fs::File::open(path)?.take(MAX_PROJECT_BYTES * 2 + 1).read_to_end(&mut bytes)?;
+        if bytes.len() as u64 > MAX_PROJECT_BYTES * 2 {
+            return Err(DomainError::invalid("historial supera 128 MiB"));
+        }
+        let history: crate::session::DurableHistory = serde_json::from_slice(&bytes)?;
+        history.validate(project)?;
+        Ok(Some(history))
     }
 
     fn merged_journal(&self, events: &[JournalEvent]) -> DomainResult<Vec<u8>> {
@@ -277,12 +346,54 @@ impl ProjectStore {
     }
 
     pub fn save_autosave(&self, project: &Project, pending: &[JournalEvent]) -> DomainResult<()> {
+        self.save_autosave_checkpoint(project, pending, None)
+    }
+
+    pub fn save_autosave_checkpoint(
+        &self,
+        project: &Project,
+        pending: &[JournalEvent],
+        history: Option<&crate::session::DurableHistory>,
+    ) -> DomainResult<()> {
         project.validate()?;
+        if let Some(history) = history {
+            history.validate(project)?;
+        }
+        fs::create_dir_all(&self.root)?;
+        let lock = fs::OpenOptions::new().read(true).write(true).create(true).truncate(false).open(self.root.join(".write.lock"))?;
+        lock.try_lock().map_err(|e| DomainError::new(tv2_domain::ErrorCode::ExternalConflict, format!("otro escritor usa el proyecto: {e}")))?;
+        self.finish_pending()?;
+        let saved = Self::read_project(&self.project_path())?;
+        if Some(Self::digest(&saved)?) != *self.observed.lock().map_err(|_| DomainError::io("estado de persistencia no disponible"))? {
+            return Err(DomainError::new(tv2_domain::ErrorCode::ExternalConflict, "el proyecto cambió en disco antes del autosave"));
+        }
+        let autosave_path = self.root.join("autosave.json");
+        if autosave_path.exists() {
+            let mut previous = Vec::new();
+            fs::File::open(&autosave_path)?.take(MAX_PROJECT_BYTES * 2 + 1).read_to_end(&mut previous)?;
+            if previous.len() as u64 > MAX_PROJECT_BYTES * 2 {
+                return Err(DomainError::invalid("autosave previo demasiado grande"));
+            }
+            let raw: serde_json::Value = serde_json::from_slice(&previous)?;
+            let revision = raw["project"]["revision"].as_u64().or_else(|| raw["revision"].as_u64()).unwrap_or(u64::MAX);
+            if revision > saved.revision && raw["writer"].as_str() != Some(&self.writer) {
+                return Err(DomainError::new(
+                    tv2_domain::ErrorCode::ExternalConflict,
+                    "hay un autosave recuperable de otra sesión; recupera o guarda explícitamente antes de sustituirlo",
+                ));
+            }
+        }
         let bytes = self.merged_journal(pending)?;
         let events =
             bytes.split(|b| *b == b'\n').filter(|line| !line.is_empty()).map(serde_json::from_slice).collect::<Result<Vec<JournalEvent>, _>>()?;
         crate::ProjectSession::with_audit(project.clone(), &events)?;
-        let snapshot = AutosaveSnapshot { schema: "transcriptor-autosave/1".into(), project: project.clone(), events };
+        let snapshot = AutosaveSnapshot {
+            schema: "transcriptor-autosave/1".into(),
+            project: project.clone(),
+            events,
+            history: history.cloned(),
+            writer: Some(self.writer.clone()),
+        };
         let bytes = serde_json::to_vec(&snapshot)?;
         if bytes.len() as u64 > MAX_PROJECT_BYTES {
             return Err(DomainError::invalid("autosave con auditoría supera 64 MiB"));
@@ -305,6 +416,9 @@ impl ProjectStore {
         let raw: serde_json::Value = serde_json::from_slice(&bytes)?;
         let (candidate, events) = if raw["schema"] == "transcriptor-autosave/1" {
             let snapshot: AutosaveSnapshot = serde_json::from_value(raw)?;
+            if let Some(history) = &snapshot.history {
+                history.validate(&snapshot.project)?;
+            }
             (snapshot.project, snapshot.events)
         } else {
             (Self::read_project(&path)?, vec![])
@@ -522,7 +636,7 @@ mod tests {
 
     #[test]
     fn recovery_finishes_each_commit_boundary_once_and_rejects_external_writes() {
-        for boundary in 0..3 {
+        for boundary in 0..4 {
             let dir = tempfile::tempdir().unwrap();
             let store = ProjectStore::at(dir.path());
             let old = Project::new("old");
@@ -535,6 +649,7 @@ mod tests {
                 before_digest: Some(ProjectStore::digest(&old).unwrap()),
                 project: next.clone(),
                 events: session.pending_journal().to_vec(),
+                history: Some(session.history_snapshot()),
             };
             atomic_write(&store.root.join(PENDING_FILE), &serde_json::to_vec(&intent).unwrap()).unwrap();
             if boundary >= 1 {
@@ -543,9 +658,15 @@ mod tests {
             if boundary >= 2 {
                 atomic_write(&store.journal_path(), &store.merged_journal(&intent.events).unwrap()).unwrap();
             }
+            if boundary >= 3 {
+                atomic_write(&store.root.join("history.json"), &serde_json::to_vec(intent.history.as_ref().unwrap()).unwrap()).unwrap();
+            }
             let reopened = ProjectStore::at(dir.path());
             assert_eq!(reopened.load().unwrap(), next);
             assert_eq!(reopened.read_journal().unwrap().len(), 1);
+            let mut restored = reopened.load_session().unwrap();
+            restored.undo(crate::Actor::Human).unwrap();
+            assert_eq!(restored.project().name, "old");
             assert_eq!(reopened.load().unwrap(), next);
             assert!(!store.root.join(PENDING_FILE).exists());
             // A writer ignoring our lock must be detected, never rolled back.

@@ -60,6 +60,16 @@ pub enum Gesture {
         item: ItemId,
         origin: Pos2,
         additive: bool,
+        range_index: usize,
+        edge: Option<ClipEdge>,
+    },
+    EditItems {
+        origin: Pos2,
+        layer: LayerId,
+        item: ItemId,
+        range_index: usize,
+        edge: Option<ClipEdge>,
+        base_revision: u64,
     },
     BoxSelect {
         origin: Pos2,
@@ -350,9 +360,12 @@ pub fn draw(app: &mut TranscriptorApp, ui: &mut egui::Ui) {
             let hit = hit_test(app, &lanes, p, x0);
             match hit {
                 Hit::Clip { clip, edge } => {
-                    if app.tool == Tool::Cut && edge.is_none() {
+                    if app.tool == Tool::Cut && edge.is_none() && !secondary {
                         let t = app.timeline_view.x_to_t(p.x, x0).floor_to_frame(app.frame_rate());
-                        app.exec(Command::SplitClip { clip_id: clip, at: t });
+                        app.selection.clips = vec![clip];
+                        app.selection.items.clear();
+                        app.seek(t);
+                        app.split_at_playhead();
                     } else if secondary {
                         if !app.selection.clips.contains(&clip) {
                             app.selection.clips = vec![clip];
@@ -362,15 +375,21 @@ pub fn draw(app: &mut TranscriptorApp, ui: &mut egui::Ui) {
                         app.timeline_view.gesture = Gesture::Pending { clip, origin: p, edge, additive: modifiers.shift || modifiers.ctrl };
                     }
                 }
-                Hit::Item { layer, item } => {
+                Hit::Item { layer, item, range_index, edge } => {
                     if secondary {
                         if !app.selection.items.iter().any(|(_, i)| i == &item) {
                             app.selection.items = vec![(layer.clone(), item)];
                             app.selection.clips.clear();
                         }
                         app.selection.layer = Some(layer);
+                    } else if app.tool == Tool::Cut {
+                        app.selection.items = vec![(layer.clone(), item.clone())];
+                        app.selection.clips.clear();
+                        app.seek(app.timeline_view.x_to_t(p.x, x0));
+                        app.split_at_playhead();
                     } else {
-                        app.timeline_view.gesture = Gesture::PendingItem { layer, item, origin: p, additive: modifiers.shift || modifiers.ctrl };
+                        app.timeline_view.gesture =
+                            Gesture::PendingItem { layer, item, origin: p, additive: modifiers.shift || modifiers.ctrl, range_index, edge };
                     }
                 }
                 Hit::Lane(kind) => {
@@ -453,19 +472,63 @@ pub fn draw(app: &mut TranscriptorApp, ui: &mut egui::Ui) {
                     next = Some(Gesture::None);
                 }
             }
-            Gesture::PendingItem { layer, item, origin, additive } => {
+            Gesture::PendingItem { layer, item, origin, additive, range_index, edge } => {
                 if primary_released || (dragging && (p - origin).length() > DRAG_THRESHOLD) {
-                    if additive {
+                    let moving = !primary_released;
+                    if moving {
+                        if !app.selection.items.contains(&(layer.clone(), item.clone())) {
+                            if !additive {
+                                app.selection.items.clear();
+                            }
+                            app.selection.items.push((layer.clone(), item.clone()));
+                        }
+                        app.selection.clips.clear();
+                    } else if additive {
                         if let Some(i) = app.selection.items.iter().position(|(_, x)| x == &item) {
                             app.selection.items.remove(i);
                         } else {
-                            app.selection.items.push((layer.clone(), item));
+                            app.selection.items.push((layer.clone(), item.clone()));
                         }
                     } else {
-                        app.selection.items = vec![(layer.clone(), item)];
+                        app.selection.items = vec![(layer.clone(), item.clone())];
                         app.selection.clips.clear();
                     }
-                    app.selection.layer = Some(layer);
+                    app.selection.layer = Some(layer.clone());
+                    next = Some(if moving {
+                        Gesture::EditItems { origin, layer, item, range_index, edge, base_revision: app.session.revision() }
+                    } else {
+                        Gesture::None
+                    });
+                }
+            }
+            Gesture::EditItems { origin, layer, item, range_index, edge, base_revision } => {
+                let raw = app.timeline_view.x_to_t(p.x, x0);
+                let target = app.timeline_view.snap(raw, &edges_for_snap, app.ui.snapping);
+                let command =
+                    if let Some(edge) = edge {
+                        app.project()
+                            .layer(&layer)
+                            .and_then(|l| app.view_edge_to_source(target, &l.asset_id, edge))
+                            .map(|new_time| Command::TrimItem { layer_id: layer.clone(), item_id: item.clone(), range_index, edge, new_time })
+                    } else {
+                        app.project().layer(&layer).and_then(|l| {
+                            let from = app.view_time_to_source(app.timeline_view.x_to_t(origin.x, x0), &l.asset_id)?;
+                            let to = app.view_time_to_source(target, &l.asset_id)?;
+                            Some(app.shift_items_command((to - from).round_to_frame(app.frame_rate())))
+                        })
+                    };
+                // The overlay is transient; only release validates and commits one command.
+                let x = app.timeline_view.t_to_x(target, x0);
+                ui.painter().line_segment([Pos2::new(x, rect.top()), Pos2::new(x, rect.bottom())], Stroke::new(2.0, colors::ACCENT));
+                ui.painter().text(Pos2::new(x + 5.0, p.y - 18.0), Align2::LEFT_BOTTOM, target.clock(), FontId::monospace(11.0), colors::TEXT);
+                if primary_released {
+                    if app.session.revision() != base_revision {
+                        app.toast(Severity::Warn, "El proyecto cambió durante el gesto; repite el arrastre");
+                    } else if let Some(command) = command {
+                        app.exec(command);
+                    } else {
+                        app.toast(Severity::Warn, "El destino no tiene correspondencia fuente");
+                    }
                     next = Some(Gesture::None);
                 }
             }
@@ -818,7 +881,7 @@ pub fn draw(app: &mut TranscriptorApp, ui: &mut egui::Ui) {
 
 enum Hit {
     Clip { clip: ClipId, edge: Option<ClipEdge> },
-    Item { layer: LayerId, item: ItemId },
+    Item { layer: LayerId, item: ItemId, range_index: usize, edge: Option<ClipEdge> },
     Lane(LaneKind),
     Header(LaneKind),
     None,
@@ -853,12 +916,19 @@ fn hit_test(app: &TranscriptorApp, lanes: &[Lane], p: Pos2, x0: f32) -> Hit {
         LaneKind::Layer(layer_id) => {
             if let Some(layer) = app.project().layer(layer_id) {
                 for it in &layer.items {
-                    for r in &it.ranges {
+                    for (range_index, r) in it.ranges.iter().enumerate() {
                         for (a, b) in item_range_in_view(app, r, &layer.asset_id) {
                             let x1 = app.timeline_view.t_to_x(a, x0);
                             let x2 = app.timeline_view.t_to_x(b, x0).max(x1 + 6.0);
                             if p.x >= x1 && p.x <= x2 {
-                                return Hit::Item { layer: layer_id.clone(), item: it.item_id.clone() };
+                                let edge = if !r.is_point() && p.x - x1 <= HANDLE_W {
+                                    Some(ClipEdge::Start)
+                                } else if !r.is_point() && x2 - p.x <= HANDLE_W {
+                                    Some(ClipEdge::End)
+                                } else {
+                                    None
+                                };
+                                return Hit::Item { layer: layer_id.clone(), item: it.item_id.clone(), range_index, edge };
                             }
                         }
                     }
@@ -1169,6 +1239,8 @@ fn draw_header(app: &mut TranscriptorApp, ui: &mut egui::Ui, rect: Rect, lane: &
             let resp = ui.interact(rect, ui.id().with(("layer-header", layer_id.as_str())), Sense::click());
             if resp.clicked() {
                 app.selection.layer = Some(layer_id.clone());
+                app.selection.items.clear();
+                app.selection.clips.clear();
             }
             if resp.double_clicked() {
                 app.rename_dialog = Some((name.clone(), RenameTarget::Layer(layer_id.clone())));
@@ -1181,7 +1253,28 @@ fn draw_header(app: &mut TranscriptorApp, ui: &mut egui::Ui, rect: Rect, lane: &
                 FontId::proportional(12.0),
                 colors::TEXT,
             );
-            resp.on_hover_text("Capa semántica · clic para seleccionar, doble clic para renombrar");
+            resp.context_menu(|ui| {
+                if ui.button("Subir carril").clicked() {
+                    app.move_layer(layer_id, -1);
+                    ui.close();
+                }
+                if ui.button("Bajar carril").clicked() {
+                    app.move_layer(layer_id, 1);
+                    ui.close();
+                }
+                if ui.button("Seleccionar todos los items").clicked() {
+                    app.selection.layer = Some(layer_id.clone());
+                    app.selection.clips.clear();
+                    app.selection.items.clear();
+                    app.dispatch("tools.select_all");
+                    ui.close();
+                }
+                if ui.button(if *locked { "Desbloquear" } else { "Bloquear" }).clicked() {
+                    app.exec(Command::SetLayerProps { layer_id: layer_id.clone(), name: None, color: None, visible: None, locked: Some(!locked) });
+                    ui.close();
+                }
+            });
+            resp.on_hover_text("Capa semántica · clic para seleccionar, doble clic para renombrar, menú derecho para ordenar");
         }
     }
 }
@@ -1259,7 +1352,22 @@ fn context_menu(app: &mut TranscriptorApp, ui: &mut egui::Ui) {
             "montage.move_down",
         ]);
     } else if has_item {
-        actions.extend(["edit.accept", "edit.accept_next", "edit.toggle", "edit.activate", "edit.edit", "edit.delete", "montage.add_selection"]);
+        actions.extend([
+            "edit.split",
+            "edit.trim_start",
+            "edit.trim_end",
+            "edit.copy",
+            "edit.cut",
+            "edit.paste",
+            "edit.duplicate",
+            "edit.accept",
+            "edit.accept_next",
+            "edit.toggle",
+            "edit.activate",
+            "edit.edit",
+            "edit.delete",
+            "montage.add_selection",
+        ]);
     } else {
         actions.extend([
             "edit.paste",

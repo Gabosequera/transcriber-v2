@@ -337,6 +337,8 @@ fn library(app: &mut TranscriptorApp, ui: &mut egui::Ui) {
             let sel = app.selection.layer.as_ref() == Some(&id);
             if ui.selectable_label(sel, format!("{name} ({n})")).clicked() {
                 app.selection.layer = Some(id.clone());
+                app.selection.items.clear();
+                app.selection.clips.clear();
             }
             let mut v = visible;
             if ui.checkbox(&mut v, "").on_hover_text("Visible").changed() {
@@ -344,6 +346,12 @@ fn library(app: &mut TranscriptorApp, ui: &mut egui::Ui) {
             }
             if ui.small_button(if locked { "🔒" } else { "🔓" }).on_hover_text("Bloquear").clicked() {
                 app.exec(Command::SetLayerProps { layer_id: id.clone(), name: None, color: None, visible: None, locked: Some(!locked) });
+            }
+            if ui.small_button("↑").on_hover_text("Subir carril").clicked() {
+                app.move_layer(&id, -1);
+            }
+            if ui.small_button("↓").on_hover_text("Bajar carril").clicked() {
+                app.move_layer(&id, 1);
             }
         });
     }
@@ -853,8 +861,17 @@ fn dialogs(app: &mut TranscriptorApp, ctx: &egui::Context) {
             ctx,
             |ui| {
                 ui.label("Nombre de la capa (manual, antes de transcribir):");
+                egui::ComboBox::from_id_salt("new-layer-kind").selected_text(app.new_layer_kind.v1_name()).show_ui(ui, |ui| {
+                    for (kind, label) in [
+                        (tv2_domain::LayerKind::User, "Pedidos / notas"),
+                        (tv2_domain::LayerKind::Trims, "Recortes"),
+                        (tv2_domain::LayerKind::Topics, "Temas"),
+                        (tv2_domain::LayerKind::Author, "Marcas del autor"),
+                    ] {
+                        ui.selectable_value(&mut app.new_layer_kind, kind, label);
+                    }
+                });
                 let r = ui.text_edit_singleline(&mut name);
-                r.request_focus();
                 ui.horizontal(|ui| {
                     if ui.button("Crear").clicked() || (r.lost_focus() && ui.input(|i| i.key_pressed(egui::Key::Enter))) {
                         done = true;
@@ -1153,17 +1170,16 @@ fn dialogs(app: &mut TranscriptorApp, ctx: &egui::Context) {
             ui.label("El proyecto tiene cambios sin guardar.");
             ui.horizontal(|ui| {
                 if ui.button("Guardar y salir").clicked() && app.save_project(false) {
-                    app.pending_close = false;
-                    app.session.mark_clean();
-                    ctx.send_viewport_cmd(egui::ViewportCommand::Close);
+                    app.close_after_save = true;
                 }
-                if ui.button("Salir sin guardar").clicked() {
+                if ui.add_enabled(app.persistence_job.is_none() && app.autosave_job.is_none(), egui::Button::new("Salir sin guardar")).clicked() {
                     app.pending_close = false;
                     app.session.mark_clean();
                     ctx.send_viewport_cmd(egui::ViewportCommand::Close);
                 }
                 if ui.button("Cancelar").clicked() {
                     app.pending_close = false;
+                    app.close_after_save = false;
                 }
             });
         });

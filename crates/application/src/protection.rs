@@ -4,6 +4,30 @@ use crate::session::Actor;
 use tv2_domain::error::DomainResult;
 use tv2_domain::{DomainError, Project};
 
+/// Commands describe editorial intent; only a human actor can create human review.
+/// External imports retain review recorded by their source and still pass protection.
+pub(crate) fn attribute(before: &Project, after: &mut Project, actor: &Actor) -> DomainResult<()> {
+    if !matches!(actor, Actor::Agent { .. }) {
+        return Ok(());
+    }
+    for layer in &mut after.layers {
+        for item in &mut layer.items {
+            let old = before.layer(&layer.layer_id).and_then(|l| l.item(&item.item_id));
+            if old == Some(item) {
+                continue;
+            }
+            if item.is_human_accepted() && old.is_none_or(|i| !i.is_human_accepted()) {
+                return Err(DomainError::precondition("un agente no puede registrar aceptación humana"));
+            }
+            item.edited = old.is_some_and(|i| i.edited);
+            if old.is_none() && (item.origin.is_none() || item.origin.as_deref() == Some("user")) {
+                item.origin = Some("ai".into());
+            }
+        }
+    }
+    Ok(())
+}
+
 pub(crate) fn check_transition(before: &Project, after: &Project, actor: &Actor) -> DomainResult<()> {
     for master in &before.masters {
         if after.masters.iter().find(|m| m.asset_id == master.asset_id) != Some(master) {

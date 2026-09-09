@@ -312,7 +312,7 @@ impl TranscriptorApp {
             }
             runner.waiting_export = None;
         }
-        if self.imports.busy() || self.editorial_job.is_some() {
+        if self.imports.busy() || self.editorial_job.is_some() || self.persistence_job.is_some() {
             ctx.request_repaint_after(Duration::from_millis(16));
             self.script = Some(runner);
             return;

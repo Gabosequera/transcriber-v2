@@ -16,6 +16,7 @@ pub mod layers;
 pub mod project;
 pub mod resolve;
 pub mod review;
+mod semantic_edit;
 pub mod time;
 pub mod timeline;
 pub mod validation;

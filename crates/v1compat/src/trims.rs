@@ -16,19 +16,20 @@ use tv2_domain::time::{Ticks, TimeRange};
 
 pub const SCHEMA_TRIMS: &str = "editorial-trims/1";
 
-const KNOWN_CUT_KEYS: &[&str] = &["cut_id", "t_ini", "t_fin", "origin", "lane", "enabled", "accepted", "edited", "reason"];
+const KNOWN_CUT_KEYS: &[&str] = &["cut_id", "t_ini", "t_fin", "origin", "lane", "enabled", "accepted", "edited", "reason", "tv2_label"];
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct Lane {
     pub lane_id: String,
     pub name: String,
     pub color: String,
+    pub extra: Map<String, Value>,
 }
 
 pub fn default_lanes() -> Vec<Lane> {
     vec![
-        Lane { lane_id: "main".into(), name: "Recortes".into(), color: "#728bd0".into() },
-        Lane { lane_id: "ai".into(), name: "Cortes sugeridos (AI)".into(), color: "#8ab06b".into() },
+        Lane { lane_id: "main".into(), name: "Recortes".into(), color: "#728bd0".into(), extra: Map::new() },
+        Lane { lane_id: "ai".into(), name: "Cortes sugeridos (AI)".into(), color: "#8ab06b".into(), extra: Map::new() },
     ]
 }
 
@@ -69,6 +70,9 @@ pub fn trims_from_v1(v: &Value, asset_id: &AssetId, expected: Option<&Fingerprin
         return Err(invalid("los recortes pertenecen a otro video"));
     }
     let duration = secs_to_ticks(obj.get("duration").and_then(|x| x.as_f64()).ok_or_else(|| invalid("trims sin duration"))?);
+    if duration <= Ticks::ZERO || duration == Ticks::MAX {
+        return Err(invalid("duración de recortes no representable"));
+    }
     let lanes: Vec<Lane> = match obj.get("lanes").and_then(|x| x.as_array()) {
         Some(arr) => arr
             .iter()
@@ -76,6 +80,7 @@ pub fn trims_from_v1(v: &Value, asset_id: &AssetId, expected: Option<&Fingerprin
                 lane_id: l.get("lane_id").and_then(|x| x.as_str()).unwrap_or("main").to_string(),
                 name: l.get("name").and_then(|x| x.as_str()).unwrap_or("Recortes").to_string(),
                 color: l.get("color").and_then(|x| x.as_str()).unwrap_or("#728bd0").to_string(),
+                extra: l.as_object().cloned().unwrap_or_default(),
             })
             .collect(),
         None => default_lanes(),
@@ -90,7 +95,7 @@ pub fn trims_from_v1(v: &Value, asset_id: &AssetId, expected: Option<&Fingerprin
         let lane =
             c.get("lane").and_then(|x| x.as_str()).map(|s| s.to_string()).unwrap_or_else(|| if origin == "ai" { "ai".into() } else { "main".into() });
         if !lanes.iter().any(|l| l.lane_id == lane) {
-            lanes.push(Lane { lane_id: lane.clone(), name: lane.clone(), color: "#c58e43".into() });
+            lanes.push(Lane { lane_id: lane.clone(), name: lane.clone(), color: "#c58e43".into(), extra: Map::new() });
         }
         let a = c.get("t_ini").and_then(|x| x.as_f64()).ok_or_else(|| invalid(format!("{cut_id}: t_ini inválido")))?;
         let b = c.get("t_fin").and_then(|x| x.as_f64()).ok_or_else(|| invalid(format!("{cut_id}: t_fin inválido")))?;
@@ -104,7 +109,7 @@ pub fn trims_from_v1(v: &Value, asset_id: &AssetId, expected: Option<&Fingerprin
         extra.insert("accepted".into(), json!(c.get("accepted").and_then(|x| x.as_bool()).unwrap_or(false)));
         let item = SemanticItem {
             item_id: ItemId::new(cut_id),
-            label: cut_id.to_string(),
+            label: c.get("tv2_label").and_then(Value::as_str).unwrap_or(cut_id).to_string(),
             comment: c.get("reason").and_then(|x| x.as_str()).unwrap_or("").to_string(),
             state: cut_state(cut),
             edited: c.get("edited").and_then(|x| x.as_bool()).unwrap_or(false),
@@ -146,7 +151,20 @@ pub fn trims_from_v1(v: &Value, asset_id: &AssetId, expected: Option<&Fingerprin
     let revision = obj.get("revision").and_then(|x| x.as_u64()).unwrap_or(0);
     for l in &mut layers {
         l.revision = revision;
+        l.extra.insert("v1_import_layer_revision".into(), json!(revision));
         l.extra.insert("v1_media_fingerprint".into(), obj.get("media").cloned().unwrap_or(Value::Null));
+        let meta = lanes.iter().find(|m| Some(m.lane_id.as_str()) == l.lane.as_deref()).unwrap();
+        l.extra.insert("v1_lane_metadata".into(), Value::Object(meta.extra.clone()));
+        tv2_domain::layers::validate_layer(l, duration).map_err(|e| invalid(e.to_string()))?;
+    }
+    let ids: std::collections::HashSet<_> = layers.iter().flat_map(|l| l.items.iter().map(|i| &i.item_id)).collect();
+    if ids.len() != cuts.len() {
+        return Err(invalid("cut_id duplicado entre carriles"));
+    }
+    // One normalized authoritative document: header stored once, cuts in lanes.
+    // No second editable copy of cuts is retained.
+    if let Some(owner) = layers.first_mut() {
+        owner.extra.insert("v1_trims_header".into(), Value::Object(header.clone()));
     }
     Ok(V1Trims { duration, revision, next_id: obj.get("next_id").and_then(|x| x.as_u64()).unwrap_or(1), lanes, layers, header })
 }
@@ -166,7 +184,21 @@ pub fn trims_to_v1(t: &V1Trims, fingerprint: &Fingerprint) -> Value {
     obj.insert("duration".into(), secs_json(t.duration));
     obj.insert("revision".into(), json!(t.revision));
     obj.insert("next_id".into(), json!(t.next_id));
-    obj.insert("lanes".into(), Value::Array(t.lanes.iter().map(|l| json!({"lane_id": l.lane_id, "name": l.name, "color": l.color})).collect()));
+    obj.insert(
+        "lanes".into(),
+        Value::Array(
+            t.lanes
+                .iter()
+                .map(|l| {
+                    let mut lane = l.extra.clone();
+                    lane.insert("lane_id".into(), json!(l.lane_id));
+                    lane.insert("name".into(), json!(l.name));
+                    lane.insert("color".into(), json!(l.color));
+                    Value::Object(lane)
+                })
+                .collect(),
+        ),
+    );
     let mut cuts: Vec<(Ticks, Value)> = Vec::new();
     for layer in &t.layers {
         for it in &layer.items {
@@ -180,6 +212,9 @@ pub fn trims_to_v1(t: &V1Trims, fingerprint: &Fingerprint) -> Value {
             c.insert("accepted".into(), json!(it.is_human_accepted()));
             c.insert("edited".into(), json!(it.edited));
             c.insert("reason".into(), json!(it.comment));
+            if it.label != it.item_id.as_str() {
+                c.insert("tv2_label".into(), json!(it.label));
+            }
             for (k, v) in &it.extra {
                 if k != "enabled" && k != "accepted" {
                     c.entry(k.clone()).or_insert(v.clone());

@@ -9,3 +9,5 @@ pub mod store;
 pub use session::{Actor, CommandEnvelope, CommandResult, DryRunResult, HistoryEntry, PROTOCOL_VERSION, ProjectSession};
 pub use store::{JOURNAL_FILE, PROJECT_FILE, ProjectStore};
 mod protection;
+#[cfg(test)]
+mod semantic_tests;

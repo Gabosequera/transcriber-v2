@@ -166,6 +166,14 @@ impl Clip {
         self.range().contains(t).then(|| self.source.start + (t - self.position))
     }
 
+    /// An exclusive end belongs to the interval immediately to its left.
+    pub fn seq_edge_to_source(&self, t: Ticks, edge: crate::ClipEdge) -> Option<Ticks> {
+        match edge {
+            crate::ClipEdge::Start => self.seq_to_source(t),
+            crate::ClipEdge::End => t.0.checked_sub(1).and_then(|t| self.seq_to_source(Ticks(t))).map(|t| t + Ticks(1)),
+        }
+    }
+
     /// Tiempo de secuencia que corresponde a un tiempo fuente dentro del clip.
     pub fn source_to_seq(&self, s: Ticks) -> Option<Ticks> {
         self.source.contains(s).then(|| self.position + (s - self.source.start))
