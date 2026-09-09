@@ -1,3 +1,12 @@
+# Publicación vigente — continuación 8, alpha.5
+
+Publicada y verificada [v2.0.0-alpha.5](https://github.com/Gabosequera/transcriber-v2/releases/tag/v2.0.0-alpha.5) sobre `83987b68a8dae139a8f70a5dba71c407b6fd7de8`, código subido a main. `isPrerelease=true`, `isDraft=false`, `assets=[]`; tag remoto coincide con el SHA completo. Registro: `evidence/publication-alpha5.json`, publicado 2026-09-09 01:32:59 UTC.
+
+51 tests dirigidos (33 application +18 V1compat), Clippy all-targets y formato OK. Build release final OK en 2m13s, tamaño/SHA256 en `evidence/build-alpha5.json`. Exe no ejecutado; sin paquete nuevo ni aceptación GUI/multimedia/general. E2/E3 siguen abiertas; E4 pendiente; E5 no iniciada. V1 observado limpio y tratado como solo lectura.
+
+Este commit posterior solo registra publicación/evidencia. Continuar desde main para conservar el traspaso vigente, no desde un checkpoint anterior. El objetivo global hasta completar E4 sigue **incompleto**.
+
+---
 # Publicación de continuación 7 — alpha.4
 
 La prerelease [v2.0.0-alpha.4](https://github.com/Gabosequera/transcriber-v2/releases/tag/v2.0.0-alpha.4) está publicada y verificada sobre `7e050bcee3777924389703db79e87b0ecf381841`, código subido a main. `isPrerelease=true`, `isDraft=false`, `assets=[]`; tag remoto coincide con ese commit. Build release OK (2m51s), 39 tests dirigidos, Clippy y formato. No se ejecutó el exe ni se preparó un paquete nuevo. E2/E3 abiertas y E4 pendiente. Registro remoto: `evidence/publication-alpha4.json`; tamaño/SHA256 local: `evidence/build-alpha4.json`. Main incluye después el commit documental de este resultado.

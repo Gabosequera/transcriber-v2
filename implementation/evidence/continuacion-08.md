@@ -28,3 +28,5 @@ Bloques importan plan elegido antes que view; cabecera/items forman una represen
 Control añadido antes de publicar: test de mapping de borde exclusivo en corte/final de secuencia (33 application). El primer build release de 2m13s fue anterior a esa corrección; el log/build metadata final lo sustituye. Save As valida también identidad/revisión de auditoría leída del origen para rechazar una sustitución concurrente incompatible.
 
 Build final alpha.5 después de la corrección de borde: **OK, 2m13s**, comando ./scripts/cargo.ps1 build --release --locked -p transcriptor; tamaño/SHA256 en build-alpha5.json. Exe compilado, no ejecutado. 51 tests finales, Clippy (4,43 s) y formato OK.
+
+Publicación verificada: [v2.0.0-alpha.5](https://github.com/Gabosequera/transcriber-v2/releases/tag/v2.0.0-alpha.5), código/tag `83987b68a8dae139a8f70a5dba71c407b6fd7de8`, main subido. Prerelease no draft, sin assets binarios; `publication-alpha5.json` y PUBLISH. 51 tests, Clippy/formato/build release final OK; sin ejecución física ni cierre global de E2/E3/E4.

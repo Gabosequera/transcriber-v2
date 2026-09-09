@@ -38,3 +38,5 @@ Controles exactos y publicación: `evidence/continuacion-08.md`, logs y `PUBLISH
 V1 `bb7012c` observado limpio; solo lectura AST/texto, sin ejecutar sus módulos ni tocar datos personales. Traspaso vigente al final de `prompts/00-CONSTRUIR-TRANSCRIPTOR-V2.md`.
 
 Controles finales alpha.5: **51 tests (33 application +18 V1compat), Clippy/all-targets y formato OK; build release OK en 2m13s**, sin ejecutar el exe. Metadatos en evidence/build-alpha5.json.
+
+Publicación verificada: [v2.0.0-alpha.5](https://github.com/Gabosequera/transcriber-v2/releases/tag/v2.0.0-alpha.5), código/tag `83987b68a8dae139a8f70a5dba71c407b6fd7de8`, main subido. Prerelease no draft, sin assets binarios; `evidence/publication-alpha5.json` y PUBLISH. 51 tests, Clippy/formato/build release final OK; sin ejecución física ni cierre global de E2/E3/E4.
