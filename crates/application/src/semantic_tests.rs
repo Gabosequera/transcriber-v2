@@ -5,6 +5,211 @@ fn s(n: i64) -> Ticks {
 }
 
 #[test]
+fn prepared_command_keeps_generated_ids_rejects_stale_and_shares_master_evidence() {
+    let mut p = Project::new("prepared");
+    let asset = tv2_domain::commands::tests_support::fake_video("a", 30);
+    p.assets.push(asset.clone());
+    let raw = serde_json::json!({"schema":"editorial-master/1","media":{"fingerprint":asset.fingerprint,"duration":30.0},"tracks":{},"chunks":[],"generated_at":"now"});
+    let document: tv2_domain::evidence::EvidenceDocument = raw.clone().into();
+    p.masters.push(tv2_domain::evidence::MasterEvidence { asset_id: asset.id, source_digest: document.source_digest().into(), document });
+    let mut session = ProjectSession::new(p);
+    let request = CommandEnvelope::human(Command::CreateLayer {
+        asset_id: "a".into(),
+        kind: LayerKind::User,
+        name: "Notes".into(),
+        color: None,
+        layer_id: None,
+    })
+    .with_base(0);
+    let prepared = session.prepare_command(request.clone()).unwrap();
+    let id = prepared.preview().layers[0].layer_id.clone();
+    assert!(prepared.preview().masters[0].document.shares_storage(&session.project().masters[0].document));
+    session.commit_prepared(prepared).unwrap();
+    assert_eq!(session.project().layers[0].layer_id, id);
+    assert!(session.prepare_command(request).is_err());
+    let prepared = session.prepare_command(CommandEnvelope::human(Command::RenameProject { name: "worker".into() })).unwrap();
+    session.execute(CommandEnvelope::human(Command::RenameProject { name: "human".into() })).unwrap();
+    assert!(session.commit_prepared(prepared).is_err());
+    assert_eq!(session.project().name, "human");
+    let mut serialized = serde_json::to_value(session.project()).unwrap();
+    serialized["masters"][0]["document"]["media"]["duration"] = serde_json::json!(29);
+    assert!(serde_json::from_value::<Project>(serialized).unwrap().validate().is_err());
+}
+
+#[test]
+fn recovery_restores_full_undo_and_redo_and_survives_save_reopen() {
+    let dir = tempfile::tempdir().unwrap();
+    let store = crate::ProjectStore::at(dir.path());
+    let saved = Project::new("saved");
+    store.save(&saved).unwrap();
+    let mut original = store.load_session().unwrap();
+    for name in ["one", "two", "three"] {
+        original.execute(CommandEnvelope::human(Command::RenameProject { name: name.into() })).unwrap();
+    }
+    original.undo(Actor::Human).unwrap();
+    store.save_autosave_checkpoint(original.project(), original.pending_journal(), Some(&original.history_snapshot())).unwrap();
+    let candidate = store.recovery_checkpoint(&saved).unwrap().unwrap();
+    let mut recovered = store.load_session().unwrap();
+    recovered.recover_checkpoint(candidate.project, candidate.events, candidate.history).unwrap();
+    assert_eq!(recovered.project().name, "two");
+    assert!(recovered.can_redo());
+    recovered.redo(Actor::Human).unwrap();
+    assert_eq!(recovered.project().name, "three");
+    recovered.undo(Actor::Human).unwrap();
+    recovered.undo(Actor::Human).unwrap();
+    assert_eq!(recovered.project().name, "one");
+    store.save_checkpoint(recovered.project(), recovered.pending_journal(), Some(&recovered.history_snapshot())).unwrap();
+    let mut reopened = store.load_session().unwrap();
+    reopened.undo(Actor::Human).unwrap();
+    assert_eq!(reopened.project().name, "saved");
+    for _ in 0..3 {
+        reopened.redo(Actor::Human).unwrap();
+    }
+    assert_eq!(reopened.project().name, "three");
+}
+
+#[test]
+fn cut_box_union_subtract_metadata_tombstones_and_history() {
+    let mut p = Project::new("box");
+    p.assets.push(tv2_domain::commands::tests_support::fake_video("a", 30));
+    let mut layer = SemanticLayer::new("a".into(), LayerKind::Trims, "Recortes");
+    layer.layer_id = "trims-test".into();
+    layer.lane = Some("test".into());
+    for (id, a, b, state) in [("cut-000001", 2, 5, ItemState::Accepted), ("cut-000002", 8, 12, ItemState::Disabled)] {
+        let mut i = SemanticItem::new(TimeRange::new(s(a), s(b)), id);
+        i.item_id = id.into();
+        i.state = state;
+        i.comment = id.into();
+        i.extra.insert("evidence".into(), serde_json::json!({"word":id}));
+        layer.items.push(i);
+    }
+    p.layers.push(layer);
+    let initial = p.layers.clone();
+    let mut session = ProjectSession::new(p);
+    let request = CommandEnvelope::human(Command::BoxEdit { layer_id: "trims-test".into(), range: TimeRange::new(s(4), s(9)), subtract: false })
+        .with_idempotency("box");
+    session.dry_run(&request).unwrap();
+    assert_eq!(session.project().layers, initial);
+    session.execute(request.clone()).unwrap();
+    let layer = session.project().layer(&"trims-test".into()).unwrap();
+    assert_eq!(layer.items.len(), 1);
+    assert_eq!(layer.items[0].ranges, vec![TimeRange::new(s(2), s(12))]);
+    assert_eq!(layer.items[0].state, ItemState::Accepted);
+    assert_eq!(layer.items[0].comment, "cut-000001 · cut-000002");
+    assert_eq!(layer.items[0].extra["tv2_absorbed"][0]["extra"]["evidence"]["word"], "cut-000002");
+    assert!(layer.deleted_item_ids.contains(&"cut-000002".into()));
+    assert!(session.execute(request).unwrap().replayed);
+    session
+        .execute(CommandEnvelope::human(Command::BoxEdit { layer_id: "trims-test".into(), range: TimeRange::new(s(5), s(8)), subtract: true }))
+        .unwrap();
+    let layer = session.project().layer(&"trims-test".into()).unwrap();
+    assert_eq!(layer.items.len(), 2);
+    assert!(layer.items.iter().all(|i| i.state == ItemState::Accepted && i.extra.contains_key("evidence")));
+    assert!(layer.items.iter().any(|i| i.ranges == vec![TimeRange::new(s(8), s(12))]));
+    session.undo(Actor::Human).unwrap();
+    session.undo(Actor::Human).unwrap();
+    assert_eq!(session.project().layers, initial);
+    session.redo(Actor::Human).unwrap();
+    session.redo(Actor::Human).unwrap();
+    session
+        .execute(CommandEnvelope::human(Command::BoxEdit { layer_id: "trims-test".into(), range: TimeRange::new(s(20), s(22)), subtract: false }))
+        .unwrap();
+    assert_eq!(session.project().layers[0].items.len(), 3);
+}
+
+#[test]
+fn coalesce_preserves_enabled_groups_actor_identity_and_lane_removal() {
+    let mut p = Project::new("lanes");
+    p.assets.push(tv2_domain::commands::tests_support::fake_video("a", 30));
+    let mut main = SemanticLayer::new("a".into(), LayerKind::Trims, "Main");
+    main.layer_id = "trims-main".into();
+    main.lane = Some("main".into());
+    for (id, a, b, state) in [
+        ("cut-000001", 1, 5, ItemState::Proposed),
+        ("cut-000002", 4, 8, ItemState::Accepted),
+        ("cut-000003", 2, 9, ItemState::Disabled),
+        ("cut-000004", 8, 10, ItemState::Proposed),
+    ] {
+        let mut item = SemanticItem::new(TimeRange::new(s(a), s(b)), id);
+        item.item_id = id.into();
+        item.state = state;
+        main.items.push(item);
+    }
+    let mut other = SemanticLayer::new("a".into(), LayerKind::Trims, "Other");
+    other.layer_id = "other".into();
+    other.lane = Some("other".into());
+    p.layers = vec![main, other];
+    let mut session = ProjectSession::new(p);
+    session.execute(CommandEnvelope::human(Command::CoalesceTrims { layer_id: "trims-main".into(), actor_id: Some("cut-000001".into()) })).unwrap();
+    let main = &session.project().layers[0];
+    assert_eq!(main.items.len(), 3);
+    assert_eq!(main.item(&"cut-000001".into()).unwrap().state, ItemState::Proposed);
+    assert_eq!(main.item(&"cut-000001".into()).unwrap().end(), s(8)); // merely touching cut-4 remains separate
+    assert!(session.execute(CommandEnvelope::human(Command::DeleteLayer { layer_id: "trims-main".into() })).is_err());
+    session
+        .execute(CommandEnvelope::human(Command::MoveTrimItems {
+            layer_id: "trims-main".into(),
+            target_layer_id: "other".into(),
+            item_ids: vec!["cut-000004".into()],
+        }))
+        .unwrap();
+    assert_eq!(session.project().layers[1].items[0].item_id.as_str(), "cut-000004");
+    session.execute(CommandEnvelope::human(Command::RemoveTrimLane { layer_id: "other".into(), move_to: Some("trims-main".into()) })).unwrap();
+    assert_eq!(session.project().layers[0].items.len(), 3);
+    assert!(session.project().layers[1].deleted);
+    session.undo(Actor::Human).unwrap();
+    assert!(!session.project().layers[1].deleted);
+}
+
+#[test]
+fn blocks_inspector_edits_both_neighbors_and_invalid_batch_rolls_back() {
+    let mut p = Project::new("blocks");
+    p.assets.push(tv2_domain::commands::tests_support::fake_video("a", 30));
+    let mut layer = SemanticLayer::new("a".into(), LayerKind::Blocks, "Blocks");
+    layer.layer_id = "blocks".into();
+    layer.extra.insert("v1_chunks_header".into(), serde_json::json!({"schema":"editorial-chunks/1"}));
+    for (id, a, b) in [("one", 0, 10), ("two", 10, 20), ("three", 20, 30)] {
+        let mut i = SemanticItem::new(TimeRange::new(s(a), s(b)), id);
+        i.item_id = id.into();
+        layer.items.push(i);
+    }
+    p.layers.push(layer);
+    let mut session = ProjectSession::new(p);
+    session
+        .execute(CommandEnvelope::human(Command::SetItemStructure {
+            layer_id: "blocks".into(),
+            item_id: "two".into(),
+            parent_id: None,
+            ranges: vec![TimeRange::new(s(8), s(22))],
+        }))
+        .unwrap();
+    assert_eq!(session.project().layers[0].items[0].end(), s(8));
+    assert_eq!(session.project().layers[0].items[2].start(), s(22));
+    session
+        .execute(CommandEnvelope::human(Command::SetItemProps {
+            layer_id: "blocks".into(),
+            item_id: "two".into(),
+            label: None,
+            comment: None,
+            ranges: Some(vec![TimeRange::new(s(7), s(23))]),
+        }))
+        .unwrap();
+    assert_eq!(session.project().layers[0].items[0].end(), s(7));
+    let before = session.project().clone();
+    assert!(
+        session
+            .execute(CommandEnvelope::human(Command::SetItemStructure {
+                layer_id: "blocks".into(),
+                item_id: "two".into(),
+                parent_id: None,
+                ranges: vec![TimeRange::new(s(0), s(30))]
+            }))
+            .is_err()
+    );
+    assert_eq!(session.project(), &before);
+}
+
+#[test]
 fn exclusive_trim_end_maps_to_previous_clip_at_cut_and_sequence_end() {
     let left = tv2_domain::Clip::new("track".into(), "a".into(), TimeRange::new(s(10), s(12)), s(0));
     let right = tv2_domain::Clip::new("track".into(), "a".into(), TimeRange::new(s(20), s(22)), s(2));

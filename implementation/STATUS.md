@@ -1,3 +1,37 @@
+# STATUS — continuación 9, fuentes 2.0.0-alpha.6
+
+Base: `main` limpio en `87d9a26`; V1 `bb7012c`, solo lectura. **Objetivo hasta E4 incompleto. E2 abierta, E3 parcial, E4 pendiente. E5 no iniciada.** Este es un checkpoint de continuidad; la aceptación física, multimedia y revisión general siguen aplazadas.
+
+## Implementado en este incremento
+
+- Caja Corte semántica: B+arrastre crea/estira/une; Shift resta, recorta, divide o borra. Ctrl+arrastre mueve; handles siguen recortando y S sigue dividiendo. Una transacción por release, Escape/captura/base de revisión protegidos. En Fuente y dentro de una ocurrencia en Secuencia. Selecciona superviviente y abre editor de pedido nuevo en user/ai. Como V1, caja opera items de un rango; cruces de jerarquía incompatibles se rechazan sin cambios. No declarar cobertura física de gestos.
+- Coalescencia de recortes: solape estricto por enabled/carril; actor conserva ID/origen/aceptación (sin actor: mayor duración/ID). Razones y warnings unidos; evidencia y extras conservados con procedencia de absorbidos; tombstones. AddItem, bordes, nudge e inspector la usan. Movimiento entre carriles del mismo medio y eliminación de carril conservando recortes en destino o borrándolos con undo. main/ai de fábrica no se eliminan. Menú de cabecera conectado.
+- Marcas del autor: adaptador schema 1/timebase media_elapsed_v1, identidad completa, revisión/contador, punto/región/decisión, prompt/label, campos desconocidos y cuarentena de marcas inválidas. Selección por revisión; empate divergente exige selección explícita de archivo. Import por carpeta o Archivo → Importar marcas del autor V1, incluso sin master; export sidecar. Una colección normalizada, no se convierte la evidencia del master en otra copia editable. No inspecciona automáticamente el store global V1 ni resuelve su conflicto con un diálogo especializado.
+- Bloques: SetItemStructure y SetItemProps ajustan ambos vecinos (inspector), además de trim/nudge existentes. SnapBlockBoundaries recalcula palabras ±40 ms, risas ±120 ms y utterances de todas las pistas; scoring global-safe/2, radio explícito, first/last utterance y ajustes. Sin corte duro seguro rechaza entero. Menú de cabecera prepara el comando en worker y confirma exactamente su resultado si la base sigue vigente.
+- Exportar bloques produce master derivado, plan seleccionado, view/Markdown y archivos transcript/señales/intensidad/pedido/momentos por bloque. El master de evidencia en sesión no cambia. Una intención recuperable publica el conjunto, verifica todas las bases antes de escribir, registra recibo y se elimina al final. Solo carpetas nuevas propiedad de V2; rutas portables, sin traversal/alias/enlaces. Archivo → Recuperar exportación V1 interrumpida conecta la recuperación en worker. No es export completo de carpeta V1 ni transacción sobre fuentes V1.
+- Autosave: recupera la pila completa undo y redo junto con auditoría/recibos; revisión nueva y frontera revalidada. Reapertura posterior conserva ambas pilas. Legacy sin history conserva recuperación de un paso. El historial recuperado sustituye la entrada artificial de recuperación; undo recorre las ediciones del candidato.
+- PreparedCommand conserva IDs de dry-run/preview para commit, con campos privados y validación de base/identidad/recibos. GUI snap e import de marcas trabajan en worker. MasterEvidence usa documento inmutable compartido con digest cacheado, sin duplicar el árbol JSON en cada snapshot/undo/worker ni recalcular su hash por cada validación. Serialización no cambia; un documento deserializado se vuelve a validar. Otros clones, proyecciones e historial serializado siguen costosos: PERF-01 abierto.
+
+
+
+Build release final alpha.6: **OK en 2m04s**, exe compilado y no ejecutado; tamaño/SHA256/tiempo del wrapper en `evidence/build-alpha6.json` (desde evidence: `build-alpha6.json`). Sin paquete binario nuevo aceptado.
+
+## Controles y límites
+
+Ver `evidence/continuacion-09.md` y logs. Solo tests application/V1compat ejecutados; Clippy all-targets compila desktop/dominio, no ejecuta sus tests bloqueados por Windows 4551. Sin GUI, medios, modelos ni pruebas físicas. Publicación exacta en PUBLISH/evidence.
+
+## Pendientes reales para continuar
+
+1. E2/E3: revisión de controles/gestos dinámicos completa; integración y resolución de candidatos globales de autor; reglas editoriales restantes y pruebas físicas aplazadas. Caja multirrango no soportada (igual a V1); no presentarla como edición general de jerarquías.
+2. E3 contratos: derivación padre/hijo y mapping, manifests/requests/proposals/passes, export carpeta V1 completa, montaje inverso editado con material invisible. El montaje editado sigue rechazado: falta implementar la inversa. Materialización nueva de bloques no equivale a materializar todos los contratos/proyectos previos.
+3. Durabilidad: jobs durables, archivado de auditoría/recibos de sesión y migraciones generales; watcher SO/documentos V1, diff por campo y resolución explícita. Recuperación de exports es explícita desde menú; no se ha ensayado crash real. Persisten límites 200 entradas, 64/128 MiB y snapshots serializados completos. Compartir masters reduce clones/hash; no elimina todo el trabajo costoso de GUI.
+4. E4 completo pendiente: MCP específico, schemas/capabilities reales, queries paginadas/contexto/evidencia/selección/transporte/jobs, permisos, propuestas con digest/revisión/dry-run/diff/preview/apply/verificación, eventos/auditoría y cliente local conectado. PreparedCommand es base interna, no implementación de MCP.
+
+Continuar sobre main hasta completar E4, sin pedir nueva autorización y detenerse antes de E5. No reiniciar E0/E1. Traspaso vigente al final del prompt principal.
+
+
+---
+
 # STATUS — Transcriptor V2
 
 Checkpoint **continuación 8, fuentes 2.0.0-alpha.5**, desde `main` limpio/sincronizado `acecb37`. Objetivo hasta E4 **incompleto**. E5 no iniciada. Aceptación física, multimedia y revisión general siguen aplazadas.

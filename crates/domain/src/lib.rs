@@ -7,6 +7,8 @@
 //! - Toda mutación del proyecto pasa por [`commands::Command::apply`].
 
 pub mod asset;
+pub mod blocks;
+mod box_edit;
 pub mod commands;
 pub mod digest;
 pub mod error;

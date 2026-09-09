@@ -2,6 +2,7 @@
 //! (actor, revisión base, idempotencia), mantiene historial undo/redo por
 //! revisiones auditables, persiste JSON de forma atómica y escribe un journal.
 
+pub mod documents;
 pub mod reconcile;
 pub mod session;
 pub mod store;

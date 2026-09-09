@@ -267,6 +267,28 @@ pub enum Command {
         layer_id: LayerId,
         item_ids: Vec<ItemId>,
     },
+    BoxEdit {
+        layer_id: LayerId,
+        range: TimeRange,
+        subtract: bool,
+    },
+    SnapBlockBoundaries {
+        layer_id: LayerId,
+        radius: Ticks,
+    },
+    CoalesceTrims {
+        layer_id: LayerId,
+        actor_id: Option<ItemId>,
+    },
+    MoveTrimItems {
+        layer_id: LayerId,
+        target_layer_id: LayerId,
+        item_ids: Vec<ItemId>,
+    },
+    RemoveTrimLane {
+        layer_id: LayerId,
+        move_to: Option<LayerId>,
+    },
     DeleteItems {
         layer_id: LayerId,
         item_ids: Vec<ItemId>,
@@ -384,6 +406,11 @@ impl Command {
             Command::TrimItem { .. } => "Recortar borde del item".into(),
             Command::ShiftItems { .. } => "Mover items y descendientes".into(),
             Command::CycleAuthorDecision { .. } => "Decisión del autor".into(),
+            Command::BoxEdit { subtract, .. } => if *subtract { "Restar caja" } else { "Crear o unir caja" }.into(),
+            Command::SnapBlockBoundaries { .. } => "Ajustar bloques a bordes seguros".into(),
+            Command::CoalesceTrims { .. } => "Unir recortes solapados".into(),
+            Command::MoveTrimItems { .. } => "Mover recortes entre carriles".into(),
+            Command::RemoveTrimLane { .. } => "Quitar carril de recortes".into(),
             Command::DeleteItems { .. } => "Borrar tramos".into(),
             Command::ReplaceLayer { .. } => "Reemplazar capa".into(),
             Command::AddSequence { sequence, .. } => format!("Añadir secuencia {}", sequence.name),
@@ -1013,6 +1040,9 @@ impl Command {
             }
             Command::CreateLayer { asset_id, kind, name, color, layer_id } => {
                 project.asset(asset_id).ok_or_else(|| DomainError::not_found("asset", asset_id))?;
+                if *kind == LayerKind::Author && project.layers.iter().any(|l| l.asset_id == *asset_id && l.kind == LayerKind::Author && !l.deleted) {
+                    return Err(DomainError::precondition("el medio ya tiene su carril autoritativo de marcas"));
+                }
                 let mut layer = SemanticLayer::new(asset_id.clone(), kind.clone(), name.clone());
                 if let Some(c) = color {
                     layer.color = c.clone();
@@ -1043,6 +1073,7 @@ impl Command {
             Command::DeleteLayer { layer_id } => {
                 let l = project.layer_mut(layer_id).ok_or_else(|| DomainError::not_found("capa", layer_id))?;
                 ensure_layer_editable(l)?;
+                crate::box_edit::ensure_removable(l)?;
                 if l.deleted {
                     return Err(DomainError::not_found("capa", layer_id));
                 }
@@ -1093,6 +1124,45 @@ impl Command {
                 ensure_layer_editable(layer)?;
                 crate::semantic_edit::apply(self, layer, duration)
             }
+            Command::BoxEdit { layer_id, .. } | Command::CoalesceTrims { layer_id, .. } => {
+                let duration = layer_asset_duration(project, layer_id)?;
+                let layer = project.layer_mut(layer_id).ok_or_else(|| DomainError::not_found("capa", layer_id))?;
+                ensure_layer_editable(layer)?;
+                crate::box_edit::apply(self, layer, duration)
+            }
+            Command::MoveTrimItems { layer_id, target_layer_id, item_ids } => {
+                crate::box_edit::move_items(project, layer_id, target_layer_id, item_ids)
+            }
+            Command::SnapBlockBoundaries { layer_id, radius } => {
+                let duration = layer_asset_duration(project, layer_id)?;
+                let layer = project.layers.iter_mut().find(|l| &l.layer_id == layer_id).ok_or_else(|| DomainError::not_found("capa", layer_id))?;
+                ensure_layer_editable(layer)?;
+                let master = project
+                    .masters
+                    .iter()
+                    .find(|m| m.asset_id == layer.asset_id)
+                    .ok_or_else(|| DomainError::not_available("snap seguro requiere el master del medio"))?;
+                if layer.source_master_digest.as_ref().is_some_and(|d| d != &master.source_digest) {
+                    return Err(DomainError::precondition("plan de otro master"));
+                }
+                crate::blocks::snap(layer, &master.document, duration, *radius)
+            }
+            Command::RemoveTrimLane { layer_id, move_to } => {
+                let layer = project.layer(layer_id).ok_or_else(|| DomainError::not_found("capa", layer_id))?;
+                ensure_layer_editable(layer)?;
+                crate::box_edit::ensure_removable(layer)?;
+                if layer.kind != LayerKind::Trims {
+                    return Err(DomainError::invalid("se exige un carril de recortes"));
+                }
+                let ids = layer.items.iter().map(|i| i.item_id.clone()).collect::<Vec<_>>();
+                let mut effect = CommandEffect::new(self.label());
+                if let Some(target) = move_to {
+                    effect = crate::box_edit::move_items(project, layer_id, target, &ids)?;
+                }
+                let deleted = Command::DeleteLayer { layer_id: layer_id.clone() }.apply(project)?;
+                effect.affected.extend(deleted.affected);
+                Ok(effect)
+            }
             Command::AddItem { layer_id, item } => {
                 let duration = layer_asset_duration(project, layer_id)?;
                 let l = project.layer_mut(layer_id).ok_or_else(|| DomainError::not_found("capa", layer_id))?;
@@ -1104,6 +1174,10 @@ impl Command {
                 items.push(item.clone());
                 validate_items(&items, duration, l.kind.allows_points())?;
                 l.items = items;
+                if l.kind == LayerKind::Trims {
+                    crate::box_edit::coalesce(l, Some(&item.item_id))?;
+                }
+                validate_layer(l, duration)?;
                 l.revision = l.revision.checked_add(1).ok_or_else(|| DomainError::out_of_range("revisión de capa agotada"))?;
                 Ok(CommandEffect::new(self.label()).create(&item.item_id))
             }
@@ -1162,6 +1236,12 @@ impl Command {
                 let duration = layer_asset_duration(project, layer_id)?;
                 let l = project.layer_mut(layer_id).ok_or_else(|| DomainError::not_found("capa", layer_id))?;
                 ensure_layer_editable(l)?;
+                if l.kind == LayerKind::Blocks
+                    && l.extra.contains_key("v1_chunks_header")
+                    && let Some(ranges) = ranges
+                {
+                    crate::semantic_edit::set_block_range(l, item_id, ranges)?;
+                }
                 let allow_points = l.kind.allows_points();
                 let mut items = l.items.clone();
                 let it = items.iter_mut().find(|i| &i.item_id == item_id).ok_or_else(|| DomainError::not_found("item", item_id))?;
@@ -1177,6 +1257,10 @@ impl Command {
                 it.edited = true;
                 validate_items(&items, duration, allow_points)?;
                 l.items = items;
+                if l.kind == LayerKind::Trims && ranges.is_some() {
+                    crate::box_edit::coalesce(l, Some(item_id))?;
+                }
+                validate_layer(l, duration)?;
                 l.revision = l.revision.checked_add(1).ok_or_else(|| DomainError::out_of_range("revisión de capa agotada"))?;
                 Ok(CommandEffect::new(self.label()).touch(item_id))
             }
@@ -1265,6 +1349,9 @@ impl Command {
                 let duration = layer_asset_duration(project, layer_id)?;
                 let layer = project.layer_mut(layer_id).ok_or_else(|| DomainError::not_found("capa", layer_id))?;
                 ensure_layer_editable(layer)?;
+                if layer.kind == LayerKind::Blocks && layer.extra.contains_key("v1_chunks_header") {
+                    crate::semantic_edit::set_block_range(layer, item_id, ranges)?;
+                }
                 let mut items = layer.items.clone();
                 let item = items.iter_mut().find(|i| &i.item_id == item_id).ok_or_else(|| DomainError::not_found("item", item_id))?;
                 item.parent_id = parent_id.clone();
@@ -1272,6 +1359,10 @@ impl Command {
                 item.edited = true;
                 validate_items(&items, duration, layer.kind.allows_points())?;
                 layer.items = items;
+                if layer.kind == LayerKind::Trims {
+                    crate::box_edit::coalesce(layer, Some(item_id))?;
+                }
+                validate_layer(layer, duration)?;
                 layer.revision = layer.revision.checked_add(1).ok_or_else(|| DomainError::out_of_range("revisión de capa agotada"))?;
                 Ok(CommandEffect::new(self.label()).touch(item_id))
             }

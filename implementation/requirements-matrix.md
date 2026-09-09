@@ -1,3 +1,20 @@
+# Incremento vigente — continuación 9, alpha.6
+
+E2 abierta/E3 parcial/E4 pendiente. Evidencia: `evidence/continuacion-09.md`. Las secciones inferiores son históricas.
+
+| ID | Incremento real | Verificación / límite |
+|---|---|---|
+| UI-03/UI-04/LAY-02 | Caja Corte add/subtract, selección/edición de pedido, menú de carriles y movimientos | Tests application; GUI compilada, interacción pendiente; caja solo un rango como V1 |
+| DAT-01/LAY-01 | Coalescencia strict overlap por enabled, actor/metadata/tombstones; carriles de fábrica protegidos | Tests box/coalesce/move/undo; falta inventario dinámico completo |
+| DAT-01/LAY-01/LAY-04 | Sidecar autor schema 1, revisión, identidad, cuarentena, export; import explícito sin master | Test roundtrip/conflictos/decisiones; store global automático/diálogo especializado pendiente |
+| LAY-01/LAY-02/DAT-01 | Inspector adapta vecinos; snap global-safe/2/evidencia; materialización de archivos por bloque | Tests chunks; no aceptación física ni carpeta V1 completa |
+| DAT-02/DAT-04 | Recuperación de historia completa de autosave y reapertura con undo/redo | Test recovery_restores_full_undo_and_redo; crash real aplazado |
+| DAT-02/DAT-03 | Publicación documental recuperable en carpeta V2 y recibo; CAS, rutas y todos los checkpoints | Tests documents, sin escritura en V1; no sustituye jobs/archivado/migraciones generales |
+| PERF-01/AI-02/AI-03 | Master compartido inmutable/digest cacheado; prepared command conserva IDs y valida base al commit; workers | Tests shared/prepared/stale; GUI compilada; rendimiento físico y E4 abiertos |
+
+
+---
+
 # Incremento vigente — continuación 8, alpha.5
 
 E2/E3 abiertas, E4 pendiente; aceptación física aplazada. Evidencia: `evidence/continuacion-08.md`. Las secciones inferiores son históricas.

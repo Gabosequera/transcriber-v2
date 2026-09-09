@@ -50,3 +50,8 @@ Se completaron los avisos de24crates que faltaban en la raíz del registro media
 ## Continuación 6, 2026-09-08
 
 Incremento propio en dominio/aplicación/GUI y adaptador existente; sin incorporación de código de references ni nuevas dependencias. Se consultaron en solo lectura editorial_layers_ui.py y los contratos/fixtures V1 existentes para contrastar estados y persistencia. La política explícita de preservar aceptación de trims desactivados corrige pérdida en round-trip y mantiene campos independientes. Fixtures sintéticas Rust existentes ampliadas; no se ejecutó V1 ni se regeneraron goldens. Licencias vigentes intactas.
+
+
+## Continuación 9
+
+V1 bb7012c: lectura exclusiva de editorial_edits.py, editorial_layers_ui.py, editorial_trims.py, marcas.py, consolidar.py, pipeline.py y editorial_chunks.py para contratos y reglas (mismo titular, autorizada migración). Implementación Rust propia en box_edit/blocks/author/materialize y ampliaciones de núcleo/GUI/persistencia. No se ejecutaron módulos V1 ni se regeneraron goldens; fixtures sintéticas Rust. Sin nuevas dependencias ni copia de references. Licencias vigentes intactas.

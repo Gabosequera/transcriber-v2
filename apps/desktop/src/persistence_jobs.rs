@@ -19,24 +19,27 @@ pub enum Completion {
 pub struct LoadedProject {
     store: ProjectStore,
     session: ProjectSession,
-    recovery: Option<(Project, Vec<JournalEvent>)>,
+    recovery: Option<tv2_application::store::RecoveryCheckpoint>,
     warning: Option<DomainError>,
 }
 
 pub fn load(store: ProjectStore) -> DomainResult<Completion> {
     let mut session = store.load_session()?;
-    let (recovery, warning) = match store.recovery_with_audit(session.project()) {
+    let (recovery, warning) = match store.recovery_checkpoint(session.project()) {
         Ok(value) => (value, None),
         Err(e) => (None, Some(e)),
     };
     session.resolve_paths(|path| store.resolve_path(path).to_string_lossy().replace('\\', "/"));
     let mut availability = std::collections::HashMap::new();
     session.refresh_asset_availability(|path| *availability.entry(path.to_string()).or_insert_with(|| std::path::Path::new(path).exists()));
-    let recovery = recovery.map(|(mut p, audit)| {
-        for asset in &mut p.assets {
+    let recovery = recovery.map(|mut checkpoint| {
+        for asset in &mut checkpoint.project.assets {
             asset.path = store.resolve_path(&asset.path).to_string_lossy().replace('\\', "/");
         }
-        (p, audit)
+        if let Some(history) = &mut checkpoint.history {
+            history.map_paths(|path| store.resolve_path(path).to_string_lossy().replace('\\', "/"));
+        }
+        checkpoint
     });
     Ok(Completion::Open(Box::new(LoadedProject { store, session, recovery, warning })))
 }
@@ -90,8 +93,14 @@ impl TranscriptorApp {
                     self.report(warning);
                 }
                 self.session = session;
-                self.recovery = recovery.as_ref().map(|(p, _)| p.clone());
-                self.recovery_audit = recovery.map(|(_, audit)| audit).unwrap_or_default();
+                self.recovery = None;
+                self.recovery_audit.clear();
+                self.recovery_history = None;
+                if let Some(checkpoint) = recovery {
+                    self.recovery = Some(checkpoint.project);
+                    self.recovery_audit = checkpoint.events;
+                    self.recovery_history = checkpoint.history;
+                }
                 self.external = Default::default();
                 self.unsaved_store = None;
                 self.marker_editor = None;

@@ -21,6 +21,12 @@ pub const PROJECT_DIR_SUFFIX: &str = ".transcriptor";
 const MAX_PROJECT_BYTES: u64 = 64 * 1024 * 1024;
 const PENDING_FILE: &str = ".pending-commit.json";
 
+pub struct RecoveryCheckpoint {
+    pub project: Project,
+    pub events: Vec<JournalEvent>,
+    pub history: Option<crate::session::DurableHistory>,
+}
+
 #[derive(serde::Serialize, serde::Deserialize)]
 struct CommitIntent {
     schema: String,
@@ -404,6 +410,10 @@ impl ProjectStore {
     /// Legacy bare snapshots remain readable; new autosaves publish content and
     /// audit together so recovery cannot lose successful idempotency receipts.
     pub fn recovery_with_audit(&self, saved: &Project) -> DomainResult<Option<(Project, Vec<JournalEvent>)>> {
+        Ok(self.recovery_checkpoint(saved)?.map(|c| (c.project, c.events)))
+    }
+
+    pub fn recovery_checkpoint(&self, saved: &Project) -> DomainResult<Option<RecoveryCheckpoint>> {
         let path = self.root.join("autosave.json");
         if !path.is_file() {
             return Ok(None);
@@ -414,21 +424,21 @@ impl ProjectStore {
             return Err(DomainError::invalid("autosave supera 64 MiB"));
         }
         let raw: serde_json::Value = serde_json::from_slice(&bytes)?;
-        let (candidate, events) = if raw["schema"] == "transcriptor-autosave/1" {
+        let (candidate, events, history) = if raw["schema"] == "transcriptor-autosave/1" {
             let snapshot: AutosaveSnapshot = serde_json::from_value(raw)?;
             if let Some(history) = &snapshot.history {
                 history.validate(&snapshot.project)?;
             }
-            (snapshot.project, snapshot.events)
+            (snapshot.project, snapshot.events, snapshot.history)
         } else {
-            (Self::read_project(&path)?, vec![])
+            (Self::read_project(&path)?, vec![], None)
         };
         candidate.validate()?;
         crate::ProjectSession::with_audit(candidate.clone(), &events)?;
         if candidate.project_id != saved.project_id || candidate.revision <= saved.revision {
             return Ok(None);
         }
-        Ok(Some((candidate, events)))
+        Ok(Some(RecoveryCheckpoint { project: candidate, events, history }))
     }
 
     pub fn append_journal(&self, events: &[JournalEvent]) -> DomainResult<()> {

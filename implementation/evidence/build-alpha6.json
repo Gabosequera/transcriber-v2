@@ -1,0 +1,8 @@
+{
+  "version": "2.0.0-alpha.6",
+  "command": "./scripts/cargo.ps1 build --release --locked -p transcriptor",
+  "elapsed_seconds": 126.8738593,
+  "size": 24666112,
+  "sha256": "81de6da92927e07ba8e70780521d70b84bd487fa084a7d659020f4ae9bab25be",
+  "executed": false
+}

@@ -198,3 +198,20 @@ Trims conserva cabecera una sola vez y metadata en cada carril; cuts existen ún
 Chunks usa el plan seleccionado antes que la view; una cabecera + colección única, cobertura 0..duración/max50min. Split/trim/nudge preservan partición y vecinos. Summary original se conserva como metadata; comment editorial es independiente. `tv2_original_range` permite rechazar export de metadata de bordes/snap desactualizada tras editar. Esta negativa es un límite explícito, no implementación de recalcular evidencia/snap ni materializar master/chunks. Export sigue documental, no carpeta; montaje inverso editado sigue pendiente.
 
 D-0039, frontera temporal: un trim de fin exclusivo consulta el intervalo inmediatamente anterior al corte; trim de inicio consulta el siguiente. Clip::seq_edge_to_source y test application evitan usar el inicio de otra ocurrencia o rechazar el fin de secuencia.
+
+
+## D-0043 · Caja Corte y coalescencia sobre el núcleo común
+
+Se conserva box_add/box_subtract de V1 para items de un rango; intersección estricta, superviviente primero en tiempo, resta con conservación de metadata. No se recortan multirrangos a su envolvente. Jerarquías incompatibles se rechazan atómicamente. Coalescencia solo por carril/enabled, actor explícito o mayor duración/ID; razones/warnings/evidencia y extras de absorbidos conservados. Recortes de fábrica no se eliminan; quitar carril propio admite mover o borrar. Commands BoxEdit/CoalesceTrims/MoveTrimItems/RemoveTrimLane compartidos. Tests semantic_tests; GUI compilada, no aceptación. Extensión tv2_absorbed conserva procedencia de campos absorbidos, no otra colección editable de cuts.
+
+## D-0044 · Fuente autoritativa del autor y selección de candidatos
+
+El adaptador normaliza cabecera/cuarentena una vez y marcas como items. Schema numérico 1, timebase media_elapsed_v1, fingerprint completo, revisión/contador y geometría estricta. Marcas inválidas permanecen en cuarentena; documentos inválidos no se confunden con ausencia. Elige mayor revisión; empate divergente produce conflicto y el import explícito permite elegir un archivo. No convierte autor.marcas de un master en marcas editables ni consulta configuración/store global V1 automáticamente. Import worker usa actor External y protecciones comunes. Campo tv2_author_optional conserva null/ausencia de prompt/label; tv2_edited mantiene atribución de Agent. No se escribe sidecar fuente.
+
+## D-0045 · Bordes seguros y materialización de bloques
+
+Todos los caminos de edición de rangos del inspector ajustan vecinos. SnapBlockBoundaries implementa global-safe/2: palabras ±40 ms, risas ±120 ms, utterances de todas las pistas, conflicto duro primero, intervención/clearance/distancia después. Calcula evidencia nueva y preserva IDs; sin borde duro seguro rechaza. Worker produce PreparedCommand ligado a base, commit usa sus mismos IDs/resultados; no repite el cálculo en GUI. Export genera master derivado sin cambiar master evidencia, selected/view y archivos por bloque. Publicación multidocumento solo en carpetas V2; intención antes de datos, preflight de todas las bases, comprobación antes de cada reemplazo, recibo y eliminación final. Recuperación explícita desde menú. No promete atomicidad de lectores V1 no cooperativos ni crash físico probado, ni carpeta V1 completa.
+
+## D-0046 · Recuperar toda la historia y compartir masters inmutables
+
+Autosave/1 devuelve project/events/history; recuperación valida antes de mutar y restaura undo/redo del candidato elevando la revisión y sus fronteras. La entrada artificial de recuperación solo se conserva para legacy sin history. Reapertura, receipts y ambas pilas probadas. EvidenceDocument encapsula Arc<Value> sin acceso mutable, comparte caché OnceLock del digest excluyendo generated_at/chunks; Deserialize crea evidencia y caché nuevas. Evita clones del master en historial/worker/validación, conservando JSON compatible; no deduplica serialización ni proyecciones. PreparedCommand privado permite preparar en worker y confirma solo contra la misma base/identidad. No constituye E4 ni resuelve todo PERF-01.

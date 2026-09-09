@@ -339,6 +339,22 @@ pub struct CommandReceipt {
     pub result: CommandResult,
 }
 
+/// Validated command result bound to an immutable base; fields cannot be forged by clients.
+pub struct PreparedCommand {
+    envelope: CommandEnvelope,
+    before: Project,
+    after: Project,
+    effect: tv2_domain::CommandEffect,
+}
+impl PreparedCommand {
+    pub fn preview(&self) -> &Project {
+        &self.after
+    }
+    pub fn diff(&self) -> DiffSummary {
+        DiffSummary::compute(&self.before, &self.after)
+    }
+}
+
 pub struct ProjectSession {
     project: Project,
     undo: VecDeque<HistoryEntry>,
@@ -499,6 +515,26 @@ impl ProjectSession {
     }
 
     /// Explicit human recovery; preserve the saved snapshot as one undo step.
+    pub fn recover_checkpoint(&mut self, candidate: Project, events: Vec<JournalEvent>, history: Option<DurableHistory>) -> DomainResult<()> {
+        if let Some(history) = &history {
+            history.validate(&candidate)?;
+        }
+        self.recover_with_audit(candidate, events)?;
+        if let Some(mut history) = history {
+            history.revision = self.revision();
+            if let Some(entry) = history.undo.back_mut() {
+                entry.expect = history.revision;
+            }
+            if let Some(entry) = history.redo.back_mut() {
+                entry.expect = history.revision;
+            }
+            self.undo = history.undo;
+            self.redo = history.redo;
+        }
+        Ok(())
+    }
+
+    /// Legacy recovery without a persisted history gets one undo to saved content.
     pub fn recover(&mut self, mut candidate: Project) -> DomainResult<()> {
         candidate.validate()?;
         crate::protection::check_transition(&self.project, &candidate, &Actor::Human)?;
@@ -650,6 +686,43 @@ impl ProjectSession {
         crate::protection::attribute(&before, &mut after, &envelope.actor)?;
         after.validate()?;
         crate::protection::check_transition(&before, &after, &envelope.actor)?;
+        self.commit_prepared(PreparedCommand { envelope, before, after, effect })
+    }
+
+    /// Run on a worker for expensive commands, retaining generated IDs for preview/apply.
+    pub fn prepare_command(&self, envelope: CommandEnvelope) -> DomainResult<PreparedCommand> {
+        self.check_base(&envelope)?;
+        let before = self.project.clone();
+        let mut after = before.clone();
+        let effect = envelope.command.apply(&mut after)?;
+        crate::protection::attribute(&before, &mut after, &envelope.actor)?;
+        after.validate()?;
+        crate::protection::check_transition(&before, &after, &envelope.actor)?;
+        Ok(PreparedCommand { envelope, before, after, effect })
+    }
+
+    pub fn commit_prepared(&mut self, prepared: PreparedCommand) -> DomainResult<CommandResult> {
+        let PreparedCommand { envelope, before, mut after, effect } = prepared;
+        self.check_identity(&envelope)?;
+        if let Some(key) = &envelope.idempotency_key {
+            if let Some((request, previous)) = self.idempotency.get(key) {
+                let mut retry = envelope.clone();
+                retry.command_id.clone_from(&request.command_id);
+                if &retry != request {
+                    return Err(DomainError::precondition("idempotency_key ya usada para otra solicitud"));
+                }
+                let mut result = previous.clone();
+                result.replayed = true;
+                return Ok(result);
+            }
+            if self.legacy_keys.contains(key) || self.idempotency.len() >= 10_000 {
+                return Err(DomainError::precondition("recibo antiguo o límite de recibos alcanzado"));
+            }
+        }
+        self.check_base(&envelope)?;
+        if before != self.project {
+            return Err(DomainError::precondition("la base del comando preparado cambió"));
+        }
         let base = before.revision;
         after.revision = base.max(after.revision).checked_add(1).ok_or_else(|| DomainError::out_of_range("revisión agotada"))?;
         after.updated_at = now_iso();

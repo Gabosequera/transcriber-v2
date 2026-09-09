@@ -1,3 +1,17 @@
+# Continuación 9 — nuevas operaciones (aceptación física aplazada)
+
+- B y arrastrar en carril semántico: crear/estirar/unir. Shift resta; Ctrl mueve un item. Handles recortan, S divide. Escape cancela. Caja solo items de un rango, como V1; para cajas que cruzan clips usa Fuente.
+- Cabecera de recortes → Unir solapados / Mover selección a… / Quitar carril… (conservando en destino o borrando con undo). main/ai no se quitan.
+- Archivo → Importar marcas del autor V1 permite elegir un sidecar del medio seleccionado, aun sin master. Valida identidad; empate de candidatos de carpeta con distinta información requiere elegir archivo. Exportar su capa genera autor.marcas.json. El original V1 no se escribe.
+- Inspector de bloques ajusta los vecinos de ambos bordes. Cabecera → Ajustar bordes seguros (radio 15 s), en worker. Si cambia la base no aplica. Exportar bloques materializa un conjunto V1 nuevo (master derivado, selected/view, Markdown, transcript y señales por bloque).
+- Archivo → Recuperar exportación V1 interrumpida reanuda una carpeta creada por V2 con intención pendiente; rechaza terceros contenidos/rutas ajenas. No borres .pending-documents.json manualmente.
+- Recuperar autosave conserva sus undo/redo completos. Con historia disponible, undo recorre ediciones originales del candidato; legacy sin historia tiene un paso hacia lo guardado.
+
+Controles exactos: evidence/continuacion-09.md. No ejecutar GUI/multimedia/aceptación física aplazada ni eludir Windows 4551.
+
+
+---
+
 # Continuación 8 — recorridos añadidos
 
 - Selecciona un item y usa S, [ / ], Alt+flechas; el playhead se convierte a tiempo fuente. División jerárquica conserva los demás rangos. Trim que deje hijos fuera falla entero.

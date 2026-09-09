@@ -93,3 +93,13 @@ Estados: **impl** = handler V2 funcional; **impl-parcial** = funciona con límit
 ## Gestos y botones V1 pendientes de inventariar (E3)
 
 `editorial_layers_ui.py` (arrastre de items, redimensionar rangos, menú contextual de capa, administración de capas), `editorial_montaje_ui.py` (arrastrar clips entre pistas, doble clic = revelar), `automatico_ui.py` (pipeline, pedidos/propuestas) y `app.py` (ajustes, wizard). Se completan al importar contratos V1 (E3) y el ciclo de propuestas (E4).
+
+
+## Continuación 9 — ampliaciones vigentes
+
+- `editorial_layers_ui.apply_box`, `editorial_edits.box_add/box_subtract` → Command::BoxEdit, B+arrastre/Shift, control semántico de timeline; tests box_union_subtract. Ctrl mueve, handles recortan, S divide. Caja solo un rango (V1); bases y cancelación compiladas en GUI, sin ejecutar.
+- `editorial_trims.coalesce/remove_lane` → CoalesceTrims/MoveTrimItems/RemoveTrimLane; menú de cabecera, controles de misma identidad y carriles de fábrica; tests coalesce/lane/undo.
+- `marcas.validar_marca/_doc_valido` → v1compat::author; Archivo → Importar marcas del autor V1 / export capa; tests identidad/revisión/cuarentena/punto-región. X ya cicla nota/incluir/excluir desde alpha.5; la fila histórica que dice pendiente E3 no describe este incremento.
+- `editorial_chunks.snap_plan_to_safe_boundaries/materialize` → SnapBlockBoundaries en worker y materialize::blocks + documents::publish; cabecera / export bloques. Tests snap/archivos/recuperación, sin validación física.
+
+Esto no termina el inventario dinámico V1 completo ni certifica paridad física.

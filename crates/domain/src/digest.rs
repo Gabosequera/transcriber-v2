@@ -23,6 +23,25 @@ pub fn digest_json(value: &Value) -> String {
     hex::encode(Sha256::digest(text.as_bytes()))
 }
 
+pub fn digest_object_without(value: &Value, excluded: &[&str]) -> String {
+    let Some(map) = value.as_object() else {
+        return digest_json(value);
+    };
+    let mut keys: Vec<_> = map.keys().filter(|k| !excluded.contains(&k.as_str())).collect();
+    keys.sort();
+    let mut out = String::from("{");
+    for (n, key) in keys.iter().enumerate() {
+        if n > 0 {
+            out.push(',');
+        }
+        write_string(key, &mut out);
+        out.push(':');
+        write_value(&map[*key], &mut out);
+    }
+    out.push('}');
+    hex::encode(Sha256::digest(out.as_bytes()))
+}
+
 fn write_value(v: &Value, out: &mut String) {
     match v {
         Value::Null => out.push_str("null"),

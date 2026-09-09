@@ -178,6 +178,13 @@ pub(crate) fn apply(command: &Command, layer: &mut SemanticLayer, duration: Tick
         }
         _ => unreachable!(),
     }
+    if layer.kind == LayerKind::Trims {
+        match command {
+            Command::TrimItem { item_id, .. } => crate::box_edit::coalesce(layer, Some(item_id))?,
+            Command::ShiftItems { item_ids, .. } => crate::box_edit::coalesce(layer, item_ids.last())?,
+            _ => {}
+        }
+    }
     crate::layers::validate_layer(layer, duration)?;
     for item in &layer.items {
         let old = before.iter().find(|i| i.item_id == item.item_id);
@@ -192,4 +199,39 @@ pub(crate) fn apply(command: &Command, layer: &mut SemanticLayer, duration: Tick
         layer.revision = layer.revision.checked_add(1).ok_or_else(|| DomainError::out_of_range("revisión de capa agotada"))?;
     }
     Ok(effect)
+}
+
+/// Both inspector paths edit the same partition and adjust the existing neighbors.
+pub(crate) fn set_block_range(layer: &mut SemanticLayer, id: &ItemId, ranges: &[TimeRange]) -> DomainResult<()> {
+    if ranges.len() != 1 {
+        return Err(DomainError::invalid("un bloque exige un rango"));
+    }
+    let old = layer.item(id).ok_or_else(|| DomainError::not_found("bloque", id))?.clone();
+    for edge in [ClipEdge::Start, ClipEdge::End] {
+        let (previous, next) = match edge {
+            ClipEdge::Start => (old.start(), ranges[0].start),
+            ClipEdge::End => (old.end(), ranges[0].end),
+        };
+        if previous == next {
+            continue;
+        }
+        let neighbor = layer
+            .items
+            .iter_mut()
+            .find(|i| {
+                &i.item_id != id
+                    && match edge {
+                        ClipEdge::Start => i.end() == previous,
+                        ClipEdge::End => i.start() == previous,
+                    }
+            })
+            .ok_or_else(|| DomainError::out_of_range("el borde exterior del plan está fijado al medio"))?;
+        match edge {
+            ClipEdge::Start => neighbor.ranges[0].end = next,
+            ClipEdge::End => neighbor.ranges[0].start = next,
+        }
+        neighbor.edited = true;
+    }
+    layer.item_mut(id).unwrap().ranges = ranges.to_vec();
+    Ok(())
 }

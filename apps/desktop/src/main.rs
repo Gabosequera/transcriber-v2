@@ -12,6 +12,7 @@ mod keymap;
 mod paths;
 mod persistence_jobs;
 mod scripting;
+mod semantic_jobs;
 mod timeline_index;
 mod ui_markers;
 mod ui_media;

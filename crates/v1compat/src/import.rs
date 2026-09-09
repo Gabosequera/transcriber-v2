@@ -99,6 +99,20 @@ pub fn read_v1_editorial(root: &Path, asset: &Asset) -> V1Result<V1Import> {
         }
     }
     report.layers = layers.len();
+    let mut author_paths = vec![std::path::PathBuf::from(&asset.path).with_extension("marcas.json")];
+    author_paths.push(editorial_dir.join("autor.marcas.json"));
+    if let Some(stem) = std::path::Path::new(&master.media_path).file_stem() {
+        author_paths.push(editorial_dir.join(format!("{}.marcas.json", stem.to_string_lossy())));
+    }
+    author_paths.push(editorial_dir.join("marcas_store").join(format!("{}.marcas.json", asset.fingerprint.hash_muestreado)));
+    author_paths.sort();
+    author_paths.dedup();
+    let candidates = author_paths.iter().filter(|p| p.is_file()).map(|p| read_json(p)).collect::<V1Result<Vec<_>>>()?;
+    if let Some(author) = crate::author::select(&candidates, asset)? {
+        layers.push(author);
+    } else if master.raw.pointer("/streams/autor.marcas").is_some() {
+        report.warnings.push("El master contiene evidencia de autor; importa el sidecar autoritativo para editar las marcas".into());
+    }
     // Selected plan takes precedence over generated views. Never import both.
     let selected_plan = editorial_dir.join(".work/chunks.selected.json");
     let plan_path = if selected_plan.exists() { selected_plan } else { editorial_dir.join("views/chunks.json") };
@@ -138,6 +152,12 @@ pub fn import_commands(import: &V1Import, project: &Project, _asset_id: &AssetId
     let mut cmds = vec![Command::AttachMaster { master: import.master.clone() }];
     for l in &import.layers {
         let mut layer = l.clone();
+        if layer.kind == tv2_domain::LayerKind::Author
+            && let Some(existing) =
+                project.layers.iter().find(|l| l.kind == tv2_domain::LayerKind::Author && l.asset_id == layer.asset_id && !l.deleted)
+        {
+            layer.layer_id = existing.layer_id.clone();
+        }
         if let Some(existing) = project.layer(&layer.layer_id) {
             // conservar el orden/visibilidad locales
             layer.visible = existing.visible;

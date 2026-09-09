@@ -91,6 +91,14 @@ fn menu_bar(app: &mut TranscriptorApp, root: &mut egui::Ui) {
                     app.export_v1_dialog(false);
                     ui.close();
                 }
+                if ui.button("Importar marcas del autor V1…").clicked() {
+                    app.import_author_dialog();
+                    ui.close();
+                }
+                if ui.button("Recuperar exportación V1 interrumpida…").clicked() {
+                    app.recover_export_dialog();
+                    ui.close();
+                }
                 if ui
                     .button("Exportar montaje a JSON V1…")
                     .on_hover_text("Conserva el original completo si la proyección no cambió; rechaza cambios sin inversa sin pérdida")
@@ -1150,7 +1158,7 @@ fn dialogs(app: &mut TranscriptorApp, ctx: &egui::Context) {
                             asset.path = path.to_string_lossy().to_string();
                         }
                     }
-                    match app.session.recover_with_audit(candidate, std::mem::take(&mut app.recovery_audit)) {
+                    match app.session.recover_checkpoint(candidate, std::mem::take(&mut app.recovery_audit), app.recovery_history.take()) {
                         Ok(()) => {
                             app.after_change();
                             app.selection.clear();

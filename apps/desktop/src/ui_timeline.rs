@@ -75,6 +75,12 @@ pub enum Gesture {
         origin: Pos2,
         current: Pos2,
     },
+    BoxEdit {
+        origin: Pos2,
+        layer: LayerId,
+        subtract: bool,
+        base_revision: u64,
+    },
 }
 
 pub struct TimelineView {
@@ -382,11 +388,9 @@ pub fn draw(app: &mut TranscriptorApp, ui: &mut egui::Ui) {
                             app.selection.clips.clear();
                         }
                         app.selection.layer = Some(layer);
-                    } else if app.tool == Tool::Cut {
-                        app.selection.items = vec![(layer.clone(), item.clone())];
-                        app.selection.clips.clear();
-                        app.seek(app.timeline_view.x_to_t(p.x, x0));
-                        app.split_at_playhead();
+                    } else if app.tool == Tool::Cut && edge.is_none() && !modifiers.ctrl {
+                        app.timeline_view.gesture =
+                            Gesture::BoxEdit { origin: p, layer, subtract: modifiers.shift, base_revision: app.session.revision() };
                     } else {
                         app.timeline_view.gesture =
                             Gesture::PendingItem { layer, item, origin: p, additive: modifiers.shift || modifiers.ctrl, range_index, edge };
@@ -398,6 +402,12 @@ pub fn draw(app: &mut TranscriptorApp, ui: &mut egui::Ui) {
                     }
                     if modifiers.alt || secondary {
                         app.timeline_view.gesture = Gesture::Pan { last: p };
+                    } else if app.tool == Tool::Cut
+                        && !modifiers.ctrl
+                        && let LaneKind::Layer(layer) = kind
+                    {
+                        app.timeline_view.gesture =
+                            Gesture::BoxEdit { origin: p, layer, subtract: modifiers.shift, base_revision: app.session.revision() };
                     } else {
                         if !modifiers.shift {
                             app.selection.clear();
@@ -638,6 +648,39 @@ pub fn draw(app: &mut TranscriptorApp, ui: &mut egui::Ui) {
                     next = Some(Gesture::None);
                 } else {
                     next = Some(Gesture::BoxSelect { origin, current: p });
+                }
+            }
+            Gesture::BoxEdit { origin, layer, subtract, base_revision } => {
+                let a = app.timeline_view.x_to_t(origin.x, x0).max(Ticks::ZERO);
+                let b = app.timeline_view.snap(app.timeline_view.x_to_t(p.x, x0).max(Ticks::ZERO), &edges_for_snap, app.ui.snapping);
+                let color = if subtract { Color32::LIGHT_RED } else { colors::ACCENT };
+                let preview = Rect::from_min_max(Pos2::new(origin.x.min(p.x), origin.y - 12.0), Pos2::new(origin.x.max(p.x), origin.y + 12.0));
+                ui.painter().rect_filled(preview, 0.0, color.gamma_multiply(0.3));
+                ui.painter().rect_stroke(preview, 0.0, Stroke::new(1.5, color), egui::StrokeKind::Inside);
+                if primary_released {
+                    if app.session.revision() != base_revision {
+                        app.toast(Severity::Warn, "El proyecto cambió durante la caja; repite el gesto");
+                    } else if (p.x - origin.x).abs() >= DRAG_THRESHOLD {
+                        let command = app.project().layer(&layer).and_then(|l| {
+                            let (start, end) = match app.view {
+                                ViewMode::Source => {
+                                    (app.view_time_to_source(a.min(b), &l.asset_id)?, app.view_time_to_source(a.max(b), &l.asset_id)?)
+                                }
+                                ViewMode::Sequence => {
+                                    app.sequence()?.clips.iter().filter(|c| c.enabled && c.asset_id == l.asset_id).find_map(|c| {
+                                        Some((c.seq_edge_to_source(a.min(b), ClipEdge::Start)?, c.seq_edge_to_source(a.max(b), ClipEdge::End)?))
+                                    })?
+                                }
+                            };
+                            Some(Command::BoxEdit { layer_id: layer.clone(), range: TimeRange::new(start, end), subtract })
+                        });
+                        if let Some(command) = command {
+                            app.exec(command);
+                        } else {
+                            app.toast(Severity::Warn, "La caja cruza un salto de fuente; dibújala en Fuente");
+                        }
+                    }
+                    next = Some(Gesture::None);
                 }
             }
             Gesture::None => {}
@@ -1254,6 +1297,50 @@ fn draw_header(app: &mut TranscriptorApp, ui: &mut egui::Ui, rect: Rect, lane: &
                 colors::TEXT,
             );
             resp.context_menu(|ui| {
+                if app.project().layer(layer_id).is_some_and(|l| l.kind == tv2_domain::LayerKind::Blocks)
+                    && ui.button("Ajustar bordes seguros (radio 15 s)").clicked()
+                {
+                    app.prepare_semantic(Command::SnapBlockBoundaries { layer_id: layer_id.clone(), radius: Ticks::from_seconds(15) });
+                    ui.close();
+                }
+                if let Some(layer) = app.project().layer(layer_id).cloned()
+                    && layer.kind == tv2_domain::LayerKind::Trims
+                {
+                    if ui.button("Unir recortes solapados").clicked() {
+                        app.exec(Command::CoalesceTrims { layer_id: layer_id.clone(), actor_id: None });
+                        ui.close();
+                    }
+                    let targets: Vec<_> = app
+                        .project()
+                        .ordered_layers()
+                        .into_iter()
+                        .filter(|l| l.layer_id != *layer_id && l.asset_id == layer.asset_id && l.kind == tv2_domain::LayerKind::Trims && !l.locked)
+                        .map(|l| (l.layer_id.clone(), l.name.clone()))
+                        .collect();
+                    ui.menu_button("Mover selección a…", |ui| {
+                        for (id, name) in &targets {
+                            if ui.button(name).clicked() {
+                                let item_ids = app.selection.items.iter().filter(|(l, _)| l == layer_id).map(|(_, i)| i.clone()).collect();
+                                app.exec(Command::MoveTrimItems { layer_id: layer_id.clone(), target_layer_id: id.clone(), item_ids });
+                                ui.close();
+                            }
+                        }
+                    });
+                    if !matches!(layer.lane.as_deref(), Some("main" | "ai")) {
+                        ui.menu_button("Quitar carril…", |ui| {
+                            for (id, name) in &targets {
+                                if ui.button(format!("Conservar recortes en {name}")).clicked() {
+                                    app.exec(Command::RemoveTrimLane { layer_id: layer_id.clone(), move_to: Some(id.clone()) });
+                                    ui.close();
+                                }
+                            }
+                            if ui.button("Borrar carril y sus recortes (con Deshacer)").clicked() {
+                                app.exec(Command::RemoveTrimLane { layer_id: layer_id.clone(), move_to: None });
+                                ui.close();
+                            }
+                        });
+                    }
+                }
                 if ui.button("Subir carril").clicked() {
                     app.move_layer(layer_id, -1);
                     ui.close();

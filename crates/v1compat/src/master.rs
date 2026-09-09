@@ -57,7 +57,11 @@ impl V1Master {
     }
 
     pub fn evidence(&self, asset_id: &tv2_domain::AssetId) -> tv2_domain::evidence::MasterEvidence {
-        tv2_domain::evidence::MasterEvidence { asset_id: asset_id.clone(), source_digest: self.source_master_digest(), document: self.raw.clone() }
+        tv2_domain::evidence::MasterEvidence {
+            asset_id: asset_id.clone(),
+            source_digest: self.source_master_digest(),
+            document: self.raw.clone().into(),
+        }
     }
 
     /// Project words, utterances/speakers and signals without rewriting the

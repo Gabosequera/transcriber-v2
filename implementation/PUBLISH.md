@@ -1,3 +1,11 @@
+# Checkpoint alpha.6 — continuación 9
+
+Base main `87d9a26`, versión de fuentes 2.0.0-alpha.6. 60 tests dirigidos (40 application +20 V1compat), check, Clippy/all-targets y formato correctos. Build release local correcto en 2m04s; `evidence/build-alpha6.json` con tamaño/SHA256. Exe no ejecutado. Pruebas físicas/multimedia/revisión general aplazadas; no se eludió Windows4551.
+
+Publicación de checkpoint autorizada por el encargo vigente. Prerelease de fuentes sin assets binarios nuevos; estado exacto de la publicación se registra tras confirmación. **E2 abierta, E3 parcial y E4 pendiente; objetivo hasta E4 incompleto. E5 no iniciada.** Alcance y próximos pendientes en STATUS y evidence/continuacion-09.md.
+
+---
+
 # Publicación vigente — continuación 8, alpha.5
 
 Publicada y verificada [v2.0.0-alpha.5](https://github.com/Gabosequera/transcriber-v2/releases/tag/v2.0.0-alpha.5) sobre `83987b68a8dae139a8f70a5dba71c407b6fd7de8`, código subido a main. `isPrerelease=true`, `isDraft=false`, `assets=[]`; tag remoto coincide con el SHA completo. Registro: `evidence/publication-alpha5.json`, publicado 2026-09-09 01:32:59 UTC.

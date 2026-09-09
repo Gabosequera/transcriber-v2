@@ -10,6 +10,10 @@ pub fn layer_document(project: &Project, id: &LayerId) -> V1Result<Value> {
     if layer.kind == LayerKind::Trims {
         return trims_document(project, &layer.asset_id);
     }
+    if layer.kind == LayerKind::Author {
+        let asset = project.asset(&layer.asset_id).ok_or_else(|| invalid("Medio inexistente"))?;
+        return crate::author::to_v1(layer, asset);
+    }
     if layer.kind == LayerKind::Blocks {
         let asset = project.asset(&layer.asset_id).ok_or_else(|| invalid("Medio inexistente"))?;
         return crate::chunks::to_v1(layer, asset.duration());
@@ -138,7 +142,13 @@ mod tests {
         assert_eq!(twin["evidence"], json!({"w":1}));
         let restored = crate::trims::trims_from_v1(&exported, &asset.id, Some(&asset.fingerprint)).unwrap();
         assert_eq!(restored.layers.iter().find(|l| l.lane.as_deref() == Some("ai")).unwrap().items[0].label, "Etiqueta");
-        Command::DeleteLayer { layer_id: "trims-main".into() }.apply(&mut p).unwrap();
+        assert!(Command::DeleteLayer { layer_id: "trims-main".into() }.apply(&mut p).is_err());
+        Command::DeleteItems {
+            layer_id: "trims-main".into(),
+            item_ids: p.layer(&"trims-main".into()).unwrap().items.iter().map(|i| i.item_id.clone()).collect(),
+        }
+        .apply(&mut p)
+        .unwrap();
         assert_eq!(layer_document(&p, &"trims-ai".into()).unwrap()["cuts"].as_array().unwrap().len(), 1);
     }
 

@@ -160,6 +160,7 @@ pub struct TranscriptorApp {
     pub export: ExportState,
     pub imports: crate::import_jobs::ImportJobs,
     pub editorial_job: Option<crate::editorial_jobs::EditorialJob>,
+    pub semantic_job: Option<crate::semantic_jobs::SemanticJob>,
     pub timeline_view: crate::ui_timeline::TimelineView,
     pub resolved: Arc<ResolvedTimeline>,
     pub resolved_revision: Option<(u64, ViewMode, Option<AssetId>)>,
@@ -177,6 +178,7 @@ pub struct TranscriptorApp {
     pub close_after_save: bool,
     pub recovery: Option<Project>,
     pub recovery_audit: Vec<tv2_application::session::JournalEvent>,
+    pub recovery_history: Option<tv2_application::session::DurableHistory>,
     pub v1_export_job: Option<crossbeam_channel::Receiver<tv2_domain::error::DomainResult<PathBuf>>>,
     pub autosave_job: Option<crossbeam_channel::Receiver<tv2_domain::error::DomainResult<()>>>,
     pub persistence_job: Option<crate::persistence_jobs::PersistenceJob>,
@@ -274,6 +276,7 @@ impl TranscriptorApp {
             _console_sink: console_sink,
             imports: Default::default(),
             editorial_job: None,
+            semantic_job: None,
             export: ExportState {
                 open: false,
                 preset_idx: 1,
@@ -307,6 +310,7 @@ impl TranscriptorApp {
             close_after_save: false,
             recovery: None,
             recovery_audit: Vec::new(),
+            recovery_history: None,
             autosave_job: None,
             persistence_job: None,
             v1_export_job: None,
@@ -371,7 +375,10 @@ impl TranscriptorApp {
                 let mut empty = Project::new(candidate.name.clone());
                 empty.project_id = candidate.project_id.clone();
                 let mut session = ProjectSession::new(empty);
-                match store.read_journal().and_then(|events| session.recover_with_audit(candidate, events)) {
+                match store
+                    .load_history(&candidate)
+                    .and_then(|history| store.read_journal().and_then(|events| session.recover_checkpoint(candidate, events, history)))
+                {
                     Ok(()) => {
                         self.player_send(PlayerCommand::Pause);
                         self.session = session;
@@ -443,10 +450,32 @@ impl TranscriptorApp {
 
     /// Mismo recorrido humano, conservando el error tipado para los guiones.
     pub fn exec_checked(&mut self, command: Command) -> Result<(), DomainError> {
+        let box_layer = match &command {
+            Command::BoxEdit { layer_id, .. } => Some(layer_id.clone()),
+            _ => None,
+        };
         match self.session.execute(CommandEnvelope::human(command)) {
             Ok(r) => {
                 tracing::debug!(rev = r.new_revision, "{}: {}", r.effect.label, r.diff.human());
                 self.after_change();
+                if let Some(id) = box_layer
+                    && let Some(layer) = self.project().layer(&id)
+                {
+                    let selected =
+                        r.effect.created.iter().rev().chain(&r.effect.affected).find_map(|id| layer.items.iter().find(|i| i.item_id.as_str() == id));
+                    let item = selected.cloned();
+                    let kind = layer.kind.clone();
+                    self.selection.items.clear();
+                    self.selection.clips.clear();
+                    self.selection.layer = Some(id.clone());
+                    if let Some(item) = item {
+                        self.selection.items.push((id.clone(), item.item_id.clone()));
+                        if matches!(kind, LayerKind::User | LayerKind::Ai) && r.effect.created.contains(&item.item_id.to_string()) {
+                            self.item_editor =
+                                Some(crate::item_editor::ItemEditor::new(self.project().project_id.clone(), self.session.revision(), id, &item));
+                        }
+                    }
+                }
                 Ok(())
             }
             Err(e) => {
@@ -863,6 +892,16 @@ impl TranscriptorApp {
         let (tx, rx) = crossbeam_channel::bounded(1);
         let result = std::thread::Builder::new().name("v1-export".into()).spawn(move || {
             let work = || -> tv2_domain::error::DomainResult<PathBuf> {
+                if !montage
+                    && let Some(id) = &layer
+                    && project.layer(id).is_some_and(|l| l.kind == LayerKind::Blocks)
+                {
+                    let documents = tv2_v1compat::materialize::blocks(&project, id)?;
+                    let target = directory.join(format!("v1-blocks-r{}-{}", project.revision, tv2_domain::ids::random_hex12()));
+                    tv2_application::documents::create(&target)?;
+                    tv2_application::documents::publish(&target, &documents)?;
+                    return Ok(target);
+                }
                 let (value, name) = if montage {
                     let id = sequence.ok_or_else(|| DomainError::invalid("Selecciona una secuencia"))?;
                     (tv2_v1compat::export::montage_document(&project, &id)?, "montaje.json".to_string())
@@ -872,6 +911,7 @@ impl TranscriptorApp {
                     let filename = match kind {
                         LayerKind::Trims => "trims.json".into(),
                         LayerKind::Blocks => "chunks.selected.json".into(),
+                        LayerKind::Author => "autor.marcas.json".into(),
                         _ => format!("{id}.json"),
                     };
                     (tv2_v1compat::export::layer_document(&project, &id)?, filename)
@@ -2207,6 +2247,7 @@ impl eframe::App for TranscriptorApp {
         self.poll_editorial_import();
         self.poll_v1_export();
         self.poll_persistence();
+        self.poll_semantic();
         if self.close_after_save && self.persistence_job.is_none() && !self.session.is_dirty() {
             self.close_after_save = false;
             self.pending_close = false;
@@ -2265,6 +2306,7 @@ impl eframe::App for TranscriptorApp {
         if self.imports.busy()
             || self.persistence_job.is_some()
             || self.editorial_job.is_some()
+            || self.semantic_job.is_some()
             || self.player_snapshot.playing
             || self.export.running.is_some()
             || !self.toasts.is_empty()

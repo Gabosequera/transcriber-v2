@@ -100,6 +100,34 @@ mod tests {
     use super::*;
     use tv2_domain::{ClipEdge, Command, Project};
     #[test]
+    fn snap_recomputes_boundary_evidence_and_materializes_without_mutating_master() {
+        let asset = tv2_domain::commands::tests_support::fake_video("a", 10);
+        let raw_master = json!({"schema":"editorial-master/1","media":{"duration":10.0,"fingerprint":asset.fingerprint},"tracks":{"A":{"label":"A","words":[{"word_id":"w1","t_ini":4.0,"t_fin":6.0,"text":"habla","intensity_z":1.5}],"laughter":[],"arousal":[]}},"conversation":{"clean_utterance_ids":["u1","u2"],"utterances":[{"utterance_id":"u1","track_id":"A","t_ini":1.0,"t_fin":4.5,"text":"uno"},{"utterance_id":"u2","track_id":"A","t_ini":4.5,"t_fin":9.0,"text":"dos"}]}});
+        let master = crate::master::V1Master::parse(raw_master.clone()).unwrap();
+        let plan = json!({"schema":"editorial-chunks/1","chunks":[{"chunk_id":"chunk-001","t_ini":0.0,"t_fin":5.0,"title":"Uno","first_utterance_id":"stale"},{"chunk_id":"chunk-002","t_ini":5.0,"t_fin":10.0,"title":"Dos"}]});
+        let layer = from_v1(&plan, &asset.id, asset.duration(), &master.source_master_digest()).unwrap();
+        let id = layer.layer_id.clone();
+        let mut p = Project::new("safe");
+        p.masters.push(master.evidence(&asset.id));
+        p.assets.push(asset);
+        p.layers.push(layer);
+        Command::SnapBlockBoundaries { layer_id: id.clone(), radius: Ticks::from_seconds(2) }.apply(&mut p).unwrap();
+        let exported = to_v1(p.layer(&id).unwrap(), Ticks::from_seconds(10)).unwrap();
+        let boundary = exported["chunks"][0]["t_fin"].as_f64().unwrap();
+        assert!(!(3.96..6.04).contains(&boundary));
+        assert_eq!(exported["boundary_snap"], "global-safe/2");
+        assert_eq!(exported["boundary_adjustments"][0]["safety"]["word_conflicts"], 0);
+        let docs = crate::materialize::blocks(&p, &id).unwrap();
+        assert!(docs.contains_key("chunks/chunk-001/signals-summary.json"));
+        assert!(docs.contains_key(".work/chunks.selected.json"));
+        let exported_master: Value = serde_json::from_str(&docs["project.editorial.master.json"]).unwrap();
+        assert_eq!(exported_master["chunks"], exported["chunks"]);
+        assert_eq!(p.masters[0].document, raw_master);
+        let layer = p.layers[0].clone();
+        assert!(Command::SnapBlockBoundaries { layer_id: id, radius: Ticks::ZERO }.apply(&mut p).is_err());
+        assert_eq!(p.layers[0], layer);
+    }
+    #[test]
     fn selected_plan_split_and_boundary_move_preserve_partition_and_unknown_fields() {
         let raw = json!({"schema":"editorial-chunks/1", "duration":10.0, "future":{"x":1}, "chunks":[
             {"chunk_id":"chunk-001", "t_ini":0.0,"t_fin":5.0,"title":"Uno","summary":"texto","evidence":{"w":1}},

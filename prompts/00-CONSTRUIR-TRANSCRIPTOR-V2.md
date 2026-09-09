@@ -141,3 +141,14 @@ Pendientes: caja Corte unión/resta, paridad de gestos/control dinámico; sideca
 51 tests dirigidos (33 application +18 V1compat) pasan; controles finales exactos en evidence. Tests desktop/dominio solo compilados; no reintentar ni eludir Windows4551. V1 bb7012c observado limpio, AST/texto solo lectura, datos/modelos intactos. Al cortar por contexto: actualizar evidencia, commit/push/prerelease y traspaso sin inflar el cierre.
 
 Publicación verificada: [v2.0.0-alpha.5](https://github.com/Gabosequera/transcriber-v2/releases/tag/v2.0.0-alpha.5), código/tag `83987b68a8dae139a8f70a5dba71c407b6fd7de8`, main subido. Prerelease no draft, sin assets binarios; `evidence/publication-alpha5.json` y PUBLISH. 51 tests, Clippy/formato/build release final OK; sin ejecución física ni cierre global de E2/E3/E4.
+
+
+## Traspaso vigente — continuación 9 (sustituye al anterior)
+
+Continuar desde main; base de este incremento 87d9a26, fuentes alpha.6. Leer STATUS, evidence/continuacion-09.md, matriz, RUN, inventario y D-0043–D-0046. No reiniciar E0/E1. Alcance hasta completar E4 sigue autorizado e incompleto; parar antes de E5. Pruebas físicas/multimedia/revisión general aplazadas.
+
+Nuevo: BoxEdit creación/unión/resta por gesto, selección/pedido; coalescencia strict/actor/metadata/tombstones y movimiento/eliminación de carriles trims (main/ai protegidos); adaptador author sidecar schema 1 con identidad/revisión/cuarentena/import explícito/export, sin master editable duplicado. Inspector de bloques ajusta vecinos; SnapBlockBoundaries global-safe/2/evidencia en worker; materializa master derivado/selected/view y archivos por bloque. Transacción documental recuperable en carpetas propias V2, recibos y recuperación desde menú. Autosave restaura pila undo/redo completa. EvidenceDocument inmutable compartido con digest cacheado; PreparedCommand ligado a base conserva IDs al commit.
+
+Pendientes reales: paridad dinámica restante e integración de candidatos globales de autor; derivación/mapping/manifests/requests/proposals/passes, carpeta V1 completa y montaje inverso editado (todavía rechazado), transacciones para contratos restantes. Jobs durables, archivado de auditoría/recibos de sesión, migraciones, watcher SO/V1/diff detallado/resolución; clones de proyecciones/historial serializado y otros costos GUI. E4 entero: MCP real/schemas/capabilities/paginación/selección/transporte/contexto/evidencia/jobs/permisos/propuestas/digests/dry-run/diff/preview/apply/verificación/eventos/cliente GUI. No confundir PreparedCommand con MCP ni materialización de bloques con export carpeta completa.
+
+Controles finales y publicación exactos en evidence/continuacion-09.md y PUBLISH. Solo application/V1compat ejecutados; dominio/desktop compilados por all-targets, no ejecutar ni eludir Windows4551. V1/datos personales intactos. Al necesitar checkpoint: evidencia/matriz/decisiones/traspaso, commit/push/prerelease sin declarar E2/E3/E4 cerradas.
