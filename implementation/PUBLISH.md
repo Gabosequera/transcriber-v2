@@ -1,5 +1,8 @@
 # Checkpoint alpha.6 — continuación 9
 
+Publicación verificada: [v2.0.0-alpha.6](https://github.com/Gabosequera/transcriber-v2/releases/tag/v2.0.0-alpha.6), código/tag `48784e6ef9a6cfb1c13fcee1e82a1f0989f98a7b`. Prerelease no draft, sin assets binarios; tag y código main confirmados en remoto. Evidencia en `implementation/evidence/publication-alpha6.json`. 60 tests dirigidos, check/Clippy/formato/build release correctos; sin ejecución física ni cierre de E2/E3/E4.
+
+
 Base main `87d9a26`, versión de fuentes 2.0.0-alpha.6. 60 tests dirigidos (40 application +20 V1compat), check, Clippy/all-targets y formato correctos. Build release local correcto en 2m04s; `evidence/build-alpha6.json` con tamaño/SHA256. Exe no ejecutado. Pruebas físicas/multimedia/revisión general aplazadas; no se eludió Windows4551.
 
 Publicación de checkpoint autorizada por el encargo vigente. Prerelease de fuentes sin assets binarios nuevos; estado exacto de la publicación se registra tras confirmación. **E2 abierta, E3 parcial y E4 pendiente; objetivo hasta E4 incompleto. E5 no iniciada.** Alcance y próximos pendientes en STATUS y evidence/continuacion-09.md.

@@ -1,5 +1,8 @@
 # STATUS — continuación 9, fuentes 2.0.0-alpha.6
 
+Publicación verificada: [v2.0.0-alpha.6](https://github.com/Gabosequera/transcriber-v2/releases/tag/v2.0.0-alpha.6), código/tag `48784e6ef9a6cfb1c13fcee1e82a1f0989f98a7b`. Prerelease no draft, sin assets binarios; tag y código main confirmados en remoto. Evidencia en `implementation/evidence/publication-alpha6.json`. 60 tests dirigidos, check/Clippy/formato/build release correctos; sin ejecución física ni cierre de E2/E3/E4.
+
+
 Base: `main` limpio en `87d9a26`; V1 `bb7012c`, solo lectura. **Objetivo hasta E4 incompleto. E2 abierta, E3 parcial, E4 pendiente. E5 no iniciada.** Este es un checkpoint de continuidad; la aceptación física, multimedia y revisión general siguen aplazadas.
 
 ## Implementado en este incremento
