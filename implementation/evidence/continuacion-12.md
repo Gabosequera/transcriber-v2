@@ -56,3 +56,7 @@ El autosave posterior a deshacer una vinculación exige conservar la semántica 
 Check workspace/all-targets correcto; su log conserva un error intermedio de tipo en la nueva acción Guardar como, corregido descartando el retorno booleano del handler. La repetición termina correctamente (2,53 s). Clippy workspace/all-targets -D warnings correcto (5,56 s). Formato correcto y parser PowerShell del cliente correcto. Los tests all-targets de dominio/desktop/V1compat/control están solo compilados. No se lanzó FFmpeg ni el ejecutable. Build release y publicación se registran a continuación cuando finalicen.
 
 Build release final correcto: 2 min32 s de Cargo (153,95 s con wrapper), 30656000 bytes. SHA-256:2577a293b879ce2aedd997bfc15e054f43f579ce21632fb22512c3e881367a66. Metadata en build-alpha9.json y stdout en build-continuacion-12.log. Ejecutable NO lanzado; NO se adjunta como asset de release. V1 se observó limpio al terminar las comprobaciones.
+
+
+Publicación confirmada: [v2.0.0-alpha.9](https://github.com/Gabosequera/transcriber-v2/releases/tag/v2.0.0-alpha.9), código/tag 0fc6ae2184ce642b222ec6764d0edf9796096592; prerelease pública no draft, sin assets binarios. Verificación en publication-alpha9.json. Main incluye después el commit documental de este registro; el tag conserva exactamente el código compilado. La publicación no declara aceptación física ni inicia E5.
+

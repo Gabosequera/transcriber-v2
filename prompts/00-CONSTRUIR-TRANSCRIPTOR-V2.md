@@ -193,3 +193,7 @@ E2: inspector/estados/gestos/paleta, preview preparado, índices/composición/im
 V1 y datos personales permanecen estrictamente de solo lectura. GUI/multimedia/revisión general y aceptación siguen aplazadas: no ejecutarlas ni inferirlas de Clippy. Tests dominio/desktop/V1compat/control bloqueados por4551 no se reintentan ni se eluden. Application sintética permitida; los comandos/resultados exactos del último árbol figuran en la evidencia. El build release no se ejecuta y la prerelease solo distribuye fuentes.
 
 La siguiente actividad preparada es la aceptación de los recorridos RUN/control.md cuando el usuario la reanude: edición/foco/gestos, reproducción/export, portabilidad/recuperación y cliente MCP contra la aplicación. Hasta entonces no lanzar el ejecutable ni seguir a E5. Las limitaciones de metadatos/undo/COW/archivo/RAM están documentadas como contratos y costes reales; PERF-01 no tiene aceptación global ni cifras nuevas de latencia o sincronía. No confundir el registro de implementación con una revisión general o aprobación del producto.
+
+
+Publicación confirmada: [v2.0.0-alpha.9](https://github.com/Gabosequera/transcriber-v2/releases/tag/v2.0.0-alpha.9), código/tag 0fc6ae2184ce642b222ec6764d0edf9796096592; prerelease pública no draft, sin assets binarios. Verificación en evidence/publication-alpha9.json. Main incluye después el commit documental de este registro; el tag conserva exactamente el código compilado. La publicación no declara aceptación física ni inicia E5.
+

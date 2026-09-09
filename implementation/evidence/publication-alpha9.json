@@ -1,0 +1,14 @@
+{
+  "remote_tag": "0fc6ae2184ce642b222ec6764d0edf9796096592\trefs/tags/v2.0.0-alpha.9",
+  "code_commit": "0fc6ae2184ce642b222ec6764d0edf9796096592",
+  "verified_utc": "2026-09-09T19:21:46.2572112Z",
+  "release": {
+    "assets": [],
+    "isDraft": false,
+    "isPrerelease": true,
+    "publishedAt": "2026-09-09T19:21:45Z",
+    "tagName": "v2.0.0-alpha.9",
+    "targetCommitish": "main",
+    "url": "https://github.com/Gabosequera/transcriber-v2/releases/tag/v2.0.0-alpha.9"
+  }
+}

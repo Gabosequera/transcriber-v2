@@ -97,3 +97,7 @@ Build41,63s; exe SHA2562eb8464f6800dd84cb111c942115a6658df85dbb92a11a5aad6486403
 ## Continuación12 — fuentes alpha.9
 
 El incremento integra implementación E2/E3/E4 y conserva E0/E1; E5 no iniciada. V1/datos personales solo lectura. La publicación prevista es una prerelease de fuentes sin assets binarios, siguiendo el formato de alpha.8. El build local no se ejecuta; GUI/multimedia/revisión general y aceptación quedan aplazadas. Código, resultados y límites en evidence/continuacion-12.md; notas en evidence/release-alpha9.md. El resultado confirmado y la identidad del commit/tag se añadirán tras publicar/verificar.
+
+
+Publicación confirmada: [v2.0.0-alpha.9](https://github.com/Gabosequera/transcriber-v2/releases/tag/v2.0.0-alpha.9), código/tag 0fc6ae2184ce642b222ec6764d0edf9796096592; prerelease pública no draft, sin assets binarios. Verificación en evidence/publication-alpha9.json. Main incluye después el commit documental de este registro; el tag conserva exactamente el código compilado. La publicación no declara aceptación física ni inicia E5.
+

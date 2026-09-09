@@ -150,3 +150,7 @@ V1 `bb7012c` observado limpio; solo lectura AST/texto, sin ejecutar sus módulos
 Controles finales alpha.5: **51 tests (33 application +18 V1compat), Clippy/all-targets y formato OK; build release OK en 2m13s**, sin ejecutar el exe. Metadatos en evidence/build-alpha5.json.
 
 Publicación verificada: [v2.0.0-alpha.5](https://github.com/Gabosequera/transcriber-v2/releases/tag/v2.0.0-alpha.5), código/tag `83987b68a8dae139a8f70a5dba71c407b6fd7de8`, main subido. Prerelease no draft, sin assets binarios; `evidence/publication-alpha5.json` y PUBLISH. 51 tests, Clippy/formato/build release final OK; sin ejecución física ni cierre global de E2/E3/E4.
+
+
+Publicación confirmada: [v2.0.0-alpha.9](https://github.com/Gabosequera/transcriber-v2/releases/tag/v2.0.0-alpha.9), código/tag 0fc6ae2184ce642b222ec6764d0edf9796096592; prerelease pública no draft, sin assets binarios. Verificación en evidence/publication-alpha9.json. Main incluye después el commit documental de este registro; el tag conserva exactamente el código compilado. La publicación no declara aceptación física ni inicia E5.
+
