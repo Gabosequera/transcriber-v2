@@ -63,13 +63,16 @@ pub fn read_v1_editorial(root: &Path, asset: &Asset) -> V1Result<V1Import> {
 }
 
 pub fn read_v1_editorial_with_stores(root: &Path, asset: &Asset, stores: &[PathBuf]) -> V1Result<V1Import> {
+    read_v1_editorial_with_cancel(root, asset, stores, &std::sync::atomic::AtomicBool::new(false))
+}
+
+pub fn read_v1_editorial_with_cancel(root: &Path, asset: &Asset, stores: &[PathBuf], cancel: &std::sync::atomic::AtomicBool) -> V1Result<V1Import> {
     let master_path = find_master(root).ok_or_else(|| invalid(format!("no se encontró *.editorial.master.json en {}", root.display())))?;
     let editorial_dir = master_path.parent().map(Path::to_path_buf).unwrap_or_else(|| root.to_path_buf());
-    let original = crate::folder::snapshot(&editorial_dir, master_path.file_name().unwrap().to_string_lossy().into_owned())?;
+    let original = crate::folder::snapshot_with_cancel(&editorial_dir, master_path.file_name().unwrap().to_string_lossy().into_owned(), cancel)?;
     let read_json = |path: &Path| -> V1Result<Value> {
         let relative = path.strip_prefix(&editorial_dir).map_err(|_| invalid("documento fuera de carpeta"))?.to_string_lossy().replace('\\', "/");
-        let text = original.documents().get(&relative).ok_or_else(|| invalid("documento ausente del snapshot"))?;
-        Ok(serde_json::from_str(text.trim_start_matches('\u{feff}'))?)
+        crate::folder::read_snapshot_json(&original, &relative, cancel)
     };
     let master = V1Master::parse(read_json(&master_path)?)?;
     let mut report = V1ImportReport {
@@ -95,10 +98,14 @@ pub fn read_v1_editorial_with_stores(root: &Path, asset: &Asset, stores: &[PathB
         paths.sort();
         for p in paths {
             match read_json(&p).and_then(|v| layer_from_v1(&v, &asset.id, Some(&asset.fingerprint), duration)) {
-                Ok(l) => {
+                Ok(mut l) => {
                     if p.file_stem().is_some_and(|s| s != l.layer_id.as_str()) {
                         report.warnings.push(format!("{}: nombre de archivo incoherente con layer_id {}", p.display(), l.layer_id));
                     }
+                    l.extra.insert(
+                        "tv2_v1_source_path".into(),
+                        serde_json::json!(p.strip_prefix(&editorial_dir).unwrap().to_string_lossy().replace('\\', "/")),
+                    );
                     layers.push(l);
                 }
                 Err(e) => return Err(invalid(format!("{}: {e}; no se importó la carpeta", p.display()))),
@@ -158,17 +165,44 @@ pub fn read_v1_editorial_with_stores(root: &Path, asset: &Asset, stores: &[PathB
         }
     }
     layers.extend(master.projections(&asset.id)?);
-    let final_snapshot = crate::folder::snapshot(&editorial_dir, original.master_path().to_string())?;
-    if original != final_snapshot {
-        return Err(invalid("la carpeta V1 cambió durante la lectura; no se importó"));
-    }
-    let mut evidence = master.evidence(&asset.id);
+    crate::folder::verify_snapshot(&editorial_dir, &original, cancel)?;
+    let mut evidence = tv2_domain::evidence::MasterEvidence {
+        asset_id: asset.id.clone(),
+        source_digest: master.source_master_digest(),
+        document: master.raw.into(),
+        source_bundle: None,
+    };
+    let original = if original.files().contains_key(original.master_path()) {
+        original.with_external_master_digest(evidence.document.full_digest().into())
+    } else {
+        original
+    };
     evidence.source_bundle = Some(std::sync::Arc::new(original));
     Ok(V1Import { master: evidence, report, layers, sequence, author_candidates })
 }
 
+/// Vincular la carpeta de un proyecto antiguo no vuelve a importar su edición.
+/// Se compara el documento completo: el digest editorial omite campos como
+/// `chunks` y por sí solo no identifica la misma evidencia inmutable.
+pub fn is_source_bundle_enrichment(import: &V1Import, project: &Project) -> bool {
+    import.master.source_bundle.is_some()
+        && project.masters.iter().any(|existing| {
+            existing.asset_id == import.master.asset_id
+                && existing.source_bundle.is_none()
+                && existing.source_digest == import.master.source_digest
+                && existing.document == import.master.document
+        })
+}
+
 /// Comandos para incorporar la importación a un proyecto (batch todo-o-nada).
+/// Para evidencia antigua idéntica sin carpeta solo adjunta el origen: conserva
+/// todas las capas, secuencias y metadatos del master ya presente.
 pub fn import_commands(import: &V1Import, project: &Project, _asset_id: &AssetId) -> Vec<Command> {
+    if is_source_bundle_enrichment(import, project) {
+        let mut master = project.masters.iter().find(|existing| existing.asset_id == import.master.asset_id).unwrap().clone();
+        master.source_bundle = import.master.source_bundle.clone();
+        return vec![Command::AttachMaster { master }];
+    }
     let mut cmds = vec![Command::AttachMaster { master: import.master.clone() }];
     for l in &import.layers {
         let mut layer = l.clone();
@@ -209,6 +243,31 @@ mod tests {
     use crate::master::fixtures;
     use serde_json::json;
     use tv2_domain::commands::tests_support::fake_video;
+    #[test]
+    fn external_master_uses_verified_bytes_and_exports_original_reference() {
+        let root = tempfile::tempdir().unwrap();
+        let asset = fake_video("external", 12);
+        let mut raw = fixtures::master(12.0);
+        raw["media"]["fingerprint"] = serde_json::json!(asset.fingerprint);
+        raw["future_large_metadata"] = serde_json::json!("immutable".repeat(10000));
+        let name = "external.editorial.master.json";
+        let bytes = format!("\u{feff}{}\r\n", raw);
+        std::fs::write(root.path().join(name), &bytes).unwrap();
+        let imported = read_v1_editorial(root.path(), &asset).unwrap();
+        let bundle = imported.master.source_bundle.as_ref().unwrap();
+        assert!(!bundle.documents().contains_key(name));
+        assert!(bundle.files().contains_key(name));
+        assert_eq!(bundle.external_master_digest(), Some(imported.master.document.full_digest()));
+        let mut p = Project::new("external");
+        p.assets.push(asset.clone());
+        Command::Batch { label: "import".into(), commands: import_commands(&imported, &p, &asset.id) }.apply(&mut p).unwrap();
+        p.validate().unwrap();
+        let exported = crate::folder::export(&p, &asset.id, None).unwrap();
+        assert!(exported.files.contains_key(name));
+        assert!(!exported.documents.contains_key(name));
+        std::fs::write(root.path().join(name), "changed").unwrap();
+        assert!(crate::folder::read_snapshot_json(bundle, name, &std::sync::atomic::AtomicBool::new(false)).is_err());
+    }
 
     #[test]
     fn imports_folder_with_layers_trims_and_montage() {
@@ -243,6 +302,34 @@ mod tests {
         let seq = project.active().unwrap();
         assert_eq!(seq.name, "Montaje V1");
         assert_eq!(seq.extent(), tv2_domain::time::Ticks::from_seconds(20));
+
+        // Reattaching a moved original folder must not replay old layer or
+        // montage documents over subsequent native edits.
+        let mut legacy = project.clone();
+        legacy.masters[0].source_bundle = None;
+        legacy.layers[0].name = "Edición humana posterior".into();
+        legacy.sequences[0].name = "Montaje humano posterior".into();
+        let layers_before = legacy.layers.clone();
+        let sequences_before = legacy.sequences.clone();
+        let active_before = legacy.active_sequence.clone();
+        let document_before = legacy.masters[0].document.clone();
+        assert!(is_source_bundle_enrichment(&import, &legacy));
+        let commands = import_commands(&import, &legacy, &asset.id);
+        assert!(matches!(commands.as_slice(), [Command::AttachMaster { .. }]));
+        Command::Batch { label: "Vincular carpeta".into(), commands }.apply(&mut legacy).unwrap();
+        assert_eq!(legacy.layers, layers_before);
+        assert_eq!(legacy.sequences, sequences_before);
+        assert_eq!(legacy.active_sequence, active_before);
+        assert!(legacy.masters[0].document.shares_storage(&document_before));
+        assert!(legacy.masters[0].source_bundle.is_some());
+        assert!(!is_source_bundle_enrichment(&import, &legacy), "an existing bundle is not an enrichment");
+        legacy.masters[0].source_bundle = None;
+        let mut different = (*legacy.masters[0].document).clone();
+        different["generated_at"] = json!("different source metadata");
+        legacy.masters[0].document = different.into();
+        assert_eq!(legacy.masters[0].document.source_digest(), import.master.source_digest);
+        assert!(!is_source_bundle_enrichment(&import, &legacy), "editorial digest equality must not substitute full evidence equality");
+
         std::fs::write(ed.join("layers").join("invalid.json"), "{broken").unwrap();
         assert!(read_v1_editorial(dir.path(), &asset).is_err(), "recognized invalid documents must abort the whole import");
         // identidad distinta → rechazo explícito

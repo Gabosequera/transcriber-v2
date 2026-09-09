@@ -37,6 +37,26 @@ macro_rules! actions {
 }
 
 actions! {
+    "app.commands", "Paleta de comandos…", "Herramientas", ["Ctrl+Shift+P"], [];
+    "file.new", "Nuevo proyecto", "Herramientas", [], [];
+    "file.save_as", "Guardar como…", "Herramientas", [], [];
+    "file.import_v1", "Importar proyecto o vincular carpeta original V1…", "Herramientas", [], [];
+    "export.v1_layer", "Exportar capa seleccionada a JSON V1…", "Herramientas", [], [];
+    "export.v1_montage", "Exportar montaje a JSON V1…", "Montaje", [], [];
+    "export.v1_folder", "Exportar carpeta documental V1…", "Herramientas", [], [];
+    "export.v1_folder_montage", "Exportar carpeta V1 con montaje activo…", "Montaje", [], [];
+    "editorial.author_import", "Importar marcas del autor V1…", "Marcas", [], [];
+    "editorial.author_review", "Buscar y resolver marcas del autor…", "Marcas", [], [];
+    "export.recover", "Recuperar exportación V1 interrumpida…", "Herramientas", [], [];
+    "export.jobs", "Trabajos de exportación guardados…", "Herramientas", [], [];
+    "settings.shortcuts", "Ajustes de atajos…", "Herramientas", [], [];
+    "view.conversation", "Conversación y evidencia…", "Vista", [], [];
+    "control.open", "Control externo y propuestas MCP…", "Herramientas", [], [];
+    "editorial.review", "Pedidos y respuestas editoriales JSON…", "Herramientas", [], [];
+    "editorial.watch", "Vigilar documento V1 individual…", "Herramientas", [], [];
+    "editorial.watches", "Documentos V1 vigilados…", "Herramientas", [], [];
+    "export.edl", "Exportar EDL CMX3600…", "Montaje", [], [];
+    "export.fcpxml", "Exportar FCPXML…", "Montaje", [], [];
     "sequence.marker_add", "Añadir marcador de secuencia", "Marcas", [], [];
     "sequence.markers", "Lista de marcadores", "Marcas", [], [];
     "sequence.insert_selection", "Insertar selección en playhead (cierra origen)", "Montaje", [], [Context::Clip];
@@ -67,17 +87,17 @@ actions! {
     "nav.goto", "Ir a tiempo…", "Navegación", ["Ctrl+G"], [];
     "nav.sel_start", "Inicio de la selección", "Navegación", ["Shift+I"], [];
     "nav.sel_end", "Fin de la selección", "Navegación", ["Shift+O"], [];
-    "edit.split", "Dividir en el playhead", "Edición", ["S"], [Context::Clip];
-    "edit.trim_start", "Recortar inicio al playhead", "Edición", ["bracketleft"], [Context::Clip];
-    "edit.trim_end", "Recortar fin al playhead", "Edición", ["bracketright"], [Context::Clip];
-    "edit.nudge_prev", "Empujar 1 fotograma atrás", "Edición", ["Alt+Left"], [Context::Clip];
-    "edit.nudge_next", "Empujar 1 fotograma adelante", "Edición", ["Alt+Right"], [Context::Clip];
-    "edit.nudge_prev_10", "Empujar 10 fotogramas atrás", "Edición", ["Alt+Shift+Left"], [Context::Clip];
-    "edit.nudge_next_10", "Empujar 10 fotogramas adelante", "Edición", ["Alt+Shift+Right"], [Context::Clip];
+    "edit.split", "Dividir en el playhead", "Edición", ["S"], [Context::Clip, Context::Item];
+    "edit.trim_start", "Recortar inicio al playhead", "Edición", ["bracketleft"], [Context::Clip, Context::Item];
+    "edit.trim_end", "Recortar fin al playhead", "Edición", ["bracketright"], [Context::Clip, Context::Item];
+    "edit.nudge_prev", "Empujar 1 fotograma atrás", "Edición", ["Alt+Left"], [Context::Clip, Context::Item];
+    "edit.nudge_next", "Empujar 1 fotograma adelante", "Edición", ["Alt+Right"], [Context::Clip, Context::Item];
+    "edit.nudge_prev_10", "Empujar 10 fotogramas atrás", "Edición", ["Alt+Shift+Left"], [Context::Clip, Context::Item];
+    "edit.nudge_next_10", "Empujar 10 fotogramas adelante", "Edición", ["Alt+Shift+Right"], [Context::Clip, Context::Item];
     "edit.item_prev", "Item anterior del carril", "Edición", ["Shift+Tab"], [];
     "edit.item_next", "Item siguiente del carril", "Edición", ["Tab"], [];
-    "edit.accept", "Aceptar (marca de revisión: se corta igual que un propuesto)", "Edición", ["E"], [Context::Item];
-    "edit.accept_next", "Aceptar y pasar al siguiente", "Edición", ["Shift+E"], [Context::Item];
+    "edit.accept", "Aceptar (marca de revisión: se corta igual que un propuesto)", "Edición", ["E"], [Context::Clip, Context::Item];
+    "edit.accept_next", "Aceptar y pasar al siguiente", "Edición", ["Shift+E"], [Context::Clip, Context::Item];
     "edit.toggle", "Desactivar (no se corta; en una marca cicla la decisión)", "Edición", ["X"], [Context::Item, Context::Clip];
     "edit.activate", "Activar: vuelve a propuesto (se corta)", "Edición", ["P"], [Context::Item, Context::Clip];
     "edit.delete", "Borrar", "Edición", ["Delete", "BackSpace", "D"], [Context::Item, Context::Clip];
@@ -129,6 +149,7 @@ pub struct KeymapFile {
 
 pub struct Keymap {
     pub actions: Vec<Action>,
+    pub manifest: std::sync::Arc<Vec<serde_json::Value>>,
     chords: HashMap<&'static str, Vec<String>>,
     bindings: HashMap<String, &'static str>,
     pub conflicts: Vec<(String, String, String)>,
@@ -216,7 +237,11 @@ impl Keymap {
             }
             chords.insert(a.id, list);
         }
-        Keymap { actions, chords, bindings, conflicts, warnings, overrides: clean_overrides }
+        let manifest = std::sync::Arc::new(actions.iter().map(|action| {
+            let contexts: Vec<_> = action.contexts.iter().map(|context| match context { Context::Clip => "clip", Context::Item => "item", Context::Any => "any" }).collect();
+            serde_json::json!({"id":action.id,"label":action.label,"group":action.group,"shortcuts":chords.get(action.id),"contexts":contexts})
+        }).collect());
+        Keymap { actions, manifest, chords, bindings, conflicts, warnings, overrides: clean_overrides }
     }
 
     pub fn resolve(&self, chord: &str) -> Option<&'static str> {

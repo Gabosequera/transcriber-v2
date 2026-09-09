@@ -49,6 +49,81 @@ pub struct ExportPreset {
     pub expect_video_codec: Option<String>,
     #[serde(default)]
     pub expect_audio_codec: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub sample_rate: Option<u32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub channels: Option<u32>,
+}
+
+#[derive(Clone, Debug, Serialize, Deserialize)]
+pub struct ExportSettings {
+    pub enabled: bool,
+    pub width: u32,
+    pub height: u32,
+    pub fps_num: i64,
+    pub fps_den: i64,
+    pub sample_rate: u32,
+    pub channels: u32,
+    pub video_kbps: u32,
+}
+impl Default for ExportSettings {
+    fn default() -> Self {
+        Self { enabled: false, width: 1920, height: 1080, fps_num: 30, fps_den: 1, sample_rate: 48000, channels: 2, video_kbps: 0 }
+    }
+}
+impl ExportSettings {
+    pub fn apply(&self, mut preset: ExportPreset) -> DomainResult<ExportPreset> {
+        if !self.enabled {
+            return Ok(preset);
+        }
+        if ![1, 2].contains(&self.channels) || !(8000..=192000).contains(&self.sample_rate) {
+            return Err(DomainError::invalid("Audio requiere mono/estéreo y 8000–192000 Hz"));
+        }
+        if preset.has_video {
+            if !(64..=8192).contains(&self.width)
+                || !(64..=8192).contains(&self.height)
+                || !self.width.is_multiple_of(2)
+                || !self.height.is_multiple_of(2)
+            {
+                return Err(DomainError::invalid("Resolución par entre 64 y 8192 píxeles"));
+            }
+            if self.fps_num <= 0 || self.fps_den <= 0 || self.fps_num > 240_000 || self.fps_den > 100_000 {
+                return Err(DomainError::invalid("Frecuencia racional inválida"));
+            }
+            let fps = Rational::new(self.fps_num, self.fps_den);
+            if !(1.0..=240.0).contains(&(self.fps_num as f64 / self.fps_den as f64)) {
+                return Err(DomainError::invalid("Frecuencia entre 1 y 240 fps"));
+            }
+            preset.width = self.width;
+            preset.height = self.height;
+            preset.frame_rate = Some(fps);
+            if self.video_kbps > 0 {
+                if !(100..=200000).contains(&self.video_kbps) {
+                    return Err(DomainError::invalid("Bitrate entre 100 y 200000 kbit/s, o 0 para calidad del preset"));
+                }
+                if !matches!(preset.expect_video_codec.as_deref(), Some("h264" | "hevc" | "vp9" | "av1")) {
+                    return Err(DomainError::unsupported("Este encoder usa la calidad fija de su preset"));
+                }
+                let mut args = vec![];
+                let mut i = 0;
+                while i < preset.video_args.len() {
+                    if matches!(preset.video_args[i].as_str(), "-crf" | "-cq" | "-b:v") {
+                        i += 2;
+                    } else {
+                        args.push(preset.video_args[i].clone());
+                        i += 1;
+                    }
+                }
+                args.extend(["-b:v".into(), format!("{}k", self.video_kbps)]);
+                preset.video_args = args;
+            }
+        }
+        preset.sample_rate = Some(self.sample_rate);
+        preset.channels = Some(self.channels);
+        preset.audio_args.extend(["-ar".into(), self.sample_rate.to_string(), "-ac".into(), self.channels.to_string()]);
+        preset.id = format!("{}-custom", preset.id);
+        Ok(preset)
+    }
 }
 
 fn args(list: &[&str]) -> Vec<String> {
@@ -86,6 +161,8 @@ pub fn presets() -> Vec<ExportPreset> {
             hardware_encoder: None,
             expect_video_codec: Some(vcodec.into()),
             expect_audio_codec: Some(acodec.into()),
+            sample_rate: None,
+            channels: None,
         }
     };
     let audio = |id: &str, label: &str, container: &str, aargs: &[&str], enc: &str, acodec: &str, notes: &str| ExportPreset {
@@ -104,6 +181,8 @@ pub fn presets() -> Vec<ExportPreset> {
         hardware_encoder: None,
         expect_video_codec: None,
         expect_audio_codec: Some(acodec.into()),
+        sample_rate: None,
+        channels: None,
     };
     const X264: &[&str] = &["-c:v", "libx264", "-preset", "fast", "-crf", "20", "-pix_fmt", "yuv420p"];
     const AAC: &[&str] = &["-c:a", "aac", "-b:a", "192k"];
@@ -338,7 +417,7 @@ impl ExportJob {
             dir.join(format!(".{}.partial", req.destination.file_name().map(|n| n.to_string_lossy().to_string()).unwrap_or_else(|| "export".into())));
         let _ = std::fs::remove_file(&staging);
         let fps = req.preset.frame_rate.unwrap_or(req.timeline.frame_rate);
-        let sample_rate = req.timeline.sample_rate.max(8000);
+        let sample_rate = req.preset.sample_rate.unwrap_or(req.timeline.sample_rate).max(8000);
         let has_audio = req.timeline.pieces.iter().any(|p| !p.audio.is_empty());
 
         // 1) audio → WAV temporal (misma mezcla que el visor, rate 1)
@@ -421,6 +500,13 @@ impl ExportJob {
         let tolerance = Ticks::from_millis(150).max(fps.frame_duration() * 2);
         let video_streams = probe.video.iter().count();
         let audio_streams = probe.audio.len();
+        if probe
+            .audio
+            .first()
+            .is_some_and(|a| req.preset.channels.is_some_and(|n| n != a.channels) || req.preset.sample_rate.is_some_and(|n| n != a.sample_rate))
+        {
+            return Err(DomainError::process("El audio codificado no coincide con canales/sample rate solicitados; no se publicó"));
+        }
         if (probe.duration - expected).abs() > tolerance || (req.preset.has_video && video_streams != 1) || audio_streams != 1 {
             let _ = std::fs::remove_file(&staging);
             return Err(DomainError::process(format!(

@@ -33,6 +33,7 @@ pub enum Gesture {
         origin: Pos2,
         edge: Option<ClipEdge>,
         additive: bool,
+        base_revision: u64,
     },
     MoveClips {
         clips: Vec<ClipId>,
@@ -40,12 +41,14 @@ pub enum Gesture {
         delta_t: Ticks,
         track_delta: i32,
         valid: bool,
+        base_revision: u64,
     },
     TrimClip {
         clip: ClipId,
         edge: ClipEdge,
         new_time: Ticks,
         origin: Pos2,
+        base_revision: u64,
     },
     Scrub,
     Pan {
@@ -54,6 +57,7 @@ pub enum Gesture {
     /// Press en un carril vacío: clic = playhead; arrastre = selección por área.
     LanePress {
         origin: Pos2,
+        additive: bool,
     },
     PendingItem {
         layer: LayerId,
@@ -62,6 +66,7 @@ pub enum Gesture {
         additive: bool,
         range_index: usize,
         edge: Option<ClipEdge>,
+        base_revision: u64,
     },
     EditItems {
         origin: Pos2,
@@ -74,6 +79,7 @@ pub enum Gesture {
     BoxSelect {
         origin: Pos2,
         current: Pos2,
+        additive: bool,
     },
     BoxEdit {
         origin: Pos2,
@@ -95,6 +101,7 @@ pub struct TimelineView {
     pub last_x0: f32,
     pub last_lanes: Vec<(String, f32, f32)>,
     pub index: crate::timeline_index::ClipIndex,
+    pub semantic_index: crate::timeline_index::SemanticIndex,
 }
 
 impl TimelineView {
@@ -110,6 +117,7 @@ impl TimelineView {
             last_x0: 0.0,
             last_lanes: Vec::new(),
             index: Default::default(),
+            semantic_index: Default::default(),
         }
     }
 
@@ -191,6 +199,38 @@ enum LaneKind {
 }
 
 pub fn draw(app: &mut TranscriptorApp, ui: &mut egui::Ui) {
+    if app.view == ViewMode::Sequence {
+        let mut index = std::mem::take(&mut app.timeline_view.index);
+        if let Some(sequence) = app.sequence() {
+            index.ensure_async(&app.project().project_id, app.session.revision(), sequence, ui.ctx());
+        }
+        if index.busy() {
+            ui.label("Actualizando índices multimedia…");
+        }
+        if let Some(error) = index.error().map(str::to_owned) {
+            ui.horizontal(|ui| {
+                ui.colored_label(colors::WARN, error);
+                if ui.button("Reintentar índices").clicked() {
+                    index.retry();
+                }
+            });
+        }
+        app.timeline_view.index = index;
+    }
+    let mut semantic_index = std::mem::take(&mut app.timeline_view.semantic_index);
+    semantic_index.ensure(app, ui.ctx());
+    if semantic_index.busy() {
+        ui.label("Actualizando índices editoriales…");
+    }
+    if let Some(error) = semantic_index.error().map(str::to_owned) {
+        ui.horizontal(|ui| {
+            ui.colored_label(colors::WARN, error);
+            if ui.button("Reintentar índices").clicked() {
+                semantic_index.retry();
+            }
+        });
+    }
+    app.timeline_view.semantic_index = semantic_index;
     let available = ui.available_rect_before_wrap();
     let rect = available;
     ui.expand_to_include_rect(rect);
@@ -306,10 +346,12 @@ pub fn draw(app: &mut TranscriptorApp, ui: &mut egui::Ui) {
 
     let edges_for_snap: Vec<Ticks> = {
         let mut e = Vec::new();
-        if primary_down && app.view == ViewMode::Sequence {
+        let margin = Ticks::from_seconds_f64((SNAP_PX / app.timeline_view.px_per_s) as f64);
+        let window = TimeRange::new(app.timeline_view.scroll_t - margin, app.timeline_view.scroll_t + app.timeline_view.visible_span() + margin);
+        if (primary_down || primary_released) && app.view == ViewMode::Sequence {
             let mut index = std::mem::take(&mut app.timeline_view.index);
             if let Some(seq) = app.sequence() {
-                index.ensure(&app.project().project_id, app.session.revision(), seq);
+                index.ensure_async(&app.project().project_id, app.session.revision(), seq, ui.ctx());
             }
             let margin = Ticks::from_seconds_f64((SNAP_PX / app.timeline_view.px_per_s) as f64);
             let a = app.timeline_view.scroll_t - margin;
@@ -319,11 +361,12 @@ pub fn draw(app: &mut TranscriptorApp, ui: &mut egui::Ui) {
             e.extend_from_slice(&index.edges[lo..hi]);
             app.timeline_view.index = index;
         }
-        if app.view == ViewMode::Sequence
-            && let Some(seq) = app.sequence()
-        {
-            for m in &seq.markers {
-                e.extend([m.range.start, m.range.end]);
+        if primary_down || primary_released {
+            if app.view == ViewMode::Sequence {
+                e.extend_from_slice(app.timeline_view.index.marker_edges(window));
+            }
+            if let Some(asset) = &layer_asset {
+                e.extend_from_slice(app.timeline_view.semantic_index.edges(asset, window));
             }
         }
         e.push(app.playhead);
@@ -339,10 +382,13 @@ pub fn draw(app: &mut TranscriptorApp, ui: &mut egui::Ui) {
     // ---- gestos ----
     let ruler_rect = Rect::from_min_max(Pos2::new(x0, rect.top()), Pos2::new(rect.right(), rect.top() + RULER_H));
     let escape = ui.input(|i| i.key_pressed(egui::Key::Escape));
-    if escape && !matches!(app.timeline_view.gesture, Gesture::None) {
+    let capture_lost = !ui.input(|i| i.focused) || (!primary_down && !primary_released && !matches!(app.timeline_view.gesture, Gesture::None));
+    if escape || capture_lost {
         app.timeline_view.gesture = Gesture::None;
+        app.gesture_preview = Default::default();
     }
     if (press_in_rect || secondary)
+        && !app.gesture_preview.commit
         && let Some(p) = pointer
     {
         if ruler_rect.contains(p) {
@@ -362,7 +408,11 @@ pub fn draw(app: &mut TranscriptorApp, ui: &mut egui::Ui) {
                 app.player_send(tv2_media::player::PlayerCommand::Pause);
                 app.scrub(t);
             }
-        } else if content_rect.contains(p) {
+        } else if content_rect.contains(p)
+            && !app.timeline_view.semantic_index.busy()
+            && app.timeline_view.semantic_index.error().is_none()
+            && (app.view != ViewMode::Sequence || !app.timeline_view.index.busy() && app.timeline_view.index.error().is_none())
+        {
             let hit = hit_test(app, &lanes, p, x0);
             match hit {
                 Hit::Clip { clip, edge } => {
@@ -378,12 +428,18 @@ pub fn draw(app: &mut TranscriptorApp, ui: &mut egui::Ui) {
                             app.selection.items.clear();
                         }
                     } else {
-                        app.timeline_view.gesture = Gesture::Pending { clip, origin: p, edge, additive: modifiers.shift || modifiers.ctrl };
+                        app.timeline_view.gesture = Gesture::Pending {
+                            clip,
+                            origin: p,
+                            edge,
+                            additive: modifiers.shift || modifiers.ctrl,
+                            base_revision: app.session.revision(),
+                        };
                     }
                 }
                 Hit::Item { layer, item, range_index, edge } => {
                     if secondary {
-                        if !app.selection.items.iter().any(|(_, i)| i == &item) {
+                        if !app.selection.items.iter().any(|(l, i)| l == &layer && i == &item) {
                             app.selection.items = vec![(layer.clone(), item)];
                             app.selection.clips.clear();
                         }
@@ -392,15 +448,25 @@ pub fn draw(app: &mut TranscriptorApp, ui: &mut egui::Ui) {
                         app.timeline_view.gesture =
                             Gesture::BoxEdit { origin: p, layer, subtract: modifiers.shift, base_revision: app.session.revision() };
                     } else {
-                        app.timeline_view.gesture =
-                            Gesture::PendingItem { layer, item, origin: p, additive: modifiers.shift || modifiers.ctrl, range_index, edge };
+                        app.timeline_view.gesture = Gesture::PendingItem {
+                            layer,
+                            item,
+                            origin: p,
+                            additive: modifiers.shift || modifiers.ctrl,
+                            range_index,
+                            edge: if modifiers.ctrl { None } else { edge },
+                            base_revision: app.session.revision(),
+                        };
                     }
                 }
                 Hit::Lane(kind) => {
                     if let LaneKind::Layer(l) = &kind {
                         app.selection.layer = Some(l.clone());
                     }
-                    if modifiers.alt || secondary {
+                    if secondary {
+                        // Right-click opens context; it must not start a pan on
+                        // button release and then keep panning on mere hover.
+                    } else if modifiers.alt {
                         app.timeline_view.gesture = Gesture::Pan { last: p };
                     } else if app.tool == Tool::Cut
                         && !modifiers.ctrl
@@ -409,13 +475,17 @@ pub fn draw(app: &mut TranscriptorApp, ui: &mut egui::Ui) {
                         app.timeline_view.gesture =
                             Gesture::BoxEdit { origin: p, layer, subtract: modifiers.shift, base_revision: app.session.revision() };
                     } else {
-                        if !modifiers.shift {
+                        let additive = modifiers.shift || modifiers.ctrl;
+                        if !additive {
                             app.selection.clear();
+                        }
+                        if let LaneKind::Layer(layer) = kind {
+                            app.selection.layer = Some(layer);
                         }
                         let t = app.timeline_view.x_to_t(p.x, x0).max(Ticks::ZERO);
                         app.player_send(tv2_media::player::PlayerCommand::Pause);
                         app.seek(t);
-                        app.timeline_view.gesture = Gesture::LanePress { origin: p };
+                        app.timeline_view.gesture = Gesture::LanePress { origin: p, additive };
                     }
                 }
                 Hit::Header(kind) => {
@@ -433,7 +503,12 @@ pub fn draw(app: &mut TranscriptorApp, ui: &mut egui::Ui) {
         if dragging
             && matches!(
                 app.timeline_view.gesture,
-                Gesture::MoveClips { .. } | Gesture::TrimClip { .. } | Gesture::Scrub | Gesture::EditItems { .. } | Gesture::BoxEdit { .. }
+                Gesture::MoveClips { .. }
+                    | Gesture::TrimClip { .. }
+                    | Gesture::Scrub
+                    | Gesture::EditItems { .. }
+                    | Gesture::BoxEdit { .. }
+                    | Gesture::BoxSelect { .. }
             )
         {
             let direction = if p.x > rect.right() - 20.0 {
@@ -449,20 +524,50 @@ pub fn draw(app: &mut TranscriptorApp, ui: &mut egui::Ui) {
                 app.timeline_view.scroll_t =
                     (before + Ticks::from_seconds_f64((direction * 300.0 * dt / app.timeline_view.px_per_s) as f64)).max(Ticks::ZERO);
                 let px = (app.timeline_view.scroll_t - before).as_seconds_f64() as f32 * app.timeline_view.px_per_s;
-                if let Gesture::MoveClips { origin, .. } | Gesture::EditItems { origin, .. } | Gesture::BoxEdit { origin, .. } =
-                    &mut app.timeline_view.gesture
+                if let Gesture::MoveClips { origin, .. }
+                | Gesture::EditItems { origin, .. }
+                | Gesture::BoxEdit { origin, .. }
+                | Gesture::BoxSelect { origin, .. } = &mut app.timeline_view.gesture
                 {
                     origin.x -= px;
                 }
                 ui.ctx().request_repaint_after(std::time::Duration::from_millis(16));
             }
         }
+        if dragging && matches!(app.timeline_view.gesture, Gesture::BoxSelect { .. } | Gesture::MoveClips { .. }) {
+            let direction = if p.y > content_rect.bottom() - 20.0 {
+                1.0
+            } else if p.y < content_rect.top() + 20.0 {
+                -1.0
+            } else {
+                0.0
+            };
+            let before = app.timeline_view.scroll_y;
+            let dt = ui.input(|i| i.stable_dt).clamp(0.001, 0.05);
+            app.timeline_view.scroll_y = (before + direction * 240.0 * dt).clamp(0.0, (total_h - content_rect.height()).max(0.0));
+            let delta = app.timeline_view.scroll_y - before;
+            if delta != 0.0 {
+                // Keep the selection/drag anchor in document coordinates while the viewport moves.
+                if let Gesture::BoxSelect { origin, .. } | Gesture::MoveClips { origin, .. } = &mut app.timeline_view.gesture {
+                    origin.y -= delta;
+                }
+                for lane in &mut lanes {
+                    lane.y -= delta;
+                }
+                for (_, y, _) in &mut app.timeline_view.last_lanes {
+                    *y -= delta;
+                }
+                ui.ctx().request_repaint_after(std::time::Duration::from_millis(16));
+            }
+        }
         let mut next: Option<Gesture> = None;
         match app.timeline_view.gesture.clone() {
-            Gesture::Pending { clip, origin, edge, additive } => {
+            Gesture::Pending { clip, origin, edge, additive, base_revision } => {
                 if dragging && (p - origin).length() > DRAG_THRESHOLD {
                     if let Some(edge) = edge {
-                        next = Some(Gesture::TrimClip { clip, edge, new_time: app.timeline_view.x_to_t(p.x, x0), origin });
+                        app.selection.clips = vec![clip.clone()];
+                        app.selection.items.clear();
+                        next = Some(Gesture::TrimClip { clip, edge, new_time: app.timeline_view.x_to_t(p.x, x0), origin, base_revision });
                     } else {
                         if !app.selection.clips.contains(&clip) {
                             if !additive {
@@ -472,7 +577,7 @@ pub fn draw(app: &mut TranscriptorApp, ui: &mut egui::Ui) {
                             app.selection.clips.push(clip.clone());
                         }
                         let clips = app.linked_selection();
-                        next = Some(Gesture::MoveClips { clips, origin, delta_t: Ticks::ZERO, track_delta: 0, valid: true });
+                        next = Some(Gesture::MoveClips { clips, origin, delta_t: Ticks::ZERO, track_delta: 0, valid: true, base_revision });
                     }
                 } else if primary_released {
                     // clic simple: seleccionar
@@ -489,7 +594,7 @@ pub fn draw(app: &mut TranscriptorApp, ui: &mut egui::Ui) {
                     next = Some(Gesture::None);
                 }
             }
-            Gesture::PendingItem { layer, item, origin, additive, range_index, edge } => {
+            Gesture::PendingItem { layer, item, origin, additive, range_index, edge, base_revision } => {
                 if primary_released || (dragging && (p - origin).length() > DRAG_THRESHOLD) {
                     let moving = !primary_released;
                     if moving {
@@ -501,7 +606,7 @@ pub fn draw(app: &mut TranscriptorApp, ui: &mut egui::Ui) {
                         }
                         app.selection.clips.clear();
                     } else if additive {
-                        if let Some(i) = app.selection.items.iter().position(|(_, x)| x == &item) {
+                        if let Some(i) = app.selection.items.iter().position(|(l, x)| l == &layer && x == &item) {
                             app.selection.items.remove(i);
                         } else {
                             app.selection.items.push((layer.clone(), item.clone()));
@@ -511,98 +616,108 @@ pub fn draw(app: &mut TranscriptorApp, ui: &mut egui::Ui) {
                         app.selection.clips.clear();
                     }
                     app.selection.layer = Some(layer.clone());
-                    next = Some(if moving {
-                        Gesture::EditItems { origin, layer, item, range_index, edge, base_revision: app.session.revision() }
-                    } else {
-                        Gesture::None
-                    });
+                    next = Some(if moving { Gesture::EditItems { origin, layer, item, range_index, edge, base_revision } } else { Gesture::None });
                 }
             }
             Gesture::EditItems { origin, layer, item, range_index, edge, base_revision } => {
                 let raw = app.timeline_view.x_to_t(p.x, x0);
                 let target = app.timeline_view.snap(raw, &edges_for_snap, app.ui.snapping);
-                let command =
-                    if let Some(edge) = edge {
-                        app.project()
-                            .layer(&layer)
-                            .and_then(|l| app.view_edge_to_source(target, &l.asset_id, edge))
-                            .map(|new_time| Command::TrimItem { layer_id: layer.clone(), item_id: item.clone(), range_index, edge, new_time })
-                    } else {
-                        app.project().layer(&layer).and_then(|l| {
-                            let from = app.view_time_to_source(app.timeline_view.x_to_t(origin.x, x0), &l.asset_id)?;
-                            let to = app.view_time_to_source(target, &l.asset_id)?;
-                            Some(app.shift_items_command((to - from).round_to_frame(app.frame_rate())))
-                        })
-                    };
+                let origin_time = app.timeline_view.x_to_t(origin.x, x0);
+                let command = if let Some(edge) = edge {
+                    app.project()
+                        .layer(&layer)
+                        .and_then(|l| gesture_source_pair(app, &l.asset_id, l.item(&item)?.ranges.get(range_index).copied()?, origin_time, target))
+                        .map(|(_, to)| to)
+                        .map(|new_time| Command::TrimItem { layer_id: layer.clone(), item_id: item.clone(), range_index, edge, new_time })
+                } else {
+                    app.project().layer(&layer).and_then(|l| {
+                        let (from, to) =
+                            gesture_source_pair(app, &l.asset_id, l.item(&item)?.ranges.get(range_index).copied()?, origin_time, target)?;
+                        Some(app.shift_items_command((to - from).round_to_frame(app.frame_rate())))
+                    })
+                };
                 // The overlay is transient; only release validates and commits one command.
                 let x = app.timeline_view.t_to_x(target, x0);
                 ui.painter().line_segment([Pos2::new(x, rect.top()), Pos2::new(x, rect.bottom())], Stroke::new(2.0, colors::ACCENT));
                 ui.painter().text(Pos2::new(x + 5.0, p.y - 18.0), Align2::LEFT_BOTTOM, target.clock(), FontId::monospace(11.0), colors::TEXT);
+                let stale = app.session.revision() != base_revision;
+                if !stale && let Some(command) = command.clone() {
+                    app.preview_gesture(command, primary_released, ui.ctx());
+                } else if command.is_none() {
+                    app.gesture_preview = Default::default();
+                }
                 if primary_released {
-                    if app.session.revision() != base_revision {
+                    if stale {
                         app.toast(Severity::Warn, "El proyecto cambió durante el gesto; repite el arrastre");
-                    } else if let Some(command) = command {
-                        app.exec(command);
-                    } else {
-                        app.toast(Severity::Warn, "El destino no tiene correspondencia fuente");
+                    } else if command.is_none() {
+                        app.toast(Severity::Warn, "El gesto cruza otra ocurrencia o un mapping ambiguo; edita este tramo en Fuente");
                     }
                     next = Some(Gesture::None);
                 }
             }
-            Gesture::MoveClips { clips, origin, .. } => {
+            Gesture::MoveClips { clips, origin, base_revision, .. } => {
                 let raw_dt = Ticks::from_seconds_f64(((p.x - origin.x) / app.timeline_view.px_per_s) as f64);
-                // snapping: el borde izquierdo del primer clip
-                let first = clips.first().and_then(|c| app.sequence().and_then(|s| s.clip(c)).map(|c| c.position));
-                let dt = match first {
-                    Some(pos) => {
-                        let target = app.timeline_view.snap(
-                            pos + raw_dt,
-                            &edges_for_snap.iter().copied().filter(|e| *e != pos).collect::<Vec<_>>(),
-                            app.ui.snapping,
-                        );
-                        (target - pos).floor_to_frame(app.frame_rate())
+                let moving_edges: std::collections::BTreeSet<_> =
+                    clips.iter().filter_map(|id| app.sequence()?.clip(id)).flat_map(|clip| [clip.position, clip.end()]).collect();
+                let targets: Vec<_> = edges_for_snap.iter().filter(|edge| !moving_edges.contains(edge)).copied().collect();
+                let mut dt = raw_dt.round_to_frame(app.frame_rate());
+                let mut nearest = Ticks::MAX;
+                for edge in moving_edges {
+                    let moved = edge + raw_dt;
+                    let snapped = app.timeline_view.snap(moved, &targets, app.ui.snapping);
+                    let distance = (snapped - moved).abs();
+                    if snapped != moved && distance < nearest {
+                        nearest = distance;
+                        dt = snapped - edge;
                     }
-                    None => raw_dt,
-                };
+                }
                 let track_delta = lane_delta(&lanes, origin.y, p.y, app);
-                // validez: comprobar con dry-run
-                let valid = app
-                    .session
-                    .dry_run(&tv2_application::CommandEnvelope::human(Command::ShiftClips {
-                        clip_ids: clips.clone(),
-                        delta: dt,
-                        track_delta,
-                        policy: MovePolicy::Reject,
-                    }))
-                    .is_ok();
+                let stale = app.session.revision() != base_revision;
+                if !stale && (dt != Ticks::ZERO || track_delta != 0) {
+                    app.preview_gesture(
+                        Command::ShiftClips { clip_ids: clips.clone(), delta: dt, track_delta, policy: MovePolicy::Reject },
+                        primary_released,
+                        ui.ctx(),
+                    );
+                } else if !stale {
+                    app.gesture_preview = Default::default();
+                }
+                let valid = !stale && app.gesture_preview.error.is_none();
                 if primary_released {
-                    if dt != Ticks::ZERO || track_delta != 0 {
-                        app.exec(Command::ShiftClips { clip_ids: clips.clone(), delta: dt, track_delta, policy: MovePolicy::Reject });
+                    if stale {
+                        app.toast(Severity::Warn, "El proyecto cambió durante el gesto; repite el arrastre");
                     }
                     next = Some(Gesture::None);
                 } else {
-                    next = Some(Gesture::MoveClips { clips, origin, delta_t: dt, track_delta, valid });
+                    next = Some(Gesture::MoveClips { clips, origin, delta_t: dt, track_delta, valid, base_revision });
                 }
             }
-            Gesture::TrimClip { clip, edge, origin, .. } => {
+            Gesture::TrimClip { clip, edge, origin, base_revision, .. } => {
                 let raw = app.timeline_view.x_to_t(p.x, x0);
                 let t = app.timeline_view.snap(raw, &edges_for_snap, app.ui.snapping).floor_to_frame(app.frame_rate()).max(Ticks::ZERO);
+                let stale = app.session.revision() != base_revision;
+                if !stale {
+                    let command = Command::Batch {
+                        label: "Recortar clips enlazados".into(),
+                        commands: app.linked_selection().into_iter().map(|clip_id| Command::TrimClip { clip_id, edge, new_time: t }).collect(),
+                    };
+                    app.preview_gesture(command, primary_released, ui.ctx());
+                }
                 if primary_released {
-                    app.exec(Command::TrimClip { clip_id: clip, edge, new_time: t });
+                    if stale {
+                        app.toast(Severity::Warn, "El proyecto cambió durante el gesto; repite el recorte");
+                    }
                     next = Some(Gesture::None);
                 } else {
-                    next = Some(Gesture::TrimClip { clip, edge, new_time: t, origin });
+                    next = Some(Gesture::TrimClip { clip, edge, new_time: t, origin, base_revision });
                 }
             }
             Gesture::Scrub => {
                 if dragging {
                     let raw = app.timeline_view.x_to_t(p.x, x0).max(Ticks::ZERO);
-                    let markers: Vec<Ticks> = if app.view == ViewMode::Sequence {
-                        app.sequence().map(|s| s.markers.iter().flat_map(|m| [m.range.start, m.range.end]).collect()).unwrap_or_default()
-                    } else {
-                        Vec::new()
-                    };
-                    let t = app.timeline_view.snap(raw, &markers, app.ui.snapping);
+                    let window = TimeRange::new(app.timeline_view.scroll_t, app.timeline_view.scroll_t + app.timeline_view.visible_span());
+                    let markers = if app.view == ViewMode::Sequence { app.timeline_view.index.marker_edges(window) } else { &[] };
+                    let t = app.timeline_view.snap(raw, markers, app.ui.snapping);
                     app.scrub(t);
                 }
                 if primary_released || !dragging {
@@ -616,16 +731,16 @@ pub fn draw(app: &mut TranscriptorApp, ui: &mut egui::Ui) {
                 app.timeline_view.scroll_t =
                     (app.timeline_view.scroll_t - Ticks::from_seconds_f64((dx / app.timeline_view.px_per_s) as f64)).max(Ticks::ZERO);
                 app.timeline_view.scroll_y = (app.timeline_view.scroll_y - (p.y - last.y)).max(0.0);
-                next = Some(if primary_released { Gesture::None } else { Gesture::Pan { last: p } });
+                next = Some(if primary_released || !primary_down { Gesture::None } else { Gesture::Pan { last: p } });
             }
-            Gesture::LanePress { origin } => {
+            Gesture::LanePress { origin, additive } => {
                 if primary_released {
                     next = Some(Gesture::None);
                 } else if dragging && (p - origin).length() > DRAG_THRESHOLD {
-                    next = Some(Gesture::BoxSelect { origin, current: p });
+                    next = Some(Gesture::BoxSelect { origin, current: p, additive });
                 }
             }
-            Gesture::BoxSelect { origin, .. } => {
+            Gesture::BoxSelect { origin, additive, .. } => {
                 if primary_released {
                     let r = Rect::from_two_pos(origin, p);
                     let t0 = app.timeline_view.x_to_t(r.left(), x0);
@@ -635,14 +750,14 @@ pub fn draw(app: &mut TranscriptorApp, ui: &mut egui::Ui) {
                         .filter(|l| l.y < r.bottom() && l.y + l.h > r.top())
                         .filter_map(|l| if let LaneKind::Track(t) = &l.kind { Some(t.clone()) } else { None })
                         .collect();
-                    if let Some(seq) = app.sequence() {
-                        let ids: Vec<ClipId> = seq
-                            .clips
-                            .iter()
-                            .filter(|c| sel_tracks.contains(&c.track_id) && c.range().overlaps(&TimeRange::new(t0, t1)))
-                            .map(|c| c.id.clone())
-                            .collect();
-                        if modifiers.shift {
+                    let mut index = std::mem::take(&mut app.timeline_view.index);
+                    let clip_indices = index.query(&sel_tracks, TimeRange::new(t0, t1));
+                    app.timeline_view.index = index;
+                    if app.view == ViewMode::Sequence
+                        && let Some(seq) = app.sequence()
+                    {
+                        let ids: Vec<ClipId> = clip_indices.into_iter().filter_map(|i| seq.clips.get(i).map(|c| c.id.clone())).collect();
+                        if additive {
                             for id in ids {
                                 if !app.selection.clips.contains(&id) {
                                     app.selection.clips.push(id);
@@ -652,9 +767,32 @@ pub fn draw(app: &mut TranscriptorApp, ui: &mut egui::Ui) {
                             app.selection.clips = ids;
                         }
                     }
+                    let mut items = Vec::new();
+                    for lane in lanes.iter().filter(|lane| lane.y < r.bottom() && lane.y + lane.h > r.top()) {
+                        if let LaneKind::Layer(layer_id) = &lane.kind
+                            && let Some(layer) = app.project().layer(layer_id)
+                        {
+                            for occurrence in app.timeline_view.semantic_index.query(layer_id, TimeRange::new(t0, t1)) {
+                                if let Some(item) = layer.items.get(occurrence.item) {
+                                    items.push((layer_id.clone(), item.item_id.clone()));
+                                }
+                            }
+                        }
+                    }
+                    items.sort();
+                    items.dedup();
+                    if additive {
+                        for item in items {
+                            if !app.selection.items.contains(&item) {
+                                app.selection.items.push(item);
+                            }
+                        }
+                    } else {
+                        app.selection.items = items;
+                    }
                     next = Some(Gesture::None);
                 } else {
-                    next = Some(Gesture::BoxSelect { origin, current: p });
+                    next = Some(Gesture::BoxSelect { origin, current: p, additive });
                 }
             }
             Gesture::BoxEdit { origin, layer, subtract, base_revision } => {
@@ -664,28 +802,26 @@ pub fn draw(app: &mut TranscriptorApp, ui: &mut egui::Ui) {
                 let preview = Rect::from_min_max(Pos2::new(origin.x.min(p.x), origin.y - 12.0), Pos2::new(origin.x.max(p.x), origin.y + 12.0));
                 ui.painter().rect_filled(preview, 0.0, color.gamma_multiply(0.3));
                 ui.painter().rect_stroke(preview, 0.0, Stroke::new(1.5, color), egui::StrokeKind::Inside);
+                let stale = app.session.revision() != base_revision;
+                if !stale && (p.x - origin.x).abs() >= DRAG_THRESHOLD {
+                    let command = app.project().layer(&layer).and_then(|l| {
+                        let (start, end) = match app.view {
+                            ViewMode::Source => (app.view_time_to_source(a.min(b), &l.asset_id)?, app.view_time_to_source(a.max(b), &l.asset_id)?),
+                            ViewMode::Sequence => app.sequence()?.clips.iter().filter(|c| c.enabled && c.asset_id == l.asset_id).find_map(|c| {
+                                Some((c.seq_edge_to_source(a.min(b), ClipEdge::Start)?, c.seq_edge_to_source(a.max(b), ClipEdge::End)?))
+                            })?,
+                        };
+                        Some(Command::BoxEdit { layer_id: layer.clone(), range: TimeRange::new(start, end), subtract })
+                    });
+                    if let Some(command) = command {
+                        app.preview_gesture(command, primary_released, ui.ctx());
+                    } else if primary_released {
+                        app.toast(Severity::Warn, "La caja cruza un salto de fuente; dibújala en Fuente");
+                    }
+                }
                 if primary_released {
-                    if app.session.revision() != base_revision {
+                    if stale {
                         app.toast(Severity::Warn, "El proyecto cambió durante la caja; repite el gesto");
-                    } else if (p.x - origin.x).abs() >= DRAG_THRESHOLD {
-                        let command = app.project().layer(&layer).and_then(|l| {
-                            let (start, end) = match app.view {
-                                ViewMode::Source => {
-                                    (app.view_time_to_source(a.min(b), &l.asset_id)?, app.view_time_to_source(a.max(b), &l.asset_id)?)
-                                }
-                                ViewMode::Sequence => {
-                                    app.sequence()?.clips.iter().filter(|c| c.enabled && c.asset_id == l.asset_id).find_map(|c| {
-                                        Some((c.seq_edge_to_source(a.min(b), ClipEdge::Start)?, c.seq_edge_to_source(a.max(b), ClipEdge::End)?))
-                                    })?
-                                }
-                            };
-                            Some(Command::BoxEdit { layer_id: layer.clone(), range: TimeRange::new(start, end), subtract })
-                        });
-                        if let Some(command) = command {
-                            app.exec(command);
-                        } else {
-                            app.toast(Severity::Warn, "La caja cruza un salto de fuente; dibújala en Fuente");
-                        }
                     }
                     next = Some(Gesture::None);
                 }
@@ -701,10 +837,16 @@ pub fn draw(app: &mut TranscriptorApp, ui: &mut egui::Ui) {
     }
 
     // ---- dibujo: lanes ----
+    if matches!(app.timeline_view.gesture, Gesture::None) && !app.gesture_preview.commit {
+        app.gesture_preview = Default::default();
+    }
+    let mut semantic_index = std::mem::take(&mut app.timeline_view.semantic_index);
+    semantic_index.ensure(app, ui.ctx());
+    app.timeline_view.semantic_index = semantic_index;
     let seq_clone = if app.view == ViewMode::Sequence {
         let mut index = std::mem::take(&mut app.timeline_view.index);
         let result = app.sequence().map(|seq| {
-            index.ensure(&app.project().project_id, app.session.revision(), seq);
+            index.ensure_async(&app.project().project_id, app.session.revision(), seq, ui.ctx());
             let tracks: Vec<TrackId> = lanes
                 .iter()
                 .filter(|l| l.y + l.h >= content_rect.top() && l.y < content_rect.bottom())
@@ -712,13 +854,19 @@ pub fn draw(app: &mut TranscriptorApp, ui: &mut egui::Ui) {
                 .collect();
             let range = TimeRange::new(app.timeline_view.scroll_t, app.timeline_view.scroll_t + app.timeline_view.visible_span());
             let indices = index.query(&tracks, range);
-            let mut clips: Vec<_> = indices.into_iter().map(|i| seq.clips[i].clone()).collect();
+            let mut clips: Vec<_> = indices
+                .into_iter()
+                .map(|i| {
+                    let clip = &seq.clips[i];
+                    crate::timeline_index::paint_clip(app.gesture_preview.clip(&clip.id).unwrap_or(clip))
+                })
+                .collect();
             if let Gesture::MoveClips { clips: moving, .. } = &app.timeline_view.gesture {
                 for id in moving {
                     if !clips.iter().any(|c| &c.id == id)
                         && let Some(c) = seq.clip(id)
                     {
-                        clips.push(c.clone());
+                        clips.push(crate::timeline_index::paint_clip(app.gesture_preview.clip(&c.id).unwrap_or(c)));
                     }
                 }
             }
@@ -751,10 +899,12 @@ pub fn draw(app: &mut TranscriptorApp, ui: &mut egui::Ui) {
                         for c in seq.clips.iter().filter(|c| &c.track_id == track_id) {
                             let mut pos = c.position;
                             let mut end = c.end();
-                            let mut ghost = false;
+                            let exact = app.gesture_preview.clip(&c.id).is_some();
+                            let mut ghost = exact;
                             let mut valid = true;
                             if let Some((ids, dt, td, v)) = &move_preview
                                 && ids.contains(&c.id)
+                                && !exact
                             {
                                 pos += *dt;
                                 end += *dt;
@@ -762,7 +912,7 @@ pub fn draw(app: &mut TranscriptorApp, ui: &mut egui::Ui) {
                                 valid = *v;
                                 if *td != 0 {
                                     // se dibuja en el carril destino si existe
-                                    let target = lane_by_track_delta(&lanes, lane, *td);
+                                    let target = lane_by_track_delta(&lanes, lane, *td, app);
                                     if let Some(tl) = target {
                                         let r = clip_rect_of(&app.timeline_view, tl, pos, end);
                                         draw_clip(&ui.painter_at(content_rect), r, c, track.kind, app, true, valid, None);
@@ -772,6 +922,7 @@ pub fn draw(app: &mut TranscriptorApp, ui: &mut egui::Ui) {
                             }
                             if let Some((id, edge, nt)) = &trim_preview
                                 && id == &c.id
+                                && !exact
                             {
                                 match edge {
                                     ClipEdge::Start => pos = *nt,
@@ -783,22 +934,22 @@ pub fn draw(app: &mut TranscriptorApp, ui: &mut egui::Ui) {
                             if r.right() < x0 || r.left() > rect.right() {
                                 continue;
                             }
-                            let items_overlay = semantic_overlay_for_clip(app, c);
+                            let items_overlay = if ghost { Vec::new() } else { semantic_overlay_for_clip(app, c) };
                             draw_clip(&clip_painter, r, c, track.kind, app, ghost, valid, Some(&items_overlay));
                         }
                     }
                 } else if app.view == ViewMode::Source
-                    && let Some(a) = app.source_asset.as_ref().and_then(|a| app.project().asset(a)).cloned()
+                    && let Some(a) = app.source_asset.as_ref().and_then(|a| app.session.project().asset(a))
                 {
                     let r = clip_rect_of(&app.timeline_view, lane, Ticks::ZERO, a.duration());
                     clip_painter.rect_filled(r, 4.0, colors::VIDEO_CLIP.gamma_multiply(0.7));
-                    let path = app.resolve_asset_path(&a);
+                    let path = app.resolve_asset_path(a);
                     if let Some(media) = &mut app.media_view {
                         let kind = if lane.source_stream.is_some() { TrackKind::Audio } else { TrackKind::Video };
                         media.draw(
                             &clip_painter,
                             r,
-                            &a,
+                            a,
                             &path,
                             TimeRange::new(Ticks::ZERO, a.duration()),
                             kind,
@@ -819,26 +970,42 @@ pub fn draw(app: &mut TranscriptorApp, ui: &mut egui::Ui) {
             LaneKind::Layer(layer_id) => {
                 if let Some(layer) = app.project().layer(layer_id) {
                     let color = parse_color(&layer.color);
-                    let mut items: Vec<&tv2_domain::layers::SemanticItem> = layer.items.iter().collect();
-                    items.sort_by_key(|i| i.start());
-                    for it in items {
+                    let margin = Ticks::from_seconds_f64((8.0 / app.timeline_view.px_per_s) as f64);
+                    let visible =
+                        TimeRange::new(app.timeline_view.scroll_t - margin, app.timeline_view.scroll_t + app.timeline_view.visible_span() + margin);
+                    for occurrence in app.timeline_view.semantic_index.query(layer_id, visible) {
+                        let Some(it) = layer.items.get(occurrence.item) else { continue };
                         let selected = app.selection.items.iter().any(|(l, i)| l == layer_id && i == &it.item_id);
-                        for r in &it.ranges {
-                            for (a, b) in item_range_in_view(app, r, &layer.asset_id) {
-                                let x1 = app.timeline_view.t_to_x(a, x0);
-                                let x2 = app.timeline_view.t_to_x(b, x0).max(x1 + 6.0);
-                                if x2 < x0 || x1 > rect.right() {
-                                    continue;
-                                }
-                                let rr = Rect::from_min_max(Pos2::new(x1, lane.y + 4.0), Pos2::new(x2, lane.y + lane.h - 4.0));
-                                draw_item(&clip_painter, rr, it, color, selected, app.timeline_view.px_per_s);
-                            }
+                        let (a, b) = (occurrence.range.start, occurrence.range.end);
+                        let x1 = app.timeline_view.t_to_x(a, x0);
+                        let x2 = app.timeline_view.t_to_x(b, x0).max(x1 + 6.0);
+                        if x2 < x0 || x1 > rect.right() {
+                            continue;
                         }
+                        let rr = Rect::from_min_max(Pos2::new(x1, lane.y + 4.0), Pos2::new(x2, lane.y + lane.h - 4.0));
+                        draw_item(&clip_painter, rr, it, color, selected, app.timeline_view.px_per_s);
                     }
                 }
             }
         }
         // cabecera
+        for geometry in app.gesture_preview.geometry() {
+            if !matches!(&lane.kind,LaneKind::Layer(id) if id==&geometry.layer) {
+                continue;
+            }
+            let Some(layer) = app.project().layer(&geometry.layer) else { continue };
+            for range in &geometry.ranges {
+                for (a, b) in item_range_in_view(app, range, &layer.asset_id) {
+                    let ghost = Rect::from_min_max(
+                        Pos2::new(app.timeline_view.t_to_x(a, x0), lane.y + 3.0),
+                        Pos2::new(app.timeline_view.t_to_x(b, x0).max(app.timeline_view.t_to_x(a, x0) + 6.0), lane.y + lane.h - 3.0),
+                    );
+                    let color = if geometry.removed { Color32::LIGHT_RED } else { colors::ACCENT };
+                    clip_painter.rect_filled(ghost, 2.0, color.gamma_multiply(0.22));
+                    clip_painter.rect_stroke(ghost, 2.0, Stroke::new(2.0, color), egui::StrokeKind::Inside);
+                }
+            }
+        }
         let header_rect = Rect::from_min_max(Pos2::new(rect.left(), lane.y), Pos2::new(x0, lane.y + lane.h));
         draw_header(
             app,
@@ -882,7 +1049,7 @@ pub fn draw(app: &mut TranscriptorApp, ui: &mut egui::Ui) {
         overlay_painter.rect_filled(r, 0.0, colors::LOOP);
     }
     // caja de selección
-    if let Gesture::BoxSelect { origin, current } = &app.timeline_view.gesture {
+    if let Gesture::BoxSelect { origin, current, .. } = &app.timeline_view.gesture {
         let r = Rect::from_two_pos(*origin, *current);
         overlay_painter.rect_filled(r, 0.0, colors::ACCENT.gamma_multiply(0.15));
         overlay_painter.rect_stroke(r, 0.0, Stroke::new(1.0, colors::ACCENT), egui::StrokeKind::Inside);
@@ -927,6 +1094,23 @@ pub fn draw(app: &mut TranscriptorApp, ui: &mut egui::Ui) {
             colors::TEXT_DIM,
         );
     }
+    if response.double_clicked()
+        && app.tool == Tool::Select
+        && app.view == ViewMode::Sequence
+        && let Some(pointer) = pointer.filter(|p| content_rect.contains(*p))
+        && let Hit::Clip { clip, .. } = hit_test(app, &lanes, pointer, x0)
+    {
+        let time = app.timeline_view.x_to_t(pointer.x, x0);
+        if let Some(current) = app.sequence().and_then(|sequence| sequence.clip(&clip)) {
+            app.playhead = time.clamp(current.position, current.end() - Ticks(1));
+        }
+        app.selection.clips = vec![clip];
+        app.selection.items.clear();
+        app.timeline_view.gesture = Gesture::None;
+        app.gesture_preview = Default::default();
+        app.dispatch("montage.reveal_source");
+        ui.ctx().request_repaint();
+    }
 }
 
 enum Hit {
@@ -946,7 +1130,9 @@ fn hit_test(app: &TranscriptorApp, lanes: &[Lane], p: Pos2, x0: f32) -> Hit {
     match &lane.kind {
         LaneKind::Track(track_id) => {
             if let Some(seq) = app.sequence() {
-                for c in seq.clips.iter().filter(|c| &c.track_id == track_id) {
+                let near = TimeRange::new(t - Ticks(1), t + Ticks(1));
+                for i in app.timeline_view.index.query_track(track_id, near) {
+                    let Some(c) = seq.clips.get(i) else { continue };
                     let x1 = app.timeline_view.t_to_x(c.position, x0);
                     let x2 = app.timeline_view.t_to_x(c.end(), x0);
                     if p.x >= x1 && p.x <= x2 {
@@ -965,22 +1151,24 @@ fn hit_test(app: &TranscriptorApp, lanes: &[Lane], p: Pos2, x0: f32) -> Hit {
         }
         LaneKind::Layer(layer_id) => {
             if let Some(layer) = app.project().layer(layer_id) {
-                for it in &layer.items {
-                    for (range_index, r) in it.ranges.iter().enumerate() {
-                        for (a, b) in item_range_in_view(app, r, &layer.asset_id) {
-                            let x1 = app.timeline_view.t_to_x(a, x0);
-                            let x2 = app.timeline_view.t_to_x(b, x0).max(x1 + 6.0);
-                            if p.x >= x1 && p.x <= x2 {
-                                let edge = if !r.is_point() && p.x - x1 <= HANDLE_W {
-                                    Some(ClipEdge::Start)
-                                } else if !r.is_point() && x2 - p.x <= HANDLE_W {
-                                    Some(ClipEdge::End)
-                                } else {
-                                    None
-                                };
-                                return Hit::Item { layer: layer_id.clone(), item: it.item_id.clone(), range_index, edge };
-                            }
-                        }
+                let margin = Ticks::from_seconds_f64((8.0 / app.timeline_view.px_per_s) as f64);
+                for occurrence in app.timeline_view.semantic_index.query(layer_id, TimeRange::new(t - margin, t + margin)).into_iter().rev() {
+                    let Some(it) = layer.items.get(occurrence.item) else { continue };
+                    let range_index = occurrence.range_index;
+                    let Some(r) = it.ranges.get(range_index) else { continue };
+                    let (a, b) = (occurrence.range.start, occurrence.range.end);
+                    let x1 = app.timeline_view.t_to_x(a, x0);
+                    let x2 = app.timeline_view.t_to_x(b, x0).max(x1 + 6.0);
+                    if p.x >= x1 && p.x <= x2 {
+                        let handle = HANDLE_W.min((x2 - x1) / 3.0);
+                        let edge = if !r.is_point() && p.x - x1 <= handle {
+                            Some(ClipEdge::Start)
+                        } else if !r.is_point() && x2 - p.x <= handle {
+                            Some(ClipEdge::End)
+                        } else {
+                            None
+                        };
+                        return Hit::Item { layer: layer_id.clone(), item: it.item_id.clone(), range_index, edge };
                     }
                 }
             }
@@ -991,41 +1179,51 @@ fn hit_test(app: &TranscriptorApp, lanes: &[Lane], p: Pos2, x0: f32) -> Hit {
 }
 
 /// Rango fuente → rangos de vista (uno por clip que lo contenga en Secuencia).
-fn item_range_in_view(app: &TranscriptorApp, r: &TimeRange, asset: &tv2_domain::ids::AssetId) -> Vec<(Ticks, Ticks)> {
+pub(crate) fn item_range_in_view(app: &TranscriptorApp, r: &TimeRange, asset: &tv2_domain::ids::AssetId) -> Vec<(Ticks, Ticks)> {
     match app.view {
-        ViewMode::Source => vec![(r.start, r.end)],
-        ViewMode::Sequence => {
-            let mut out = Vec::new();
-            if let Some(seq) = app.sequence() {
-                for c in seq.clips.iter().filter(|c| &c.asset_id == asset && c.enabled) {
-                    if r.is_point() {
-                        if c.source.contains(r.start) {
-                            let t = c.position + (r.start - c.source.start);
-                            out.push((t, t));
-                        }
-                    } else if let Some(i) = c.source.intersection(r) {
-                        out.push((c.position + (i.start - c.source.start), c.position + (i.end - c.source.start)));
-                    }
-                }
+        ViewMode::Source => {
+            if app.source_asset.as_ref() == Some(asset) {
+                vec![(r.start, r.end)]
+            } else {
+                vec![]
             }
-            out
         }
+        ViewMode::Sequence => app.timeline_view.semantic_index.project_range(asset, *r),
     }
 }
 
 fn semantic_overlay_for_clip(app: &TranscriptorApp, c: &tv2_domain::timeline::Clip) -> Vec<(Ticks, Ticks, Color32)> {
     let mut out = Vec::new();
-    for l in app.project().ordered_layers().iter().filter(|l| l.asset_id == c.asset_id && l.visible) {
-        let color = parse_color(&l.color);
-        for it in l.items.iter().filter(|i| i.state != ItemState::Disabled) {
-            for r in &it.ranges {
-                if let Some(i) = c.source.intersection(r) {
-                    out.push((c.position + (i.start - c.source.start), c.position + (i.end - c.source.start), color));
-                }
+    let view = TimeRange::new(app.timeline_view.scroll_t, app.timeline_view.scroll_t + app.timeline_view.visible_span());
+    let Some(visible) = c.range().intersection(&view) else { return out };
+    let source = TimeRange::new(c.source.start + (visible.start - c.position), c.source.start + (visible.end - c.position));
+    for (layer_id, color) in app.timeline_view.semantic_index.visible_layers(&c.asset_id) {
+        let Some(layer) = app.project().layer(layer_id) else { continue };
+        let color = parse_color(color);
+        for occurrence in app.timeline_view.semantic_index.query_source(layer_id, source) {
+            let Some(it) = layer.items.get(occurrence.item).filter(|item| item.state != ItemState::Disabled) else { continue };
+            if let Some(r) = it.ranges.get(occurrence.range_index)
+                && let Some(i) = c.source.intersection(r)
+            {
+                out.push((c.position + (i.start - c.source.start), c.position + (i.end - c.source.start), color));
             }
         }
     }
     out
+}
+
+fn gesture_source_pair(
+    app: &TranscriptorApp,
+    asset: &tv2_domain::AssetId,
+    source_range: TimeRange,
+    origin: Ticks,
+    target: Ticks,
+) -> Option<(Ticks, Ticks)> {
+    if app.view == ViewMode::Source {
+        return (app.source_asset.as_ref() == Some(asset)).then_some((origin, target));
+    }
+    let tolerance = Ticks::from_seconds_f64((HANDLE_W / app.timeline_view.px_per_s) as f64);
+    app.timeline_view.semantic_index.gesture_source_pair(asset, source_range, origin, target, tolerance)
 }
 
 fn lane_delta(lanes: &[Lane], y_from: f32, y_to: f32, app: &TranscriptorApp) -> i32 {
@@ -1047,14 +1245,14 @@ fn lane_delta(lanes: &[Lane], y_from: f32, y_to: f32, app: &TranscriptorApp) -> 
     }
 }
 
-fn lane_by_track_delta<'a>(lanes: &'a [Lane], from: &Lane, delta: i32) -> Option<&'a Lane> {
-    let idx = lanes.iter().position(|l| l.y == from.y)?;
-    let visual = -delta; // para video; el audio usa +delta pero comparte cálculo aproximado
-    let target = idx as i32 + visual;
-    if target < 0 {
-        return None;
-    }
-    lanes.get(target as usize).filter(|l| matches!(l.kind, LaneKind::Track(_)))
+fn lane_by_track_delta<'a>(lanes: &'a [Lane], from: &Lane, delta: i32, app: &TranscriptorApp) -> Option<&'a Lane> {
+    let LaneKind::Track(track) = &from.kind else { return None };
+    let sequence = app.sequence()?;
+    let kind = sequence.track(track)?.kind;
+    let compatible: Vec<_> = sequence.tracks.iter().filter(|track| track.kind == kind).collect();
+    let index = compatible.iter().position(|candidate| &candidate.id == track)? as i32;
+    let target = usize::try_from(index.checked_add(delta)?).ok().and_then(|index| compatible.get(index))?;
+    lanes.iter().find(|lane| matches!(&lane.kind,LaneKind::Track(id) if id==&target.id))
 }
 
 #[allow(clippy::too_many_arguments)]
@@ -1083,16 +1281,17 @@ fn draw_clip(
     let fill = if ghost { base.gamma_multiply(0.5) } else { base };
     let fill = if !valid { colors::ERR.gamma_multiply(0.6) } else { fill };
     painter.rect_filled(r, 4.0, fill);
-    if !ghost && let Some(asset) = app.project().asset(&c.asset_id).cloned() {
-        let path = app.resolve_asset_path(&asset);
+    if !ghost && let Some(asset) = app.session.project().asset(&c.asset_id) {
+        let path = app.resolve_asset_path(asset);
         if let Some(media) = &mut app.media_view {
-            media.draw(painter, r, &asset, &path, c.source, kind, c.audio_stream.unwrap_or(0), app.timeline_view.px_per_s);
+            media.draw(painter, r, asset, &path, c.source, kind, c.audio_stream.unwrap_or(0), app.timeline_view.px_per_s);
         }
     }
     if !c.enabled {
         // patrón rayado para desactivado (no solo color)
-        let mut x = r.left();
-        while x < r.right() {
+        let visible = r.intersect(painter.clip_rect());
+        let mut x = visible.left() - r.height();
+        while x < visible.right() {
             painter.line_segment(
                 [Pos2::new(x, r.bottom()), Pos2::new((x + r.height()).min(r.right()), r.top())],
                 Stroke::new(1.0, Color32::from_white_alpha(30)),
@@ -1143,8 +1342,9 @@ fn draw_item(painter: &egui::Painter, r: Rect, it: &tv2_domain::layers::Semantic
     match it.state {
         ItemState::Proposed => {
             // trama diagonal = propuesto
-            let mut x = r.left();
-            while x < r.right() {
+            let visible = r.intersect(painter.clip_rect());
+            let mut x = visible.left() - r.height();
+            while x < visible.right() {
                 painter.line_segment(
                     [Pos2::new(x, r.bottom()), Pos2::new((x + r.height()).min(r.right()), r.top())],
                     Stroke::new(1.0, Color32::from_black_alpha(60)),
@@ -1399,17 +1599,19 @@ fn draw_ruler(app: &TranscriptorApp, painter: &egui::Painter, ruler: Rect, x0: f
         && let Some(seq) = app.sequence()
     {
         let p = painter.with_clip_rect(ruler);
-        for marker in &seq.markers {
+        let margin = Ticks::from_seconds_f64((5.0 / px_per_s) as f64);
+        let window = TimeRange::new(app.timeline_view.scroll_t - margin, app.timeline_view.scroll_t + app.timeline_view.visible_span() + margin);
+        for index in app.timeline_view.index.query_markers(window) {
+            let Some(marker) = seq.markers.get(index) else { continue };
             let x = app.timeline_view.t_to_x(marker.range.start, x0);
-            if x < ruler.left() - 5.0 || x > ruler.right() + 5.0 {
-                continue;
-            }
             let color = parse_color(&marker.color);
-            p.add(egui::Shape::convex_polygon(
-                vec![Pos2::new(x - 5.0, ruler.bottom() - 8.0), Pos2::new(x + 5.0, ruler.bottom() - 8.0), Pos2::new(x, ruler.bottom())],
-                color,
-                Stroke::NONE,
-            ));
+            if x >= ruler.left() - 5.0 && x <= ruler.right() + 5.0 {
+                p.add(egui::Shape::convex_polygon(
+                    vec![Pos2::new(x - 5.0, ruler.bottom() - 8.0), Pos2::new(x + 5.0, ruler.bottom() - 8.0), Pos2::new(x, ruler.bottom())],
+                    color,
+                    Stroke::NONE,
+                ));
+            }
             if !marker.range.is_point() {
                 let end = app.timeline_view.t_to_x(marker.range.end, x0);
                 p.line_segment([Pos2::new(x, ruler.bottom() - 8.0), Pos2::new(end, ruler.bottom() - 8.0)], Stroke::new(2.0, color));

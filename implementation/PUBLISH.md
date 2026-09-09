@@ -93,3 +93,7 @@ Build41,63s; exe SHA2562eb8464f6800dd84cb111c942115a6658df85dbb92a11a5aad6486403
 - V1: commit bb7012c, tag v0.4.0, https://github.com/Gabosequera/transcriber/releases/tag/v0.4.0. Tres assets publicados por CI correcto. PolyForm NC intacta.
 - V2: commit de release5cd55a7, tag v2.0.0-alpha.1, https://github.com/Gabosequera/transcriber-v2/releases/tag/v2.0.0-alpha.1. Repo público, prerelease publicada (draft=false), ZIP y SHA256SUMS.txt adjuntos. Digest del ZIP confirmado por GitHub:6278e97df38597b7f7809bb61c54c9909f9439264ef1a6fe38420ddb8ddab1f5. Licencia propietaria/todos los derechos reservados para código propio; terceros separados. Registro API en evidence/e2/publication-v2.json.
 - Commit posterior únicamente actualiza este resultado y STATUS; el tag conserva el código/paquete probado. No se continúa desarrollo. Al reanudar, E2 sigue abierta y E3 pendiente; primera regresión preparada215404 según STATUS.
+
+## Continuación12 — fuentes alpha.9
+
+El incremento integra implementación E2/E3/E4 y conserva E0/E1; E5 no iniciada. V1/datos personales solo lectura. La publicación prevista es una prerelease de fuentes sin assets binarios, siguiendo el formato de alpha.8. El build local no se ejecuta; GUI/multimedia/revisión general y aceptación quedan aplazadas. Código, resultados y límites en evidence/continuacion-12.md; notas en evidence/release-alpha9.md. El resultado confirmado y la identidad del commit/tag se añadirán tras publicar/verificar.

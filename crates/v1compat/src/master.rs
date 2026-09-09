@@ -48,12 +48,7 @@ impl V1Master {
 
     /// `editorial_chunks.source_master_digest`: digest del master sin `generated_at` ni `chunks`.
     pub fn source_master_digest(&self) -> String {
-        let mut canonical = self.raw.clone();
-        if let Some(obj) = canonical.as_object_mut() {
-            obj.remove("generated_at");
-            obj.remove("chunks");
-        }
-        digest_json(&canonical)
+        tv2_domain::digest::digest_object_without(&self.raw, &["generated_at", "chunks"])
     }
 
     pub fn evidence(&self, asset_id: &tv2_domain::AssetId) -> tv2_domain::evidence::MasterEvidence {
@@ -73,6 +68,7 @@ impl V1Master {
         let Some(tracks) = self.raw.get("tracks").and_then(Value::as_object) else {
             return Ok(layers);
         };
+        let source_digest = self.source_master_digest();
         for (track_id, track) in tracks {
             for (field, id_key, kind, label) in [
                 ("words", "word_id", LayerKind::Transcript, "Palabras"),
@@ -92,7 +88,7 @@ impl V1Master {
                 let mut layer = SemanticLayer::new(asset_id.clone(), kind, format!("{label} · {track_id}"));
                 layer.layer_id = LayerId::new(format!("master-{}", &key[..24]));
                 layer.locked = true;
-                layer.source_master_digest = Some(self.source_master_digest());
+                layer.source_master_digest = Some(source_digest.clone());
                 layer.extra.insert("master_projection".into(), serde_json::json!({"track_id":track_id,"collection":field}));
                 for record in records {
                     let id = record.get(id_key).and_then(Value::as_str).ok_or_else(|| invalid(format!("{field}: falta {id_key}")))?;

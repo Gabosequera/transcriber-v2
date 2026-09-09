@@ -29,6 +29,7 @@ struct Entry {
     after_digest: String,
 }
 #[derive(Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
 struct Compact {
     schema: String,
     project_id: String,

@@ -183,3 +183,13 @@ Primera acción concreta: implementar derivación desde mapping de exportación 
 Después completar requests/proposals/passes/manifests de ejecución, watcher/reconcile V1, archivado general/migraciones/límites, inventario/preview y E4 MCP funcional. El testing aplazado no impide ese código. Checkpoint no equivale a completar el encargo. Publicación exacta en evidence/publication-alpha8.json y PUBLISH tras verificarse.
 
 Publicación confirmada: v2.0.0-alpha.8, código/tag 2355655a658cc512ac5ed612c4950275873eef10, prerelease no draft y sin assets, registro evidence/publication-alpha8.json. Main incluye commit documental posterior. No equivale a completar E4.
+
+## Traspaso vigente — continuación12, alpha.9
+
+La implementación del alcance autorizado E2/E3/E4 está integrada en el mismo proyecto; no reiniciar E0/E1 ni introducir E5. No se declara aceptación física de las etapas. Sustituye los pendientes de implementación de los traspasos históricos inferiores/anteriores que ya resolvió este incremento. Leer STATUS, evidence/continuacion-12.md, requirements-matrix, RUN, v1-action-inventory, control.md y D-0054–D-0061.
+
+E2: inspector/estados/gestos/paleta, preview preparado, índices/composición/import V1 en workers, export configurable/intercambio/ondas adaptativas. E3: derivación con Mixed explícito, requests/proposals/passes/manifests, watchers individuales/conversación, Save As/bundles/auditoría/recibos/migración/codec/COW y enriquecimiento de proyectos antiguos sin reemplazar su evidencia/edición. E4: servicio MCP loopback con cliente HTTP/stdio, schemas/permisos/alcance automático, contexto/queries/evidencia/jobs/selección/transporte y propuesta→preview→apply→verify con idempotencia/eventos/persistencia.
+
+V1 y datos personales permanecen estrictamente de solo lectura. GUI/multimedia/revisión general y aceptación siguen aplazadas: no ejecutarlas ni inferirlas de Clippy. Tests dominio/desktop/V1compat/control bloqueados por4551 no se reintentan ni se eluden. Application sintética permitida; los comandos/resultados exactos del último árbol figuran en la evidencia. El build release no se ejecuta y la prerelease solo distribuye fuentes.
+
+La siguiente actividad preparada es la aceptación de los recorridos RUN/control.md cuando el usuario la reanude: edición/foco/gestos, reproducción/export, portabilidad/recuperación y cliente MCP contra la aplicación. Hasta entonces no lanzar el ejecutable ni seguir a E5. Las limitaciones de metadatos/undo/COW/archivo/RAM están documentadas como contratos y costes reales; PERF-01 no tiene aceptación global ni cifras nuevas de latencia o sincronía. No confundir el registro de implementación con una revisión general o aprobación del producto.

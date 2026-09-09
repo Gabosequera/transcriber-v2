@@ -1,0 +1,29 @@
+   Compiling tv2-application v2.0.0-alpha.9 (C:\Users\gabri\Todo\transcriber-v2\crates\application)
+    Finished `test` profile [optimized + debuginfo] target(s) in 20.78s
+     Running unittests src\lib.rs (target\debug\deps\tv2_application-1f119f0e3686a5a1.exe)
+
+running 8 tests
+test source_bundles::tests::source_enrichment_rejects_changed_master_wrong_bundle_and_existing_bundle_replacement ... ok
+test source_bundles::tests::future_schema_or_unknown_bundle_contract_is_rejected_without_rewriting ... ok
+test source_bundles::tests::changed_auxiliary_aborts_before_checkpoint_and_corrupt_owned_blob_is_not_overwritten ... ok
+test source_bundles::tests::external_master_survives_save_as_and_rejects_tampered_bytes_or_forged_descriptors ... ok
+test source_bundles::tests::legacy_checkpoint_migrates_only_on_save_preserving_history_receipts_and_extras ... ok
+test source_bundles::tests::recovery_after_undo_enrichment_requires_validated_pure_redo_proof_and_restores_portable_redo ... FAILED
+test source_bundles::tests::legacy_master_gains_source_bundle_without_replacing_evidence_or_human_layers_and_survives_save_as ... ok
+test source_bundles::tests::save_as_auxiliaries_survive_source_loss_folder_move_undo_and_export ... ok
+
+failures:
+
+---- source_bundles::tests::recovery_after_undo_enrichment_requires_validated_pure_redo_proof_and_restores_portable_redo stdout ----
+
+thread 'source_bundles::tests::recovery_after_undo_enrichment_requires_validated_pure_redo_proof_and_restores_portable_redo' (22168) panicked at crates\application\src\source_bundles.rs:335:90:
+called `Result::unwrap()` on an `Err` value: DomainError { code: Precondition, message: "el master original es evidencia protegida", context: [], action: None }
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    source_bundles::tests::recovery_after_undo_enrichment_requires_validated_pure_redo_proof_and_restores_portable_redo
+
+test result: FAILED. 7 passed; 1 failed; 0 ignored; 0 measured; 65 filtered out; finished in 0.08s
+
+error: test failed, to rerun pass `-p tv2-application --lib`

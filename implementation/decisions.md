@@ -1,4 +1,40 @@
-# Decisiones de continuación 11
+# Decisiones de continuación 12 — durabilidad
+
+Estas decisiones sustituyen los límites de implementación anteriores que nombran expresamente. La evidencia final es [application-continuacion-12-final.log](evidence/application-continuacion-12-final.log): 70 unitarios correctos y tres integraciones de bloques correctas. El [log previo](evidence/application-continuacion-12.log) conserva la ejecución de 68 y el fallo/corrección de una fixture. No equivalen a aceptación física, multimedia ni cierre de E2/E3/E4.
+
+## D-0054 · Save As autocontenido para evidencia auxiliar y barrera de lector
+
+Save As copia por streaming los `SourceFile` verificados a `source-bundles/<sha256>`, conserva directorios vacíos y guarda localizadores `@project/…`. Se remapean proyecto e historia; la sesión adopta solo los localizadores del snapshot confirmado y conserva ediciones concurrentes. El master fuente externo debe superar tanto SHA/tamaño de sus bytes como comparación del JSON canónico contra `MasterEvidence`; un descriptor modificado no demuestra autenticidad por sí solo. No se escriben fuentes V1 ni se convierten medios de usuario o jobs de configuración en contenido portable.
+
+El schema lógico nuevo es `transcriptor-project/2`. Los proyectos /1 siguen legibles sin escritura implícita; al guardar se migran las bases del proyecto/historia manteniendo undo/redo y recibos. Schemas futuros y campos desconocidos de contratos cerrados de evidencia/almacenamiento se rechazan en vez de descartarse. Se descarta elevar el lector de forma silenciosa o intentar downgrade. Sustituye la dependencia binaria del origen y la falta de barrera de lector de D-0052. Tests de Save As, traslado/pérdida del origen, export/undo/reapertura, corrupción y migración legacy real; no crash físico.
+
+`AttachMaster` permite un único enriquecimiento de legado: si `source_bundle` falta, puede añadirse manteniendo exactamente asset, digest y documento completo. Valida el bundle contra ese mismo master y deja intacto el documento ya incorporado; un bundle existente solo admite igualdad exacta, nunca retirada/reemplazo por otro comando. La protección común usa la misma regla. Importar esa carpeta en el proyecto existente produce solo este comando y conserva capas/seq/decisiones humanas, sustituyendo la antigua instrucción de crear otro proyecto. Undo humano restaura el estado histórico y redo repone el bundle. [Prueba dirigida](evidence/application-legacy-enrichment-12.log): siete casos correctos, incluidos dos nuevos con autosave/recovery del enriquecimiento, replay y Save As/reapertura tras perder el origen; V1compat/GUI se compilan sin ejecución física.
+
+## D-0055 · Auditoría archivada y recibos sin expulsión de claves
+
+La auditoría se escribe en segmentos inmutables verificados, seleccionados por `audit/index.json`. La intención contiene la transición del índice; los blobs preceden a su publicación y un reintento no duplica eventos. Autosave conserva el índice de su snapshot. Save As copia y verifica segmentos y blobs referenciados antes de depender del destino. La consulta admite 1–500 eventos y cursor ligado al digest del índice; si el archivo cambia, exige reiniciar la paginación.
+
+La sesión mantiene hasta 1024 recibos calientes de hasta 64 KiB codificados; el resto queda en un log temporal con offsets/tamaño/SHA y se reconstruye desde auditoría durable al abrir. No se borra la clave ni se rechaza la número 10001 por un límite arbitrario: un retry debe conservar su resultado. Sustituye el tope de D-0027 y la reescritura global de D-0031 para proyectos actuales. Segmentos objetivo 1 MiB, máximo 64 MiB por segmento/índice y metadato individual de recibo. `read_journal`/recovery aún pueden materializar todo el archivo; índice de claves en RAM, sin GC automático de segmentos/blobs. Pruebas: 10002 recibos, replay, paginación, corrupción, Save As y fronteras de publicación. No historial ilimitado ni presupuesto global de RAM.
+
+## D-0056 · Codec de almacenamiento externo sin cambiar el proyecto lógico
+
+Masters y capas serializadas mayores de 64 KiB se almacenan en `evidence/<sha256>.json`; referencias pequeñas se usan en snapshots, history/2, autosave, commit, comandos auditados y caché de recibos. Envoltorios explícitos `project-storage/1`, `history-storage/1`, `commit/2`, `autosave/2` y eventos de `audit/2` autorizan la hidratación; el dominio continúa recibiendo `Project` completo con el mismo digest lógico. El lector exige tamaño y SHA de bytes, digest canónico y correspondencia de identidad. Lee con límite de tamaño declarado + 1, sin el antiguo tope de 64 MiB para el blob. Los marcadores literales se escapan y los campos de un stub de capa deben coincidir exactamente: no se descartan ediciones o extensiones silenciosamente.
+
+Se conserva lectura de formatos legados. La alternativa de subir únicamente el límite del JSON principal mantendría la duplicación en historia, auditoría y recibos. Los metadatos siguen limitados a 64 MiB para proyecto/autosave y 128 MiB para historia/intención; no se afirma soporte ilimitado para `extra`, millones de entidades pequeñas o descripciones de comandos. Tests con master y capa de 65 MiB, digest estable, Save As sin origen, corrupción SHA/canonical, colisión de marcadores y cuatro fronteras de commit/2. Sustituye el límite efectivo del payload de evidencia de D-0051/D-0052, sin cerrar PERF-01 ni probar pérdida real de energía.
+
+## D-0057 · Items compartidos con copia al mutar y caché de capas
+
+`SemanticLayer.items` usa `SharedVec<T>` sobre `Arc<Vec<T>>`, con serde transparente como array, igualdad rápida por identidad y `Arc::make_mut` al editar. Clone de proyecto/history/worker no duplica palabras o utterances inmutables; editar una capa compartida copia su vector completo y preserva snapshots anteriores. `attribute` evita iteración mutable de capas sin cambios para no disparar una copia por un simple comando de Agent. El lector reutiliza capas verificadas entre proyecto/historia; el escritor cachea la última versión de cada capa antes de repetir fingerprint/serialización.
+
+Se conserva el límite de undo de 200 operaciones. `extra`, otras colecciones, árboles JSON hidratados y cálculos canónicos no se convierten en estructuras persistentes ni reciben un presupuesto de RAM; COW por capa no garantiza coste pequeño al editar una capa enorme. Se descarta atribuir un benchmark global a la mera compartición. Tests: 100000 items comparten almacenamiento en clone/Agent rename/historia/undo/redo y se aíslan al mutar; 1000 items reabiertos comparten proyecto e historia. JSON y digests mantienen su contrato; física/fluidez siguen pendientes.
+
+`PreparedCommand` conserva también un `DiffSummary` privado calculado tras aplicar, atribuir y validar; dry-run, preview y commit lo reutilizan. El commit no recorre otra vez el proyecto para calcular ese resumen. Revisión y `updated_at` administrados por el commit se comunican como `base_revision`, `new_revision` y `applied_at`; el diff editorial incluye schema, identidad, `created_at` y metadatos persistentes. La igualdad exacta de la base sigue impidiendo confirmar cambios de contenido o fechas sin incremento de revisión.
+
+`LayerValidationCache` conserva únicamente certificados de `validate_layer` exitoso con snapshot completo y duración exactos, nunca una suposición de validez del proyecto por revisión. Máximo 256 IDs y una versión por capa; al saturarse se descarta solo la aceleración. La identidad de items COW acelera la igualdad, pero no sustituye comparar tipo, cabecera, tombstones y demás campos. Assets/referencias/secuencias/masters continúan validados globalmente en cada preparación. Bases nuevas o reemplazadas sin validar no reciben certificados implícitos. Store/history/recovery y comandos como ReconcileProject/PasteClips/AddSequence conservan validación completa. El límite de certificados no es presupuesto de RAM en bytes. Tests negativos cubren duración, color, items, Blocks, tombstones, schema/referencias y sustitución de base con caché caliente; se mantiene la validación ordinaria como oráculo.
+
+---
+
+# Decisiones históricas de continuación 11
 
 ## D-0052 · Carpeta fuente como evidencia inmutable
 
@@ -253,3 +289,27 @@ Todos los caminos de edición de rangos del inspector ajustan vecinos. SnapBlock
 ## D-0046 · Recuperar toda la historia y compartir masters inmutables
 
 Autosave/1 devuelve project/events/history; recuperación valida antes de mutar y restaura undo/redo del candidato elevando la revisión y sus fronteras. La entrada artificial de recuperación solo se conserva para legacy sin history. Reapertura, receipts y ambas pilas probadas. EvidenceDocument encapsula Arc<Value> sin acceso mutable, comparte caché OnceLock del digest excluyendo generated_at/chunks; Deserialize crea evidencia y caché nuevas. Evita clones del master en historial/worker/validación, conservando JSON compatible; no deduplica serialización ni proyecciones. PreparedCommand privado permite preparar en worker y confirma solo contra la misma base/identidad. No constituye E4 ni resuelve todo PERF-01.
+
+## D-0058 · Preparación y presentación del editor
+
+Los gestos usan PreparedCommand opaco: IDs, efecto, diff y geometría calculados en worker; commit revalida la base exacta sin repetir el diff. Índices temporales y composición se calculan en un worker por clase y descartan generaciones/vistas/proyectos antiguos. El visor conserva el último resultado con estado visible; seek/play se difieren, incluida la llamada MCP, y exportar espera la composición vigente. La importación V1 prepara también su batch completo fuera de GUI. No se promete que toda operación sea O(1): validación global, copias de clips y ediciones COW por capa tienen costes lineales documentados.
+
+La paleta modal usa el registro de keymap y atajos efectivos; el manifiesto se comparte con tv2_context como información, sin habilitar un dispatcher remoto. Inspector conserva borradores y confirma al terminar la edición. Estados editoriales de clips se escriben en el mismo comando/undo y se propagan a grupos enlazados. Aceptación humana no se atribuye a Agent.
+
+## D-0059 · Intercambio editorial, derivación y versiones
+
+Requests/proposals se vinculan a proyecto/revisión/digests; primera pasada de temas produce un mapa validado que la segunda debe citar y cubrir. Respuestas genéricas V1 user/topics/ai conservan su contrato. Una respuesta legítima sin request_id se vincula solo tras acción local explícita y comprobación de ambos digests; se archivan original/copia, sin reescribir la evidencia ni asumir autoría humana. Avisos de montaje se muestran y conservan, y las repeticiones requieren declaración/motivo. Watchers leen fuentes estables, comparan bases y abren documentos en copias V2; no escriben documentos V1.
+
+La derivación usa mapping temporal y recibo de exportación verificado. El mezclador actual produce un stream de audio: el hijo lo declara como Mixed(0), conserva evidencia original como procedencia y no atribuye transcripts multipista originales a streams inexistentes. Gaps/relojes compuestos/efectos no representables provocan rechazo explícito. EDL/FCPXML usan un perfil V1 representable; no descartan pérdidas en silencio. No se ejecutan modelos para completar estas operaciones.
+
+## D-0060 · Servicio MCP y autorización local
+
+MCP HTTP JSON-RPC en loopback/puerto efímero, token aleatorio por sesión y validación Host/Origin/tamaño/schema. Herramientas anunciadas según permisos/capacidad real; sin shell/SQL/paths arbitrarios. Una sesión/proyecto concreta limita cada llamada. Cliente HTTP/stdio PowerShell comparte protocolo con JSON manual del panel.
+
+Propuesta ligada a revisión/digest y clave idempotente; preview preserva los IDs preparados. Apply requiere revisión local exacta o alcance automático local por todos los tipos del batch y vuelve a comprobarlo. No restaura autorización implícita tras reinicio ni permite que el cliente se conceda permisos. Verify calcula hashes en worker: pending/null no equivale a éxito; comprueba recibo y contenido real, distinguiendo aplicado/dirty/guardado. Eventos y propuestas se archivan; los límites y gaps de paginación son explícitos. E4 integra estas herramientas con el proyecto/player/jobs; la aceptación del cliente conectado al ejecutable sigue aplazada.
+
+## D-0061 · Recuperar la carpeta de un proyecto legado
+
+AttachMaster puede enriquecer None→Some de source_bundle únicamente con evidencia/asset/digest completos idénticos y bundle validado. No sustituye ni retira un bundle existente, ni acepta otro master aunque su digest editorial excluya fechas/chunks. Importar la carpeta original sobre ese proyecto emite solo AttachMaster; conserva capas humanas, secuencias, vista y selección. Save As traslada después los auxiliares. Undo/redo y recuperación se comprueban con fixtures sintéticas; fuentes V1 permanecen intactas.
+
+La recuperación humana tras deshacer el enriquecimiento admite ausencia del bundle solo con historia validada cuyo redo inmediato prueba el enriquecimiento puro y cuya preimagen coincide salvo revisión/fecha. Se normalizan localizadores a los actuales solo cuando coinciden documento, inventario, textos, directorios, SHA y tamaños; comandos/Reconcile conservan protección estricta. Ver application-continuacion-12-integrated.log:73 unitarios y3 integraciones correctos.

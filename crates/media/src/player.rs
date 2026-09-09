@@ -221,6 +221,10 @@ fn run(tools: FfmpegTools, rx: Receiver<PlayerCommand>, shared: Arc<Shared>, wak
             match cmd {
                 PlayerCommand::Shutdown => shutdown = true,
                 PlayerCommand::SetTimeline { timeline: t, assets: a } => {
+                    // Editorial-only edits must not restart an unchanged audio clock.
+                    if t == timeline && a == assets {
+                        continue;
+                    }
                     timeline = t;
                     assets = a;
                     match renderer.as_mut() {

@@ -1,4 +1,43 @@
-# STATUS — continuación 11, fuentes 2.0.0-alpha.8
+# Estado vigente — E2/E3/E4 integradas, alpha.9
+
+La implementación del alcance pedido está integrada en el mismo proyecto Rust. **Se distingue código implementado de aceptación: las etapas no se declaran aceptadas físicamente.** E0/E1 se conservan y E5 no se inicia. La referencia detallada es [continuacion-12](evidence/continuacion-12.md); el inventario V1 y RUN describen comportamientos y recorridos, no solo handlers.
+
+| Etapa | Implementación integrada | Aceptación aplazada |
+|---|---|---|
+| E2 | Inspector persistente; estados/motivos de clips y protección; paleta/atajos/contexto; previews preparados y gestos/snap/autoscroll; índices y composición en workers; reenlace cancelable; export configurable/EDL/FCPXML; ondas adaptativas | GUI/foco/IME/DPI, gesto real, sincronía/audio, composición/export y mediciones de proyectos grandes |
+| E3 | Derivación con mapping y audio mezclado declarado; requests/proposals/passes/manifests; adopción legacy explícita; watchers/reconcile individual; conversación paginada; Save As/auxiliares; auditoría/recibos archivados; schema/codec/COW | Recorrido con copias aisladas V1, aceptación documental de dos pasadas/derivación, crash físico/dos instancias/portabilidad real |
+| E4 | MCP específico conectado a sesión/selección/player/jobs, schemas/permisos/alcance automático, queries/evidencia/auditoría, dry-run/preview/apply/verify, JSON/eventos/estado y cliente HTTP/stdio | Conexión cliente→aplicación real y recorrido de permisos/revisión/reinicio; no se ejecuta el editor para aceptarlo |
+
+Los límites de tamaño, retención y costes lineales se documentan explícitamente en la evidencia y más abajo. No son funciones simuladas ni una promesa de recursos ilimitados. PERF-01 permanece sin aceptación global; los controles de compilación no miden frame time, RAM total o A/V. EDL/FCPXML/derivación rechazan aquello que su perfil no representa.
+
+Verificación final: 73 unitarios de application y 3 integraciones correctos; check, Clippy/all-targets con -D warnings, formato y parser del cliente correctos. El log integrado incluye recuperación tras undo de una vinculación y redo después de mover la carpeta. Build release correcto (2 min32 s), ejecutable no lanzado; metadata y publicación al pie de la evidencia. V1 y datos personales siguen de solo lectura; no se ejecutan tests de dominio/desktop/V1compat/control bloqueados por4551 ni multimedia. El último control permitido de application y sus logs se mantienen separados de pruebas solamente compiladas.
+
+---
+
+# STATUS — continuación 12: durabilidad implementada y verificada en el núcleo
+
+El incremento de durabilidad elimina pendientes de código concretos: traslado de auxiliares al hacer Save As, migración de los proyectos legados con sus bases históricas, archivado de auditoría/recibos y persistencia de masters y capas que superan 64 MiB. También comparte los items de capas entre proyecto, historial y workers mediante copia al mutar. Esto no declara cerradas E2/E3/E4 ni convierte las pruebas sintéticas en aceptación física; E5 no se inicia.
+
+Un proyecto antiguo que conserva el master pero carece de `source_bundle` puede incorporar la carpeta original en el mismo proyecto si coinciden documento completo, asset y digest. El enriquecimiento solo añade el bundle ausente: no reaplica capas o montajes ni reemplaza evidencia o un bundle existente. Los siete tests dirigidos de [application-legacy-enrichment-12.log](evidence/application-legacy-enrichment-12.log) pasan (0,07 s), incluidos dos nuevos para protección, autosave/recovery del enriquecimiento, undo/redo y Save As con origen ausente. Se compilaron 72 unitarios; esta ejecución dirigida no equivale a ejecutar los 72.
+
+| Implementación vigente | Evidencia ejecutada | Aceptación y alcance |
+|---|---|---|
+| Save As copia auxiliares verificados a `source-bundles/<sha256>`, relocaliza sesión/undo/redo y conserva directorios vacíos. Copia también auditoría y sus blobs de evidencia | Pérdida del origen, cambio de carpeta, exportación, undo/reapertura y corrupción en tests application | Portabilidad documental implementada; no implica copiar los medios de usuario ni los jobs guardados en configuración |
+| Lectura legacy `project/1`, migración explícita al guardar a `project/2` con historia coherente; lectores/schemas desconocidos se rechazan | Reapertura legacy real, migración, undo/redo y replay idempotente; rechazo sin reescribir | No hay downgrade ni migración especulativa de contratos desconocidos |
+| Auditoría inmutable por segmentos y un índice transaccional; páginas de 1–500 eventos ligadas al digest del índice. Recibos fríos conservan todas las claves en vez de rechazar a partir de 10000 | 10002 recibos recuperables, paginación, cursor obsoleto, corrupción, Save As y fronteras de commit/autosave | Archivo y replay implementados; no historial ilimitado ni presupuesto global de memoria |
+| Codec de almacenamiento externo para masters/capas grandes, usado también por historial, autosave, commit, comandos auditados y recibos; hidrata y verifica antes de validar el dominio | Master y capa sintéticos de 65 MiB guardados/reabiertos con digest lógico estable; corrupción SHA/canonical, marcadores literales y cuatro fronteras de commit | Se resuelve el rechazo de esos payloads por el límite del JSON principal; quedan límites de metadatos y costes de hidratación |
+| `SemanticLayer.items` usa `SharedVec` transparente en JSON; cachés reutilizan capas verificadas al abrir y evitan serializar proyecciones idénticas por cada snapshot | 100000 items comparten almacenamiento en clone/rename por Agent/undo/redo y se aíslan al mutar; 1000 items comparten proyecto e historia tras reapertura | Prueba de compartición y aislamiento, no benchmark de RAM total ni fluidez de la GUI |
+| `PreparedCommand` conserva el diff ya calculado durante preparación; preview/commit lo reutilizan. La sesión cachea validaciones de capas completas que ya pasaron, ligadas a contenido exacto y duración | Diff/revisión/metadata coherentes en dry-run/commit/recibo; bases frías inválidas y cambios de duración, items, cabecera, tombstones y referencias se rechazan | Hasta 256 certificados de capa; no se confía en una base por su revisión ni se omite validación global de proyecto |
+
+**Verificación final del núcleo:** [application-continuacion-12-final.log](evidence/application-continuacion-12-final.log) registra **70 unitarios correctos en 28,38 s y tres tests de integración correctos en 0,00 s**, después de añadir diff precalculado y caché de validación. El [log anterior](evidence/application-continuacion-12.log) conserva los 68 tests previos, el fallo de una fixture que creaba items humanos y su corrección a salida de modelo sin revisión. Dominio/desktop/V1compat no se ejecutaron para esta evidencia; GUI, medios, modelos, pérdida de energía y pruebas físicas siguen aplazados. Compilación/publicación del conjunto se registran por separado, sin inferirlas de estos tests.
+
+**Límites reales que permanecen:** metadatos de `project.json` y autosave, 64 MiB; historia e intención, 128 MiB; undo, 200 operaciones. Masters/capas mayores de 64 KiB se externalizan a blobs sin ese tope de 64 MiB, con lectura limitada a tamaño declarado + 1 y SHA/canonical. Auditoría: segmentos objetivo 1 MiB, máximo 64 MiB por segmento/índice; no tope global de 10000 eventos/recibos. Caché caliente: hasta 1024 recibos de hasta 64 KiB codificados; el resto usa archivo temporal reconstruible desde auditoría y un índice por clave en RAM. El metadato de un recibo individual aún tiene tope de 64 MiB.
+
+La copia al mutar opera por capa: editar items copia su vector completo si está compartido; `extra`, otros campos y árboles JSON hidratados no tienen un presupuesto global de RAM. La caché conserva como máximo 256 certificados completos de capa, un límite de entradas y no de bytes; solo reutiliza validaciones exitosas con capa/duración exactas. Referencias, assets, secuencias y masters se validan en cada preparación; almacenamiento, historia, recuperación y algunos comandos siguen usando validación completa. `read_journal` y recuperación aún pueden materializar la auditoría completa; hashes/digests y algunas consultas recorren datos grandes. No hay recolección automática de blobs/segmentos huérfanos. PERF-01 sigue abierto por estos costes y por falta de aceptación física. Decisiones: D-0054–D-0057. Los pendientes y resultados de las secciones inferiores son históricos y no revocan este incremento.
+
+---
+
+# Histórico — continuación 11, fuentes 2.0.0-alpha.8
 
 Checkpoint de fuentes publicado/verificado: [alpha.8](https://github.com/Gabosequera/transcriber-v2/releases/tag/v2.0.0-alpha.8), código/tag `2355655a658cc512ac5ed612c4950275873eef10`, sin assets binarios. Registro en evidence/publication-alpha8.json. Build local OK (2m21s), exe no ejecutado; main incluye después este registro documental.
 

@@ -1,0 +1,26 @@
+    Checking tv2-domain v2.0.0-alpha.9 (C:\Users\gabri\Todo\transcriber-v2\crates\domain)
+    Checking tv2-application v2.0.0-alpha.9 (C:\Users\gabri\Todo\transcriber-v2\crates\application)
+    Checking tv2-media v2.0.0-alpha.9 (C:\Users\gabri\Todo\transcriber-v2\crates\media)
+    Checking tv2-v1compat v2.0.0-alpha.9 (C:\Users\gabri\Todo\transcriber-v2\crates\v1compat)
+    Checking tv2-control v2.0.0-alpha.9 (C:\Users\gabri\Todo\transcriber-v2\crates\control)
+    Checking transcriptor v2.0.0-alpha.9 (C:\Users\gabri\Todo\transcriber-v2\apps\desktop)
+error[E0308]: `match` arms have incompatible types
+    --> apps\desktop\src\app.rs:1043:31
+     |
+1041 | /         match action {
+1042 | |             "file.new" => self.new_project(),
+     | |                           ------------------ this is found to be of type `()`
+1043 | |             "file.save_as" => self.save_project(true),
+     | |                               ^^^^^^^^^^^^^^^^^^^^^^^ expected `()`, found `bool`
+1044 | |             "file.import_v1" => self.import_v1_dialog(),
+...    |
+1296 | |             other => self.toast(Severity::Warn, format!("Acción sin implementar: {other}")),
+1297 | |         }
+     | |_________- `match` arms have incompatible types
+
+For more information about this error, try `rustc --explain E0308`.
+error: could not compile `transcriptor` (bin "Transcriptor") due to 1 previous error
+warning: build failed, waiting for other jobs to finish...
+error: could not compile `transcriptor` (bin "Transcriptor" test) due to 1 previous error
+    Checking transcriptor v2.0.0-alpha.9 (C:\Users\gabri\Todo\transcriber-v2\apps\desktop)
+    Finished `dev` profile [optimized + debuginfo] target(s) in 2.53s

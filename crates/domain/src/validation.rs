@@ -6,6 +6,37 @@ use crate::ids::is_valid_v1_id;
 use crate::{AssetKind, DomainError, Project, Rational, Ticks, TrackKind};
 use std::collections::{HashMap, HashSet};
 
+/// Successful layer-validation certificates. No project/base is presumed valid;
+/// every call still validates global references, assets, sequences and masters.
+/// The latest complete immutable layer and duration are retained for at most 256
+/// layer IDs. COW items keep a certificate unchanged when callers mutate a copy.
+#[derive(Default)]
+pub struct LayerValidationCache {
+    layers: HashMap<crate::LayerId, (crate::SemanticLayer, Ticks)>,
+}
+
+impl LayerValidationCache {
+    pub fn validate(&mut self, project: &Project) -> DomainResult<()> {
+        project.validate_with_layers(|layer, duration| {
+            if self.layers.get(&layer.layer_id).is_some_and(|(old, old_duration)| *old_duration == duration && old == layer) {
+                return Ok(());
+            }
+            validate_layer(layer, duration)?;
+            // This is acceleration only: dropping certificates never drops data.
+            if self.layers.len() >= 256 && !self.layers.contains_key(&layer.layer_id) {
+                self.layers.clear();
+            }
+            self.layers.insert(layer.layer_id.clone(), (layer.clone(), duration));
+            Ok(())
+        })
+    }
+}
+
+fn validate_layer(layer: &crate::SemanticLayer, duration: Ticks) -> DomainResult<()> {
+    crate::layers::validate_layer(layer, duration)?;
+    unique(layer.deleted_item_ids.iter().map(|id| id.as_str()), "tombstone")
+}
+
 fn unique<'a>(ids: impl Iterator<Item = &'a str>, kind: &str) -> DomainResult<()> {
     let mut seen = HashSet::new();
     for id in ids {
@@ -37,7 +68,11 @@ fn gain(v: f32) -> DomainResult<()> {
 impl Project {
     /// Shared by load, recovery, preview and commit. Unknown fields are kept.
     pub fn validate(&self) -> DomainResult<()> {
-        if self.schema != crate::PROJECT_SCHEMA {
+        self.validate_with_layers(validate_layer)
+    }
+
+    fn validate_with_layers(&self, mut layer_validator: impl FnMut(&crate::SemanticLayer, Ticks) -> DomainResult<()>) -> DomainResult<()> {
+        if !matches!(self.schema.as_str(), crate::PROJECT_SCHEMA | crate::project::LEGACY_PROJECT_SCHEMA) {
             return Err(DomainError::unsupported(format!("schema de proyecto desconocido: {}", self.schema)));
         }
         if !is_valid_v1_id(&self.project_id) || self.name.trim().is_empty() {
@@ -128,8 +163,7 @@ impl Project {
         }
         for l in &self.layers {
             let a = assets.get(&l.asset_id).ok_or_else(|| DomainError::not_found("asset", &l.asset_id))?;
-            crate::layers::validate_layer(l, if a.kind == AssetKind::Image { Ticks::MAX } else { a.duration() })?;
-            unique(l.deleted_item_ids.iter().map(|id| id.as_str()), "tombstone")?;
+            layer_validator(l, if a.kind == AssetKind::Image { Ticks::MAX } else { a.duration() })?;
         }
         for id in &self.layer_order {
             self.layer(id).ok_or_else(|| DomainError::not_found("capa", id))?;

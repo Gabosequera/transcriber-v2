@@ -171,6 +171,11 @@ pub enum Command {
         gain_db: Option<f32>,
         transform: Option<Transform>,
     },
+    SetClipEditorial {
+        clip_ids: Vec<ClipId>,
+        state: Option<ItemState>,
+        reason: Option<String>,
+    },
     LinkClips {
         clip_ids: Vec<ClipId>,
     },
@@ -244,6 +249,11 @@ pub enum Command {
         item_id: ItemId,
         parent_id: Option<ItemId>,
         ranges: Vec<TimeRange>,
+    },
+    SetBlockConfidence {
+        layer_id: LayerId,
+        item_id: ItemId,
+        confidence: f64,
     },
     SplitItem {
         layer_id: LayerId,
@@ -384,6 +394,7 @@ impl Command {
                 }
             }
             Command::SetClipProps { .. } => "Propiedades de clip".into(),
+            Command::SetClipEditorial { .. } => "Decisión editorial del clip".into(),
             Command::LinkClips { .. } => "Vincular clips".into(),
             Command::UnlinkClips { .. } => "Desvincular clips".into(),
             Command::AddMarker { .. } => "Añadir marcador".into(),
@@ -402,6 +413,7 @@ impl Command {
             },
             Command::SetItemProps { .. } => "Editar tramo".into(),
             Command::SetItemStructure { .. } => "Editar rangos y jerarquía".into(),
+            Command::SetBlockConfidence { .. } => "Editar confianza del bloque".into(),
             Command::SplitItem { .. } => "Dividir item y descendientes".into(),
             Command::TrimItem { .. } => "Recortar borde del item".into(),
             Command::ShiftItems { .. } => "Mover items y descendientes".into(),
@@ -451,9 +463,12 @@ impl Command {
             }
             Command::AttachMaster { master } => {
                 master.validate(project)?;
-                if let Some(existing) = project.masters.iter().find(|m| m.asset_id == master.asset_id) {
-                    if existing != master {
+                if let Some(existing) = project.masters.iter_mut().find(|m| m.asset_id == master.asset_id) {
+                    if !existing.allows_source_enrichment(master) {
                         return Err(DomainError::precondition("el master original está protegido; importa el nuevo análisis como otra versión"));
+                    }
+                    if existing.source_bundle.is_none() {
+                        existing.source_bundle = master.source_bundle.clone();
                     }
                 } else {
                     project.masters.push(master.clone());
@@ -819,6 +834,7 @@ impl Command {
             Command::SplitClip { clip_id, at } => {
                 let frame = project.active().map(|s| s.frame_rate).unwrap_or_default().frame_duration();
                 let seq = seq_of_clip_mut(project, clip_id)?;
+                ensure_clip_unlocked(seq, clip_id)?;
                 let clip = seq.clip_mut(clip_id).ok_or_else(|| DomainError::not_found("clip", clip_id))?;
                 let r = clip.range();
                 if *at < r.start + frame || *at > r.end - frame {
@@ -937,6 +953,7 @@ impl Command {
                 let mut effect = CommandEffect::new(self.label());
                 for id in clip_ids {
                     let seq = seq_of_clip_mut(project, id)?;
+                    ensure_clip_unlocked(seq, id)?;
                     let c = seq.clip_mut(id).ok_or_else(|| DomainError::not_found("clip", id))?;
                     c.enabled = *enabled;
                     effect = effect.touch(id);
@@ -945,6 +962,7 @@ impl Command {
             }
             Command::SetClipProps { clip_id, name, gain_db, transform } => {
                 let seq = seq_of_clip_mut(project, clip_id)?;
+                ensure_clip_unlocked(seq, clip_id)?;
                 let c = seq.clip_mut(clip_id).ok_or_else(|| DomainError::not_found("clip", clip_id))?;
                 if let Some(v) = name {
                     c.name = v.clone();
@@ -963,6 +981,42 @@ impl Command {
                 }
                 Ok(CommandEffect::new(self.label()).touch(clip_id))
             }
+            Command::SetClipEditorial { clip_ids, state, reason } => {
+                if clip_ids.is_empty() {
+                    return Err(DomainError::invalid("Selecciona clips para revisar"));
+                }
+                let mut targets = std::collections::BTreeSet::new();
+                for id in clip_ids {
+                    let seq = project.sequences.iter().find(|seq| seq.clip(id).is_some()).ok_or_else(|| DomainError::not_found("clip", id))?;
+                    let clip = seq.clip(id).unwrap();
+                    targets.insert(id.clone());
+                    if let Some(group) = &clip.link_group {
+                        targets.extend(seq.clips.iter().filter(|c| c.link_group.as_ref() == Some(group)).map(|c| c.id.clone()));
+                    }
+                }
+                let mut effect = CommandEffect::new(self.label());
+                for id in targets {
+                    let seq = seq_of_clip_mut(project, &id)?;
+                    ensure_clip_unlocked(seq, &id)?;
+                    let clip = seq.clip_mut(&id).unwrap();
+                    let meta = clip
+                        .extra
+                        .entry("v1")
+                        .or_insert_with(|| serde_json::json!({}))
+                        .as_object_mut()
+                        .ok_or_else(|| DomainError::invalid("Metadata editorial del clip inválida"))?;
+                    if let Some(state) = state {
+                        meta.insert("state".into(), serde_json::to_value(state)?);
+                        clip.enabled = *state != ItemState::Disabled;
+                    }
+                    if let Some(reason) = reason {
+                        meta.insert("reason".into(), serde_json::json!(reason));
+                    }
+                    meta.insert("edited".into(), serde_json::json!(true));
+                    effect = effect.touch(id);
+                }
+                Ok(effect)
+            }
             Command::LinkClips { clip_ids } => {
                 if clip_ids.len() < 2 {
                     return Err(DomainError::invalid("vincula al menos dos clips"));
@@ -971,6 +1025,7 @@ impl Command {
                 let mut effect = CommandEffect::new(self.label());
                 for id in clip_ids {
                     let seq = seq_of_clip_mut(project, id)?;
+                    ensure_clip_unlocked(seq, id)?;
                     let c = seq.clip_mut(id).ok_or_else(|| DomainError::not_found("clip", id))?;
                     c.link_group = Some(group.clone());
                     effect = effect.touch(id);
@@ -981,6 +1036,7 @@ impl Command {
                 let mut effect = CommandEffect::new(self.label());
                 for id in clip_ids {
                     let seq = seq_of_clip_mut(project, id)?;
+                    ensure_clip_unlocked(seq, id)?;
                     let c = seq.clip_mut(id).ok_or_else(|| DomainError::not_found("clip", id))?;
                     c.link_group = None;
                     effect = effect.touch(id);
@@ -1144,6 +1200,13 @@ impl Command {
                     .ok_or_else(|| DomainError::not_available("snap seguro requiere el master del medio"))?;
                 if layer.source_master_digest.as_ref().is_some_and(|d| d != &master.source_digest) {
                     return Err(DomainError::precondition("plan de otro master"));
+                }
+                if !master.document["tracks"].as_object().is_some_and(|tracks| {
+                    !tracks.is_empty() && tracks.values().all(|track| track["words"].is_array() && track["laughter"].is_array())
+                }) {
+                    return Err(DomainError::not_available(
+                        "snap seguro requiere evidencia original de palabras/risas; no se pueden inferir bordes seguros",
+                    ));
                 }
                 crate::blocks::snap(layer, &master.document, duration, *radius)
             }
@@ -1345,6 +1408,22 @@ impl Command {
                 project.validate()?;
                 Ok(effect)
             }
+            Command::SetBlockConfidence { layer_id, item_id, confidence } => {
+                if !confidence.is_finite() || !(0.0..=1.0).contains(confidence) {
+                    return Err(DomainError::out_of_range("confianza del bloque debe ser finita entre 0 y 1"));
+                }
+                let layer = project.layer_mut(layer_id).ok_or_else(|| DomainError::not_found("capa", layer_id))?;
+                ensure_layer_editable(layer)?;
+                if layer.kind != LayerKind::Blocks || !layer.extra.get("v1_chunks_header").is_some_and(serde_json::Value::is_object) {
+                    return Err(DomainError::invalid("se requiere un plan de bloques autoritativo"));
+                }
+                let revision = layer.revision.checked_add(1).ok_or_else(|| DomainError::out_of_range("revisión de capa agotada"))?;
+                let item = layer.items.iter_mut().find(|item| &item.item_id == item_id).ok_or_else(|| DomainError::not_found("bloque", item_id))?;
+                item.extra.insert("confidence".into(), serde_json::json!(confidence));
+                item.edited = true;
+                layer.revision = revision;
+                Ok(CommandEffect::new(self.label()).touch(item_id))
+            }
             Command::SetItemStructure { layer_id, item_id, parent_id, ranges } => {
                 let duration = layer_asset_duration(project, layer_id)?;
                 let layer = project.layer_mut(layer_id).ok_or_else(|| DomainError::not_found("capa", layer_id))?;
@@ -1534,6 +1613,10 @@ fn seq_of_track_mut<'a>(project: &'a mut Project, track_id: &TrackId) -> DomainR
 
 fn seq_of_clip_mut<'a>(project: &'a mut Project, clip_id: &ClipId) -> DomainResult<&'a mut crate::timeline::Sequence> {
     project.sequences.iter_mut().find(|s| s.clips.iter().any(|c| &c.id == clip_id)).ok_or_else(|| DomainError::not_found("clip", clip_id))
+}
+fn ensure_clip_unlocked(seq: &Sequence, id: &ClipId) -> DomainResult<()> {
+    let clip = seq.clip(id).ok_or_else(|| DomainError::not_found("clip", id))?;
+    ensure_unlocked(seq.track(&clip.track_id).ok_or_else(|| DomainError::not_found("pista", &clip.track_id))?)
 }
 
 fn layer_asset_duration(project: &Project, layer_id: &LayerId) -> DomainResult<Ticks> {
@@ -1922,7 +2005,7 @@ mod tests {
         assert!(Command::AddItem { layer_id: layer.clone(), item: zombie.clone() }.apply(&mut p).is_err());
         let mut replaced = p.layer(&layer).unwrap().clone();
         replaced.deleted_item_ids.clear();
-        replaced.items = vec![zombie, SemanticItem::new(TimeRange::new(s(5), s(6)), "vivo")];
+        replaced.items = vec![zombie, SemanticItem::new(TimeRange::new(s(5), s(6)), "vivo")].into();
         Command::ReplaceLayer { layer: replaced }.apply(&mut p).unwrap();
         let l = p.layer(&layer).unwrap();
         assert_eq!(l.items.len(), 1);

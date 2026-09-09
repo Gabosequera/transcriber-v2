@@ -1,0 +1,106 @@
+# Control externo E4: servicio de la aplicación
+
+`crates/control` implementa MCP JSON-RPC sobre HTTP local. `apps/desktop/src/control_ui.rs` conecta el servicio con la **sesión abierta**, selección, reproductor y jobs de la GUI; el panel muestra requests/respuestas JSON, permisos, propuestas, revisiones y persistencia. `scripts/mcp-client.ps1` es un cliente HTTP real y también un puente MCP stdio.
+
+## Transporte y acceso
+
+El panel inicia explícitamente un listener en `127.0.0.1` con puerto efímero. Un bearer de 288 bits aleatorios por arranque autentica todas las peticiones. No se persiste el token. La identidad `Host` debe coincidir con IP/puerto; un `Origin` presente solo se acepta si coincide exactamente. El endpoint es `/mcp`, POST devuelve JSON y GET devuelve 405 (no se anuncia SSE). Admite `initialize`, `ping`, `tools/list`, `tools/call` y la notificación de inicialización. Versión negociada: `2025-11-25`; no se anuncian recursos, prompts, modelos, inferencia, suscripciones ni notificaciones push que no existan.
+
+La implementación sigue la forma JSON de [Streamable HTTP](https://modelcontextprotocol.io/specification/2025-11-25/basic/transports) y [tools/list y tools/call](https://modelcontextprotocol.io/specification/2025-11-25/server/tools). La credencial local privada no implementa OAuth ni descubrimiento de autorización remoto. `notifications/cancelled` se acepta como aviso; no revierte un comando ya confirmado. Cancelar un job usa su herramienta específica.
+
+Cuatro workers, ocho conexiones en espera y dieciséis requests pendientes acotan recursos. Header máximo: 16 KiB; cuerpo: 1 MiB; timeout de socket: 3 s por operación; respuesta de host: 30 s. Un request vencido todavía en cola no llega a ejecutarse. Si el cliente pierde una respuesta después de que el host comience, consulta el recibo con la misma clave; desconectar no implica rollback. No hay shell, SQL, paths de lectura/escritura remota, importación arbitraria de assets, reemplazo de proyecto ni suplantación del actor humano.
+
+Permisos locales independientes: consulta, propuesta, aplicación, selección, transporte y jobs. Cada herramienta se valida contra permisos **en cada llamada**, además de su schema cerrado. `tools/list` solo publica operaciones implementadas y disponibles con los permisos y capacidades actuales del host; tras cambiar permisos, se vuelve a consultar la lista. Cada operación, salvo el contexto inicial, requiere `session_id` y `project_id`. Cambiar proyecto cierra el servicio y exige habilitar otra sesión. No existe una herramienta para concederse permisos o aprobarse una propuesta.
+
+La persona puede autorizar edición automática local por tipos concretos de comando mediante `Permissions.automatic_commands`, vacío por defecto. Requiere también permisos de propuesta y aplicación; `Permissions::automatic_command_types()` ofrece los discriminantes implementados a la UI. Un batch requiere autorización de `batch` y de **todos** sus hijos, incluidos batches anidados. `automatic_eligible` informa del alcance vigente, sin falsificar `reviewed`; apply recalcula la autorización para que retirarla tenga efecto inmediato. El modo automático conserva Actor::Agent, dry-run, diff/preview exactos, base/digest, idempotencia y todas las protecciones del núcleo. Un rechazo local sigue impidiendo aplicar. El evento `proposal_applied.authorization` distingue revisión exacta de alcance automático. Ni JSON/MCP ni un snapshot restaurado conceden permisos.
+
+## Consultas, evidencia y escritura
+
+| Herramienta | Comportamiento |
+|---|---|
+| `tv2_context` | Identidad, revisión, digest, unidad temporal, selección/transporte y límites reales |
+| `tv2_query` | Clips, items, marcadores, pistas, capas, medios y secuencias; filtro temporal/objeto y páginas |
+| `tv2_evidence` | Registros originales words/utterances/laughter/arousal/emotions, por pista/tiempo; índice y metadatos resumidos de otras secciones |
+| `tv2_jobs` | Jobs reales suministrados por el host, con IDs y estado |
+| `tv2_events` | Cursor monótono de eventos, gap explícito si expiró la retención |
+| `tv2_audit` | Metadatos del journal archivado del proyecto guardado, cursor ligado al digest del archivo y lecturas de segmentos verificados en worker |
+| `tv2_propose` | Valida y prepara comando tipado en snapshot; devuelve diff, base y digest del preview |
+| `tv2_proposals` | Propuestas, estado de revisión y recibos paginados |
+| `tv2_preview` | Consulta paginada del proyecto preparado exacto, conservando IDs generados |
+| `tv2_reprepare` | Recalcula solicitud restaurada/obsoleta sobre base nueva; requiere nueva clave y revisión o alcance automático local |
+| `tv2_apply` | Commit del PreparedCommand autorizado por revisión exacta o alcance automático local, mediante ProjectSession |
+| `tv2_verify` | Verificación hash en worker: pending/null hasta completar; compara contenido real con preview, revisión y recibo vivo del journal, e indica dirty/save |
+| `tv2_select`, `tv2_transport` | Selección y player del host, validación de IDs/revisión, resultados del callback |
+| `tv2_cancel_job` | Cancelación por ID de job conocido; callback comunica el resultado real |
+| `tv2_export` | Solo se anuncia cuando el host conecta su exportación configurada localmente; nunca acepta ruta o política de sobrescritura remotas |
+| `tv2_import` | Solicita el selector local habitual y devuelve un ticket `pending_local_selection`; no admite rutas remotas ni afirma que el medio ya esté importado |
+
+Tiempo de consulta en flicks enteros (`705600000/s`); rangos semiabiertos. Items/evidencia usan tiempo fuente; clips/marcadores usan secuencia. El master retiene sus segundos originales `t_ini/t_fin`. Páginas de 1–200 entradas y hasta 1 MiB, con `next_offset`; la revisión es obligatoria y una base obsoleta obliga a reiniciar la consulta. No se devuelve el transcript entero dentro de un objeto «paginado»: se consulta por registros o se resumen las colecciones anidadas.
+
+`tv2_query`, `tv2_preview` y `tv2_evidence` admiten `text` opcional de 1–256 caracteres. La búsqueda de subcadena convierte Unicode a minúsculas (no elimina acentos) y filtra **antes** de calcular offsets. Objetos: nombres y labels/comments; evidencia temporal: campos string directos de cada registro original, por ejemplo text/word/speaker. Índice y metadatos buscan nombres de sección y campos escalares, sin recorrer colecciones anidadas. Se combina con kind, target_id, asset_id, track_id y rangos según la herramienta. Los registros devueltos conservan texto y tiempos originales. Una búsqueda recorre candidatos en worker y no serializa el master ni se dispara por movimiento del playhead; offsets posteriores siguen siendo un recorrido lineal de candidatos.
+
+`tv2_audit` usa `cursor`/`next_cursor`, distinto del offset de objetos vivos. La GUI proporciona un `ProjectStore` de confianza en `HostState.audit_store`, excluido de deserialización y nunca aceptado como argumento remoto. Sin proyecto guardado o permiso de consulta, la herramienta no se anuncia. `journal_page` verifica segmentos y digest de cursor; si cambia el archivo se reinicia la consulta. Los resultados contienen actor, IDs, tiempos, revisiones, diff y presencia de comando/recibo, sin serializar snapshots completos incluidos en antiguas reconciliaciones. La auditoría aún sin guardar se distingue del journal archivado consultado.
+
+`tv2_import` requiere permiso de jobs, base vigente y clave idempotente; `HostState.supports_import` es false por defecto. El callback `HostAction::Import` abre el flujo normal de selección local/ImportJobs y debe comunicar ticket pendiente, cancelación o error. La aceptación del request no equivale a importar un archivo. No contiene un argumento path/URL. Importación y exportación usan claves ligadas al nombre de herramienta además de los argumentos: reutilizar una clave entre ambas no devuelve por error el recibo de la otra.
+
+La superficie editorial publicada usa los mismos `Command` que la GUI: propiedades de proyecto; retirar medios existentes/duración de imagen; añadir/eliminar/ordenar/configurar pistas; insertar medios existentes con todos sus streams enlazados; añadir/mover/desplazar/dividir/recortar/duplicar/habilitar/vincular clips y editar su composición; crear/editar/eliminar marcadores; crear/eliminar/configurar/ordenar capas; añadir/pegar/configurar/mover/dividir/recortar/reestructurar/eliminar items; cajas, decisiones del autor, snap de bloques, coalescer/mover/quitar recortes; crear secuencias vacías tipadas y activar secuencias existentes. Los batches son atómicos, con hasta cuatro niveles y 128 nodos totales, y cada subcomando pasa el mismo schema cerrado. Los items nuevos solo admiten estado proposed/disabled, sin evidencia extra ni aceptación humana falsificada. No se permite reemplazo de proyecto/capa/evidencia, importación o relink por path, campos desconocidos ni pegar snapshots arbitrarios de clips. Las protecciones de decisiones humanas, bloqueos y tombstones de application se aplican al dry-run y al commit de todos los subcomandos.
+
+Flujo: contexto → propuesta con revisión/digest/clave → diff y preview → autorización local (revisión de ese contenido o tipos de comando concedidos previamente) → apply con ID/preview_digest/clave → verify. PreparedCommand conserva los IDs aleatorios del dry-run. Revisión o digest cambiado rechaza antes del commit, incluso si el número de revisión no cambió. Repetir una propuesta idéntica conserva ID; reutilizar su clave con otro contenido falla. Repetir apply devuelve recibo únicamente si existe en el journal de la sesión; un snapshot de control adelantado a un autosave fallido no se presenta como commit recuperado.
+
+`set_clip_editorial` admite `proposed`/`disabled` y motivo opcional de hasta 8192 caracteres. El núcleo expande grupos enlazados y mantiene las protecciones de decisiones humanas. La herramienta no permite atribuir aceptación o edición humana al agente, tampoco en alcance automático.
+
+`set_block_confidence` edita exclusivamente la confianza finita 0–1 de un bloque vivo perteneciente a un plan autoritativo; conserva el resto del contenido y no admite evidencia extra arbitraria. Se somete al mismo Actor::Agent y a bloqueos/decisiones humanas. El editor local de items muestra confianza solo para bloques del plan: un valor original ausente/null sigue ausente hasta que la persona decide introducirlo. Al confirmar prepara en worker un batch de estructura, título/comentario, confianza si corresponde y `SnapBlockBoundaries` con radio 15 s, el valor por defecto de `automatico_ui.ChunkReviewWindow`/`editorial_chunks.snap_plan_to_safe_boundaries` V1. Los extremos exteriores permanecen fijos y los interiores actualizan vecinos manteniendo la partición contigua.
+
+El snap exige master del mismo medio y arrays originales de palabras y risas por cada pista; arrays vacíos son evidencia explícita, la ausencia de análisis es un error. Si no existe borde sin conflicto de palabras/risas dentro del radio, falla el batch completo. El commit usa el PreparedCommand exacto y rechaza una revisión/base cambiada mientras trabajaba; cerrar el editor descarta su aplicación pendiente. Solo la atribución Human marca el header `planner: manual-review`, exportado por el adaptador chunks existente. Un agente no puede crear esa marca mediante import/reemplazo ni por un comando de confianza. La evidencia master permanece inmutable y undo recupera el plan anterior.
+
+Aceptación de bloques pendiente: abrir plan V1 con confianza presente/ausente, editar título/límites/confianza, confirmar y revisar partición/snaps, manual-review y export chunks; sin evidencia o con habla continua debe aparecer error sin cambios. `crates/application/tests/block_review.rs` añade tres pruebas sintéticas de atomicidad, exactitud de preview/undo/evidencia, límites de confianza, actor y base obsoleta; su resultado se registra en la verificación general. No implica ejecución de desktop ni de tests bloqueados de dominio/V1compat/control.
+
+## Concurrencia y durabilidad
+
+Queries/preparación se ejecutan en worker mediante `is_background_request`/`handle_background`, moviendo el engine y un snapshot inmutable. La GUI puede seguir editando; review/apply comprueban la sesión actual. Los commits y callbacks de selección/transporte/jobs se despachan por la GUI; no se responde éxito antes de que el callback acepte la operación. La copia inicial del snapshot y el commit del núcleo todavía usan las estructuras de ProjectSession: este módulo no convierte todos sus costes de clones/diff en O(1).
+
+Review/preview/apply comparan la base inmutable exacta mediante `PreparedCommand::matches_base`, sin serializar el proyecto para recalcular su hash en GUI. La comprobación incluye cambios de contenido con la misma revisión, como relocalizar bundles. Tras commit, apply compara el proyecto con el preview exacto, normalizando solamente revision/updated_at; únicamente si coinciden puede reutilizar el digest de contenido calculado en worker. Su respuesta distingue `verification: exact_prepared_state` del hash completo pendiente.
+
+`tv2_verify` conserva la lectura del recibo y dirty en la sesión viva y delega ambos hashes a un único worker acotado. Hasta completarse responde `verification: pending`, `matches_preview: null`, digests null y `retry_after_ms: 50`: no equivale a verificación positiva. Se repite la misma consulta hasta `complete`. El cache solo se usa si coincide el snapshot exacto, incluidos metadatos y cambios de contenido sin nueva revisión; un worker obsoleto se descarta antes de iniciar el más reciente. El cliente `-Tool tv2_verify -WaitForVerification` hace ese polling con plazo de 60 s, y sin el switch muestra cada respuesta para que otro cliente decida el reintento. El cache es de sesión, no persistido ni sustituye la comprobación del recibo real.
+
+`ControlEngine::restore` y `set_state_path` habilitan un writer con señal acotada que coalesce snapshots y usa escritura atómica. Un backlog de audit independiente conserva todos los eventos nuevos hasta escribirlos, incluso en ráfagas mayores al anillo de UI; los errores conservan el backlog pendiente y se muestran. Un lock del sistema operativo por proyecto se adquiere antes de leer el snapshot y dura hasta terminar el writer: una segunda ventana no puede sobrescribir sus propuestas. La UI actual configura un archivo por identidad de proyecto en la configuración V2; `persistence_status` distingue pending/saved/error. Guarda command/diff/recibos, requests JSON validados y respuestas de operaciones. Consultas grandes se registran por digest, y el polling de eventos no archiva recursivamente respuestas anteriores. Cada evento se conserva además como documento inmutable por digest en la carpeta `.audit` adyacente. La vista de memoria conserva 512 eventos y hasta 128 summaries; el backlog pendiente aumenta si el disco no acompaña. Hasta 32 preparaciones pendientes retienen snapshots. Un rechazo libera el snapshot preparado. Un archivo de control excediendo 8 MiB se rechaza sin sustituir el último válido y la UI informa el fallo.
+
+Reabrir conserva las propuestas y recibos pero **revoca aprobaciones** y no deserializa un PreparedCommand ejecutable. Las pendientes requieren `tv2_reprepare`, nuevo preview y revisión local. El journal de comandos/undo/save sigue siendo el de ProjectSession; guardar el control no equivale a guardar el proyecto. Los recibos de acciones efímeras del host se conservan dentro de la sesión de control. La configuración de control no se empaqueta automáticamente para otra máquina en Save As; los recibos editoriales sí siguen el journal del proyecto. La aceptación física del reproductor/exportación y la interoperabilidad con clientes MCP de terceros permanecen aplazadas.
+
+`observe_host` registra cambios de revisión, selección, jobs y play/pausa/seek de GUI/teclado; el avance de reproducción se muestrea como máximo cada segundo. No serializa ni calcula digest de todo el proyecto por frame. Los eventos persistidos conservan session_id además de su secuencia.
+
+## Cliente y procedimiento reproducible
+
+1. Abrir el panel Control externo, iniciar en lectura y copiar endpoint/token. Solo la UI concede permisos adicionales.
+2. En PowerShell 7, asignar el token a `$env:TV2_MCP_TOKEN` sin pegarlo en una URL/archivo. Consultar contexto:
+
+   ```powershell
+   ./scripts/mcp-client.ps1 -Endpoint 'http://127.0.0.1:PUERTO/mcp'
+   ./scripts/mcp-client.ps1 -Endpoint 'http://127.0.0.1:PUERTO/mcp' -ListTools
+   ```
+
+3. Copiar `session_id`, `project_id`, `revision` y `digest` del structuredContent. Construir argumentos JSON y pasarlos con `-Tool tv2_propose -ArgumentsJson $json`. Ejemplo de comando: `{"type":"rename_project","name":"Revisión sintética"}`. Añadir una clave idempotente nueva al mismo objeto.
+4. Consultar `tv2_preview` (`kind: sequences`, `proposal_id`, revisión y scope), revisar el diff en GUI, aplicar con `proposal_id`, `preview_digest`, la misma clave y scope. Consultar `tv2_verify`; dirty=true significa que aún falta el save ordinario.
+5. Repetir apply: mismo recibo, sin otra revisión. Editar por GUI antes de apply de otra propuesta: error de base obsoleta. Reabrir: la propuesta debe conservarse y pedir reprepare/review. Revocar permiso: herramienta retirada y llamada rechazada.
+6. Para cliente MCP stdio externo, configurar `pwsh -NoProfile -File scripts/mcp-client.ps1 -Endpoint URL -Stdio`, pasando TV2_MCP_TOKEN por entorno. Solo JSON-RPC se escribe a stdout; diagnósticos van a stderr.
+
+Ejemplos adicionales del cliente (`$scope` contiene session_id/project_id/revision actuales):
+
+```powershell
+$request = $scope + @{ proposal_id='proposal-...'; digest=$digestActual; idempotency_key='reprepare-2' }
+./scripts/mcp-client.ps1 -Endpoint $url -Tool tv2_reprepare -ArgumentsJson ($request | ConvertTo-Json -Compress)
+$request = $scope + @{ idempotency_key='import-choice-1' }
+./scripts/mcp-client.ps1 -Endpoint $url -Tool tv2_import -ArgumentsJson ($request | ConvertTo-Json -Compress)
+$request = $scope + @{ limit=50 }
+./scripts/mcp-client.ps1 -Endpoint $url -Tool tv2_audit -ArgumentsJson ($request | ConvertTo-Json -Compress)
+```
+
+Aceptación pendiente específica de host: import debe mostrar selección local, cancelar debe reflejarse en el ticket, escoger un fixture sintético debe seguir el ImportJobs habitual y solo su finalización debe añadir medios al proyecto; un retry idéntico debe devolver el ticket sin otro selector. Export debe devolver su estado real de encolado y evolucionar en jobs. La consulta de audit debe paginar revisiones guardadas, rechazar cursor antiguo tras guardar otra edición y desaparecer para un proyecto sin store. Estos procedimientos permanecen aplazados con la aceptación GUI; las APIs nuevas se verifican por compilación/Clippy y no se reintenta el binario bloqueado por 4551.
+
+Aceptación pendiente del alcance automático: conceder solo rename_project y comprobar apply sin review manual; quitarlo antes de apply y comprobar rechazo; en batch omitir un hijo y comprobar rechazo atómico. Decisiones humanas/bloqueos y bases obsoletas deben seguir rechazándose. Reiniciar debe volver a permisos de solo lectura. Para búsqueda, usar registros sintéticos con mayúsculas y acentos, combinar tiempo/pista, avanzar offset y comprobar texto original sin emitir el master entero.
+
+Verificación del 9 de septiembre de 2026: **17 tests sintéticos de `tv2-control` ejecutados y correctos** mediante `scripts/cargo.ps1 test -p tv2-control --lib --locked`, incluidos TCP/HTTP real en loopback, token/Origin, schema, revisión/digest, review/apply/verify, replay/conflicto, permisos/proyecto, paginación, worker concurrente, persistencia/restauración, batches semánticos, inserción enlazada y eventos. Después, los cambios de backlog de audit/lock exclusivo y **dos tests nuevos** se compilaron, pero Windows4551 impidió ejecutar el binario de 19 tests. **No reintentar tampoco control**, ni renombrar binarios ni cambiar rutas/políticas. Tras incorporar alcance automático, texto e import/audit, se compilaron 21 tests; después de la verificación asíncrona son **22 tests compilados, sin ejecución**, mediante Clippy control/all-targets `-D warnings` (3.01 s). Los últimos cubren alcance batch/revocación, búsqueda/paginación de evidencia original y pending/cache invalidado por contenido con idéntica revisión. El script PowerShell pasó parseo sintáctico. No se lanzaron desktop, medios, FFmpeg ni tests de dominio/V1compat bloqueados. Estas comprobaciones no sustituyen la aceptación física ni las pruebas multimedia aplazadas.
+
+## Composición pendiente y registro de acciones
+
+`tv2_context.transport.pending_composition` distingue el snapshot editorial de una composición que aún está calculándose. `tv2_transport` devuelve ese estado y difiere seek/play mediante el mismo camino que GUI; no confirma la reproducción del grafo antiguo como nueva revisión. `ui_actions` se genera del registro de teclado/menús/paleta, con los atajos efectivos. Es información de capacidades de UI; los cambios remotos siguen restringidos a las herramientas tipadas y sus permisos.

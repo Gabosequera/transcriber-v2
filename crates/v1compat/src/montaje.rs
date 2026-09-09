@@ -33,6 +33,7 @@ pub struct V1Clip {
     pub state: String,
     pub origin: String,
     pub label: String,
+    pub reason: String,
     pub topic_ids: Vec<String>,
     pub edited: bool,
     pub raw: Map<String, Value>,
@@ -121,6 +122,7 @@ impl V1Montaje {
                 state,
                 origin: co.get("origin").and_then(|x| x.as_str()).unwrap_or("user").to_string(),
                 label: co.get("label").and_then(|x| x.as_str()).unwrap_or("").to_string(),
+                reason: co.get("reason").and_then(|x| x.as_str()).unwrap_or("").to_string(),
                 topic_ids: co
                     .get("topic_ids")
                     .and_then(|x| x.as_array())
@@ -257,7 +259,7 @@ impl V1Montaje {
         let vid = v.id.clone();
         seq.tracks.push(v);
         let mut audio_tracks = Vec::new();
-        for i in 0..audio_streams.max(1) {
+        for i in 0..audio_streams {
             let a = Track::new(TrackKind::Audio, format!("A{}", i + 1));
             audio_tracks.push(a.id.clone());
             seq.tracks.push(a);
@@ -281,7 +283,7 @@ impl V1Montaje {
                     created_at: Some(tv2_domain::project::now_iso()),
                 };
                 if let Some(oc) = origin_clip {
-                    c.extra.insert("v1".into(), json!({"state": oc.state, "origin": oc.origin, "topic_ids": oc.topic_ids, "edited": oc.edited, "track_id": oc.track_id, "seq_ini_placed": oc.seq_ini}));
+                    c.extra.insert("v1".into(), json!({"state": oc.state, "reason":oc.reason, "origin": oc.origin, "topic_ids": oc.topic_ids, "edited": oc.edited, "track_id": oc.track_id, "seq_ini_placed": oc.seq_ini}));
                 }
                 c
             };
@@ -331,6 +333,7 @@ fn edited_sequence(sequence: &Sequence, montage: V1Montaje) -> V1Result<Value> {
     let mut audio = Vec::new();
     let mut identity = None;
     for clip in &sequence.clips {
+        editorial_metadata(clip)?;
         if let Some(asset) = &identity {
             if asset != &clip.asset_id {
                 return Err(invalid("V1 requiere un único medio"));
@@ -379,6 +382,9 @@ fn edited_sequence(sequence: &Sequence, montage: V1Montaje) -> V1Result<Value> {
             if twins.len() != 1 || !matched.insert(twins[0].id.clone()) {
                 return Err(invalid("V1 requiere audio completo enlazado a cada pieza de video"));
             }
+            if editorial_metadata(twins[0])? != editorial_metadata(clip)? {
+                return Err(invalid("V1 requiere el mismo estado y motivo editorial en video y audio enlazados"));
+            }
         }
     }
     if matched.len() != audio.len() {
@@ -417,6 +423,7 @@ fn edited_sequence(sequence: &Sequence, montage: V1Montaje) -> V1Result<Value> {
         raw.remove("tv2_archived_state");
         let id = format!("clip-{next:06}");
         next = next.checked_add(1).ok_or_else(|| invalid("contador agotado"))?;
+        let (state, reason) = editorial_metadata(clip)?;
         for (key, value) in [
             ("clip_id", json!(id)),
             ("track_id", json!(placement_track)),
@@ -424,14 +431,8 @@ fn edited_sequence(sequence: &Sequence, montage: V1Montaje) -> V1Result<Value> {
             ("source_fin", crate::secs_json(clip.source.end)),
             ("seq_ini", crate::secs_json(clip.position)),
             ("label", json!(clip.name)),
-            (
-                "state",
-                if !clip.enabled {
-                    json!("disabled")
-                } else {
-                    clip.extra.get("v1").and_then(|v| v.get("state")).filter(|s| *s != "disabled").cloned().unwrap_or(json!("proposed"))
-                },
-            ),
+            ("state", json!(state)),
+            ("reason", json!(reason.or_else(|| source.map(|c| c.reason.as_str())).unwrap_or(""))),
             ("origin", source.map(|c| json!(c.origin)).unwrap_or(json!("user"))),
             ("edited", json!(true)),
             ("tv2_clip_id", json!(clip.id)),
@@ -469,6 +470,30 @@ fn edited_sequence(sequence: &Sequence, montage: V1Montaje) -> V1Result<Value> {
     Ok(out)
 }
 
+fn editorial_metadata(clip: &Clip) -> V1Result<(&str, Option<&str>)> {
+    let metadata = clip.extra.get("v1");
+    let state = match metadata.and_then(|v| v.get("state")) {
+        Some(Value::String(state)) if matches!(state.as_str(), "proposed" | "accepted" | "disabled") => state.as_str(),
+        None => "proposed",
+        _ => return Err(invalid("Estado editorial V1 inválido")),
+    };
+    let reason = match metadata.and_then(|v| v.get("reason")) {
+        Some(Value::String(reason)) => Some(reason.as_str()),
+        None => None,
+        _ => return Err(invalid("El motivo editorial V1 debe ser texto")),
+    };
+    Ok((
+        if !clip.enabled {
+            "disabled"
+        } else if state == "disabled" {
+            "proposed"
+        } else {
+            state
+        },
+        reason,
+    ))
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -485,6 +510,44 @@ mod tests {
     fn doc(clips: Vec<Value>) -> Value {
         json!({"schema": "editorial-montaje/1", "media": {"size": 10, "hash_muestreado": "m", "inventario_sha256": "i"}, "duration_source": 100.0,
                "target_seconds": 900.0, "revision": 0, "next_id": 10, "tracks": [{"track_id": "V1", "name": "V1"}], "clips": clips, "analysis": {"request_id": null, "pass": 0}})
+    }
+
+    #[test]
+    fn editorial_reason_and_state_survive_linked_edits_and_copies() {
+        let mut raw = doc(vec![clip(1, "V1", 0.0, 3.0, 0.0)]);
+        raw["clips"][0]["reason"] = json!("original reason");
+        let montage = V1Montaje::parse(raw, Some(&fp())).unwrap();
+        let mut sequence = montage.to_sequence(&"a".into(), Rational::new(30, 1), 1920, 1080, 1);
+        assert!(sequence.clips.iter().all(|clip| clip.extra["v1"]["reason"] == "original reason"));
+        for clip in &mut sequence.clips {
+            clip.extra["v1"]["reason"] = json!("human reason");
+            clip.extra["v1"]["state"] = json!("accepted");
+            clip.extra["v1"]["edited"] = json!(true);
+        }
+        let mut copies = sequence.clips.clone();
+        for clip in &mut copies {
+            clip.id = ClipId::random();
+            clip.position = Ticks::from_seconds(3);
+            clip.link_group = Some("copy".into());
+        }
+        sequence.clips.extend(copies);
+        let output = sequence_to_v1(&sequence, &fp()).unwrap();
+        assert!(
+            output["clips"]
+                .as_array()
+                .unwrap()
+                .iter()
+                .filter(|clip| clip.get("tv2_clip_id").is_some())
+                .all(|clip| clip["reason"] == "human reason" && clip["state"] == "accepted")
+        );
+        sequence.clips[1].extra["v1"]["reason"] = json!("different audio reason");
+        assert!(sequence_to_v1(&sequence, &fp()).is_err());
+        sequence.clips[1].extra["v1"]["reason"] = json!("human reason");
+        for clip in &mut sequence.clips {
+            clip.enabled = false;
+        }
+        let output = sequence_to_v1(&sequence, &fp()).unwrap();
+        assert!(output["clips"].as_array().unwrap().iter().all(|clip| clip["state"] == "disabled"));
     }
 
     #[test]

@@ -3,7 +3,7 @@
 use serde::{Deserialize, Serialize};
 use sha2::{Digest, Sha256};
 use std::{
-    collections::{BTreeMap, HashSet},
+    collections::{BTreeMap, BTreeSet, HashSet},
     fs,
     io::{Read, Write},
     path::{Component, Path},
@@ -26,6 +26,8 @@ struct Intent {
     schema: String,
     id: String,
     entries: Vec<Entry>,
+    #[serde(default, skip_serializing_if = "BTreeSet::is_empty")]
+    directories: BTreeSet<String>,
 }
 
 fn safe_path(root: &Path, path: &str) -> DomainResult<std::path::PathBuf> {
@@ -108,10 +110,24 @@ pub fn publish(root: &Path, documents: &BTreeMap<String, String>) -> DomainResul
     publish_with_files(root, documents, &BTreeMap::new())
 }
 pub fn publish_with_files(root: &Path, documents: &BTreeMap<String, String>, files: &BTreeMap<String, SourceFile>) -> DomainResult<()> {
+    publish_with_directories(root, documents, files, &BTreeSet::new())
+}
+pub fn publish_with_directories(
+    root: &Path,
+    documents: &BTreeMap<String, String>,
+    files: &BTreeMap<String, SourceFile>,
+    directories: &BTreeSet<String>,
+) -> DomainResult<()> {
     let _lock = lock(root)?;
     finish(root, None)?;
     let mut seen = HashSet::new();
     let mut entries = Vec::new();
+    for directory in directories {
+        let target = safe_path(root, directory)?;
+        if !seen.insert(directory.to_ascii_lowercase()) || target.exists() && !target.is_dir() {
+            return Err(DomainError::invalid("directorio duplicado o ocupado por un archivo"));
+        }
+    }
     for (path, after) in documents {
         if !seen.insert(path.to_ascii_lowercase()) {
             return Err(DomainError::invalid("rutas duplicadas en Windows"));
@@ -127,8 +143,14 @@ pub fn publish_with_files(root: &Path, documents: &BTreeMap<String, String>, fil
         verify_source(file)?;
         entries.push(Entry { path: path.clone(), before: file_digest(&target)?, after: String::new(), file: Some(file.clone()) });
     }
-    let schema = if files.is_empty() { "transcriptor-documents/1" } else { "transcriptor-documents/2" };
-    let intent = Intent { schema: schema.into(), id: tv2_domain::ids::random_hex12(), entries };
+    let schema = if !directories.is_empty() {
+        "transcriptor-documents/3"
+    } else if files.is_empty() {
+        "transcriptor-documents/1"
+    } else {
+        "transcriptor-documents/2"
+    };
+    let intent = Intent { schema: schema.into(), id: tv2_domain::ids::random_hex12(), entries, directories: directories.clone() };
     let bytes = serde_json::to_vec(&intent)?;
     if bytes.len() as u64 > LIMIT {
         return Err(DomainError::invalid("transacción excede 128 MiB"));
@@ -145,13 +167,19 @@ fn finish(root: &Path, stop_after: Option<usize>) -> DomainResult<()> {
         return Ok(());
     };
     let intent: Intent = serde_json::from_str(&raw)?;
-    if !matches!(intent.schema.as_str(), "transcriptor-documents/1" | "transcriptor-documents/2")
+    if !matches!(intent.schema.as_str(), "transcriptor-documents/1" | "transcriptor-documents/2" | "transcriptor-documents/3")
         || !intent.id.bytes().all(|c| c.is_ascii_hexdigit())
         || intent.id.len() != 12
     {
         return Err(DomainError::invalid("intención inválida"));
     }
     let mut seen = HashSet::new();
+    for directory in &intent.directories {
+        let target = safe_path(root, directory)?;
+        if !seen.insert(directory.to_ascii_lowercase()) || target.exists() && !target.is_dir() {
+            return Err(DomainError::invalid("directorio duplicado o ocupado por un archivo"));
+        }
+    }
     for entry in &intent.entries {
         if !seen.insert(entry.path.to_ascii_lowercase()) {
             return Err(DomainError::invalid("rutas repetidas en intención"));
@@ -166,6 +194,9 @@ fn finish(root: &Path, stop_after: Option<usize>) -> DomainResult<()> {
         {
             verify_source(file)?;
         }
+    }
+    for directory in &intent.directories {
+        fs::create_dir_all(safe_path(root, directory)?)?;
     }
     for (n, entry) in intent.entries.iter().enumerate() {
         if stop_after == Some(n) {
@@ -185,7 +216,7 @@ fn finish(root: &Path, stop_after: Option<usize>) -> DomainResult<()> {
             }
         }
     }
-    let receipt = serde_json::json!({"schema":"transcriptor-document-receipt/1","id":intent.id,"documents":intent.entries.iter().map(|e|serde_json::json!({"path":e.path,"digest":after_digest(e),"digest_kind":if e.file.is_some(){"sha256-bytes"}else{"canonical-json-string"}})).collect::<Vec<_>>()});
+    let receipt = serde_json::json!({"schema":"transcriptor-document-receipt/1","id":intent.id,"directories":intent.directories,"documents":intent.entries.iter().map(|e|serde_json::json!({"path":e.path,"digest":after_digest(e),"digest_kind":if e.file.is_some(){"sha256-bytes"}else{"canonical-json-string"}})).collect::<Vec<_>>()});
     crate::store::atomic_write(&root.join("receipts").join(format!("{}.json", intent.id)), &serde_json::to_vec(&receipt)?)?;
     fs::remove_file(root.join(INTENT))?;
     Ok(())
@@ -208,7 +239,7 @@ fn file_digest(path: &Path) -> DomainResult<Option<String>> {
     }
     Ok(Some(hex::encode(hasher.finalize())))
 }
-fn verify_source(file: &SourceFile) -> DomainResult<()> {
+pub(crate) fn verify_source(file: &SourceFile) -> DomainResult<()> {
     let meta = fs::symlink_metadata(&file.source)?;
     if !meta.is_file() || meta.file_type().is_symlink() || meta.len() != file.size || file_digest(&file.source)?.as_deref() != Some(&file.sha256) {
         return Err(DomainError::precondition(format!("archivo de origen cambió o no está disponible: {}", file.source.display())));
@@ -221,7 +252,7 @@ fn current_digest(entry: &Entry, path: &Path) -> DomainResult<Option<String>> {
 fn after_digest(entry: &Entry) -> String {
     entry.file.as_ref().map(|f| f.sha256.clone()).unwrap_or_else(|| digest(&entry.after))
 }
-fn copy_verified(file: &SourceFile, target: &Path, before: &Option<String>) -> DomainResult<()> {
+pub(crate) fn copy_verified(file: &SourceFile, target: &Path, before: &Option<String>) -> DomainResult<()> {
     let parent = target.parent().ok_or_else(|| DomainError::invalid("destino sin carpeta"))?;
     fs::create_dir_all(parent)?;
     let mut temporary = tempfile::NamedTempFile::new_in(parent)?;
@@ -253,6 +284,27 @@ fn copy_verified(file: &SourceFile, target: &Path, before: &Option<String>) -> D
 mod tests {
     use super::*;
     #[test]
+    fn empty_directories_recover_with_documents_and_reject_path_conflicts() {
+        let temp = tempfile::tempdir().unwrap();
+        let root = temp.path().join("output");
+        create(&root).unwrap();
+        let intent = Intent {
+            schema: "transcriptor-documents/3".into(),
+            id: "0123456789ab".into(),
+            directories: BTreeSet::from(["empty/nested".into()]),
+            entries: vec![Entry { path: "master.json".into(), before: None, after: "{}".into(), file: None }],
+        };
+        crate::store::atomic_write(&root.join(INTENT), &serde_json::to_vec(&intent).unwrap()).unwrap();
+        assert!(finish(&root, Some(0)).is_err());
+        assert!(root.join("empty/nested").is_dir());
+        assert!(!root.join("master.json").exists());
+        recover(&root).unwrap();
+        recover(&root).unwrap();
+        assert_eq!(fs::read_to_string(root.join("master.json")).unwrap(), "{}");
+        assert!(publish_with_directories(&root, &BTreeMap::new(), &BTreeMap::new(), &BTreeSet::from(["../escape".into()])).is_err());
+        assert!(publish_with_directories(&root, &BTreeMap::new(), &BTreeMap::new(), &BTreeSet::from(["master.json".into()])).is_err());
+    }
+    #[test]
     fn binary_publication_recovers_boundaries_and_preserves_changed_sources_and_targets() {
         let temp = tempfile::tempdir().unwrap();
         let source = temp.path().join("source.bin");
@@ -265,6 +317,7 @@ mod tests {
             let intent = Intent {
                 schema: "transcriptor-documents/2".into(),
                 id: "0123456789ab".into(),
+                directories: Default::default(),
                 entries: vec![
                     Entry { path: "master.json".into(), before: None, after: "{}".into(), file: None },
                     Entry { path: "tracks/A/audio.bin".into(), before: None, after: String::new(), file: Some(file.clone()) },
@@ -290,6 +343,7 @@ mod tests {
         let intent = Intent {
             schema: "transcriptor-documents/2".into(),
             id: "0123456789ab".into(),
+            directories: Default::default(),
             entries: vec![Entry { path: "audio.bin".into(), before: None, after: String::new(), file: Some(file) }],
         };
         crate::store::atomic_write(&root.join(INTENT), &serde_json::to_vec(&intent).unwrap()).unwrap();
@@ -306,7 +360,7 @@ mod tests {
             create(&root).unwrap();
             let entries =
                 (0..3).map(|n| Entry { path: format!("views/{n}.json"), before: None, after: format!("{{\"n\":{n}}}"), file: None }).collect();
-            let intent = Intent { schema: "transcriptor-documents/1".into(), id: "0123456789ab".into(), entries };
+            let intent = Intent { schema: "transcriptor-documents/1".into(), id: "0123456789ab".into(), entries, directories: Default::default() };
             crate::store::atomic_write(&root.join(INTENT), &serde_json::to_vec(&intent).unwrap()).unwrap();
             let _ = finish(&root, Some(stop));
             recover(&root).unwrap();
@@ -322,6 +376,7 @@ mod tests {
         let intent = Intent {
             schema: "transcriptor-documents/1".into(),
             id: "0123456789ab".into(),
+            directories: Default::default(),
             entries: vec![
                 Entry { path: "a.json".into(), before: None, after: "new".into(), file: None },
                 Entry { path: "b.json".into(), before: None, after: "other".into(), file: None },

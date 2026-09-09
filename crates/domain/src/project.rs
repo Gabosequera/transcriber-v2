@@ -7,7 +7,10 @@ use crate::time::Rational;
 use crate::timeline::Sequence;
 use serde::{Deserialize, Serialize};
 
-pub const PROJECT_SCHEMA: &str = "transcriptor-project/1";
+/// /2 requires a reader which understands project-owned source-bundle locators.
+/// Legacy /1 snapshots remain readable and migrate at an explicit save boundary.
+pub const PROJECT_SCHEMA: &str = "transcriptor-project/2";
+pub const LEGACY_PROJECT_SCHEMA: &str = "transcriptor-project/1";
 
 /// Revisión monótona del proyecto. Cada comando persistente confirmado la incrementa;
 /// undo/redo también producen una revisión nueva (nunca rebobinan).

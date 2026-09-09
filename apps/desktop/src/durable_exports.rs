@@ -12,6 +12,42 @@ use tv2_media::export::{ExportRequest, ExportResult};
 pub struct ExportPayload {
     pub request: ExportRequest,
     pub fingerprints: HashMap<AssetId, Fingerprint>,
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub editorial_sources: Vec<EditorialSource>,
+}
+#[derive(Clone, serde::Serialize, serde::Deserialize)]
+pub struct EditorialSource {
+    pub asset: tv2_domain::Asset,
+    pub master: tv2_domain::evidence::EvidenceDocument,
+    pub layers: Vec<tv2_domain::SemanticLayer>,
+}
+impl EditorialSource {
+    pub fn capture(project: &tv2_domain::Project) -> Vec<Self> {
+        project
+            .masters
+            .iter()
+            .filter_map(|master| {
+                let asset = project.asset(&master.asset_id)?.clone();
+                let layers = project
+                    .layers
+                    .iter()
+                    .filter(|l| {
+                        l.asset_id == asset.id
+                            && !l.extra.contains_key("master_projection")
+                            && matches!(
+                                l.kind,
+                                tv2_domain::LayerKind::User
+                                    | tv2_domain::LayerKind::Topics
+                                    | tv2_domain::LayerKind::Ai
+                                    | tv2_domain::LayerKind::Other(_)
+                            )
+                    })
+                    .cloned()
+                    .collect();
+                Some(Self { asset, master: master.document.clone(), layers })
+            })
+            .collect()
+    }
 }
 pub struct QueuedExport {
     pub payload: ExportPayload,
@@ -164,6 +200,7 @@ pub fn draw(app: &mut TranscriptorApp, ctx: &egui::Context) {
     }
     let mut open = true;
     let mut resume = None;
+    let mut derive = None;
     egui::Window::new("Trabajos de exportación guardados").open(&mut open).show(ctx, |ui| {
         ui.label("Se conservan la revisión, los medios y la solicitud original. Un destino existente requiere inspección y nunca se sobrescribe.");
         egui::ScrollArea::vertical().max_height(450.0).show(ui, |ui| {
@@ -176,6 +213,9 @@ pub fn draw(app: &mut TranscriptorApp, ctx: &egui::Context) {
                     }
                     if !matches!(job.state, JobState::Running | JobState::Succeeded) && ui.button("Reanudar esta solicitud").clicked() {
                         resume = Some(i);
+                    }
+                    if job.state == JobState::Succeeded && ui.button("Derivar carpeta hija desde esta exportación…").clicked() {
+                        derive = Some(i);
                     }
                     if let Some(result) = &job.result {
                         ui.collapsing("Recibo", |ui| {
@@ -197,5 +237,83 @@ pub fn draw(app: &mut TranscriptorApp, ctx: &egui::Context) {
     app.export_jobs_open = open;
     if let Some(i) = resume {
         app.recover_export_job(i);
+    }
+    if let Some(i) = derive {
+        app.derive_export_job(i);
+    }
+}
+
+impl TranscriptorApp {
+    pub fn derive_export_job(&mut self, index: usize) {
+        if self.v1_export_job.is_some() {
+            self.toast(Severity::Warn, "Hay una publicación documental en curso");
+            return;
+        }
+        let Some(job) = self.export_jobs_recovery.get(index).cloned() else { return };
+        if job.state != JobState::Succeeded {
+            return;
+        }
+        let Some(parent_id) = self.current_layer_asset() else {
+            self.toast(Severity::Warn, "Selecciona el medio padre en la biblioteca o capa");
+            return;
+        };
+        let source = job.payload.editorial_sources.iter().find(|s| s.asset.id == parent_id).cloned().or_else(|| {
+            (job.project_id == self.project().project_id && job.revision == self.session.revision())
+                .then(|| EditorialSource::capture(self.project()).into_iter().find(|s| s.asset.id == parent_id))
+                .flatten()
+        });
+        let Some(source) = source else {
+            self.toast(Severity::Warn, "Este job no conserva evidencia editorial de ese padre; usa una exportación nueva o su revisión original");
+            return;
+        };
+        let Some(directory) = rfd::FileDialog::new().set_title("Destino de la carpeta hija (incluye copia del medio exportado)").pick_folder() else {
+            return;
+        };
+        let Ok(tools) = self.tools.clone() else {
+            self.toast(Severity::Error, "FFprobe no está disponible");
+            return;
+        };
+        let (tx, rx) = crossbeam_channel::bounded(1);
+        match std::thread::Builder::new().name("derive-export-child".into()).spawn(move || {
+            let work = || -> DomainResult<PathBuf> {
+                let receipt: ExportResult = serde_json::from_value(job.result.ok_or_else(|| DomainError::precondition("Export sin recibo"))?)?;
+                let req = &job.payload.request;
+                if receipt.path != req.destination || receipt.project_revision != job.revision {
+                    return Err(DomainError::precondition("Recibo y solicitud no coinciden"));
+                }
+                let mapping = tv2_v1compat::projects::mapping_from_timeline(&req.timeline, &source.asset, req.range, req.preset.has_video)?;
+                let extension = req.destination.extension().and_then(|x| x.to_str()).ok_or_else(|| DomainError::invalid("Salida sin extensión"))?;
+                if !extension.bytes().all(|b| b.is_ascii_alphanumeric()) {
+                    return Err(DomainError::invalid("Extensión no portable"));
+                }
+                let media_path = format!("media/export.{extension}");
+                let child = tools.import(&req.destination, media_path.clone())?;
+                let parent = tv2_v1compat::master::V1Master::parse((*source.master).clone())?;
+                let layers = source.layers.iter().map(|l| tv2_v1compat::layers::layer_to_v1(l, &source.asset.fingerprint)).collect::<Vec<_>>();
+                let audio = match receipt.audio_streams {
+                    0 => tv2_v1compat::projects::AudioDisposition::Silent,
+                    1 => tv2_v1compat::projects::AudioDisposition::Mixed { output_audio_index: 0 },
+                    _ => return Err(DomainError::precondition("El exportador no tiene contrato de preservación multipista para este job")),
+                };
+                let mut docs = tv2_v1compat::projects::derive_package(&parent, &child, &mapping, &audio, &layers)?;
+                docs.insert("archive/export-receipt.json".into(), serde_json::to_string_pretty(&receipt)?);
+                let files = std::collections::BTreeMap::from([(
+                    media_path,
+                    tv2_domain::evidence::SourceFile {
+                        source: req.destination.clone(),
+                        size: std::fs::metadata(&req.destination)?.len(),
+                        sha256: receipt.sha256,
+                    },
+                )]);
+                let root = directory.join(format!("child-{}", tv2_domain::ids::random_hex12()));
+                tv2_application::documents::create(&root)?;
+                tv2_application::documents::publish_with_files(&root, &docs, &files)?;
+                Ok(root)
+            };
+            let _ = tx.send(work());
+        }) {
+            Ok(_) => self.v1_export_job = Some(rx),
+            Err(e) => self.report(e.into()),
+        }
     }
 }

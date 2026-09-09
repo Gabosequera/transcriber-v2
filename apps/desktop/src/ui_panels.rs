@@ -3,16 +3,31 @@
 
 use crate::app::{Severity, Tool, TranscriptorApp, ViewMode, colors, describe_asset};
 use egui::{Align2, Color32, FontId, Pos2, Rect, RichText, Stroke, Vec2};
+use tv2_domain::Command;
 use tv2_domain::asset::AssetKind;
 use tv2_domain::ids::AssetId;
 use tv2_domain::layers::ItemState;
 use tv2_domain::time::{Ticks, TimeRange};
-use tv2_domain::{Command, Transform};
 use tv2_media::player::{PlayerCommand, SPEEDS, audio_policy};
 
 pub fn draw(app: &mut TranscriptorApp, root: &mut egui::Ui) {
     let ctx = root.ctx().clone();
     menu_bar(app, root);
+    if app.composition_pending() {
+        ctx.request_repaint_after(std::time::Duration::from_millis(250));
+        egui::Panel::top("composition_status").show(root, |ui| {
+            if let Some(error) = app.resolver.error.clone() {
+                ui.horizontal(|ui| {
+                    ui.colored_label(colors::WARN, error);
+                    if ui.button("Reintentar composición").clicked() {
+                        app.resolver.retry();
+                    }
+                });
+            } else {
+                ui.label("Actualizando composición… El visor conserva el último resultado.");
+            }
+        });
+    }
     egui::Panel::top("toolbar").show(root, |ui| toolbar(app, ui));
     let console_open = app.ui.console_open;
     if console_open {
@@ -39,9 +54,72 @@ pub fn draw(app: &mut TranscriptorApp, root: &mut egui::Ui) {
     });
     dialogs(app, &ctx);
     crate::author_ui::draw(app, &ctx);
+    crate::v1_documents::draw(app, &ctx);
+    crate::control_ui::draw(app, &ctx);
+    crate::editorial_review::draw(app, &ctx);
+    crate::conversation_ui::draw(app, &ctx);
     crate::durable_exports::draw(app, &ctx);
     crate::ui_markers::draw(app, &ctx);
+    command_palette(app, &ctx);
     toasts(app, &ctx);
+}
+
+fn command_palette(app: &mut TranscriptorApp, ctx: &egui::Context) {
+    let focus_id = egui::Id::new("command_palette_focused");
+    let Some(mut query) = app.command_palette.take() else {
+        ctx.data_mut(|data| data.remove::<bool>(focus_id));
+        return;
+    };
+    let mut selected = None;
+    let mut first = None;
+    let response = egui::Modal::new(egui::Id::new("command_palette")).show(ctx, |ui| {
+        ui.set_width(580.0_f32.min(ctx.content_rect().width() - 40.0));
+        ui.heading("Paleta de comandos");
+        let search = ui.add(egui::TextEdit::singleline(&mut query).hint_text("Buscar acción, grupo o identificador…").desired_width(f32::INFINITY));
+        if !ctx.data(|data| data.get_temp::<bool>(focus_id).unwrap_or(false)) {
+            search.request_focus();
+            ctx.data_mut(|data| data.insert_temp(focus_id, true));
+        }
+        let query = query.to_lowercase();
+        egui::ScrollArea::vertical().max_height(400.0).show(ui, |ui| {
+            for action in &app.keymap.actions {
+                if action.id == "app.commands" || !format!("{} {} {}", action.label, action.group, action.id).to_lowercase().contains(&query) {
+                    continue;
+                }
+                let enabled = action.contexts.is_empty()
+                    || action.contexts.iter().any(|context| match context {
+                        crate::keymap::Context::Clip => !app.selection.clips.is_empty(),
+                        crate::keymap::Context::Item => !app.selection.items.is_empty(),
+                        crate::keymap::Context::Any => true,
+                    });
+                if enabled && first.is_none() {
+                    first = Some(action.id);
+                }
+                if ui
+                    .add_enabled(
+                        enabled,
+                        egui::Button::new(format!("{} · {}", action.group, action.label)).shortcut_text(app.keymap.pretty(action.id)),
+                    )
+                    .on_hover_text(if enabled { action.id } else { "Requiere una selección compatible" })
+                    .clicked()
+                {
+                    selected = Some(action.id);
+                }
+            }
+        });
+        ui.label("Enter ejecuta el primer resultado disponible · Escape cierra");
+        if ui.input_mut(|input| input.consume_key(egui::Modifiers::NONE, egui::Key::Enter)) {
+            selected = first;
+        }
+    });
+    if response.should_close() {
+        ctx.data_mut(|data| data.remove::<bool>(focus_id));
+    } else if let Some(action) = selected {
+        ctx.data_mut(|data| data.remove::<bool>(focus_id));
+        app.dispatch(action);
+    } else {
+        app.command_palette = Some(query);
+    }
 }
 
 fn menu_bar(app: &mut TranscriptorApp, root: &mut egui::Ui) {
@@ -56,7 +134,7 @@ fn menu_bar(app: &mut TranscriptorApp, root: &mut egui::Ui) {
                 ui.add(b).clicked()
             };
             ui.menu_button("Archivo", |ui| {
-                if ui.button("Nuevo proyecto").clicked() {
+                if item(ui, app, "file.new") {
                     app.new_project();
                     ui.close();
                 }
@@ -68,7 +146,7 @@ fn menu_bar(app: &mut TranscriptorApp, root: &mut egui::Ui) {
                     app.save_project(false);
                     ui.close();
                 }
-                if ui.button("Guardar como…").clicked() {
+                if item(ui, app, "file.save_as") {
                     app.save_project(true);
                     ui.close();
                 }
@@ -81,18 +159,24 @@ fn menu_bar(app: &mut TranscriptorApp, root: &mut egui::Ui) {
                     app.open_export_dialog();
                     ui.close();
                 }
-                if ui
-                    .button("Importar proyecto V1…")
-                    .on_hover_text("Carpeta editorial de V1: capas, recortes y montaje (perfil V1 aplanado)")
-                    .clicked()
-                {
+                if item(ui, app, "file.import_v1") {
                     app.import_v1_dialog();
                     ui.close();
                 }
-                if ui.button("Exportar capa seleccionada a JSON V1…").clicked() {
+                if item(ui, app, "export.v1_layer") {
                     app.export_v1_dialog(false);
                     ui.close();
                 }
+                ui.menu_button("Exportar intercambio de montaje", |ui| {
+                    if ui.button("EDL (perfil V1)…").clicked() {
+                        app.export_interchange_dialog(false);
+                        ui.close();
+                    }
+                    if ui.button("FCPXML (perfil V1)…").clicked() {
+                        app.export_interchange_dialog(true);
+                        ui.close();
+                    }
+                });
                 ui.menu_button("Exportar carpeta documental V1", |ui| {
                     if ui
                         .button("Capas del medio seleccionado…")
@@ -111,19 +195,39 @@ fn menu_bar(app: &mut TranscriptorApp, root: &mut egui::Ui) {
                         ui.close();
                     }
                 });
-                if ui.button("Importar marcas del autor V1…").clicked() {
+                if item(ui, app, "editorial.author_import") {
                     app.import_author_dialog();
                     ui.close();
                 }
-                if ui.button("Buscar y resolver marcas del autor…").clicked() {
+                if item(ui, app, "editorial.author_review") {
                     app.scan_author(false);
                     ui.close();
                 }
-                if ui.button("Recuperar exportación V1 interrumpida…").clicked() {
+                if item(ui, app, "editorial.watch") {
+                    app.watch_v1_document();
+                    ui.close();
+                }
+                if item(ui, app, "editorial.watches") {
+                    app.v1_documents.open = true;
+                    ui.close();
+                }
+                if ui.button("Control externo y propuestas MCP…").clicked() {
+                    app.control.open = true;
+                    ui.close();
+                }
+                if item(ui, app, "editorial.review") {
+                    app.editorial_review.open = true;
+                    ui.close();
+                }
+                if item(ui, app, "view.conversation") {
+                    app.conversation.open = true;
+                    ui.close();
+                }
+                if item(ui, app, "export.recover") {
                     app.recover_export_dialog();
                     ui.close();
                 }
-                if ui.button("Trabajos de exportación guardados…").clicked() {
+                if item(ui, app, "export.jobs") {
                     app.export_jobs_open = true;
                     app.export_jobs_scanned = false;
                     ui.close();
@@ -144,6 +248,11 @@ fn menu_bar(app: &mut TranscriptorApp, root: &mut egui::Ui) {
                 }
             });
             ui.menu_button("Edición", |ui| {
+                if item(ui, app, "app.commands") {
+                    app.dispatch("app.commands");
+                    ui.close();
+                }
+                ui.separator();
                 for id in [
                     "edit.undo",
                     "edit.redo",
@@ -202,7 +311,7 @@ fn menu_bar(app: &mut TranscriptorApp, root: &mut egui::Ui) {
                 }
             });
             ui.menu_button("Ajustes", |ui| {
-                if ui.button("Atajos…").clicked() {
+                if item(ui, app, "settings.shortcuts") {
                     app.shortcuts_open = true;
                     ui.close();
                 }
@@ -267,6 +376,15 @@ fn toolbar(app: &mut TranscriptorApp, ui: &mut egui::Ui) {
 }
 
 fn library(app: &mut TranscriptorApp, ui: &mut egui::Ui) {
+    if let Some(job) = &app.relink_job {
+        ui.horizontal(|ui| {
+            ui.spinner();
+            ui.label("Verificando identidad del reenlace…");
+            if ui.small_button("Cancelar reenlace").clicked() {
+                job.probe.cancel.store(true, std::sync::atomic::Ordering::Release);
+            }
+        });
+    }
     if app.imports.busy() {
         ui.horizontal(|ui| {
             ui.spinner();
@@ -401,17 +519,7 @@ fn library(app: &mut TranscriptorApp, ui: &mut egui::Ui) {
 
 fn relink(app: &mut TranscriptorApp, id: AssetId) {
     let Some(p) = rfd::FileDialog::new().set_title("Reenlazar medio").pick_file() else { return };
-    let Ok(tools) = app.tools.clone() else { return };
-    let portable = match &app.store {
-        Some(s) => s.portable_path(&p),
-        None => p.to_string_lossy().replace('\\', "/"),
-    };
-    match tools.import(&p, portable.clone()) {
-        Ok(asset) => {
-            app.exec(Command::RelinkAsset { asset_id: id, path: portable, asset: Some(asset) });
-        }
-        Err(e) => app.report(e),
-    }
+    app.start_relink(id, p);
 }
 
 fn viewer(app: &mut TranscriptorApp, ui: &mut egui::Ui) {
@@ -597,16 +705,44 @@ fn timeline_header(app: &mut TranscriptorApp, ui: &mut egui::Ui) {
     });
 }
 
+#[derive(Clone)]
+struct PropertyDraft<T> {
+    base: T,
+    value: T,
+}
+
+fn property_draft<T: Clone + PartialEq + Send + Sync + 'static>(ui: &egui::Ui, key: egui::Id, original: T) -> PropertyDraft<T> {
+    ui.ctx()
+        .data_mut(|data| data.get_temp::<PropertyDraft<T>>(key))
+        .filter(|draft| draft.base == original)
+        .unwrap_or_else(|| PropertyDraft { base: original.clone(), value: original })
+}
+
+fn persistent_text(ui: &mut egui::Ui, source: impl std::hash::Hash + std::fmt::Debug, original: &str) -> Option<String> {
+    let key = ui.make_persistent_id(source);
+    let mut draft = property_draft(ui, key, original.to_owned());
+    let response = ui.add(egui::TextEdit::singleline(&mut draft.value).id(key.with("editor")));
+    let cancel = response.has_focus() && ui.input(|input| input.key_pressed(egui::Key::Escape));
+    if cancel {
+        draft.value.clone_from(&draft.base);
+        response.surrender_focus();
+    }
+    let result = (!cancel && response.lost_focus() && draft.value != draft.base).then(|| draft.value.clone());
+    ui.ctx().data_mut(|data| data.insert_temp(key, draft));
+    result
+}
+
 fn inspector(app: &mut TranscriptorApp, ui: &mut egui::Ui) {
     ui.heading("Inspector");
     egui::ScrollArea::vertical().id_salt("inspector-scroll").show(ui, |ui| {
         if let Some((layer_id, item_id)) = app.selection.items.first().cloned() {
-            let Some(layer) = app.project().layer(&layer_id).cloned() else { return };
+            let Some(layer) = app.project().layer(&layer_id) else { return };
             let Some(item) = layer.item(&item_id).cloned() else { return };
+            let (layer_name, layer_kind, layer_asset, editable) =
+                (layer.name.clone(), layer.kind.clone(), layer.asset_id.clone(), !layer.deleted && !layer.locked && layer.kind.is_editable());
             ui.label(RichText::new("Tramo semántico").strong());
-            ui.label(format!("Capa: {} ({})", layer.name, layer.kind.v1_name()));
+            ui.label(format!("Capa: {} ({})", layer_name, layer_kind.v1_name()));
             ui.label(format!("ID: {}", item.item_id));
-            let editable = !layer.deleted && !layer.locked && layer.kind.is_editable();
             if !editable {
                 ui.label("Evidencia de solo lectura / capa bloqueada");
             }
@@ -642,7 +778,7 @@ fn inspector(app: &mut TranscriptorApp, ui: &mut egui::Ui) {
                 }));
             });
             ui.horizontal(|ui| {
-                let can_accept = editable && layer.kind.accepts_acceptance();
+                let can_accept = editable && layer_kind.accepts_acceptance();
                 let b = ui.add_enabled(can_accept, egui::Button::new("Aceptar (E)"));
                 if b.clicked() {
                     app.dispatch("edit.accept");
@@ -676,7 +812,7 @@ fn inspector(app: &mut TranscriptorApp, ui: &mut egui::Ui) {
             }
             let mut occurrences = app
                 .sequence()
-                .map(|seq| item.ranges.iter().flat_map(|r| seq.range_occurrences(&layer.asset_id, *r)).collect::<Vec<_>>())
+                .map(|seq| item.ranges.iter().flat_map(|r| seq.range_occurrences(&layer_asset, *r)).collect::<Vec<_>>())
                 .unwrap_or_default();
             occurrences.sort_by_key(|o| (o.sequence.start, o.clip_id.clone()));
             ui.collapsing(format!("Ocurrencias en secuencia ({})", occurrences.len()), |ui| {
@@ -695,9 +831,37 @@ fn inspector(app: &mut TranscriptorApp, ui: &mut egui::Ui) {
             let Some(clip) = app.sequence().and_then(|s| s.clip(&clip_id)).cloned() else { return };
             let asset = app.project().asset(&clip.asset_id).cloned();
             ui.label(RichText::new("Clip").strong());
-            let mut name = clip.name.clone();
-            if ui.text_edit_singleline(&mut name).lost_focus() && name != clip.name {
+            if let Some(name) = persistent_text(ui, (app.project().project_id.as_str(), clip_id.as_str(), "name"), &clip.name) {
                 app.exec(Command::SetClipProps { clip_id: clip_id.clone(), name: Some(name), gain_db: None, transform: None });
+            }
+            ui.label("Motivo / nota editorial");
+            let reason = clip.extra.get("v1").and_then(|v| v["reason"].as_str()).unwrap_or_default();
+            if let Some(reason) = persistent_text(ui, (app.project().project_id.as_str(), clip_id.as_str(), "reason"), reason) {
+                app.exec(Command::SetClipEditorial { clip_ids: vec![clip_id.clone()], state: None, reason: Some(reason) });
+            }
+            let mut state = if !clip.enabled {
+                ItemState::Disabled
+            } else if clip.extra.get("v1").is_some_and(|v| v["state"] == "accepted") {
+                ItemState::Accepted
+            } else {
+                ItemState::Proposed
+            };
+            let previous = state;
+            egui::ComboBox::from_label("Decisión editorial")
+                .selected_text(match state {
+                    ItemState::Proposed => "Propuesto",
+                    ItemState::Accepted => "Aceptado",
+                    ItemState::Disabled => "Desactivado",
+                })
+                .show_ui(ui, |ui| {
+                    for (value, label) in
+                        [(ItemState::Proposed, "Propuesto"), (ItemState::Accepted, "Aceptado"), (ItemState::Disabled, "Desactivado")]
+                    {
+                        ui.selectable_value(&mut state, value, label);
+                    }
+                });
+            if state != previous {
+                app.exec(Command::SetClipEditorial { clip_ids: vec![clip_id.clone()], state: Some(state), reason: None });
             }
             ui.label(format!("ID: {}", clip.id));
             if let Some(a) = &asset {
@@ -727,18 +891,30 @@ fn inspector(app: &mut TranscriptorApp, ui: &mut egui::Ui) {
             }
             let is_audio = app.sequence().and_then(|s| s.track(&clip.track_id)).map(|t| t.kind == tv2_domain::TrackKind::Audio).unwrap_or(false);
             if is_audio {
-                let mut gain = clip.gain_db;
-                if ui.add(egui::Slider::new(&mut gain, -48.0..=12.0).text("ganancia dB")).drag_stopped() {
+                let key = ui.make_persistent_id((app.project().project_id.as_str(), clip_id.as_str(), "gain"));
+                let mut draft = property_draft(ui, key, clip.gain_db);
+                let gain = &mut draft.value;
+                let response = ui.add(egui::Slider::new(gain, -48.0..=12.0).text("ganancia dB"));
+                if response.drag_stopped() || response.changed() && !response.dragged() {
+                    let gain = *gain;
                     app.exec(Command::SetClipProps { clip_id: clip_id.clone(), name: None, gain_db: Some(gain), transform: None });
                 }
+                ui.ctx().data_mut(|d| d.insert_temp(key, draft));
             } else {
                 ui.label(RichText::new("Transformación").strong());
-                let mut t: Transform = clip.transform;
+                let key = ui.make_persistent_id((app.project().project_id.as_str(), clip_id.as_str(), "transform"));
+                let mut draft = property_draft(ui, key, clip.transform);
+                let t = &mut draft.value;
                 let mut changed = false;
-                changed |= ui.add(egui::Slider::new(&mut t.scale, 0.1..=4.0).text("escala")).drag_stopped();
-                changed |= ui.add(egui::Slider::new(&mut t.x, -1.0..=1.0).text("x")).drag_stopped();
-                changed |= ui.add(egui::Slider::new(&mut t.y, -1.0..=1.0).text("y")).drag_stopped();
-                changed |= ui.add(egui::Slider::new(&mut t.opacity, 0.0..=1.0).text("opacidad")).drag_stopped();
+                for (value, range, label) in [
+                    (&mut t.scale, 0.1..=4.0, "escala"),
+                    (&mut t.x, -1.0..=1.0, "x"),
+                    (&mut t.y, -1.0..=1.0, "y"),
+                    (&mut t.opacity, 0.0..=1.0, "opacidad"),
+                ] {
+                    let response = ui.add(egui::Slider::new(value, range).text(label));
+                    changed |= response.drag_stopped() || response.changed() && !response.dragged();
+                }
                 egui::ComboBox::from_label("ajuste").selected_text(format!("{:?}", t.fit)).show_ui(ui, |ui| {
                     for (v, l) in [
                         (tv2_domain::timeline::FitMode::Fit, "Ajustar"),
@@ -752,14 +928,18 @@ fn inspector(app: &mut TranscriptorApp, ui: &mut egui::Ui) {
                     }
                 });
                 if changed {
-                    app.exec(Command::SetClipProps { clip_id: clip_id.clone(), name: None, gain_db: None, transform: Some(t) });
+                    app.exec(Command::SetClipProps { clip_id: clip_id.clone(), name: None, gain_db: None, transform: Some(*t) });
                 }
+                ui.ctx().data_mut(|d| d.insert_temp(key, draft));
                 if asset.as_ref().is_some_and(|a| a.kind == AssetKind::Image) {
-                    let mut secs = clip.duration().as_seconds_f64();
-                    if ui.add(egui::Slider::new(&mut secs, 0.1..=60.0).text("duración (s)")).drag_stopped() {
-                        let new_end = clip.position + Ticks::from_seconds_f64(secs);
+                    let key = ui.make_persistent_id((app.project().project_id.as_str(), clip_id.as_str(), "duration"));
+                    let mut draft = property_draft(ui, key, clip.duration().as_seconds_f64());
+                    let response = ui.add(egui::Slider::new(&mut draft.value, 0.1..=60.0).text("duración (s)"));
+                    if response.drag_stopped() || response.changed() && !response.dragged() {
+                        let new_end = clip.position + Ticks::from_seconds_f64(draft.value);
                         app.exec(Command::TrimClip { clip_id: clip_id.clone(), edge: tv2_domain::ClipEdge::End, new_time: new_end });
                     }
+                    ui.ctx().data_mut(|d| d.insert_temp(key, draft));
                 }
             }
             ui.label(
@@ -774,20 +954,21 @@ fn inspector(app: &mut TranscriptorApp, ui: &mut egui::Ui) {
             return;
         }
         if let Some(layer_id) = app.selection.layer.clone()
-            && let Some(layer) = app.project().layer(&layer_id).cloned()
+            && let Some((name, color, kind, count, revision, deleted_count)) = app
+                .project()
+                .layer(&layer_id)
+                .map(|l| (l.name.clone(), l.color.clone(), l.kind.clone(), l.items.len(), l.revision, l.deleted_item_ids.len()))
         {
             ui.label(RichText::new("Capa").strong());
-            let mut name = layer.name.clone();
-            if ui.text_edit_singleline(&mut name).lost_focus() && name != layer.name {
+            if let Some(name) = persistent_text(ui, (app.project().project_id.as_str(), layer_id.as_str(), "name"), &name) {
                 app.exec(Command::SetLayerProps { layer_id: layer_id.clone(), name: Some(name), color: None, visible: None, locked: None });
             }
-            ui.label(format!("Tipo: {} · {} tramos · revisión {}", layer.kind.v1_name(), layer.items.len(), layer.revision));
-            let mut color = layer.color.clone();
-            if ui.text_edit_singleline(&mut color).lost_focus() && color != layer.color {
+            ui.label(format!("Tipo: {} · {} tramos · revisión {}", kind.v1_name(), count, revision));
+            if let Some(color) = persistent_text(ui, (app.project().project_id.as_str(), layer_id.as_str(), "color"), &color) {
                 app.exec(Command::SetLayerProps { layer_id: layer_id.clone(), name: None, color: Some(color), visible: None, locked: None });
             }
-            if !layer.deleted_item_ids.is_empty() {
-                ui.label(RichText::new(format!("{} tombstones", layer.deleted_item_ids.len())).size(10.5).color(colors::TEXT_DIM));
+            if deleted_count > 0 {
+                ui.label(RichText::new(format!("{} tombstones", deleted_count)).size(10.5).color(colors::TEXT_DIM));
             }
             ui.label(RichText::new("Marca IN/OUT (I/O) y pulsa «Añadir tramo» (Ctrl+Enter).").size(11.0).color(colors::TEXT_DIM));
             if ui.button("Borrar capa").clicked() {
@@ -812,10 +993,13 @@ fn inspector(app: &mut TranscriptorApp, ui: &mut egui::Ui) {
                 .color(colors::TEXT_DIM),
             );
             if a.kind == AssetKind::Image {
-                let mut secs = a.duration().as_seconds_f64();
-                if ui.add(egui::Slider::new(&mut secs, 0.1..=60.0).text("duración por defecto (s)")).drag_stopped() {
-                    app.exec(Command::SetImageDuration { asset_id: a.id.clone(), duration: Ticks::from_seconds_f64(secs) });
+                let key = ui.make_persistent_id((app.project().project_id.as_str(), a.id.as_str(), "default-duration"));
+                let mut draft = property_draft(ui, key, a.duration().as_seconds_f64());
+                let response = ui.add(egui::Slider::new(&mut draft.value, 0.1..=60.0).text("duración por defecto (s)"));
+                if response.drag_stopped() || response.changed() && !response.dragged() {
+                    app.exec(Command::SetImageDuration { asset_id: a.id.clone(), duration: Ticks::from_seconds_f64(draft.value) });
                 }
+                ui.ctx().data_mut(|data| data.insert_temp(key, draft));
             }
             return;
         }
@@ -823,8 +1007,7 @@ fn inspector(app: &mut TranscriptorApp, ui: &mut egui::Ui) {
         ui.label(RichText::new("Clic en un clip, un tramo o una capa para ver sus propiedades.").size(11.0).color(colors::TEXT_DIM));
         ui.separator();
         ui.label(RichText::new("Proyecto").strong());
-        let mut name = app.project().name.clone();
-        if ui.text_edit_singleline(&mut name).lost_focus() && name != app.project().name {
+        if let Some(name) = persistent_text(ui, (app.project().project_id.as_str(), "project-name"), &app.project().name) {
             app.exec(Command::RenameProject { name });
         }
         ui.label(format!(
@@ -1287,6 +1470,19 @@ fn export_dialog(app: &mut TranscriptorApp, ctx: &egui::Context) {
             );
             let preset = &presets[app.export.preset_idx.min(presets.len() - 1)];
             ui.label(RichText::new(&preset.notes).size(10.5).color(colors::TEXT_DIM));
+            ui.collapsing("Parámetros de salida",|ui|{
+                let settings=&mut app.ui.export_settings;
+                ui.checkbox(&mut settings.enabled,"Personalizar este preset");
+                ui.add_enabled_ui(settings.enabled,|ui|{
+                    if preset.has_video{
+                        ui.horizontal(|ui|{ui.label("Resolución");ui.add(egui::DragValue::new(&mut settings.width).range(64..=8192));ui.label("×");ui.add(egui::DragValue::new(&mut settings.height).range(64..=8192));});
+                        ui.horizontal(|ui|{ui.label("FPS");ui.add(egui::DragValue::new(&mut settings.fps_num).range(1..=240000));ui.label("/");ui.add(egui::DragValue::new(&mut settings.fps_den).range(1..=100000));});
+                        ui.horizontal(|ui|{ui.label("Video kbit/s (0 = calidad del preset)");ui.add(egui::DragValue::new(&mut settings.video_kbps).range(0..=200000));});
+                    }
+                    ui.horizontal(|ui|{ui.label("Audio Hz");ui.add(egui::DragValue::new(&mut settings.sample_rate).range(8000..=192000));ui.radio_value(&mut settings.channels,1,"Mono");ui.radio_value(&mut settings.channels,2,"Estéreo");});
+                    ui.label("La mezcla original es estéreo; mono usa downmix. El encuadre conserva las transformaciones Fit/Fill del inspector. Salida SDR.");
+                });
+            });
             ui.horizontal_wrapped(|ui| {
                 ui.radio_value(&mut app.export.range_mode, 0, "Secuencia completa");
                 let has_io = matches!((app.in_point, app.out_point), (Some(i), Some(o)) if i < o);

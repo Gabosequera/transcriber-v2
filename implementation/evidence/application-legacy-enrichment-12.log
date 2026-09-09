@@ -1,0 +1,21 @@
+   Compiling tv2-domain v2.0.0-alpha.9 (C:\Users\gabri\Todo\transcriber-v2\crates\domain)
+   Compiling tv2-application v2.0.0-alpha.9 (C:\Users\gabri\Todo\transcriber-v2\crates\application)
+    Finished `test` profile [optimized + debuginfo] target(s) in 45.62s
+     Running unittests src\lib.rs (target\debug\deps\tv2_application-1f119f0e3686a5a1.exe)
+
+running 7 tests
+test source_bundles::tests::source_enrichment_rejects_changed_master_wrong_bundle_and_existing_bundle_replacement ... ok
+test source_bundles::tests::future_schema_or_unknown_bundle_contract_is_rejected_without_rewriting ... ok
+test source_bundles::tests::changed_auxiliary_aborts_before_checkpoint_and_corrupt_owned_blob_is_not_overwritten ... ok
+test source_bundles::tests::external_master_survives_save_as_and_rejects_tampered_bytes_or_forged_descriptors ... ok
+test source_bundles::tests::legacy_checkpoint_migrates_only_on_save_preserving_history_receipts_and_extras ... ok
+test source_bundles::tests::save_as_auxiliaries_survive_source_loss_folder_move_undo_and_export ... ok
+test source_bundles::tests::legacy_master_gains_source_bundle_without_replacing_evidence_or_human_layers_and_survives_save_as ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 65 filtered out; finished in 0.07s
+
+     Running tests\block_review.rs (target\debug\deps\block_review-05a6913c5cc4b662.exe)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 3 filtered out; finished in 0.00s

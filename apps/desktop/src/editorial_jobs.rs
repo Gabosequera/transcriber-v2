@@ -17,28 +17,54 @@ pub struct EditorialImport {
     pub asset: Asset,
     pub import: tv2_v1compat::import::V1Import,
 }
+pub struct PreparedEditorialImport {
+    pub data: EditorialImport,
+    pub command: tv2_application::session::PreparedCommand,
+    pub enrichment: bool,
+    pub command_count: usize,
+}
 
 pub struct EditorialJob {
     pub project: String,
     pub revision: Revision,
     pub cancel: Arc<AtomicBool>,
-    pub result: crossbeam_channel::Receiver<DomainResult<EditorialImport>>,
+    pub result: crossbeam_channel::Receiver<DomainResult<PreparedEditorialImport>>,
 }
 
 impl EditorialJob {
     pub fn start(
-        project: String,
-        revision: Revision,
+        snapshot: tv2_domain::Project,
         root: PathBuf,
         hint: Option<PathBuf>,
-        assets: Vec<Asset>,
         tools: Option<tv2_media::FfmpegTools>,
     ) -> std::io::Result<Self> {
         let cancel = Arc::new(AtomicBool::new(false));
+        let project = snapshot.project_id.clone();
+        let revision = snapshot.revision;
         let token = cancel.clone();
         let (tx, result) = crossbeam_channel::bounded(1);
         std::thread::Builder::new().name("editorial-import".into()).spawn(move || {
-            let value = prepare(root, hint, assets, tools, &token);
+            let value = (|| {
+                let data = prepare(root, hint, snapshot.assets.clone(), tools, &token)?;
+                let enrichment = tv2_v1compat::import::is_source_bundle_enrichment(&data.import, &snapshot);
+                let mut commands = Vec::new();
+                if snapshot.asset(&data.asset.id).is_none() {
+                    commands.push(tv2_domain::Command::ImportAsset { asset: data.asset.clone() });
+                }
+                commands.extend(tv2_v1compat::import::import_commands(&data.import, &snapshot, &data.asset.id));
+                let command_count = commands.len();
+                let envelope = tv2_application::CommandEnvelope::human(tv2_domain::Command::Batch {
+                    label: if enrichment { "Vincular carpeta original V1" } else { "Importar proyecto V1" }.into(),
+                    commands,
+                })
+                .with_base(revision)
+                .with_actor(tv2_application::Actor::External { source: "import-v1".into() });
+                let command = tv2_application::ProjectSession::new(snapshot).prepare_command(envelope)?;
+                if token.load(Ordering::Acquire) {
+                    return Err(DomainError::not_available("Importación cancelada"));
+                }
+                Ok(PreparedEditorialImport { data, command, enrichment, command_count })
+            })();
             let _ = tx.send(value);
         })?;
         Ok(Self { project, revision, cancel, result })
@@ -61,7 +87,7 @@ fn prepare(
     cancel: &Arc<AtomicBool>,
 ) -> DomainResult<EditorialImport> {
     let master_path = tv2_v1compat::import::find_master(&root).ok_or_else(|| DomainError::invalid("No hay master V1 en la carpeta"))?;
-    let master = tv2_v1compat::master::V1Master::load(&master_path)?;
+    let master = discovery_header(&master_path, cancel)?;
     let mut asset = assets.into_iter().find(|a| a.fingerprint.same_identity(&master.fingerprint));
     if asset.is_none() {
         let media = PathBuf::from(&master.media_path);
@@ -99,8 +125,39 @@ fn prepare(
     }
     let asset = asset
         .ok_or_else(|| DomainError::invalid(format!("Ningún medio coincide con el master: {}. Importa el original y repite.", master.media_path)))?;
-    let import = tv2_v1compat::import::read_v1_editorial_with_stores(&root, &asset, &crate::paths::v1_marks_stores())?;
+    drop(master);
+    let import = tv2_v1compat::import::read_v1_editorial_with_cancel(&root, &asset, &crate::paths::v1_marks_stores(), cancel)?;
     Ok(EditorialImport { asset, import })
+}
+
+// Media discovery only needs the identity header. Serde skips track records
+// through a cancellable reader instead of allocating another complete master.
+fn discovery_header(path: &std::path::Path, cancel: &AtomicBool) -> DomainResult<tv2_v1compat::master::V1Master> {
+    use std::io::{BufRead, Read};
+    #[derive(serde::Deserialize)]
+    struct Header {
+        schema: String,
+        media: serde_json::Value,
+    }
+    struct Reader<'a> {
+        file: std::fs::File,
+        cancel: &'a AtomicBool,
+    }
+    impl Read for Reader<'_> {
+        fn read(&mut self, buf: &mut [u8]) -> std::io::Result<usize> {
+            if self.cancel.load(Ordering::Acquire) {
+                return Err(std::io::Error::other("Importación cancelada"));
+            }
+            let len = buf.len().min(64 * 1024);
+            self.file.read(&mut buf[..len])
+        }
+    }
+    let mut reader = std::io::BufReader::new(Reader { file: std::fs::File::open(path)?, cancel });
+    if reader.fill_buf()?.starts_with(&[239, 187, 191]) {
+        reader.consume(3);
+    }
+    let header: Header = serde_json::from_reader(reader)?;
+    Ok(tv2_v1compat::master::V1Master::parse(serde_json::json!({"schema":header.schema,"media":header.media}))?)
 }
 
 #[cfg(test)]

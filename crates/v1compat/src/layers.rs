@@ -60,6 +60,12 @@ pub fn item_from_v1(v: &Value) -> V1Result<SemanticItem> {
             extra.insert(k.clone(), val.clone());
         }
     }
+    if ranges_v.iter().any(|r| r.as_object().is_some_and(|obj| obj.keys().any(|k| k != "t_ini" && k != "t_fin"))) {
+        // Keep per-range provenance outside the mutable time model. The exact
+        // original range remains archived after an edit; only matching ranges
+        // regain those annotations on V1 export.
+        extra.insert("tv2_v1_range_evidence".into(), Value::Array(ranges_v.clone()));
+    }
     Ok(SemanticItem {
         item_id: ItemId::new(item_id),
         label: obj.get("label").and_then(|x| x.as_str()).unwrap_or("").to_string(),
@@ -81,7 +87,31 @@ pub fn item_to_v1(it: &SemanticItem) -> Value {
     obj.insert("state".into(), json!(it.state.as_str()));
     obj.insert("edited".into(), json!(it.edited));
     obj.insert("parent_id".into(), it.parent_id.as_ref().map(|p| json!(p.as_str())).unwrap_or(Value::Null));
-    obj.insert("ranges".into(), Value::Array(it.ranges.iter().map(|r| json!({"t_ini": secs_json(r.start), "t_fin": secs_json(r.end)})).collect()));
+    obj.insert(
+        "ranges".into(),
+        Value::Array(
+            it.ranges
+                .iter()
+                .map(|r| {
+                    let mut value = it
+                        .extra
+                        .get("tv2_v1_range_evidence")
+                        .and_then(Value::as_array)
+                        .into_iter()
+                        .flatten()
+                        .find(|v| {
+                            v["t_ini"].as_f64().is_some_and(|a| secs_to_ticks(a) == r.start)
+                                && v["t_fin"].as_f64().is_some_and(|b| secs_to_ticks(b) == r.end)
+                        })
+                        .cloned()
+                        .unwrap_or_else(|| json!({}));
+                    value["t_ini"] = secs_json(r.start);
+                    value["t_fin"] = secs_json(r.end);
+                    value
+                })
+                .collect(),
+        ),
+    );
     for (k, v) in &it.extra {
         obj.entry(k.clone()).or_insert(v.clone());
     }
@@ -130,7 +160,7 @@ pub fn layer_from_v1(v: &Value, asset_id: &AssetId, expected: Option<&Fingerprin
         name: obj.get("name").and_then(|x| x.as_str()).unwrap_or(layer_id).to_string(),
         color: obj.get("color").and_then(|x| x.as_str()).unwrap_or("#d09947").to_string(),
         asset_id: asset_id.clone(),
-        items,
+        items: items.into(),
         deleted_item_ids: obj
             .get("deleted_item_ids")
             .and_then(|x| x.as_array())
@@ -169,7 +199,7 @@ pub fn layer_to_v1(layer: &SemanticLayer, fingerprint: &Fingerprint) -> Value {
         obj.insert("deleted_item_ids".into(), Value::Array(layer.deleted_item_ids.iter().map(|i| json!(i.as_str())).collect()));
     }
     for (k, v) in &layer.extra {
-        if k != "v1_media_fingerprint" {
+        if k != "v1_media_fingerprint" && k != "tv2_v1_source_path" {
             obj.entry(k.clone()).or_insert(v.clone());
         }
     }

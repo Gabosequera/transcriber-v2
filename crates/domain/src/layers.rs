@@ -173,7 +173,7 @@ pub struct SemanticLayer {
     pub color: String,
     /// Asset cuya línea de tiempo fuente usan los rangos.
     pub asset_id: AssetId,
-    pub items: Vec<SemanticItem>,
+    pub items: crate::SharedVec<SemanticItem>,
     /// Tombstones: items borrados que un merge no debe resucitar.
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub deleted_item_ids: Vec<ItemId>,
@@ -208,7 +208,7 @@ impl SemanticLayer {
             name: name.into(),
             color: default_color(),
             asset_id,
-            items: Vec::new(),
+            items: crate::SharedVec::new(),
             deleted_item_ids: Vec::new(),
             revision: 0,
             deleted: false,
@@ -439,7 +439,7 @@ mod tests {
         let b = item("b", 2, 4); // proposed → también corta
         let mut c = item("c", 6, 7);
         c.state = ItemState::Disabled;
-        layer.items = vec![a, b, c];
+        layer.items = vec![a, b, c].into();
         assert_eq!(layer.enabled_intervals(), vec![TimeRange::new(Ticks::from_seconds(1), Ticks::from_seconds(4))]);
         assert!(!LayerKind::Blocks.accepts_acceptance());
         assert!(LayerKind::Trims.accepts_acceptance());

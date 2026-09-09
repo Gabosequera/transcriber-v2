@@ -6,6 +6,38 @@ pub struct SemanticJob {
     pub result: crossbeam_channel::Receiver<DomainResult<PreparedCommand>>,
 }
 impl TranscriptorApp {
+    pub fn export_interchange_dialog(&mut self, xml: bool) {
+        if self.v1_export_job.is_some() {
+            self.toast(Severity::Warn, "Hay una exportación documental en curso");
+            return;
+        }
+        let Some(sequence) = self.sequence().map(|s| s.id.clone()) else { return };
+        let Some(directory) = rfd::FileDialog::new().set_title("Destino de intercambio de montaje").pick_folder() else { return };
+        let mut project = self.project().clone();
+        for asset in &mut project.assets {
+            asset.path = self.resolve_asset_path(asset).to_string_lossy().replace('\\', "/");
+        }
+        let (tx, rx) = crossbeam_channel::bounded(1);
+        match std::thread::Builder::new().name("interchange-export".into()).spawn(move || {
+            let work = || -> DomainResult<std::path::PathBuf> {
+                let text = if xml {
+                    tv2_v1compat::interchange::export_fcpxml(&project, &sequence)?
+                } else {
+                    tv2_v1compat::interchange::export_edl(&project, &sequence)?
+                };
+                let ext = if xml { "fcpxml" } else { "edl" };
+                let docs = std::collections::BTreeMap::from([(format!("montage.{ext}"), text)]);
+                let root = directory.join(format!("{ext}-r{}-{}", project.revision, tv2_domain::ids::random_hex12()));
+                tv2_application::documents::create(&root)?;
+                tv2_application::documents::publish(&root, &docs)?;
+                Ok(root)
+            };
+            let _ = tx.send(work());
+        }) {
+            Ok(_) => self.v1_export_job = Some(rx),
+            Err(e) => self.report(e.into()),
+        }
+    }
     pub fn export_v1_folder_dialog(&mut self, include_montage: bool) {
         if self.v1_export_job.is_some() {
             self.toast(Severity::Warn, "Hay una exportación en curso");
@@ -30,7 +62,7 @@ impl TranscriptorApp {
                 let docs = tv2_v1compat::folder::export(&project, &asset, sequence.as_ref())?;
                 let root = directory.join(format!("v1-folder-r{}-{}", project.revision, tv2_domain::ids::random_hex12()));
                 tv2_application::documents::create(&root)?;
-                tv2_application::documents::publish_with_files(&root, &docs.documents, &docs.files)?;
+                tv2_application::documents::publish_with_directories(&root, &docs.documents, &docs.files, &docs.directories)?;
                 Ok(root)
             };
             let _ = tx.send(work());

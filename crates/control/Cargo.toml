@@ -1,0 +1,17 @@
+[package]
+name = "tv2-control"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license-file.workspace = true
+description = "Authenticated local MCP control of the running Transcriptor project session"
+
+[dependencies]
+tv2-domain = { path = "../domain" }
+tv2-application = { path = "../application" }
+serde.workspace = true
+serde_json.workspace = true
+crossbeam-channel.workspace = true
+
+[dev-dependencies]
+tempfile.workspace = true

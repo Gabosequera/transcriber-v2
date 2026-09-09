@@ -32,6 +32,15 @@ use tv2_domain::time::{FLICKS_PER_SECOND, Ticks, TimeRange};
 pub const WAVE_BPS: u32 = 256;
 /// Frecuencia de decodificación para la forma de onda (32 muestras por bucket).
 const WAVE_RATE: u32 = WAVE_BPS * 32;
+const WAVE_MAX_BUCKETS: usize = 8 * 1024 * 1024;
+
+fn wave_bucket_samples(duration: Ticks) -> u64 {
+    let mut samples = u64::from(WAVE_RATE / WAVE_BPS);
+    while duration.as_seconds_f64().max(0.0) * f64::from(WAVE_RATE) / samples as f64 > (WAVE_MAX_BUCKETS - WAVE_BPS as usize) as f64 {
+        samples *= 2;
+    }
+    samples
+}
 /// Factor entre niveles de la pirámide.
 const WAVE_FACTOR: usize = 4;
 const WAVE_LEVELS: usize = 16; // incluye medios largos con coste por píxel acotado
@@ -57,25 +66,41 @@ impl Drop for Reservation {
     }
 }
 
-#[derive(Debug, Default)]
+#[derive(Debug)]
 pub struct WaveformData {
-    /// `levels[i]` tiene `WAVE_BPS / 4^i` buckets por segundo.
+    /// Density is reduced for long media; every bucket retains its maximum peak.
     pub levels: Vec<Vec<u8>>,
     /// Buckets del nivel 0 ya calculados.
     pub ready: usize,
     pub complete: bool,
     pub error: Option<String>,
+    bucket_samples: u64,
     reservation: Option<Arc<Reservation>>,
     budget_blocked: bool,
 }
 
+impl Default for WaveformData {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl WaveformData {
     fn new() -> Self {
-        WaveformData { levels: vec![Vec::new(); WAVE_LEVELS], ready: 0, complete: false, error: None, reservation: None, budget_blocked: false }
+        WaveformData {
+            levels: vec![Vec::new(); WAVE_LEVELS],
+            ready: 0,
+            complete: false,
+            error: None,
+            bucket_samples: u64::from(WAVE_RATE / WAVE_BPS),
+            reservation: None,
+            budget_blocked: false,
+        }
     }
 
-    fn from_level0(level0: Vec<u8>) -> Self {
+    fn from_level0(level0: Vec<u8>, bucket_samples: u64) -> Self {
         let mut d = WaveformData::new();
+        d.bucket_samples = bucket_samples;
         d.ready = level0.len();
         d.levels[0] = level0;
         d.rebuild_levels(0);
@@ -100,8 +125,8 @@ impl WaveformData {
         }
     }
 
-    pub fn level_bps(level: usize) -> f64 {
-        WAVE_BPS as f64 / (WAVE_FACTOR.pow(level as u32) as f64)
+    pub fn level_bps(&self, level: usize) -> f64 {
+        WAVE_RATE as f64 / self.bucket_samples as f64 / (WAVE_FACTOR.pow(level as u32) as f64)
     }
 
     /// Pico máximo (0..255) por columna para `range` repartido en `columns`
@@ -114,10 +139,10 @@ impl WaveformData {
         let secs_per_col = range.duration().as_seconds_f64() / columns as f64;
         // nivel más fino con ≤ 4 buckets por columna
         let mut level = 0;
-        while level + 1 < self.levels.len() && !self.levels[level + 1].is_empty() && secs_per_col * Self::level_bps(level) > 4.0 {
+        while level + 1 < self.levels.len() && !self.levels[level + 1].is_empty() && secs_per_col * self.level_bps(level) > 4.0 {
             level += 1;
         }
-        let bps = Self::level_bps(level);
+        let bps = self.level_bps(level);
         let data = &self.levels[level];
         let ready_here = if self.complete { data.len() } else { (self.ready / WAVE_FACTOR.pow(level as u32)).min(data.len()) };
         let start_s = range.start.as_seconds_f64();
@@ -364,7 +389,9 @@ impl MediaCaches {
             }
             return handle;
         }
-        let bytes = ((asset.duration().as_seconds_f64().max(0.0) * WAVE_BPS as f64).ceil() as usize)
+        let bucket_samples = wave_bucket_samples(asset.duration());
+        handle.write().bucket_samples = bucket_samples;
+        let bytes = ((asset.duration().as_seconds_f64().max(0.0) * WAVE_RATE as f64 / bucket_samples as f64).ceil() as usize)
             .saturating_add(WAVE_BPS as usize)
             .saturating_mul(6)
             .saturating_add(1024 * 1024);
@@ -388,10 +415,10 @@ impl MediaCaches {
                 if cancel.load(Ordering::Relaxed) {
                     return;
                 }
-                if let Some(level0) = file.as_ref().and_then(|f| read_wave_file(f, duration)) {
+                if let Some((level0, bucket_samples)) = file.as_ref().and_then(|f| read_wave_file(f, duration)) {
                     let mut data = h2.write();
                     let reservation = data.reservation.take();
-                    *data = WaveformData::from_level0(level0);
+                    *data = WaveformData::from_level0(level0, bucket_samples);
                     data.reservation = reservation;
                     return;
                 }
@@ -523,9 +550,8 @@ fn compute_waveform(
         d.error = Some(msg);
         d.complete = true;
     };
-    if duration.as_seconds_f64() > (32 * 1024 * 1024 / WAVE_BPS) as f64 {
-        return fail("Forma de onda pendiente: el medio supera el presupuesto de 32 MiB por stream".into());
-    }
+    let samples_per_bucket = wave_bucket_samples(duration);
+    handle.write().bucket_samples = samples_per_bucket;
     let mut cmd = tools.ffmpeg_cmd();
     cmd.arg("-i").arg(path);
     cmd.args(["-af", &format!("aresample={WAVE_RATE}:async=1:first_pts=0")]);
@@ -536,11 +562,12 @@ fn compute_waveform(
         Err(e) => return fail(format!("ffmpeg (forma de onda): {e}")),
     };
     let mut stdout = child.stdout.take().expect("stdout");
-    let expected_buckets = ((duration.as_seconds_f64() * WAVE_BPS as f64).ceil() as usize).max(1);
-    let samples_per_bucket = (WAVE_RATE / WAVE_BPS) as usize;
-    let mut buf = vec![0u8; samples_per_bucket * 4 * 256]; // 256 buckets (~1 s) por lectura
+    let bps = WAVE_RATE as f64 / samples_per_bucket as f64;
+    let expected_buckets = ((duration.as_seconds_f64() * bps).ceil() as usize).max(1);
+    let mut buf = vec![0u8; WAVE_RATE as usize * 4]; // one second, independent of bucket duration
     let mut level0: Vec<u8> = Vec::with_capacity(expected_buckets);
-    let mut carry: Vec<f32> = Vec::new();
+    let mut bucket_count = 0u64;
+    let mut bucket_peak = 0f32;
     let mut last_publish = 0usize;
     loop {
         if cancel.load(Ordering::Relaxed) {
@@ -564,25 +591,24 @@ fn compute_waveform(
             }
         }
         let usable = filled - (filled % 4);
-        carry.extend(buf[..usable].as_chunks::<4>().0.iter().map(|b| f32::from_le_bytes([b[0], b[1], b[2], b[3]])));
-        let whole = carry.len() / samples_per_bucket;
-        for b in 0..whole {
-            let block = &carry[b * samples_per_bucket..(b + 1) * samples_per_bucket];
-            let peak = block.iter().fold(0f32, |m, s| m.max(s.abs())).min(1.0);
-            level0.push((peak * 255.0).round() as u8);
+        for bytes in buf[..usable].as_chunks::<4>().0 {
+            bucket_peak = bucket_peak.max(f32::from_le_bytes(*bytes).abs()).min(1.0);
+            bucket_count += 1;
+            if bucket_count == samples_per_bucket {
+                level0.push((bucket_peak * 255.0).round() as u8);
+                bucket_count = 0;
+                bucket_peak = 0.0;
+            }
         }
-        if level0.len() > (32 * 1024 * 1024).min(expected_buckets.saturating_add(WAVE_BPS as usize)) {
+        if level0.len() > WAVE_MAX_BUCKETS.min(expected_buckets.saturating_add(bps.ceil() as usize)) {
             let _ = child.kill();
             let _ = child.wait();
             return fail("La forma de onda supera la duración declarada o el presupuesto por stream".into());
         }
-        carry.drain(..whole * samples_per_bucket);
-        if eof && !carry.is_empty() {
-            let peak = carry.iter().fold(0f32, |m, s| m.max(s.abs())).min(1.0);
-            level0.push((peak * 255.0).round() as u8);
-            carry.clear();
+        if eof && bucket_count > 0 {
+            level0.push((bucket_peak * 255.0).round() as u8);
         }
-        if level0.len() - last_publish >= 256 || eof {
+        if level0.len() - last_publish >= (bps.ceil() as usize).max(1) || eof {
             let mut d = handle.write();
             let from = d.levels[0].len();
             d.levels[0].extend_from_slice(&level0[from..]);
@@ -605,7 +631,7 @@ fn compute_waveform(
         other => return fail(format!("forma de onda: FFmpeg no terminó correctamente: {other:?}")),
     }
     if let Some(f) = file
-        && let Err(e) = write_wave_file(&f, &level0)
+        && let Err(e) = write_wave_file(&f, &level0, samples_per_bucket)
     {
         tracing::warn!("caché de forma de onda: {e}");
     }
@@ -728,7 +754,7 @@ fn compute_thumbs(
 const WAVE_MAGIC: &[u8; 4] = b"TV2W";
 const THUMB_MAGIC: &[u8; 4] = b"TV2T";
 
-fn write_wave_file(path: &Path, level0: &[u8]) -> std::io::Result<()> {
+fn write_wave_file(path: &Path, level0: &[u8], bucket_samples: u64) -> std::io::Result<()> {
     if let Some(p) = path.parent() {
         std::fs::create_dir_all(p)?;
     }
@@ -736,8 +762,8 @@ fn write_wave_file(path: &Path, level0: &[u8]) -> std::io::Result<()> {
     {
         let f = tmp.as_file_mut();
         f.write_all(WAVE_MAGIC)?;
-        f.write_all(&1u32.to_le_bytes())?;
-        f.write_all(&WAVE_BPS.to_le_bytes())?;
+        f.write_all(&2u32.to_le_bytes())?;
+        f.write_all(&bucket_samples.to_le_bytes())?;
         f.write_all(&(level0.len() as u64).to_le_bytes())?;
         f.write_all(level0)?;
         f.flush()?;
@@ -749,26 +775,26 @@ fn write_wave_file(path: &Path, level0: &[u8]) -> std::io::Result<()> {
     Ok(())
 }
 
-fn read_wave_file(path: &Path, duration: Ticks) -> Option<Vec<u8>> {
-    let max_bytes = (duration.as_seconds_f64().max(0.0) * WAVE_BPS as f64) as u64 + WAVE_BPS as u64 + 20;
-    if std::fs::metadata(path).ok()?.len() > max_bytes.min(32 * 1024 * 1024) {
+fn read_wave_file(path: &Path, duration: Ticks) -> Option<(Vec<u8>, u64)> {
+    if std::fs::metadata(path).ok()?.len() > WAVE_MAX_BUCKETS as u64 + 24 {
         return None;
     }
     let bytes = std::fs::read(path).ok()?;
-    if bytes.len() < 20 || &bytes[..4] != WAVE_MAGIC || bytes[4..8] != 1u32.to_le_bytes() {
+    if bytes.len() < 24 || &bytes[..4] != WAVE_MAGIC || bytes[4..8] != 2u32.to_le_bytes() {
         return None;
     }
-    let bps = u32::from_le_bytes(bytes[8..12].try_into().ok()?);
-    let n = u64::from_le_bytes(bytes[12..20].try_into().ok()?) as usize;
-    if bps != WAVE_BPS || n != bytes.len() - 20 {
+    let bucket_samples = u64::from_le_bytes(bytes[8..16].try_into().ok()?);
+    let n = usize::try_from(u64::from_le_bytes(bytes[16..24].try_into().ok()?)).ok()?;
+    if bucket_samples != wave_bucket_samples(duration) || n != bytes.len() - 24 {
         return None;
     }
     // coherencia con la duración (±1 s)
-    let expected = duration.as_seconds_f64() * WAVE_BPS as f64;
-    if (n as f64 - expected).abs() > WAVE_BPS as f64 {
+    let bps = WAVE_RATE as f64 / bucket_samples as f64;
+    let expected = duration.as_seconds_f64() * bps;
+    if (n as f64 - expected).abs() > bps.max(1.0) {
         return None;
     }
-    Some(bytes[20..20 + n].to_vec())
+    Some((bytes[24..24 + n].to_vec(), bucket_samples))
 }
 
 fn write_thumb_file(path: &Path, interval: Ticks, w: u32, h: u32, count: usize, rgba: &[u8]) -> std::io::Result<()> {
@@ -987,13 +1013,13 @@ mod tests {
         let asset = tools.import(&path, path.to_string_lossy().into_owned()).unwrap();
         let dir = tempfile::tempdir().unwrap();
         let file = dir.path().join(format!("wave-{}-a0.bin", MediaCaches::cache_key(&asset)));
-        write_wave_file(&file, &vec![42; 12 * WAVE_BPS as usize]).unwrap();
+        write_wave_file(&file, &vec![42; 12 * WAVE_BPS as usize], u64::from(WAVE_RATE / WAVE_BPS)).unwrap();
         let mut bytes = std::fs::read(&file).unwrap();
         bytes[4] = 9;
         std::fs::write(&file, &bytes).unwrap();
         assert!(read_wave_file(&file, asset.duration()).is_none());
-        bytes[4] = 1;
-        bytes[12..20].copy_from_slice(&u64::MAX.to_le_bytes());
+        bytes[4] = 2;
+        bytes[16..24].copy_from_slice(&u64::MAX.to_le_bytes());
         std::fs::write(&file, bytes).unwrap();
         assert!(read_wave_file(&file, asset.duration()).is_none());
         let mut caches = MediaCaches::new(tools, Some(dir.path().into()), Arc::new(|| {}));
@@ -1004,6 +1030,27 @@ mod tests {
         assert!(wave.read().error.is_none());
         assert!(wave.read().levels[0][0] > 150);
         assert!(read_wave_file(&file, asset.duration()).is_some());
+    }
+
+    #[test]
+    fn long_waveform_density_preserves_time_mapping_and_cache_metadata() {
+        let duration = Ticks::from_seconds(7 * 24 * 3600);
+        let samples = wave_bucket_samples(duration);
+        assert!(samples > u64::from(WAVE_RATE / WAVE_BPS));
+        let bps = WAVE_RATE as f64 / samples as f64;
+        let count = (duration.as_seconds_f64() * bps).ceil() as usize;
+        assert!(count < WAVE_MAX_BUCKETS);
+        let mut values = vec![0; count];
+        let halfway = count / 2;
+        values[halfway] = 211;
+        let wave = WaveformData::from_level0(values.clone(), samples);
+        let at = Ticks::from_seconds_f64(halfway as f64 / bps);
+        assert_eq!(wave.peaks(TimeRange::new(at, at + Ticks::from_seconds_f64(1.0 / bps)), 1), vec![Some(211)]);
+        let dir = tempfile::tempdir().unwrap();
+        let path = dir.path().join("long-wave.bin");
+        write_wave_file(&path, &values, samples).unwrap();
+        assert_eq!(read_wave_file(&path, duration), Some((values, samples)));
+        assert!(read_wave_file(&path, Ticks::from_seconds(1)).is_none());
     }
 
     #[test]

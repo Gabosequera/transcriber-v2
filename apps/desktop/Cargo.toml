@@ -16,6 +16,7 @@ tv2-domain = { path = "../../crates/domain" }
 tv2-application = { path = "../../crates/application" }
 tv2-media = { path = "../../crates/media" }
 tv2-v1compat = { path = "../../crates/v1compat" }
+tv2-control = { path = "../../crates/control" }
 eframe = { workspace = true }
 egui = { workspace = true }
 egui_extras = { workspace = true }

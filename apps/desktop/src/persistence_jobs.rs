@@ -14,7 +14,7 @@ pub struct PersistenceJob {
 }
 pub enum Completion {
     Open(Box<LoadedProject>),
-    Save { store: ProjectStore, journal_count: usize, warning: Option<DomainError> },
+    Save { store: ProjectStore, journal_count: usize, warning: Option<DomainError>, saved: Box<(Project, DurableHistory)> },
 }
 pub struct LoadedProject {
     store: ProjectStore,
@@ -33,9 +33,9 @@ pub fn load(store: ProjectStore) -> DomainResult<Completion> {
     let mut availability = std::collections::HashMap::new();
     session.refresh_asset_availability(|path| *availability.entry(path.to_string()).or_insert_with(|| std::path::Path::new(path).exists()));
     let recovery = recovery.map(|mut checkpoint| {
-        for asset in &mut checkpoint.project.assets {
-            asset.path = store.resolve_path(&asset.path).to_string_lossy().replace('\\', "/");
-        }
+        tv2_application::source_bundles::map_project_paths(&mut checkpoint.project, |path| {
+            store.resolve_path(path).to_string_lossy().replace('\\', "/")
+        });
         if let Some(history) = &mut checkpoint.history {
             history.map_paths(|path| store.resolve_path(path).to_string_lossy().replace('\\', "/"));
         }
@@ -53,10 +53,11 @@ pub fn save(
     recovery_root: Option<std::path::PathBuf>,
 ) -> DomainResult<Completion> {
     let journal_count = pending.len();
-    let mut events = if let Some(source) = source.filter(|s| s.root != store.root) { source.read_journal()? } else { vec![] };
-    events.extend(pending);
-    // A concurrent replacement of the source store must not mix foreign/future audit into Save As.
-    ProjectSession::with_audit(project.clone(), &events)?;
+    if let Some(source) = source.filter(|s| s.root != store.root) {
+        store.copy_audit_from(&source, &project.project_id, project.revision)?;
+    }
+    let events = pending;
+    store.materialize_source_bundles(&mut project, &mut history)?;
     for asset in &mut project.assets {
         asset.path = store.portable_path(std::path::Path::new(&asset.path));
     }
@@ -66,7 +67,7 @@ pub fn save(
         let marker = serde_json::json!({"saved_to":store.root,"revision":project.revision});
         tv2_application::store::atomic_write(&root.join("resolved.json"), marker.to_string().as_bytes()).err()
     });
-    Ok(Completion::Save { store, journal_count, warning })
+    Ok(Completion::Save { store, journal_count, warning, saved: Box::new((project, history)) })
 }
 
 impl TranscriptorApp {
@@ -93,6 +94,10 @@ impl TranscriptorApp {
                     self.report(warning);
                 }
                 self.session = session;
+                self.resolver.playing.set(Some(false));
+                if let Some(player) = &self.player {
+                    player.send(tv2_media::player::PlayerCommand::Pause);
+                }
                 self.recovery = None;
                 self.recovery_audit.clear();
                 self.recovery_history = None;
@@ -116,16 +121,18 @@ impl TranscriptorApp {
                 self.seek(tv2_domain::Ticks::ZERO);
                 self.toast(Severity::Info, format!("Proyecto «{}» abierto (revisión {})", self.project().name, self.session.revision()));
             }
-            Ok(Completion::Save { store, journal_count, warning }) => {
+            Ok(Completion::Save { store, journal_count, warning, saved }) => {
                 if let Some(warning) = warning {
                     self.report(warning.with_action("Guardado completo; el autosave antiguo seguirá apareciendo como recuperable"));
                 }
                 self.unsaved_store = None;
+                self.session.adopt_source_bundle_locations(&store, &saved.0, &saved.1);
                 self.session.acknowledge_save(job.revision, journal_count);
                 self.ui.last_project = Some(store.root.to_string_lossy().to_string());
                 self.toast(Severity::Info, format!("Revisión {} guardada en {}", job.revision, store.root.display()));
                 self.store = Some(store);
                 self.dirty_title = true;
+                self.resolved_revision = None;
             }
             Err(e) => {
                 self.close_after_save = false;

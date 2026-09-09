@@ -1,4 +1,38 @@
-# Incremento vigente — continuación 11, alpha.8
+# Matriz vigente — integración E2/E3/E4, continuación12
+
+Las siguientes filas describen implementación actual. Las comprobaciones exactas del último árbol están en [continuacion-12](evidence/continuacion-12.md). Ninguna fila declara aceptación GUI/multimedia ni habilita E5.
+
+| Requisitos | Resultado implementado | Verificación / aceptación |
+|---|---|---|
+| UI-02/03/04, MED-03 | Inspector persistente, paleta del registro, estados/razones de clips, preview preparado, snap/selección/autoscroll y cancelación | All-targets compila; interacción/foco/IME/DPI/gestos aplazados |
+| MED-01/02/04/05, PERF-01 | Relink cancelable, índices/composición en workers, seek/player pendientes, grafo idéntico conserva reloj; COW/certificados; waveform adaptativo | Núcleo application verifica COW/diff/protección; sincronía/decoding/cache real y recursos aplazados |
+| EXP-01/02/03 | Parámetros validados GUI/MCP, snapshot de composición, export durable, EDL/FCPXML representables | Compilado; no encoder, NLE ni multimedia ejecutados |
+| LAY-01/02/03/04, DAT-01 | Conversación, derivación/streams, contratos/passes, avisos y adopción legacy; import/export V1 y watchers individuales | Adaptadores/tests compilados; recorridos RUN sin ejecutar; protección/bloques en application |
+| DAT-02/03/04 | Save As portable, migración/codec, auditoría/recibos, recuperación/merge y undo | Fixtures application ejecutadas; crash físico y datos reales aplazados; límites declarados abajo |
+| AI-01/02/03/04 | Servicio MCP real, schemas/permisos, consultas/contexto/jobs, preview/apply/verify y eventos/cliente |17 tests iniciales control pasaron; posterior4551 bloqueado, nuevos tests solo compilados. Cliente contra GUI pendiente |
+| ML-01..03 | Fuera de alcance E2/E3/E4 | E5 no iniciada |
+
+---
+
+# Incremento vigente — continuación 12, durabilidad
+
+Las filas siguientes distinguen código implementado, evidencia del núcleo y aceptación. No cierran por sí solas una etapa completa ni sustituyen la revisión global de E2/E3/E4. E5 no se inicia. Los pendientes de las tablas inferiores describen checkpoints históricos.
+
+| Requisito | Implementación vigente | Evidencia | Aceptación / límites restantes |
+|---|---|---|---|
+| DAT-01 / DAT-04 | Save As materializa auxiliares SHA en el destino, conserva directorios vacíos y relocaliza proyecto/undo/redo. Copia archivo de auditoría y blobs referenciados | `source_bundles` y `storage_codec`: reapertura/export/undo con origen ausente o carpeta trasladada; corrupción rechazada | Portabilidad documental implementada y verificada sintéticamente; los medios y jobs de configuración no se vuelven portables automáticamente |
+| DAT-01 / DAT-04 | Enriquecer un master legado sin bundle exige documento completo/asset/digest idénticos; añade solo la carpeta original ausente y conserva capas/decisiones humanas | [Siete tests dirigidos](evidence/application-legacy-enrichment-12.log), incluidos dos nuevos: rechazo de reemplazos, recovery del enriquecimiento, undo/redo y Save As sin origen | Ya no exige crear otro proyecto para incorporar la fuente ausente; reimportar análisis diferente sigue prohibido. Recorrido GUI/V1 solo compilado |
+| DAT-02 / DAT-03 | `project/2` establece barrera de lector; legacy /1 migra al guardar con bases históricas coherentes. Validación de masters externos y rechazo de schemas/campos de almacenamiento desconocidos | Fixture legacy con historia/recibos, undo/redo/replay; tampering y descriptor forjado rechazados sin reescritura | Migración conocida implementada; no lectura de schemas futuros ni downgrade, crash físico pendiente |
+| DAT-02 / DAT-04 | Auditoría por segmentos inmutables e índice publicado bajo la intención; autosave apunta a su índice verificado. Paginación por digest y recibos fríos sin borrar claves | 10002 recibos, reapertura/retry, Save As, cursores obsoletos, corrupción y fronteras sintéticas | Archivado implementado; máximo 64 MiB por segmento/índice y metadato de recibo; índice por clave crece en RAM, sin GC de archivo |
+| DAT-02 / PERF-01 | Referencias de almacenamiento explícitas para masters/capas >64 KiB en proyecto, historia, autosave, commit, auditoría y recibos. SHA/tamaño/canonical antes de hidratar | Master y capa de 65 MiB conservan digest al reabrir; metadatos pequeños; colisiones escapadas y commit recuperado en cuatro fronteras | Superado el límite efectivo de esos payloads; metadatos project/autosave 64 MiB, history/intent 128 MiB, undo 200; no tamaño ilimitado del proyecto |
+| PERF-01 / DAT-04 | `SharedVec` comparte items entre snapshots, copia al mutar y conserva el JSON. Lectura reutiliza capas verificadas; escritura cachea la última versión por capa | 100000 items: clone/Agent rename/historia/undo/redo compartidos, mutación aislada; reapertura de 1000 items comparte proyecto/historia | Compartición implementada y verificada; COW por capa completa, `extra` sin COW, materialización del journal/recovery y costes JSON pendientes de optimización/medición |
+| PERF-01 / AI-03 | Diff precalculado dentro de `PreparedCommand`; preview y commit usan el mismo resumen. Certificados de validación exitosos por capa completa/duración, con igualdad exacta | Diff coincide en dry-run/commit/auditoría/recibo, incluso al subir revisión externa; metadata/base cambiadas e invariantes inválidas se rechazan con caché fría o caliente | Hasta 256 certificados, sin presupuesto en bytes; globals se revalidan siempre. Store/history/recovery y comandos específicos aún validan completamente |
+
+Evidencia final ejecutada: [application-continuacion-12-final.log](evidence/application-continuacion-12-final.log), **70 unitarios correctos (28,38 s) y tres tests de integración de bloques correctos (0,00 s)**, tras los cambios de diff/validación. El [log previo](evidence/application-continuacion-12.log) conserva los 68 anteriores y el fallo/corrección de fixture. No acredita ejecución de dominio/desktop/V1compat, GUI, multimedia, modelos ni pérdida real de energía. PERF-01 y la aceptación física permanecen abiertos; no presentar archivado, migración conocida o portabilidad de auxiliares como código todavía pendiente.
+
+---
+
+# Histórico — continuación 11, alpha.8
 
 | Requisito | Incremento implementado | Estado y límite |
 |---|---|---|

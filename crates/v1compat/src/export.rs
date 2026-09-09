@@ -104,7 +104,16 @@ pub fn montage_document(project: &Project, id: &SequenceId) -> V1Result<Value> {
         )?;
         project.assets.iter().find(|a| a.fingerprint.same_identity(&fp)).ok_or_else(|| invalid("Medio del montaje vacío no encontrado"))?
     };
-    crate::montaje::sequence_to_v1(sequence, &asset.fingerprint)
+    if sequence.extra.contains_key("v1_original_montage") {
+        crate::montaje::sequence_to_v1(sequence, &asset.fingerprint)
+    } else {
+        // Native single-source timelines can use the same strict inverse
+        // adapter. There is no fictitious historical montage: the empty origin
+        // is only the seed for allocating portable V1 IDs and validation.
+        let mut native = sequence.clone();
+        native.extra.insert("v1_original_montage".into(),serde_json::json!({"schema":"editorial-montaje/1","media":asset.fingerprint,"duration_source":asset.duration().as_seconds_ms(),"revision":0,"next_id":1,"tracks":[{"track_id":"V1","name":"V1"}],"clips":[],"tv2_native_source":true}));
+        crate::montaje::sequence_to_v1(&native, &asset.fingerprint)
+    }
 }
 
 #[cfg(test)]
@@ -191,7 +200,7 @@ mod tests {
         parent.extra.insert("evidence".into(), serde_json::json!({"word_id":"w1"}));
         let mut child = SemanticItem::new(TimeRange::new(Ticks::from_seconds(1), Ticks::from_seconds(2)), "child");
         child.parent_id = Some(parent.item_id.clone());
-        layer.items = vec![parent, child];
+        layer.items = vec![parent, child].into();
         let id = layer.layer_id.clone();
         project.layers.push(layer.clone());
         let raw = layer_document(&project, &id).unwrap();

@@ -112,7 +112,9 @@ pub(crate) fn prepare(base: &Project, local: &Project, external: &Project) -> Do
     prepare_with(base, local, external, false, None, false)
 }
 
-pub(crate) fn inspect(base: &Project, local: &Project, external: &Project) -> DomainResult<ExternalChange> {
+/// Inspect changes only. This does not authorize or apply edits; callers must
+/// prepare and commit the resolved result through the normal application gate.
+pub fn inspect(base: &Project, local: &Project, external: &Project) -> DomainResult<ExternalChange> {
     prepare_with(base, local, external, true, None, false)
 }
 

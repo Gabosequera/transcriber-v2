@@ -4,8 +4,12 @@
 mod app;
 mod author_ui;
 mod console;
+mod control_ui;
+mod conversation_ui;
 mod durable_exports;
 mod editorial_jobs;
+mod editorial_review;
+mod gesture_preview;
 #[cfg(test)]
 mod gesture_tests;
 mod import_jobs;
@@ -13,6 +17,7 @@ mod item_editor;
 mod keymap;
 mod paths;
 mod persistence_jobs;
+mod resolve_jobs;
 mod scripting;
 mod semantic_jobs;
 mod timeline_index;
@@ -20,6 +25,7 @@ mod ui_markers;
 mod ui_media;
 mod ui_panels;
 mod ui_timeline;
+mod v1_documents;
 mod watcher;
 
 use std::sync::Arc;

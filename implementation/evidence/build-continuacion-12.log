@@ -1,0 +1,10 @@
+   Compiling tv2-domain v2.0.0-alpha.9 (C:\Users\gabri\Todo\transcriber-v2\crates\domain)
+   Compiling tinyvec_macros v0.1.1
+   Compiling tinyvec v1.13.2
+   Compiling unicode-normalization v0.1.25
+   Compiling tv2-application v2.0.0-alpha.9 (C:\Users\gabri\Todo\transcriber-v2\crates\application)
+   Compiling tv2-media v2.0.0-alpha.9 (C:\Users\gabri\Todo\transcriber-v2\crates\media)
+   Compiling tv2-v1compat v2.0.0-alpha.9 (C:\Users\gabri\Todo\transcriber-v2\crates\v1compat)
+   Compiling tv2-control v2.0.0-alpha.9 (C:\Users\gabri\Todo\transcriber-v2\crates\control)
+   Compiling transcriptor v2.0.0-alpha.9 (C:\Users\gabri\Todo\transcriber-v2\apps\desktop)
+    Finished `release` profile [optimized + debuginfo] target(s) in 2m 32s

@@ -3827,6 +3827,21 @@ dependencies = [
 ]
 
 [[package]]
+name = "tinyvec"
+version = "1.13.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "4cf0ded5c4e56918d8f8a339e1bb67d038d3bc6d144ac407904015ba2e4cde9b"
+dependencies = [
+ "tinyvec_macros",
+]
+
+[[package]]
+name = "tinyvec_macros"
+version = "0.1.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "1f3ccbac311fea05f86f61904b462b55fb3df8837a366dfc601a0161d0532f20"
+
+[[package]]
 name = "toml"
 version = "1.1.5+spec-1.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3933,7 +3948,7 @@ dependencies = [
 
 [[package]]
 name = "transcriptor"
-version = "2.0.0-alpha.8"
+version = "2.0.0-alpha.9"
 dependencies = [
  "anyhow",
  "crossbeam-channel",
@@ -3950,6 +3965,7 @@ dependencies = [
  "tracing",
  "tracing-subscriber",
  "tv2-application",
+ "tv2-control",
  "tv2-domain",
  "tv2-media",
  "tv2-v1compat",
@@ -3964,7 +3980,7 @@ checksum = "d2df906b07856748fa3f6e0ad0cbaa047052d4a7dd609e231c4f72cee8c36f31"
 
 [[package]]
 name = "tv2-application"
-version = "2.0.0-alpha.8"
+version = "2.0.0-alpha.9"
 dependencies = [
  "hex",
  "serde",
@@ -3977,8 +3993,20 @@ dependencies = [
 ]
 
 [[package]]
+name = "tv2-control"
+version = "2.0.0-alpha.9"
+dependencies = [
+ "crossbeam-channel",
+ "serde",
+ "serde_json",
+ "tempfile",
+ "tv2-application",
+ "tv2-domain",
+]
+
+[[package]]
 name = "tv2-domain"
-version = "2.0.0-alpha.8"
+version = "2.0.0-alpha.9"
 dependencies = [
  "hex",
  "rand 0.10.2",
@@ -3990,7 +4018,7 @@ dependencies = [
 
 [[package]]
 name = "tv2-media"
-version = "2.0.0-alpha.8"
+version = "2.0.0-alpha.9"
 dependencies = [
  "cpal",
  "crossbeam-channel",
@@ -4008,7 +4036,7 @@ dependencies = [
 
 [[package]]
 name = "tv2-v1compat"
-version = "2.0.0-alpha.8"
+version = "2.0.0-alpha.9"
 dependencies = [
  "hex",
  "serde",
@@ -4019,6 +4047,7 @@ dependencies = [
  "tracing",
  "tv2-domain",
  "tv2-media",
+ "unicode-normalization",
 ]
 
 [[package]]
@@ -4070,6 +4099,15 @@ name = "unicode-ident"
 version = "1.0.24"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "e6e4313cd5fcd3dad5cafa179702e2b244f760991f45397d14d4ebf38247da75"
+
+[[package]]
+name = "unicode-normalization"
+version = "0.1.25"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "5fd4f6878c9cb28d874b009da9e8d183b5abc80117c40bbd187a1fde336be6e8"
+dependencies = [
+ "tinyvec",
+]
 
 [[package]]
 name = "unicode-segmentation"

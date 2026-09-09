@@ -278,7 +278,7 @@ fn fixture(kind: LayerKind) -> (ProjectSession, tv2_domain::LayerId) {
     let mut grandchild = SemanticItem::new(TimeRange::new(s(7), s(9)), "grandchild");
     grandchild.item_id = "grandchild".into();
     grandchild.parent_id = Some(child.item_id.clone());
-    layer.items = vec![grandchild, child, parent]; // deliberately not tree order
+    layer.items = vec![grandchild, child, parent].into(); // deliberately not tree order
     let id = layer.layer_id.clone();
     project.layers.push(layer);
     (ProjectSession::new(project), id)

@@ -36,6 +36,7 @@ pub struct PreparedExternal {
 }
 
 #[derive(serde::Serialize, serde::Deserialize)]
+#[serde(deny_unknown_fields)]
 struct CommitIntent {
     schema: String,
     before_digest: Option<String>,
@@ -43,9 +44,12 @@ struct CommitIntent {
     events: Vec<JournalEvent>,
     #[serde(default, with = "crate::history_codec::optional")]
     history: Option<crate::session::DurableHistory>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    audit: Option<crate::audit::AuditCommit>,
 }
 
 #[derive(serde::Serialize, serde::Deserialize)]
+#[serde(deny_unknown_fields)]
 struct AutosaveSnapshot {
     schema: String,
     project: Project,
@@ -54,6 +58,8 @@ struct AutosaveSnapshot {
     history: Option<crate::session::DurableHistory>,
     #[serde(default)]
     writer: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    audit: Option<crate::audit::AuditIndex>,
 }
 
 #[derive(Clone, Debug)]
@@ -119,10 +125,7 @@ impl ProjectStore {
         if let Some(history) = history {
             history.validate(project)?;
         }
-        let text = serde_json::to_string_pretty(project)? + "\n";
-        if text.len() as u64 > MAX_PROJECT_BYTES {
-            return Err(DomainError::invalid("proyecto supera el límite de 64 MiB"));
-        }
+        crate::source_bundles::verify_checkpoint(self, project, history)?;
         fs::create_dir_all(&self.root).map_err(|e| DomainError::io(format!("no se pudo crear {}: {e}", self.root.display())))?;
         // OS lock is released on process exit, including crashes. Cooperating
         // instances serialize compare-and-replace; arbitrary editors must also
@@ -144,13 +147,26 @@ impl ProjectStore {
                 .with_action("abre la versión externa o guarda tus cambios en otra carpeta"));
         }
         // Validate audit before publishing the intent, including duplicate IDs.
-        self.merged_journal(events)?;
+        let audit = if project.schema == PROJECT_SCHEMA {
+            Some(crate::audit::prepare(&self.root, events)?)
+        } else {
+            self.merged_journal(events)?;
+            None
+        };
+        let mut writer = crate::storage_codec::Writer::new(&self.root);
+        let shadow_project = writer.project(project)?;
+        let shadow_history = history.map(|history| writer.history(history)).transpose()?;
+        let storage = writer.used;
+        if serde_json::to_vec(&shadow_project)?.len() as u64 > MAX_PROJECT_BYTES {
+            return Err(DomainError::invalid("metadatos editables de proyecto superan 64 MiB"));
+        }
         let intent = CommitIntent {
-            schema: "transcriptor-commit/1".into(),
+            schema: if storage { "transcriptor-commit/2".into() } else { "transcriptor-commit/1".into() },
             before_digest: disk_digest,
-            project: project.clone(),
-            events: events.to_vec(),
-            history: history.cloned(),
+            project: shadow_project,
+            events: if audit.is_some() { Vec::new() } else { events.to_vec() },
+            history: shadow_history,
+            audit,
         };
         let bytes = serde_json::to_vec(&intent)?;
         if bytes.len() as u64 > MAX_PROJECT_BYTES * 2 {
@@ -182,7 +198,18 @@ impl ProjectStore {
         self.finish_pending()?;
         let project = self.load_unlocked()?;
         let history = self.load_history(&project)?;
-        let mut session = crate::ProjectSession::with_audit(project, &self.read_journal()?)?;
+        let mut session = crate::ProjectSession::new(project);
+        let snapshot = crate::audit::index(&self.root)?;
+        if session.project().schema == PROJECT_SCHEMA && snapshot.is_none() {
+            return Err(DomainError::invalid("proyecto /2 sin índice durable de auditoría"));
+        }
+        let mut ids = std::collections::HashSet::new();
+        crate::audit::visit(&self.root, snapshot.as_ref(), |event| {
+            if !ids.insert(event.command_id.clone()) {
+                return Err(DomainError::invalid("command_id duplicado en archivo de auditoría"));
+            }
+            session.restore_receipts(std::slice::from_ref(&event))
+        })?;
         if let Some(history) = history {
             session.restore_history(history)?;
         }
@@ -192,6 +219,7 @@ impl ProjectStore {
     fn load_unlocked(&self) -> DomainResult<Project> {
         let path = self.project_path();
         let project = Self::read_project(&path)?;
+        crate::source_bundles::verify_checkpoint(self, &project, None)?;
         *self.observed.lock().map_err(|_| DomainError::io("estado de persistencia no disponible"))? = Some(Self::digest(&project)?);
         *self.baseline.lock().map_err(|_| DomainError::io("baseline no disponible"))? = Some(project.clone());
         Ok(project)
@@ -213,10 +241,9 @@ impl ProjectStore {
         if Self::digest(&Self::read_project(&self.project_path())?)? != disk_digest {
             return Err(DomainError::new(tv2_domain::ErrorCode::ExternalConflict, "el archivo externo sigue cambiando; se volverá a leer"));
         }
+        crate::source_bundles::verify_checkpoint(self, &external, None)?;
         for p in [&mut base, &mut external] {
-            for a in &mut p.assets {
-                a.path = self.resolve_path(&a.path).to_string_lossy().replace('\\', "/");
-            }
+            crate::source_bundles::map_project_paths(p, |path| self.resolve_path(path).to_string_lossy().replace('\\', "/"));
         }
         let mut change = crate::reconcile::inspect(&base, local, &external)?;
         change.external_digest = disk_digest;
@@ -269,31 +296,64 @@ impl ProjectStore {
         if bytes.len() as u64 > MAX_PROJECT_BYTES * 2 {
             return Err(DomainError::invalid("intent demasiado grande"));
         }
-        let intent: CommitIntent = serde_json::from_slice(&bytes)?;
-        if intent.schema != "transcriptor-commit/1" {
+        let mut intent: CommitIntent = serde_json::from_slice(&bytes)?;
+        if !matches!(intent.schema.as_str(), "transcriptor-commit/1" | "transcriptor-commit/2") {
             return Err(DomainError::unsupported("schema de transacción desconocido"));
+        }
+        if intent.schema == "transcriptor-commit/2" {
+            let mut reader = crate::storage_codec::Reader::new(&self.root);
+            reader.project(&mut intent.project)?;
+            if let Some(history) = &mut intent.history {
+                reader.history(history)?;
+            }
         }
         intent.project.validate()?;
         if let Some(history) = &intent.history {
             history.validate(&intent.project)?;
         }
+        crate::source_bundles::verify_checkpoint(self, &intent.project, intent.history.as_ref())?;
         let next = Self::digest(&intent.project)?;
         let disk = if self.project_path().exists() { Some(Self::digest(&Self::read_project(&self.project_path())?)?) } else { None };
         if disk != intent.before_digest && disk.as_ref() != Some(&next) {
             return Err(DomainError::new(tv2_domain::ErrorCode::ExternalConflict, "el archivo cambió durante una transacción pendiente"));
         }
-        let journal = self.merged_journal(&intent.events)?;
-        let project_bytes = serde_json::to_vec_pretty(&intent.project)?;
+        let journal = if let Some(audit) = &intent.audit {
+            crate::audit::validate_commit(&self.root, audit)?;
+            None
+        } else if intent.project.schema == PROJECT_SCHEMA {
+            crate::audit::additions(&self.root, &intent.events)?;
+            None
+        } else {
+            Some(self.merged_journal(&intent.events)?)
+        };
+        let mut writer = crate::storage_codec::Writer::new(&self.root);
+        let shadow_project = writer.project(&intent.project)?;
+        let wire_project = if writer.used {
+            serde_json::json!({"schema":crate::storage_codec::PROJECT_STORAGE,"project":shadow_project})
+        } else {
+            serde_json::to_value(&shadow_project)?
+        };
+        let project_bytes = serde_json::to_vec_pretty(&wire_project)?;
         if project_bytes.len() as u64 > MAX_PROJECT_BYTES {
             return Err(DomainError::invalid("proyecto demasiado grande"));
         }
         if disk.as_ref() != Some(&next) {
             atomic_write(&self.project_path(), &project_bytes)?;
         }
-        atomic_write(&self.journal_path(), &journal)?;
+        if let Some(audit) = &intent.audit {
+            crate::audit::commit(&self.root, audit)?;
+        } else if let Some(journal) = journal {
+            atomic_write(&self.journal_path(), &journal)?;
+        } else {
+            crate::audit::publish(&self.root, &intent.events)?;
+        }
         // Publish under the same recoverable intent as project + audit.
         if let Some(history) = &intent.history {
-            atomic_write(&self.root.join("history.json"), &serde_json::to_vec(&crate::history_codec::encode(history)?)?)?;
+            let shadow_history = writer.history(history)?;
+            let compact = crate::history_codec::encode(&shadow_history)?;
+            let wire_history =
+                if writer.used { serde_json::json!({"schema":crate::storage_codec::HISTORY_STORAGE,"history":compact}) } else { compact };
+            atomic_write(&self.root.join("history.json"), &serde_json::to_vec(&wire_history)?)?;
         } else if self.root.join("history.json").exists() {
             fs::remove_file(self.root.join("history.json"))?;
         }
@@ -311,8 +371,19 @@ impl ProjectStore {
         if bytes.len() as u64 > MAX_PROJECT_BYTES * 2 {
             return Err(DomainError::invalid("historial supera 128 MiB"));
         }
-        let history = crate::history_codec::decode(serde_json::from_slice(&bytes)?)?;
+        let mut raw: serde_json::Value = serde_json::from_slice(&bytes)?;
+        let storage = raw["schema"] == crate::storage_codec::HISTORY_STORAGE;
+        if storage {
+            raw = crate::storage_codec::unwrap_envelope(&mut raw, "history")?;
+        }
+        let mut history = crate::history_codec::decode(raw)?;
+        if storage {
+            let mut reader = crate::storage_codec::Reader::new(&self.root);
+            reader.seed_project(project);
+            reader.history(&mut history)?;
+        }
         history.validate(project)?;
+        crate::source_bundles::verify_checkpoint(self, project, Some(&history))?;
         Ok(Some(history))
     }
 
@@ -354,11 +425,20 @@ impl ProjectStore {
         }
         let text = std::str::from_utf8(&bytes).map_err(|_| DomainError::invalid("proyecto no es UTF-8 válido"))?;
         let text = text.strip_prefix('\u{feff}').unwrap_or(text);
-        let project: Project =
+        let mut raw: serde_json::Value =
             serde_json::from_str(text).map_err(|e| DomainError::invalid(format!("{} no es un proyecto válido: {e}", path.display())))?;
-        if project.schema != PROJECT_SCHEMA {
-            return Err(DomainError::unsupported(format!("schema de proyecto desconocido: {}", project.schema))
+        let storage = raw["schema"] == crate::storage_codec::PROJECT_STORAGE;
+        if storage {
+            raw = crate::storage_codec::unwrap_envelope(&mut raw, "project")?;
+        }
+        if !matches!(raw["schema"].as_str(), Some(PROJECT_SCHEMA | tv2_domain::project::LEGACY_PROJECT_SCHEMA)) {
+            return Err(DomainError::unsupported(format!("schema de proyecto desconocido: {}", raw["schema"]))
                 .with_action(format!("este editor entiende {PROJECT_SCHEMA}")));
+        }
+        let mut project: Project =
+            serde_json::from_value(raw).map_err(|e| DomainError::invalid(format!("{} no es un proyecto válido: {e}", path.display())))?;
+        if storage {
+            crate::storage_codec::Reader::new(path.parent().ok_or_else(|| DomainError::invalid("proyecto sin carpeta"))?).project(&mut project)?;
         }
         project.validate()?;
         Ok(project)
@@ -383,6 +463,7 @@ impl ProjectStore {
         if let Some(history) = history {
             history.validate(project)?;
         }
+        crate::source_bundles::verify_checkpoint(self, project, history)?;
         fs::create_dir_all(&self.root)?;
         let lock = fs::OpenOptions::new().read(true).write(true).create(true).truncate(false).open(self.root.join(".write.lock"))?;
         lock.try_lock().map_err(|e| DomainError::new(tv2_domain::ErrorCode::ExternalConflict, format!("otro escritor usa el proyecto: {e}")))?;
@@ -407,16 +488,28 @@ impl ProjectStore {
                 ));
             }
         }
-        let bytes = self.merged_journal(pending)?;
-        let events =
-            bytes.split(|b| *b == b'\n').filter(|line| !line.is_empty()).map(serde_json::from_slice).collect::<Result<Vec<JournalEvent>, _>>()?;
+        let mut audit = crate::audit::index(&self.root)?;
+        let mut events = if audit.is_some() {
+            crate::audit::additions(&self.root, pending)?
+        } else {
+            let bytes = self.merged_journal(pending)?;
+            bytes.split(|b| *b == b'\n').filter(|line| !line.is_empty()).map(serde_json::from_slice).collect::<Result<Vec<JournalEvent>, _>>()?
+        };
         crate::ProjectSession::with_audit(project.clone(), &events)?;
+        if audit.is_some() {
+            audit = Some(crate::audit::prepare(&self.root, &events)?.after);
+            events.clear();
+        }
+        let mut writer = crate::storage_codec::Writer::new(&self.root);
+        let shadow_project = writer.project(project)?;
+        let shadow_history = history.map(|history| writer.history(history)).transpose()?;
         let snapshot = AutosaveSnapshot {
-            schema: "transcriptor-autosave/1".into(),
-            project: project.clone(),
+            schema: if writer.used { "transcriptor-autosave/2".into() } else { "transcriptor-autosave/1".into() },
+            project: shadow_project,
             events,
-            history: history.cloned(),
+            history: shadow_history,
             writer: Some(self.writer.clone()),
+            audit,
         };
         let bytes = serde_json::to_vec(&snapshot)?;
         if bytes.len() as u64 > MAX_PROJECT_BYTES {
@@ -442,16 +535,33 @@ impl ProjectStore {
             return Err(DomainError::invalid("autosave supera 64 MiB"));
         }
         let raw: serde_json::Value = serde_json::from_slice(&bytes)?;
-        let (candidate, events, history) = if raw["schema"] == "transcriptor-autosave/1" {
-            let snapshot: AutosaveSnapshot = serde_json::from_value(raw)?;
+        let (candidate, events, history) = if matches!(raw["schema"].as_str(), Some("transcriptor-autosave/1" | "transcriptor-autosave/2")) {
+            let mut snapshot: AutosaveSnapshot = serde_json::from_value(raw)?;
+            if snapshot.schema == "transcriptor-autosave/2" {
+                let mut reader = crate::storage_codec::Reader::new(&self.root);
+                reader.seed_project(saved);
+                reader.project(&mut snapshot.project)?;
+                if let Some(history) = &mut snapshot.history {
+                    reader.history(history)?;
+                }
+            }
             if let Some(history) = &snapshot.history {
                 history.validate(&snapshot.project)?;
             }
-            (snapshot.project, snapshot.events, snapshot.history)
+            let mut events = Vec::new();
+            if let Some(index) = &snapshot.audit {
+                crate::audit::visit(&self.root, Some(index), |event| {
+                    events.push(event);
+                    Ok(())
+                })?;
+            }
+            events.extend(snapshot.events);
+            (snapshot.project, events, snapshot.history)
         } else {
             (Self::read_project(&path)?, vec![], None)
         };
         candidate.validate()?;
+        crate::source_bundles::verify_checkpoint(self, &candidate, history.as_ref())?;
         crate::ProjectSession::with_audit(candidate.clone(), &events)?;
         if candidate.project_id != saved.project_id || candidate.revision <= saved.revision {
             return Ok(None);
@@ -467,11 +577,23 @@ impl ProjectStore {
         let lock = fs::OpenOptions::new().read(true).write(true).create(true).truncate(false).open(self.root.join(".write.lock"))?;
         lock.try_lock().map_err(|e| DomainError::io(format!("proyecto ocupado: {e}")))?;
         self.finish_pending()?;
-        atomic_write(&self.journal_path(), &self.merged_journal(events)?)?;
+        if self.project_path().exists() && Self::read_project(&self.project_path())?.schema == PROJECT_SCHEMA {
+            crate::audit::publish(&self.root, events)?;
+        } else {
+            atomic_write(&self.journal_path(), &self.merged_journal(events)?)?;
+        }
         Ok(())
     }
 
     pub fn read_journal(&self) -> DomainResult<Vec<JournalEvent>> {
+        if let Some(index) = crate::audit::index(&self.root)? {
+            let mut events = Vec::new();
+            crate::audit::visit(&self.root, Some(&index), |event| {
+                events.push(event);
+                Ok(())
+            })?;
+            return Ok(events);
+        }
         let path = self.journal_path();
         if !path.is_file() {
             return Ok(Vec::new());
@@ -495,6 +617,37 @@ impl ProjectStore {
         Ok(out)
     }
 
+    /// Bounded audit queries. Cursors bind to the index digest; appending new
+    /// events requires restarting the query instead of silently skipping records.
+    pub fn journal_page(&self, cursor: Option<&str>, limit: usize) -> DomainResult<crate::audit::JournalPage> {
+        let _lock = self.read_lock()?;
+        self.finish_pending()?;
+        crate::audit::page(&self.root, cursor, limit)
+    }
+
+    /// Save As can transfer archived audit without collecting every past event
+    /// in RAM or embedding it again in the project commit intent.
+    pub fn copy_audit_from(&self, source: &ProjectStore, project_id: &str, revision: u64) -> DomainResult<()> {
+        if self.root == source.root {
+            return Ok(());
+        }
+        let _source_lock = source.read_lock()?;
+        source.finish_pending()?;
+        let saved = Self::read_project(&source.project_path())?;
+        if saved.project_id != project_id || saved.revision > revision {
+            return Err(DomainError::precondition("la auditoría de origen pertenece a otro proyecto o revisión futura"));
+        }
+        if source.observed.lock().map_err(|_| DomainError::io("baseline no disponible"))?.as_ref() != Some(&Self::digest(&saved)?) {
+            return Err(DomainError::precondition("el proyecto de origen cambió antes de copiar auditoría"));
+        }
+        fs::create_dir_all(&self.root)?;
+        let _target_lock = self.read_lock()?;
+        if self.project_path().exists() || self.root.join(PENDING_FILE).exists() {
+            return Err(DomainError::precondition("solo se copia auditoría a un proyecto nuevo"));
+        }
+        crate::audit::copy_to(&source.root, &self.root)
+    }
+
     /// Ruta portable relativa a la carpeta del proyecto si es posible.
     pub fn portable_path(&self, path: &Path) -> String {
         let rel = self.root.parent().and_then(|base| path.strip_prefix(base).ok());
@@ -504,6 +657,9 @@ impl ProjectStore {
 
     /// Resuelve una ruta portable guardada en el proyecto.
     pub fn resolve_path(&self, portable: &str) -> PathBuf {
+        if let Some(relative) = portable.strip_prefix("@project/") {
+            return self.root.join(relative);
+        }
         let p = PathBuf::from(portable);
         if p.is_absolute() { p } else { self.root.parent().map(|b| b.join(&p)).unwrap_or(p) }
     }
@@ -541,6 +697,49 @@ pub fn atomic_write(path: &Path, bytes: &[u8]) -> DomainResult<()> {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn staged_audit_commit_recovers_project_index_and_history_boundaries() {
+        for boundary in 0..=3 {
+            let temp = tempfile::tempdir().unwrap();
+            let store = ProjectStore::at(temp.path());
+            let before = Project::new("before");
+            store.save(&before).unwrap();
+            let mut live = crate::ProjectSession::new(before.clone());
+            live.execute(crate::CommandEnvelope::human(tv2_domain::Command::RenameProject { name: "after".into() }).with_idempotency("once"))
+                .unwrap();
+            let plan = crate::audit::prepare(&store.root, live.pending_journal()).unwrap();
+            let intent = CommitIntent {
+                schema: "transcriptor-commit/1".into(),
+                before_digest: Some(ProjectStore::digest(&before).unwrap()),
+                project: live.project().clone(),
+                events: Vec::new(),
+                history: Some(live.history_snapshot()),
+                audit: Some(plan),
+            };
+            atomic_write(&store.root.join(PENDING_FILE), &serde_json::to_vec(&intent).unwrap()).unwrap();
+            if boundary >= 1 {
+                atomic_write(&store.project_path(), &serde_json::to_vec(&intent.project).unwrap()).unwrap();
+            }
+            if boundary >= 2 {
+                crate::audit::commit(&store.root, intent.audit.as_ref().unwrap()).unwrap();
+            }
+            if boundary >= 3 {
+                atomic_write(
+                    &store.root.join("history.json"),
+                    &serde_json::to_vec(&crate::history_codec::encode(intent.history.as_ref().unwrap()).unwrap()).unwrap(),
+                )
+                .unwrap();
+            }
+            let mut restored = ProjectStore::at(temp.path()).load_session().unwrap();
+            assert_eq!(restored.project().name, "after");
+            assert!(restored.command_receipt("once").unwrap().is_some());
+            assert_eq!(store.read_journal().unwrap().len(), 1);
+            restored.undo(crate::Actor::Human).unwrap();
+            assert_eq!(restored.project().name, "before");
+            assert!(!store.root.join(PENDING_FILE).exists());
+        }
+    }
 
     #[test]
     fn autosave_publishes_audit_and_receipts_with_content_and_recovers_once() {
@@ -678,6 +877,7 @@ mod tests {
                 project: next.clone(),
                 events: session.pending_journal().to_vec(),
                 history: Some(session.history_snapshot()),
+                audit: None,
             };
             atomic_write(&store.root.join(PENDING_FILE), &serde_json::to_vec(&intent).unwrap()).unwrap();
             if boundary >= 1 {
@@ -704,6 +904,67 @@ mod tests {
             atomic_write(&store.project_path(), &serde_json::to_vec(&external).unwrap()).unwrap();
             assert_eq!(reopened.load().unwrap_err().code, tv2_domain::ErrorCode::ExternalConflict);
             assert_eq!(ProjectStore::read_project(&store.project_path()).unwrap(), external);
+        }
+    }
+
+    #[test]
+    fn storage_commit_recovers_shadow_history_and_audit_at_every_boundary() {
+        for boundary in 0..4 {
+            let dir = tempfile::tempdir().unwrap();
+            let store = ProjectStore::at(dir.path());
+            let mut old = Project::new("old");
+            let asset = tv2_domain::commands::tests_support::fake_video("a", 30);
+            old.assets.push(asset.clone());
+            store.save(&old).unwrap();
+            let document: tv2_domain::evidence::EvidenceDocument = serde_json::json!({"schema":"editorial-master/1","media":{"fingerprint":asset.fingerprint,"duration":30.0},"tracks":{},"opaque_analysis":"x".repeat(100*1024)}).into();
+            let master = tv2_domain::evidence::MasterEvidence {
+                asset_id: asset.id,
+                source_digest: document.source_digest().into(),
+                document,
+                source_bundle: None,
+            };
+            let request = crate::CommandEnvelope::human(tv2_domain::Command::AttachMaster { master }).with_idempotency("pending-storage");
+            let mut session = crate::ProjectSession::new(old.clone());
+            session.execute(request.clone()).unwrap();
+            let audit = crate::audit::prepare(&store.root, session.pending_journal()).unwrap();
+            let mut writer = crate::storage_codec::Writer::new(&store.root);
+            let project = writer.project(session.project()).unwrap();
+            let history = writer.history(&session.history_snapshot()).unwrap();
+            let intent = CommitIntent {
+                schema: "transcriptor-commit/2".into(),
+                before_digest: Some(ProjectStore::digest(&old).unwrap()),
+                project,
+                events: Vec::new(),
+                history: Some(history),
+                audit: Some(audit),
+            };
+            atomic_write(&store.root.join(PENDING_FILE), &serde_json::to_vec(&intent).unwrap()).unwrap();
+            if boundary >= 1 {
+                atomic_write(
+                    &store.project_path(),
+                    &serde_json::to_vec(&serde_json::json!({"schema":crate::storage_codec::PROJECT_STORAGE,"project":intent.project})).unwrap(),
+                )
+                .unwrap();
+            }
+            if boundary >= 2 {
+                crate::audit::commit(&store.root, intent.audit.as_ref().unwrap()).unwrap();
+            }
+            if boundary >= 3 {
+                let history = crate::history_codec::encode(intent.history.as_ref().unwrap()).unwrap();
+                atomic_write(
+                    &store.root.join("history.json"),
+                    &serde_json::to_vec(&serde_json::json!({"schema":crate::storage_codec::HISTORY_STORAGE,"history":history})).unwrap(),
+                )
+                .unwrap();
+            }
+            let reopened = ProjectStore::at(dir.path());
+            let mut restored = reopened.load_session().unwrap();
+            assert_eq!(restored.project(), session.project());
+            assert!(restored.execute(request).unwrap().replayed);
+            restored.undo(crate::Actor::Human).unwrap();
+            assert!(restored.project().masters.is_empty());
+            assert_eq!(reopened.read_journal().unwrap().len(), 1);
+            assert!(!store.root.join(PENDING_FILE).exists());
         }
     }
 
