@@ -165,9 +165,13 @@ pub fn to_v1(layer: &SemanticLayer, asset: &Asset) -> V1Result<Value> {
 
 /// Explicit candidates only. Never load application configuration or mutate the V1 store.
 pub fn select(candidates: &[Value], asset: &Asset) -> V1Result<Option<SemanticLayer>> {
+    let highest = candidates.iter().filter_map(|v| v["revision"].as_u64()).max();
     let mut chosen: Option<(SemanticLayer, &Value)> = None;
     for raw in candidates {
         let layer = from_v1(raw, asset)?;
+        if Some(layer.revision) != highest {
+            continue;
+        }
         if let Some((old, old_raw)) = &chosen {
             if old.revision == layer.revision && *old_raw != raw {
                 return Err(invalid("conflicto de marcas: misma revisión con contenido distinto; elige un candidato explícitamente"));

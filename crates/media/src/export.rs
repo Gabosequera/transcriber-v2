@@ -243,7 +243,7 @@ pub fn availability(tools: &FfmpegTools, preset: &ExportPreset) -> Result<(), St
     Ok(())
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct ExportRequest {
     pub timeline: Arc<ResolvedTimeline>,
     pub assets: Arc<HashMap<AssetId, AssetSource>>,

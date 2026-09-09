@@ -430,7 +430,12 @@ pub fn draw(app: &mut TranscriptorApp, ui: &mut egui::Ui) {
     // progreso del gesto
     if let Some(p) = pointer {
         let dragging = primary_down;
-        if dragging && matches!(app.timeline_view.gesture, Gesture::MoveClips { .. } | Gesture::TrimClip { .. } | Gesture::Scrub) {
+        if dragging
+            && matches!(
+                app.timeline_view.gesture,
+                Gesture::MoveClips { .. } | Gesture::TrimClip { .. } | Gesture::Scrub | Gesture::EditItems { .. } | Gesture::BoxEdit { .. }
+            )
+        {
             let direction = if p.x > rect.right() - 20.0 {
                 1.0
             } else if p.x < x0 + 20.0 {
@@ -444,7 +449,9 @@ pub fn draw(app: &mut TranscriptorApp, ui: &mut egui::Ui) {
                 app.timeline_view.scroll_t =
                     (before + Ticks::from_seconds_f64((direction * 300.0 * dt / app.timeline_view.px_per_s) as f64)).max(Ticks::ZERO);
                 let px = (app.timeline_view.scroll_t - before).as_seconds_f64() as f32 * app.timeline_view.px_per_s;
-                if let Gesture::MoveClips { origin, .. } = &mut app.timeline_view.gesture {
+                if let Gesture::MoveClips { origin, .. } | Gesture::EditItems { origin, .. } | Gesture::BoxEdit { origin, .. } =
+                    &mut app.timeline_view.gesture
+                {
                     origin.x -= px;
                 }
                 ui.ctx().request_repaint_after(std::time::Duration::from_millis(16));

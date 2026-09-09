@@ -10,7 +10,7 @@ members = [
 default-members = ["apps/desktop"]
 
 [workspace.package]
-version = "2.0.0-alpha.6"
+version = "2.0.0-alpha.7"
 edition = "2024"
 rust-version = "1.98"
 license-file = "LICENSE.md"
@@ -18,7 +18,7 @@ authors = ["Gabriel Sequera"]
 repository = "https://github.com/Gabosequera/transcriber-v2"
 
 [workspace.dependencies]
-serde = { version = "1.0.229", features = ["derive"] }
+serde = { version = "1.0.229", features = ["derive", "rc"] }
 serde_json = { version = "1.0.151", features = ["preserve_order"] }
 thiserror = "2.0.20"
 anyhow = "1.0.104"

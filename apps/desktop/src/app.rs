@@ -109,7 +109,7 @@ pub struct ExportState {
     pub range_mode: usize, // 0 todo, 1 IN/OUT, 2 clips, 3 items/bloques
     pub running: Option<RunningExport>,
     pub last_result: Option<Result<ExportResult, DomainError>>,
-    pub pending: VecDeque<ExportRequest>,
+    pub pending: VecDeque<crate::durable_exports::QueuedExport>,
     pub history: Vec<(PathBuf, u64, Result<ExportResult, DomainError>)>,
 }
 
@@ -158,9 +158,15 @@ pub struct TranscriptorApp {
     pub console_filter: tracing::Level,
     pub _console_sink: ConsoleSink,
     pub export: ExportState,
+    pub export_jobs_scanned: bool,
+    pub export_jobs_scan: Option<crate::durable_exports::RecoveryScan>,
+    pub export_jobs_recovery: Vec<tv2_application::jobs::JobRecord<crate::durable_exports::ExportPayload>>,
+    pub export_jobs_open: bool,
     pub imports: crate::import_jobs::ImportJobs,
     pub editorial_job: Option<crate::editorial_jobs::EditorialJob>,
     pub semantic_job: Option<crate::semantic_jobs::SemanticJob>,
+    pub author_scan: Option<crate::author_ui::AuthorScan>,
+    pub author_review: Option<crate::author_ui::AuthorReview>,
     pub timeline_view: crate::ui_timeline::TimelineView,
     pub resolved: Arc<ResolvedTimeline>,
     pub resolved_revision: Option<(u64, ViewMode, Option<AssetId>)>,
@@ -183,6 +189,7 @@ pub struct TranscriptorApp {
     pub autosave_job: Option<crossbeam_channel::Receiver<tv2_domain::error::DomainResult<()>>>,
     pub persistence_job: Option<crate::persistence_jobs::PersistenceJob>,
     pub external: crate::external::ExternalMonitor,
+    pub external_apply: Option<crate::external::ExternalApply>,
     pub unsaved_recoveries: Vec<PathBuf>,
     pub(crate) unsaved_store: Option<ProjectStore>,
     pub source_asset: Option<AssetId>,
@@ -277,6 +284,12 @@ impl TranscriptorApp {
             imports: Default::default(),
             editorial_job: None,
             semantic_job: None,
+            author_scan: None,
+            author_review: None,
+            export_jobs_scanned: false,
+            export_jobs_scan: None,
+            export_jobs_recovery: Vec::new(),
+            export_jobs_open: false,
             export: ExportState {
                 open: false,
                 preset_idx: 1,
@@ -315,6 +328,7 @@ impl TranscriptorApp {
             persistence_job: None,
             v1_export_job: None,
             external: Default::default(),
+            external_apply: None,
             unsaved_recoveries: Self::find_unsaved_recoveries(),
             unsaved_store: None,
             source_asset: None,
@@ -660,15 +674,42 @@ impl TranscriptorApp {
         }
     }
     pub fn accept_external(&mut self) {
+        if self.external_apply.is_some() {
+            return;
+        }
         if let (Some(store), Some(change)) = (self.store.clone(), self.external.change.take()) {
-            match store.accept_external(&mut self.session, change) {
-                Ok(()) => {
-                    self.external = Default::default();
-                    self.after_change();
-                    self.toast(Severity::Info, "Cambio externo aplicado; disponible en Deshacer");
-                }
-                Err(e) => self.report(e),
+            let project = self.project().clone();
+            let worker = store.clone();
+            let (tx, result) = crossbeam_channel::bounded(1);
+            match std::thread::Builder::new().name("external-apply-prepare".into()).spawn(move || {
+                let _ = tx.send(worker.prepare_external(&project, change));
+            }) {
+                Ok(_) => self.external_apply = Some(crate::external::ExternalApply { store, result }),
+                Err(e) => self.report(e.into()),
             }
+        }
+    }
+
+    fn poll_external_apply(&mut self) {
+        let Some(job) = &self.external_apply else {
+            return;
+        };
+        let result = match job.result.try_recv() {
+            Ok(r) => r,
+            Err(crossbeam_channel::TryRecvError::Empty) => return,
+            Err(_) => Err(DomainError::process("Preparación externa interrumpida")),
+        };
+        let job = self.external_apply.take().unwrap();
+        if self.store.as_ref().is_none_or(|s| s.root != job.store.root) {
+            return;
+        }
+        match result.and_then(|prepared| job.store.commit_external(&mut self.session, prepared)) {
+            Ok(()) => {
+                self.external = Default::default();
+                self.after_change();
+                self.toast(Severity::Info, "Cambio externo aplicado; disponible en Deshacer");
+            }
+            Err(e) => self.report(e),
         }
     }
 
@@ -861,6 +902,9 @@ impl TranscriptorApp {
         } else {
             self.after_change();
             self.source_asset = Some(asset.id.clone());
+            if !import.author_candidates.is_empty() {
+                self.author_review = Some(crate::author_ui::AuthorReview::new(self.project(), asset.clone(), import.author_candidates.clone()));
+            }
             self.resolved_revision = None;
             let r = &import.report;
             self.toast(
@@ -2032,7 +2076,16 @@ impl TranscriptorApp {
             destination: dest.clone(),
             project_revision: self.session.revision(),
         };
-        self.export.pending.push_back(req);
+        let fingerprints =
+            self.project().assets.iter().filter(|a| req.assets.contains_key(&a.id)).map(|a| (a.id.clone(), a.fingerprint.clone())).collect();
+        let payload = crate::durable_exports::ExportPayload { request: req, fingerprints };
+        match crate::durable_exports::QueuedExport::new(crate::durable_exports::root(), self.project().project_id.clone(), payload) {
+            Ok(job) => self.export.pending.push_back(job),
+            Err(e) => {
+                self.report(e.into());
+                return;
+            }
+        }
         self.launch_next_export();
         self.toast(Severity::Info, "Exportación añadida a la cola (revisión congelada)");
     }
@@ -2040,6 +2093,17 @@ impl TranscriptorApp {
     fn launch_next_export(&mut self) {
         if self.export.running.is_some() {
             return;
+        }
+        if let Some(front) = self.export.pending.front_mut() {
+            match front.ready() {
+                None => return,
+                Some(Ok(())) => {}
+                Some(Err(e)) => {
+                    self.export.pending.pop_front();
+                    self.report(e);
+                    return;
+                }
+            }
         }
         let Some(req) = self.export.pending.pop_front() else {
             return;
@@ -2057,7 +2121,7 @@ impl TranscriptorApp {
         let (tx, rx) = crossbeam_channel::bounded(1);
         let (p2, c2) = (progress.clone(), cancel.clone());
         let spawned = std::thread::Builder::new().name("export".into()).spawn(move || {
-            let r = tv2_media::export::ExportJob::run(&tools, &req, &c2, |p| *p2.lock() = p);
+            let r = req.run(&tools, &c2, |p| *p2.lock() = p);
             let _ = tx.send(r);
         });
         match spawned {
@@ -2076,14 +2140,18 @@ impl TranscriptorApp {
     pub fn cancel_queued_export(&mut self, index: usize) {
         if let Some(req) = self.export.pending.remove(index) {
             self.export.history.push((
-                req.destination,
+                req.destination.clone(),
                 req.project_revision,
                 Err(DomainError::new(tv2_domain::error::ErrorCode::Cancelled, "Cancelado antes de iniciar")),
             ));
+            if let Err(e) = req.cancel() {
+                self.report(e.into());
+            }
         }
     }
 
     fn poll_export(&mut self) {
+        self.poll_export_recovery();
         let done = self.export.running.as_ref().and_then(|r| match r.rx.try_recv() {
             Ok(result) => Some(result),
             Err(crossbeam_channel::TryRecvError::Empty) => None,
@@ -2248,6 +2316,8 @@ impl eframe::App for TranscriptorApp {
         self.poll_v1_export();
         self.poll_persistence();
         self.poll_semantic();
+        self.poll_author();
+        self.poll_external_apply();
         if self.close_after_save && self.persistence_job.is_none() && !self.session.is_dirty() {
             self.close_after_save = false;
             self.pending_close = false;
@@ -2307,6 +2377,10 @@ impl eframe::App for TranscriptorApp {
             || self.persistence_job.is_some()
             || self.editorial_job.is_some()
             || self.semantic_job.is_some()
+            || self.author_scan.is_some()
+            || self.export_jobs_scan.is_some()
+            || self.external_apply.is_some()
+            || !self.export.pending.is_empty()
             || self.player_snapshot.playing
             || self.export.running.is_some()
             || !self.toasts.is_empty()

@@ -1434,7 +1434,11 @@ impl Command {
                             incoming.deleted_item_ids.push(d);
                         }
                     }
-                    incoming.revision = existing.revision.checked_add(1).ok_or_else(|| DomainError::out_of_range("revisión de capa agotada"))?;
+                    incoming.revision = existing
+                        .revision
+                        .max(incoming.revision)
+                        .checked_add(1)
+                        .ok_or_else(|| DomainError::out_of_range("revisión de capa agotada"))?;
                 }
                 validate_layer(&incoming, duration)?;
                 let id = incoming.layer_id.clone();

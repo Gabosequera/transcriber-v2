@@ -1,4 +1,12 @@
-# Checkpoint alpha.6 — continuación 9
+# Publicación en preparación — continuación 10, alpha.7
+
+Checkpoint de fuentes autorizado por el encargo vigente. 45 application tests ejecutados/pasan; V1compat bloqueado Windows 4551 antes de ejecutarse, sin reintento. Clippy/all-targets, check, fmt y build release en evidence/continuacion-10.md y logs. Ejecutable no lanzado, sin paquete binario nuevo aceptado.
+
+**E2 abierta/E3 parcial/E4 pendiente/E5 no iniciada.** La publicación no equivale a finalización del objetivo. Estado remoto se registra en evidence/publication-alpha7.json después de verificar release y tag. Notas: evidence/release-notes-alpha7.md.
+
+---
+
+# Checkpoint histórico alpha.6 — continuación 9
 
 Publicación verificada: [v2.0.0-alpha.6](https://github.com/Gabosequera/transcriber-v2/releases/tag/v2.0.0-alpha.6), código/tag `48784e6ef9a6cfb1c13fcee1e82a1f0989f98a7b`. Prerelease no draft, sin assets binarios; tag y código main confirmados en remoto. Evidencia en `implementation/evidence/publication-alpha6.json`. 60 tests dirigidos, check/Clippy/formato/build release correctos; sin ejecución física ni cierre de E2/E3/E4.
 

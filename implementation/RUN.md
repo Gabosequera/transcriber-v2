@@ -1,3 +1,18 @@
+# Continuación 10 — procedimientos preparados (no ejecutar hasta levantar el aplazamiento físico)
+
+Fuentes alpha.7. Controles permitidos: wrapper `scripts/cargo.ps1`; application tests, check, Clippy/all-targets y formato. **No ejecutar ni reintentar tests V1compat, dominio o desktop bloqueados por Windows 4551.** Las instrucciones históricas de tests desktop debajo no son autorización vigente para ejecutarlos.
+
+- Marcas: importar un medio de fixture aislada, Archivo → Buscar y resolver marcas del autor. Descubrimiento junto al medio y stores V1. `TRANSCRIPTOR_V1_MARKS_STORE` elige el store directamente; `TRANSCRIPTOR_ROOT`/`TRANSCRIPTOR_SHARED_DIR` replican instalación administrada V1; `TRANSCRIPTOR_V1_DIR` sirve para un checkout V1 de solo lectura. Sin override se busca un hermano `transcriber/marcas_store` relativo al ejecutable. Para aceptación, usar siempre un store sintético dentro de V2. Preparar dos documentos con la misma identidad, revisión igual/contenido distinto; comprobar elección requerida, datos actuales/candidato, adopción/undo. Cambiar el archivo durante la revisión y comprobar rechazo por digest. No reasociar identidad ajena automáticamente.
+- Caja/arrastre semántico: en Fuente y Secuencia, acercar cursor a ambos bordes mientras B+arrastre o Ctrl+arrastre; verificar que el origen temporal permanece fijo, Escape cancela y release genera un solo undo. En Secuencia caja sigue limitada a una ocurrencia; usar Fuente al cruzar saltos.
+- Montaje: importar fixture V1, recortar/mover/repetir piezas con A/V enlazado manteniendo secuencia contigua; Archivo → Exportar montaje a JSON V1. Verificar clips originales desactivados con estado anterior, nuevos IDs/procedencia y mapping visible. Volver a importar y comparar tiempos; comparar medios solo cuando se autorice. Efectos, audio independiente, overlays, gaps y submilisegundo deben mostrar rechazo explícito.
+- Reconciliación: trabajar sobre `.transcriptor` sintético. Editar project.json desde otro editor con cambios independientes y dos campos divergentes. El watcher debe despertar lectura estable; comprobar diff de campos y una elección por conflicto. Sin autorizar decisiones humanas, sus modificaciones se rechazan. Autorizarlas no permite perder tombstones/master. Modificar la base local o disco durante preparación debe conservar ambas versiones. Aplicar y deshacer, después guardar/reabrir.
+- Jobs: con `TRANSCRIPTOR_CONFIG_DIR` aislado, encolar varias exportaciones, cerrar y reabrir; Archivo → Trabajos de exportación guardados. Queued/Interrupted requieren «Reanudar esta solicitud»; no se lanzan automáticamente. Comprobar fingerprint cambiado, worker vivo en otra instancia, cancelación, fallo y recibo con intentos. Si la salida ya existe se conserva: no borrar ni sobrescribir para simular recuperación. Los jobs viven en `config/export-jobs`, no acompañan todavía Save As.
+- Historial: guardar varias ediciones, deshacer dos, autosave, cerrar/reabrir/recuperar. Debe conservar ambas pilas con nueva revisión y digests. `history/2` se lee por alpha.7; alpha.6 solo entiende /1. No intentar downgrade sobre la misma carpeta como procedimiento de aceptación.
+
+Estos procedimientos no se ejecutaron. Evidencia automatizada: `evidence/continuacion-10.md`. E4 pendiente; no hay cliente MCP que probar todavía.
+
+---
+
 # Continuación 9 — nuevas operaciones (aceptación física aplazada)
 
 - B y arrastrar en carril semántico: crear/estirar/unir. Shift resta; Ctrl mueve un item. Handles recortan, S divide. Escape cancela. Caja solo items de un rango, como V1; para cajas que cruzan clips usa Fuente.

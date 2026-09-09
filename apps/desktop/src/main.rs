@@ -2,7 +2,9 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
 mod app;
+mod author_ui;
 mod console;
+mod durable_exports;
 mod editorial_jobs;
 #[cfg(test)]
 mod gesture_tests;
@@ -18,6 +20,7 @@ mod ui_markers;
 mod ui_media;
 mod ui_panels;
 mod ui_timeline;
+mod watcher;
 
 use std::sync::Arc;
 

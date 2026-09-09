@@ -99,7 +99,7 @@ fn prepare(
     }
     let asset = asset
         .ok_or_else(|| DomainError::invalid(format!("Ningún medio coincide con el master: {}. Importa el original y repite.", master.media_path)))?;
-    let import = tv2_v1compat::import::read_v1_editorial(&root, &asset)?;
+    let import = tv2_v1compat::import::read_v1_editorial_with_stores(&root, &asset, &crate::paths::v1_marks_stores())?;
     Ok(EditorialImport { asset, import })
 }
 

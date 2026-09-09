@@ -1,3 +1,20 @@
+# Actualización vigente — continuación 10
+
+La revisión dinámica completa sigue abierta. No se ha ejecutado V1 ni su UI.
+
+| Fuente V1 | Entrada V2 / comportamiento | Control actual |
+|---|---|---|
+| marcas.resolver/store_path/app_paths.MARKS_STORE_DIR | Archivo → Buscar y resolver marcas; import carpeta consulta stores; selector revisión/digest/adopción | author_candidates test escrito/compilado, ejecución 4551 bloqueada; GUI compilada |
+| marcas.adoptar / sidecars divergentes | Comparación de colecciones y adopción explícita; preserva tombstones/revisión, undo común | compile; aceptación de interacción pendiente |
+| editorial_montaje persist/flatten | Export de montaje editado contiguo, originales invisibles preservados con estado y mapping | prueba inversa nueva compilada, no ejecutada |
+| editorial_layers_ui gesto al borde | Autoscroll de EditItems y BoxEdit ajusta origen en pantalla para conservar origen temporal | UI compilada; procedimiento RUN |
+| editorial_history / cambios externos | Diff por campo/orden, resolución explícita y worker+undo | tests application; aceptación GUI pendiente |
+| export queue / cierre | Persistir antes de encoder, recuperación explícita y recibos por intento | jobs application; multimedia pendiente |
+
+Las tablas históricas de abajo no describen el estado completo de alpha.7. Pedidos/propuestas/passes/manifests/derivación y controles dinámicos restantes siguen pendientes; no declarar paridad por contar entradas.
+
+---
+
 # Auditoría vigente — continuación 8
 
 Registro ACTIONS heredado: 69 V1/81 V2, sin IDs V1 ausentes; no se usa como criterio de cierre. Nuevo inventario AST de **140 constructores/bindings** fuera de ACTIONS: `scripts/audit_v1_ui.py` → `evidence/continuacion-08-ui-inventory.json`, con archivo/línea/función/argumentos. No ejecuta V1. No enumera automáticamente todos los controles creados por bucles/helpers; no declara paridad funcional completa.

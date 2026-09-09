@@ -27,13 +27,21 @@ pub struct RecoveryCheckpoint {
     pub history: Option<crate::session::DurableHistory>,
 }
 
+/// Keeps the cooperative disk lock until the GUI confirms the exact prepared command.
+pub struct PreparedExternal {
+    command: crate::session::PreparedCommand,
+    external: Project,
+    external_digest: String,
+    _lock: fs::File,
+}
+
 #[derive(serde::Serialize, serde::Deserialize)]
 struct CommitIntent {
     schema: String,
     before_digest: Option<String>,
     project: Project,
     events: Vec<JournalEvent>,
-    #[serde(default)]
+    #[serde(default, with = "crate::history_codec::optional")]
     history: Option<crate::session::DurableHistory>,
 }
 
@@ -42,7 +50,7 @@ struct AutosaveSnapshot {
     schema: String,
     project: Project,
     events: Vec<JournalEvent>,
-    #[serde(default)]
+    #[serde(default, with = "crate::history_codec::optional")]
     history: Option<crate::session::DurableHistory>,
     #[serde(default)]
     writer: Option<String>,
@@ -210,7 +218,7 @@ impl ProjectStore {
                 a.path = self.resolve_path(&a.path).to_string_lossy().replace('\\', "/");
             }
         }
-        let mut change = crate::reconcile::prepare(&base, local, &external)?;
+        let mut change = crate::reconcile::inspect(&base, local, &external)?;
         change.external_digest = disk_digest;
         Ok(Some(change))
     }
@@ -218,7 +226,13 @@ impl ProjectStore {
     /// Explicit approval, revalidating both sides. Disk stays untouched until
     /// the next save; the external version becomes the CAS baseline only on success.
     pub fn accept_external(&self, session: &mut crate::ProjectSession, change: crate::reconcile::ExternalChange) -> DomainResult<()> {
-        if session.revision() != change.base_revision || session.digest()? != change.local_digest {
+        let prepared = self.prepare_external(session.project(), change)?;
+        self.commit_external(session, prepared)
+    }
+
+    pub fn prepare_external(&self, local: &Project, change: crate::reconcile::ExternalChange) -> DomainResult<PreparedExternal> {
+        let change = change.resolved()?;
+        if local.revision != change.base_revision || Self::digest(local)? != change.local_digest {
             return Err(DomainError::new(tv2_domain::ErrorCode::ExternalConflict, "el proyecto cambió mientras se revisaba el diff"));
         }
         let lock = fs::OpenOptions::new().read(true).write(true).create(true).truncate(false).open(self.root.join(".write.lock"))?;
@@ -227,15 +241,19 @@ impl ProjectStore {
         if Self::digest(&external)? != change.external_digest {
             return Err(DomainError::new(tv2_domain::ErrorCode::ExternalConflict, "el archivo externo cambió mientras se revisaba el diff"));
         }
-        let mut observed = self.observed.lock().map_err(|_| DomainError::io("estado de persistencia no disponible"))?;
-        let mut baseline = self.baseline.lock().map_err(|_| DomainError::io("baseline no disponible"))?;
-        session.execute(
+        let command = crate::ProjectSession::new(local.clone()).prepare_command(
             crate::CommandEnvelope::human(tv2_domain::Command::ReconcileProject { project: Box::new(change.merged) })
                 .with_base(change.base_revision)
-                .with_actor(crate::Actor::External { source: "project.json".into() }),
+                .with_actor(if change.human_review { crate::Actor::Human } else { crate::Actor::External { source: "project.json".into() } }),
         )?;
-        *observed = Some(change.external_digest);
-        *baseline = Some(external);
+        Ok(PreparedExternal { command, external, external_digest: change.external_digest, _lock: lock })
+    }
+    pub fn commit_external(&self, session: &mut crate::ProjectSession, prepared: PreparedExternal) -> DomainResult<()> {
+        let mut observed = self.observed.lock().map_err(|_| DomainError::io("estado de persistencia no disponible"))?;
+        let mut baseline = self.baseline.lock().map_err(|_| DomainError::io("baseline no disponible"))?;
+        session.commit_prepared(prepared.command)?;
+        *observed = Some(prepared.external_digest);
+        *baseline = Some(prepared.external);
         Ok(())
     }
 
@@ -275,7 +293,7 @@ impl ProjectStore {
         atomic_write(&self.journal_path(), &journal)?;
         // Publish under the same recoverable intent as project + audit.
         if let Some(history) = &intent.history {
-            atomic_write(&self.root.join("history.json"), &serde_json::to_vec(history)?)?;
+            atomic_write(&self.root.join("history.json"), &serde_json::to_vec(&crate::history_codec::encode(history)?)?)?;
         } else if self.root.join("history.json").exists() {
             fs::remove_file(self.root.join("history.json"))?;
         }
@@ -293,7 +311,7 @@ impl ProjectStore {
         if bytes.len() as u64 > MAX_PROJECT_BYTES * 2 {
             return Err(DomainError::invalid("historial supera 128 MiB"));
         }
-        let history: crate::session::DurableHistory = serde_json::from_slice(&bytes)?;
+        let history = crate::history_codec::decode(serde_json::from_slice(&bytes)?)?;
         history.validate(project)?;
         Ok(Some(history))
     }

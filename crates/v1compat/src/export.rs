@@ -93,11 +93,17 @@ pub fn trims_document(project: &Project, asset_id: &tv2_domain::AssetId) -> V1Re
 pub fn montage_document(project: &Project, id: &SequenceId) -> V1Result<Value> {
     project.validate().map_err(|e| invalid(e.to_string()))?;
     let sequence = project.sequence(id).ok_or_else(|| invalid("Secuencia inexistente"))?;
-    let first = sequence.clips.first().ok_or_else(|| invalid("Montaje vacío"))?;
-    if sequence.clips.iter().any(|c| c.asset_id != first.asset_id) {
-        return Err(invalid("V1 no representa montajes con varios medios"));
-    }
-    let asset = project.asset(&first.asset_id).ok_or_else(|| invalid("Medio inexistente"))?;
+    let asset = if let Some(first) = sequence.clips.first() {
+        if sequence.clips.iter().any(|c| c.asset_id != first.asset_id) {
+            return Err(invalid("V1 no representa montajes con varios medios"));
+        }
+        project.asset(&first.asset_id).ok_or_else(|| invalid("Medio inexistente"))?
+    } else {
+        let fp = crate::master::parse_fingerprint(
+            &sequence.extra.get("v1_original_montage").ok_or_else(|| invalid("Montaje vacío sin origen V1"))?["media"],
+        )?;
+        project.assets.iter().find(|a| a.fingerprint.same_identity(&fp)).ok_or_else(|| invalid("Medio del montaje vacío no encontrado"))?
+    };
     crate::montaje::sequence_to_v1(sequence, &asset.fingerprint)
 }
 

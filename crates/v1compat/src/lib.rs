@@ -11,6 +11,7 @@
 //! - La identidad del medio es la de V1 (`size + hash_muestreado + inventario_sha256`).
 
 pub mod author;
+pub mod author_candidates;
 pub mod chunks;
 pub mod export;
 pub mod import;

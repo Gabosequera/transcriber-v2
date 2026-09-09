@@ -32,6 +32,7 @@ pub struct V1ImportReport {
 }
 
 pub struct V1Import {
+    pub author_candidates: Vec<crate::author_candidates::Candidate>,
     pub master: tv2_domain::evidence::MasterEvidence,
     pub report: V1ImportReport,
     pub layers: Vec<SemanticLayer>,
@@ -62,6 +63,10 @@ fn read_json(path: &Path) -> V1Result<Value> {
 /// Lee la carpeta V1 y prepara capas y secuencia para `asset` (ya importado en V2 y
 /// con la misma identidad que el master).
 pub fn read_v1_editorial(root: &Path, asset: &Asset) -> V1Result<V1Import> {
+    read_v1_editorial_with_stores(root, asset, &[])
+}
+
+pub fn read_v1_editorial_with_stores(root: &Path, asset: &Asset, stores: &[PathBuf]) -> V1Result<V1Import> {
     let master_path = find_master(root).ok_or_else(|| invalid(format!("no se encontró *.editorial.master.json en {}", root.display())))?;
     let editorial_dir = master_path.parent().map(Path::to_path_buf).unwrap_or_else(|| root.to_path_buf());
     let master = V1Master::load(&master_path)?;
@@ -99,7 +104,7 @@ pub fn read_v1_editorial(root: &Path, asset: &Asset) -> V1Result<V1Import> {
         }
     }
     report.layers = layers.len();
-    let mut author_paths = vec![std::path::PathBuf::from(&asset.path).with_extension("marcas.json")];
+    let mut author_paths = crate::author_candidates::paths(asset, Some(&editorial_dir), stores)?;
     author_paths.push(editorial_dir.join("autor.marcas.json"));
     if let Some(stem) = std::path::Path::new(&master.media_path).file_stem() {
         author_paths.push(editorial_dir.join(format!("{}.marcas.json", stem.to_string_lossy())));
@@ -107,10 +112,17 @@ pub fn read_v1_editorial(root: &Path, asset: &Asset) -> V1Result<V1Import> {
     author_paths.push(editorial_dir.join("marcas_store").join(format!("{}.marcas.json", asset.fingerprint.hash_muestreado)));
     author_paths.sort();
     author_paths.dedup();
-    let candidates = author_paths.iter().filter(|p| p.is_file()).map(|p| read_json(p)).collect::<V1Result<Vec<_>>>()?;
-    if let Some(author) = crate::author::select(&candidates, asset)? {
-        layers.push(author);
-    } else if master.raw.pointer("/streams/autor.marcas").is_some() {
+    let candidates = crate::author_candidates::discover(&author_paths, asset);
+    let mut author_candidates = Vec::new();
+    match crate::author_candidates::preferred(&candidates) {
+        Ok(Some(index)) => layers.push(candidates[index].layer.as_ref().unwrap().clone()),
+        Err(e) => {
+            report.warnings.push(e.to_string());
+            author_candidates = candidates;
+        }
+        Ok(None) => {}
+    }
+    if !layers.iter().any(|l| l.kind == tv2_domain::LayerKind::Author) && master.raw.pointer("/streams/autor.marcas").is_some() {
         report.warnings.push("El master contiene evidencia de autor; importa el sidecar autoritativo para editar las marcas".into());
     }
     // Selected plan takes precedence over generated views. Never import both.
@@ -144,7 +156,7 @@ pub fn read_v1_editorial(root: &Path, asset: &Asset) -> V1Result<V1Import> {
         }
     }
     layers.extend(master.projections(&asset.id)?);
-    Ok(V1Import { master: master.evidence(&asset.id), report, layers, sequence })
+    Ok(V1Import { master: master.evidence(&asset.id), report, layers, sequence, author_candidates })
 }
 
 /// Comandos para incorporar la importación a un proyecto (batch todo-o-nada).

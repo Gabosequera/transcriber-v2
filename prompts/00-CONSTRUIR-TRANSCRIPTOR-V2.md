@@ -155,3 +155,17 @@ Controles finales y publicación exactos en evidence/continuacion-09.md y PUBLIS
 
 
 Publicación verificada: [v2.0.0-alpha.6](https://github.com/Gabosequera/transcriber-v2/releases/tag/v2.0.0-alpha.6), código/tag `48784e6ef9a6cfb1c13fcee1e82a1f0989f98a7b`. Prerelease no draft, sin assets binarios; tag y código main confirmados en remoto. Evidencia en `implementation/evidence/publication-alpha6.json`. 60 tests dirigidos, check/Clippy/formato/build release correctos; sin ejecución física ni cierre de E2/E3/E4.
+
+## Traspaso vigente — continuación 10 (sustituye al anterior)
+
+Continuar desde main y conservar avances; base de esta sesión 6997455, fuentes alpha.7. **Objetivo hasta E4 todavía incompleto. E2 abierta/E3 parcial/E4 pendiente/E5 no iniciada.** No reiniciar E0/E1 ni pedir nueva autorización. Aceptación física/multimedia/revisión general aplazadas.
+
+Leer STATUS, evidence/continuacion-10.md, matriz, RUN e inventario, D-0047–D-0051. Implementado: candidatos globales de marcas y selector/adopción por revisión/digest/actor, autoscroll semántico; inversa de montaje editado contiguo/A-V enlazado preservando originales desactivados, estado anterior y mapping; diff por campo/conflictos/orden/elecciones/protección y prepared external worker+lock; watcher Windows para carpeta de proyecto V2; jobs de export durables antes de encoder con recuperación explícita/fingerprint/locks/intentos/recibos; history/2 con ancla+deltas dentro de autosave/commit, lectura /1 y pila completa.
+
+Pendientes reales: derivación padre/hijo/mapping/manifests/requests/proposals/passes; import/export integral de carpeta V1 y transacciones de esos contratos; watcher/reconcile V1 individual; auditoría/recibos generales de sesión, migraciones restantes, coste de clones/proyecciones/serialización, 200 snapshots y límites 64/128 MiB; inventario dinámico y geometría de preview semántico completos. Jobs están en configuración V2, aún sin traslado por Save As ni paginación de archivo/cobertura documental. La inversa rechaza semántica que V1 no representa (gaps/overlays/efectos/audio independiente); no confundirlo con el rechazo anterior de toda edición.
+
+**Primera acción concreta:** seguir las lecturas de editorial_projects.py (time_map/map_range/derive_master/derive_layers/publish_child), editorial_pipeline manifests, editorial_topics y editorial_montaje requests/passes ya iniciadas y completar implementación en dominio/adaptador/worker/UI/publicación aislada. No hay código nuevo de esos contratos en alpha.7. Cuando E3 consuma contratos consolidados, avanzar a E4 MCP específico completo con schemas/capabilities/contexto/paginación/selección/transporte/jobs/permisos/propuestas/digests/preview/apply/verificación/eventos/cliente conectado. No usar E4 para aplazar E3 ni iniciar E5.
+
+Controles: 45 application ejecutados/pasan; Clippy all-targets compila el resto. Windows 4551 **también bloqueó V1compat** en esta sesión, antes de ejecutar su binario; no reintentar ni reubicar/renombrar o cambiar política. Dominio/desktop tampoco se ejecutan. Métrica sintética history: 199436 bytes /2 frente a 7622632 /1 (20 entradas, 190000 caracteres constantes); no prueba rendimiento global. Build/publicación exactos en evidence y PUBLISH. V1 bb7012c solo leído, datos personales intactos.
+
+Un nuevo checkpoint requiere actualizar evidencia/matriz/decisiones/traspaso y commit/push/prerelease autorizado. Esto no equivale a completar el encargo; continuar mientras sea posible dentro del alcance hasta E4.

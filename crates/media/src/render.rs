@@ -16,7 +16,7 @@ use tv2_domain::resolve::{ResolvedClip, ResolvedTimeline};
 use tv2_domain::time::Ticks;
 
 /// Localización y forma de un asset para decodificar.
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, serde::Serialize, serde::Deserialize)]
 pub struct AssetSource {
     pub path: PathBuf,
     pub kind: AssetKind,

@@ -1,3 +1,27 @@
+# Decisiones de continuación 10
+
+## D-0047 · Candidatos de autor y adopción explícita
+
+Se leen sidecar y stores de V1 como candidatos, con diagnóstico por archivo. Solo el empate divergente en la revisión máxima requiere elección; un archivo inválido se muestra, no equivale a ausencia. GUI ofrece contenido actual/candidato y revisión, revalida digest al adoptar y base al commit. Adopción explícita usa actor Human porque la persona revisó ese reemplazo; importación automática conserva External. Conserva tombstones y prohíbe resurrección. ReplaceLayer promueve revisión por encima de ambas fuentes. Ubicación global según app_paths V1 (managed/shared, overrides y vecino del ejecutable), sin importar Python ni rutas absolutas del host compiladas. Sustituye el límite de D-0044; no autoriza escribir V1.
+
+## D-0048 · Inversa de proyección V1 editada
+
+Una proyección editada no permite inferir cómo la persona pretendía alterar las porciones tapadas. Se preservan los clips originales y sus IDs en sus pistas, desactivados, con tv2_archived_state; la edición visible recibe una pista nueva y nuevos IDs con vínculo explícito a cada clip V2 y fuente V1. Repetidas conversiones conservan sus registros anteriores. Campos desconocidos se conservan. Se valida flatten contra el mapping de la edición antes de publicar. Original intacto conserva roundtrip exacto; rechazo de efectos/mezcla independiente/overlays/huecos/tiempos no representables sigue siendo obligatorio. La GUI informa esta conversión en el menú. No declara tests ejecutados ni equivalencia de píxeles.
+
+## D-0049 · Resolución externa por campo y watcher Windows
+
+Diff con IDs estables y rutas escapadas; todos los conflictos visibles, incluido orden. Cada conflicto necesita elección local/externa. Las decisiones humanas requieren una autorización explícita adicional, con evidencia y tombstones siempre protegidos. Merge/lectura/preparación viven en worker; un PreparedExternal conserva el lock cooperativo hasta commit de la misma base. Ediciones de terceros que ignoran locks pueden llegar después de la lectura: el próximo guardado conserva la comprobación CAS, sin prometer exclusión sobre editores no cooperativos. Watcher FindFirstChangeNotificationW en worker, cierre de handle al salir, eventos coalescidos y rescaneo estable de respaldo. [Contrato Win32](https://learn.microsoft.com/es-es/windows/win32/api/fileapi/nf-fileapi-findfirstchangenotificationw), consultado 2026-09-09. Otros SO usan rescaneo con aviso; documentos V1 individuales pendientes.
+
+## D-0050 · Registro durable de exportaciones
+
+Job tipado con payload/digest/revisión/proyecto y bloqueo OS por ID. Se persiste Queued antes de lanzar, y Running antes del encoder. Reapertura bajo bloqueo distingue worker vivo de Interrupted y revalida el registro tras tomar el lock; nunca relanza sola. Retry explícito conserva intentos y verifica fingerprint completo del medio. Fallo entre publicar multimedia y archivar recibo conserva salida y requiere inspección; no sobrescribirla ni deducir éxito solo por existir. Almacenamiento en configuración V2/export-jobs; una solicitud antigua de memoria sin registro no se inventa. Falta export/import portable de registros, paginación del archivo y cobertura de jobs documentales. Estados probados con fixtures sintéticas; multimedia/cierre real pendiente.
+
+## D-0051 · Historial serializado por deltas, compatibilidad /1
+
+history/2 guarda un ancla, cambios estructurales con preimagen y digests por snapshot; normaliza en memoria a DurableHistory /1. Autosave y commit usan el mismo codec, recovery entiende ambos. Arrays de longitud idéntica usan deltas por índice; al cambiar longitud se reemplaza ese array, conservando orden/metadata. No es un formato de comandos externos. El test de 20 entradas con evidencia constante demuestra reducción >10×, no rendimiento general. Sigue el límite de 200 snapshots en RAM y 64/128 MiB en disco; no se eleva sin resolver costes. Alpha.6 no entiende history/2: la migración de lectura es hacia delante, no downgrade automático.
+
+---
+
 # Decisiones de continuación 7
 
 ## D-0035 · Import editorial asíncrono y estricto

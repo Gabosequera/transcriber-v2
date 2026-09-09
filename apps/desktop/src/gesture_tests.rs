@@ -25,6 +25,15 @@ fn steps(h: &mut Harness<'static, TranscriptorApp>, n: usize) {
     }
 }
 
+fn wait_export_started(h: &mut Harness<'static, TranscriptorApp>) {
+    let deadline = std::time::Instant::now() + std::time::Duration::from_secs(10);
+    while h.state().export.running.is_none() && std::time::Instant::now() < deadline {
+        steps(h, 1);
+        std::thread::sleep(std::time::Duration::from_millis(10));
+    }
+    assert!(h.state().export.running.is_some(), "durable enqueue did not launch: {:?}", h.state().export.last_result);
+}
+
 #[test]
 #[ignore = "benchmark release explícito, no prueba de presentación GPU"]
 fn dense_ui_benchmark() {
@@ -79,6 +88,7 @@ fn shutdown_joins_active_export_and_caches_and_discards_queue() {
     h.state_mut().export.destination = dir.path().join("active.mp4").display().to_string();
     let preset = tv2_media::export::presets().into_iter().find(|p| p.id == "h264-2160p").unwrap();
     h.state_mut().start_export(preset.clone());
+    wait_export_started(&mut h);
     h.state_mut().export.destination = dir.path().join("pending.mp4").display().to_string();
     h.state_mut().start_export(preset);
     assert!(h.state().export.running.is_some());
@@ -110,6 +120,7 @@ fn export_selection_compacts_ranges_and_preserves_repeated_editorial_occurrences
     h.state_mut().export.destination = dir.path().join("active.mp4").display().to_string();
     let preset = tv2_media::export::presets().remove(0);
     h.state_mut().start_export(preset.clone());
+    wait_export_started(&mut h);
     h.state_mut().selection.clips = vec![clip, second];
     h.state_mut().export.range_mode = 2;
     h.state_mut().export.destination = dir.path().join("selection.mp4").display().to_string();
@@ -254,6 +265,7 @@ fn export_queue_cancels_and_freezes_each_revision_before_concurrent_edit() {
     let wav = tv2_media::presets().into_iter().find(|p| p.id == "wav-pcm").unwrap();
     h.state_mut().export.destination = first.to_string_lossy().into_owned();
     h.state_mut().start_export(video);
+    wait_export_started(&mut h);
     h.state_mut().export.destination = second.to_string_lossy().into_owned();
     h.state_mut().start_export(wav.clone());
     h.state_mut().export.destination = third.to_string_lossy().into_owned();

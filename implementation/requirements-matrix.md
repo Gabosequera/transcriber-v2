@@ -1,4 +1,20 @@
-# Incremento vigente — continuación 9, alpha.6
+# Incremento vigente — continuación 10, alpha.7
+
+**E2/E3 abiertas; E4 pendiente; E5 fuera de alcance.** Evidencia exacta: `evidence/continuacion-10.md`. Aceptación física aplazada.
+
+| ID | Incremento implementado | Verificación y límites |
+|---|---|---|
+| UI-04/LAY-01/DAT-01 | Candidatos globales de autor, selector/adopción por digest y revisión, conservación de borrados; autoscroll semántico | GUI/all-targets compilados; V1compat bloqueado 4551 antes de ejecución. Inventario dinámico completo pendiente |
+| LAY-03/DAT-01 | Inversa de montajes editados contiguos con A/V enlazado, archivo de originales invisibles, mapping y flatten de verificación | Tests compilados, no ejecutados; efectos/mezcla/overlays/huecos no representables se rechazan. Carpeta V1 completa pendiente |
+| DAT-03/DAT-04 | Diff por campo, conflictos múltiples/orden, elección explícita, prepared commit con lock, undo y watcher Windows | Tests application; GUI y watcher compilados, físico pendiente; documentos V1 individuales sin watcher/reconcile aún |
+| EXP-03/DAT-02 | Jobs de export durables, estados de recuperación, bloqueo de worker, fingerprints e historial de intentos/recibos | Tests de registro/locks/recuperación sintética en application; integración multimedia compilada, no ejecutada; jobs locales a configuración V2 |
+| DAT-02/DAT-04/PERF-01 | Historial/2 por deltas integrado en autosave/commit/reapertura; migration lectura /1 | Test roundtrip/corrupción/undo/redo y tamaño sintético; RAM, clones/serialización y límites 200/64/128 MiB siguen pendientes |
+
+No reclasificar las filas históricas como aceptación del build actual.
+
+---
+
+# Incremento histórico — continuación 9, alpha.6
 
 E2 abierta/E3 parcial/E4 pendiente. Evidencia: `evidence/continuacion-09.md`. Las secciones inferiores son históricas.
 

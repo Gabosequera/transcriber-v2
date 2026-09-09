@@ -1,0 +1,12 @@
+   Compiling windows-sys v0.61.2
+   Compiling tv2-domain v2.0.0-alpha.7 (C:\Users\gabri\Todo\transcriber-v2\crates\domain)
+   Compiling tempfile v3.27.0
+   Compiling nu-ansi-term v0.50.3
+   Compiling rfd v0.17.2
+   Compiling eframe v0.36.1
+   Compiling tracing-subscriber v0.3.23
+   Compiling tv2-application v2.0.0-alpha.7 (C:\Users\gabri\Todo\transcriber-v2\crates\application)
+   Compiling tv2-v1compat v2.0.0-alpha.7 (C:\Users\gabri\Todo\transcriber-v2\crates\v1compat)
+   Compiling tv2-media v2.0.0-alpha.7 (C:\Users\gabri\Todo\transcriber-v2\crates\media)
+   Compiling transcriptor v2.0.0-alpha.7 (C:\Users\gabri\Todo\transcriber-v2\apps\desktop)
+    Finished `release` profile [optimized + debuginfo] target(s) in 2m 40s

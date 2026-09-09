@@ -3,49 +3,11 @@ use crate::app::{Severity, TranscriptorApp};
 use tv2_application::{CommandEnvelope, ProjectSession, session::PreparedCommand};
 use tv2_domain::{Command, DomainError, error::DomainResult};
 pub struct SemanticJob {
-    result: crossbeam_channel::Receiver<DomainResult<PreparedCommand>>,
+    pub result: crossbeam_channel::Receiver<DomainResult<PreparedCommand>>,
 }
 impl TranscriptorApp {
     pub fn import_author_dialog(&mut self) {
-        if self.semantic_job.is_some() {
-            self.toast(Severity::Warn, "Hay una edición en preparación");
-            return;
-        }
-        let Some(asset) = self.current_layer_asset().and_then(|id| self.project().asset(&id)).cloned() else {
-            self.toast(Severity::Warn, "Selecciona el medio de las marcas");
-            return;
-        };
-        let Some(path) = rfd::FileDialog::new().set_title("Sidecar autoritativo de marcas V1").add_filter("Marcas", &["json"]).pick_file() else {
-            return;
-        };
-        let project = self.project().clone();
-        let (tx, result) = crossbeam_channel::bounded(1);
-        let launch = std::thread::Builder::new().name("author-import".into()).spawn(move || {
-            let work = || -> DomainResult<PreparedCommand> {
-                use std::io::Read;
-                let mut bytes = Vec::new();
-                std::fs::File::open(&path)?.take(16 * 1024 * 1024 + 1).read_to_end(&mut bytes)?;
-                if bytes.len() > 16 * 1024 * 1024 {
-                    return Err(DomainError::invalid("sidecar de marcas supera 16 MiB"));
-                }
-                let raw = serde_json::from_slice(&bytes)?;
-                let mut layer = tv2_v1compat::author::from_v1(&raw, &asset)?;
-                if let Some(existing) =
-                    project.layers.iter().find(|l| l.asset_id == asset.id && l.kind == tv2_domain::LayerKind::Author && !l.deleted)
-                {
-                    layer.layer_id = existing.layer_id.clone();
-                }
-                let request = CommandEnvelope::human(Command::ReplaceLayer { layer })
-                    .with_base(project.revision)
-                    .with_actor(tv2_application::Actor::External { source: "marcas V1".into() });
-                ProjectSession::new(project).prepare_command(request)
-            };
-            let _ = tx.send(work());
-        });
-        match launch {
-            Ok(_) => self.semantic_job = Some(SemanticJob { result }),
-            Err(e) => self.report(e.into()),
-        }
+        self.scan_author(true);
     }
 
     pub fn recover_export_dialog(&mut self) {

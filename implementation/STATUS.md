@@ -1,4 +1,24 @@
-# STATUS — continuación 9, fuentes 2.0.0-alpha.6
+# STATUS — continuación 10, fuentes 2.0.0-alpha.7
+
+Base `main` limpia `6997455`; V1 `bb7012c` observado limpio, solo lecturas de fuentes. **Encargo hasta E4 incompleto: E2 abierta, E3 parcial, E4 pendiente, E5 no iniciada.** Este checkpoint no cierra etapas. Aceptación física, multimedia y revisión general aplazadas.
+
+Implementado en este incremento:
+
+- Descubrimiento de marcas junto al medio y almacenes globales V1, también durante importación de carpeta. Selector explícito con rutas, revisión, errores, cuarentena y comparación de contenido. Mayor revisión independiente del orden; divergencias antiguas no bloquean una superior. Adopción humana con digest del archivo, base del proyecto, tombstones, capa única y undo; import automático sigue siendo External. Rutas de instalación/entorno, sin ejecutar V1 ni escribir sus fuentes. Autoscroll añadido a arrastre/bordes/caja semántica.
+- Inversa de montaje editado contiguo y audio enlazado: conserva originales/IDs/material invisible desactivados con estado anterior, genera piezas en pista V1 nueva con mapping/procedencia/campos desconocidos, valida el resultado con flatten antes de exportar. Montaje vacío importado exportable. No representa efectos, mezcla independiente, precisión submilisegundo, overlays o huecos V2; rechazo explícito de esos casos. Tests V1compat nuevos compilados, NO ejecutados.
+- Diff externo por campo/ID, conflictos múltiples y orden, selección local/externa obligatoria por conflicto. Autorización explícita para cambiar decisiones humanas, sin borrar tombstones ni evidencia. Lectura/merge/preparación en worker con lock hasta commit y base revalidada; undo común. Watcher Windows de carpeta V2 con rescaneo estable de respaldo. No vigila todavía documentos V1 individuales; otros SO conservan rescaneo.
+- Jobs de exportación persistidos antes de lanzar: solicitud/revisión/identidades congeladas, bloqueo por job, estados queued/running/interrupted/succeeded/failed/cancelled, intentos y recibos. Reapertura descubre y muestra; reanudar es explícito, verifica fingerprints, nunca sobrescribe destino existente. Los pendientes sobreviven al cierre; cancelar deja estado durable. Jobs en configuración V2/export-jobs, no dentro del proyecto; aún no son portables con Save As ni cubren todos los trabajos documentales.
+- `history/2` en history.json, autosave e intención de commit: ancla + deltas estructurales con base/digests; lectura de history/1. Conserva undo/redo y recuperación existentes. Reduce repetición serializada; no elimina clones/RAM del historial, coste de serializar/diff/hash, límite 200 ni límites 64/128 MiB. PERF-01 permanece abierto.
+
+Controles finales y publicación: `evidence/continuacion-10.md`, logs y PUBLISH. Windows 4551 bloqueó también V1compat en esta sesión antes de ejecutar su binario; no reintentar ni eludir. Solo application ejecutado. No exe/GUI/medios/modelos ejecutados.
+
+Final alpha.7: **45 tests application pasan**, Clippy/all-targets 9.93 s, check 7.10 s y formato correctos; build release correcto en 2m40s, sin lanzamiento. Hash/tamaño en `evidence/build-alpha7.json`. Prerelease de fuentes, sin paquete binario aceptado.
+
+Siguiente implementación concreta: completar derivación padre/hijo y mapping desde `editorial_projects.py`, contratos manifests/requests/proposals/passes y su materialización/import/export integral en carpetas V2. Después reconciliación V1 individual, archivado general/migraciones/límites de sesión y restantes controles dinámicos. Estos contratos siguen siendo dependencias E3 de E4; no usar MCP para aplazarlos. E4 entero sigue pendiente (schemas, capabilities, consultas/contexto/paginación, permisos, propuestas, eventos y cliente conectado).
+
+---
+
+# STATUS histórico — continuación 9, fuentes 2.0.0-alpha.6
 
 Publicación verificada: [v2.0.0-alpha.6](https://github.com/Gabosequera/transcriber-v2/releases/tag/v2.0.0-alpha.6), código/tag `48784e6ef9a6cfb1c13fcee1e82a1f0989f98a7b`. Prerelease no draft, sin assets binarios; tag y código main confirmados en remoto. Evidencia en `implementation/evidence/publication-alpha6.json`. 60 tests dirigidos, check/Clippy/formato/build release correctos; sin ejecución física ni cierre de E2/E3/E4.
 

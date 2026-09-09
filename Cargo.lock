@@ -3933,7 +3933,7 @@ dependencies = [
 
 [[package]]
 name = "transcriptor"
-version = "2.0.0-alpha.6"
+version = "2.0.0-alpha.7"
 dependencies = [
  "anyhow",
  "crossbeam-channel",
@@ -3953,6 +3953,7 @@ dependencies = [
  "tv2-domain",
  "tv2-media",
  "tv2-v1compat",
+ "windows-sys 0.61.2",
 ]
 
 [[package]]
@@ -3963,7 +3964,7 @@ checksum = "d2df906b07856748fa3f6e0ad0cbaa047052d4a7dd609e231c4f72cee8c36f31"
 
 [[package]]
 name = "tv2-application"
-version = "2.0.0-alpha.6"
+version = "2.0.0-alpha.7"
 dependencies = [
  "serde",
  "serde_json",
@@ -3975,7 +3976,7 @@ dependencies = [
 
 [[package]]
 name = "tv2-domain"
-version = "2.0.0-alpha.6"
+version = "2.0.0-alpha.7"
 dependencies = [
  "hex",
  "rand 0.10.2",
@@ -3987,7 +3988,7 @@ dependencies = [
 
 [[package]]
 name = "tv2-media"
-version = "2.0.0-alpha.6"
+version = "2.0.0-alpha.7"
 dependencies = [
  "cpal",
  "crossbeam-channel",
@@ -4005,7 +4006,7 @@ dependencies = [
 
 [[package]]
 name = "tv2-v1compat"
-version = "2.0.0-alpha.6"
+version = "2.0.0-alpha.7"
 dependencies = [
  "serde",
  "serde_json",

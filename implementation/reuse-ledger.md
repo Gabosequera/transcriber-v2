@@ -1,5 +1,7 @@
 # Registro de reutilización y terceros
 
+Continuación 10: lectura de contratos V1 `bb7012c` en marcas.py/app_paths.py/editorial_montaje.py/editorial_projects.py/editorial_pipeline.py/editorial_topics.py/editorial_layers.py. Implementación Rust de descubrimiento/inversa/reconciliación/jobs/codec propia dentro del proyecto existente; no se copiaron ni ejecutaron módulos Python. Se conserva la procedencia V1 de las reglas portadas históricamente; no se afirma clean-room. Watcher usa windows-sys 0.61.2 (ya fijado transitivamente en Cargo.lock; ahora directo en desktop, features FileSystem/Threading), bindings MIT/Apache-2.0; consulta al contrato oficial Win32 enlazada en D-0049. No se añadieron binarios de terceros ni modelos.
+
 Cada incorporación al producto: origen, revisión, archivo, licencia, qué se incorporó, modificaciones y dependencias. Los clones de `references/` **no** se copian al producto; se registran aquí solo cuando influyen en una decisión.
 
 ## Binarios distribuidos

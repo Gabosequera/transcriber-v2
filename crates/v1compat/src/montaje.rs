@@ -66,7 +66,7 @@ pub struct Piece {
 }
 
 fn track_number(t: &str) -> u32 {
-    t[1..].parse().unwrap_or(0)
+    t.strip_prefix('V').and_then(|s| s.parse().ok()).unwrap_or(0)
 }
 
 impl V1Montaje {
@@ -81,6 +81,10 @@ impl V1Montaje {
             return Err(invalid("el montaje pertenece a otro video"));
         }
         let duration = obj.get("duration_source").and_then(|x| x.as_f64()).ok_or_else(|| invalid("montaje sin duration_source"))?;
+        if !duration.is_finite() || duration <= 0.0 {
+            return Err(invalid("duration_source inválida"));
+        }
+        let mut clip_ids = std::collections::HashSet::new();
         let mut clips = Vec::new();
         for (i, c) in obj.get("clips").and_then(|x| x.as_array()).ok_or_else(|| invalid("clips debe ser una lista"))?.iter().enumerate() {
             let co = c.as_object().ok_or_else(|| invalid(format!("clip {} no es un objeto", i + 1)))?;
@@ -89,6 +93,9 @@ impl V1Montaje {
                 return Err(invalid(format!("clip_id inválido: {clip_id:?}")));
             }
             let track_id = co.get("track_id").and_then(|x| x.as_str()).unwrap_or("V1").to_string();
+            if !clip_ids.insert(clip_id.clone()) {
+                return Err(invalid("clip_id duplicado"));
+            }
             if !(track_id.starts_with('V') && track_id[1..].parse::<u32>().is_ok_and(|n| n >= 1)) {
                 return Err(invalid(format!("{clip_id}: pista inválida {track_id:?}")));
             }
@@ -133,6 +140,9 @@ impl V1Montaje {
             if !tracks.contains(&t) {
                 tracks.push(t);
             }
+        }
+        if tracks.iter().any(|t| track_number(t) == 0) {
+            return Err(invalid("pista V1 inválida"));
         }
         tracks.sort_by_key(|t| track_number(t));
         let order: std::collections::HashMap<String, usize> = tracks.iter().enumerate().map(|(i, t)| (t.clone(), i)).collect();
@@ -296,21 +306,167 @@ fn projection_digest(sequence: &Sequence) -> String {
     tv2_domain::digest::digest_json(&serde_json::to_value(projected).expect("serializable sequence"))
 }
 
-/// Lossless inverse for an unchanged imported projection. Editing an occluded
-/// flattened montage requires a richer inverse; do not silently drop hidden
-/// material, independent audio, transforms, gaps or metadata.
+/// Edited projections publish a new V1 track. Original clips remain addressable
+/// but disabled, with their original state recorded, so deleting a visible piece
+/// cannot accidentally uncover source material. The complete import is immutable
+/// provenance, not a second editable collection.
 pub fn sequence_to_v1(sequence: &Sequence, fingerprint: &Fingerprint) -> V1Result<Value> {
     let original = sequence
         .extra
         .get("v1_original_montage")
         .ok_or_else(|| invalid("El montaje no conserva un original V1 reversible; reimporta el original o exporta multimedia"))?;
-    if sequence.extra.get("v1_projection_digest").and_then(Value::as_str) != Some(projection_digest(sequence).as_str()) {
-        return Err(invalid(
-            "El montaje fue editado en V2: no hay conversión inversa sin pérdida para estos cambios. No se exportó ningún documento",
-        ));
+    let montage = V1Montaje::parse(original.clone(), Some(fingerprint))?;
+    if sequence.extra.get("v1_projection_digest").and_then(Value::as_str) == Some(projection_digest(sequence).as_str()) {
+        return Ok(original.clone());
     }
-    V1Montaje::parse(original.clone(), Some(fingerprint))?;
-    Ok(original.clone())
+    edited_sequence(sequence, montage)
+}
+
+fn edited_sequence(sequence: &Sequence, montage: V1Montaje) -> V1Result<Value> {
+    use tv2_domain::{Ticks, Transform};
+    if sequence.tracks.iter().any(|t| t.muted || t.solo || !t.visible || t.gain_db != 0.0) {
+        return Err(invalid("V1 no representa mute/solo/ganancia/visibilidad de pistas V2"));
+    }
+    let mut video = Vec::new();
+    let mut audio = Vec::new();
+    let mut identity = None;
+    for clip in &sequence.clips {
+        if let Some(asset) = &identity {
+            if asset != &clip.asset_id {
+                return Err(invalid("V1 requiere un único medio"));
+            }
+        } else {
+            identity = Some(clip.asset_id.clone());
+        }
+        if clip.transform != Transform::default() || clip.gain_db != 0.0 {
+            return Err(invalid("V1 no representa transformación ni ganancia de clips V2"));
+        }
+        for t in [clip.source.start, clip.source.end, clip.position] {
+            if crate::secs_to_ticks(crate::ticks_to_secs(t)) != t {
+                return Err(invalid("V1 no representa tiempos submilisegundo"));
+            }
+        }
+        let track = sequence.tracks.iter().find(|t| t.id == clip.track_id).ok_or_else(|| invalid("pista inexistente"))?;
+        match track.kind {
+            TrackKind::Video if clip.audio_stream.is_none() => video.push(clip),
+            TrackKind::Audio if clip.audio_stream.is_some() => audio.push(clip),
+            _ => return Err(invalid("stream y pista incompatibles")),
+        }
+    }
+    video.sort_by_key(|c| (c.position, c.id.clone()));
+    let streams = sequence.tracks.iter().filter(|t| t.kind == TrackKind::Audio).count();
+    let mut matched = std::collections::HashSet::new();
+    let mut cursor = Ticks::ZERO;
+    for clip in &video {
+        if clip.enabled {
+            if clip.position != cursor {
+                return Err(invalid("V1 compacta huecos; el montaje editado debe ser contiguo y sin overlays"));
+            }
+            cursor = clip.end();
+        }
+        for stream in 0..streams {
+            let twins: Vec<_> = audio
+                .iter()
+                .filter(|a| {
+                    a.audio_stream == Some(stream as u32)
+                        && a.position == clip.position
+                        && a.source == clip.source
+                        && a.enabled == clip.enabled
+                        && a.asset_id == clip.asset_id
+                        && a.link_group == clip.link_group
+                })
+                .collect();
+            if twins.len() != 1 || !matched.insert(twins[0].id.clone()) {
+                return Err(invalid("V1 requiere audio completo enlazado a cada pieza de video"));
+            }
+        }
+    }
+    if matched.len() != audio.len() {
+        return Err(invalid("Audio independiente no representable en V1"));
+    }
+    let mut out = montage.raw.clone();
+    let mut next = out["next_id"].as_u64().unwrap_or(1);
+    for clip in &montage.clips {
+        let number = clip.clip_id[5..].parse::<u64>().map_err(|_| invalid("contador de clip inválido"))?;
+        next = next.max(number.checked_add(1).ok_or_else(|| invalid("contador agotado"))?);
+    }
+    let track_number = montage.tracks.iter().map(|t| track_number(t)).max().unwrap_or(0).checked_add(1).ok_or_else(|| invalid("pistas agotadas"))?;
+    let track_id = format!("V{track_number}");
+    let mut next_track = track_number;
+    let mut tracks = out["tracks"].as_array().cloned().unwrap_or_default();
+    tracks.push(json!({"track_id":track_id,"name":"Edición V2"}));
+    let mut clips = out["clips"].as_array().cloned().unwrap();
+    for clip in &mut clips {
+        if clip.get("tv2_archived_state").is_none() {
+            clip["tv2_archived_state"] = clip.get("state").cloned().unwrap_or(json!("proposed"));
+        }
+        clip["state"] = json!("disabled");
+    }
+    let mut mapping = Vec::new();
+    for clip in video {
+        let placement_track = if clip.enabled {
+            track_id.clone()
+        } else {
+            next_track = next_track.checked_add(1).ok_or_else(|| invalid("pistas agotadas"))?;
+            let id = format!("V{next_track}");
+            tracks.push(json!({"track_id":id,"name":"Material V2 desactivado"}));
+            id
+        };
+        let source = clip.provenance.v1_clip_id.as_ref().and_then(|id| montage.clips.iter().find(|c| &c.clip_id == id));
+        let mut raw = source.map(|c| c.raw.clone()).unwrap_or_default();
+        raw.remove("tv2_archived_state");
+        let id = format!("clip-{next:06}");
+        next = next.checked_add(1).ok_or_else(|| invalid("contador agotado"))?;
+        for (key, value) in [
+            ("clip_id", json!(id)),
+            ("track_id", json!(placement_track)),
+            ("source_ini", crate::secs_json(clip.source.start)),
+            ("source_fin", crate::secs_json(clip.source.end)),
+            ("seq_ini", crate::secs_json(clip.position)),
+            ("label", json!(clip.name)),
+            (
+                "state",
+                if !clip.enabled {
+                    json!("disabled")
+                } else {
+                    clip.extra.get("v1").and_then(|v| v.get("state")).filter(|s| *s != "disabled").cloned().unwrap_or(json!("proposed"))
+                },
+            ),
+            ("origin", source.map(|c| json!(c.origin)).unwrap_or(json!("user"))),
+            ("edited", json!(true)),
+            ("tv2_clip_id", json!(clip.id)),
+            ("tv2_provenance", json!(clip.provenance)),
+            ("tv2_extra", json!(clip.extra)),
+        ] {
+            raw.insert(key.into(), value);
+        }
+        mapping.push(json!({"v2_clip_id":clip.id,"v1_clip_id":id,"source_clip_id":clip.provenance.v1_clip_id}));
+        clips.push(Value::Object(raw));
+    }
+    out["clips"] = json!(clips);
+    out["tracks"] = json!(tracks);
+    out["next_id"] = json!(next);
+    out["revision"] = json!(montage.revision.checked_add(1).ok_or_else(|| invalid("revisión agotada"))?);
+    if let Some(previous) = out.get("tv2_conversion").cloned() {
+        let mut history = out.get("tv2_previous_conversions").and_then(Value::as_array).cloned().unwrap_or_default();
+        history.push(previous);
+        out["tv2_previous_conversions"] = json!(history);
+    }
+    out["tv2_conversion"] = json!({"schema":"tv2-montage-inverse/1","source_digest":tv2_domain::digest::digest_json(&montage.raw),"mapping":mapping,"sequence_id":sequence.id,"markers":sequence.markers,"sequence_name":sequence.name,"tracks":sequence.tracks,"disabled_clips":sequence.clips.iter().filter(|c|!c.enabled).collect::<Vec<_>>()});
+    let validated = V1Montaje::parse(out.clone(), None)?;
+    // Independently verify the observable source mapping after V1's compaction.
+    let flattened = validated.flatten(false);
+    let wanted: Vec<_> = sequence.clips.iter().filter(|c| c.enabled && c.audio_stream.is_none()).collect();
+    if flattened.len() != wanted.len()
+        || wanted.iter().any(|c| {
+            !flattened.iter().any(|p| {
+                secs_to_ticks(p.seq_ini) == c.position && secs_to_ticks(p.source_ini) == c.source.start && secs_to_ticks(p.source_fin) == c.source.end
+            })
+        })
+    {
+        return Err(invalid("La conversión V1 no reproduce el mapping editado"));
+    }
+    Ok(out)
 }
 
 #[cfg(test)]
@@ -329,6 +485,53 @@ mod tests {
     fn doc(clips: Vec<Value>) -> Value {
         json!({"schema": "editorial-montaje/1", "media": {"size": 10, "hash_muestreado": "m", "inventario_sha256": "i"}, "duration_source": 100.0,
                "target_seconds": 900.0, "revision": 0, "next_id": 10, "tracks": [{"track_id": "V1", "name": "V1"}], "clips": clips, "analysis": {"request_id": null, "pass": 0}})
+    }
+
+    #[test]
+    fn edited_inverse_preserves_archive_and_matches_repeated_trimmed_reordered_mapping() {
+        let mut raw = doc(vec![clip(1, "V1", 10.0, 30.0, 0.0), clip(2, "V2", 50.0, 53.0, 8.0), clip(3, "V1", 80.0, 85.0, 25.0)]);
+        raw["clips"][0]["unknown"] = json!({"evidence":"keep"});
+        raw["clips"][2]["state"] = json!("disabled");
+        let m = V1Montaje::parse(raw.clone(), Some(&fp())).unwrap();
+        let mut seq = m.to_sequence(&"a".into(), Rational::new(30, 1), 1920, 1080, 1);
+        // Keep the upper occurrence, trim it, repeat it, and delete the two lower pieces.
+        seq.clips.retain(|c| c.provenance.v1_clip_id.as_deref() == Some("clip-000002"));
+        for c in &mut seq.clips {
+            c.source = TimeRange::new(Ticks::from_seconds(51), Ticks::from_seconds(53));
+            c.position = Ticks::ZERO;
+            c.name = "Editado ñ".into();
+        }
+        let mut copies = seq.clips.clone();
+        for c in &mut copies {
+            c.id = ClipId::random();
+            c.position = Ticks::from_seconds(2);
+            c.link_group = Some("repeat".into());
+        }
+        seq.clips.extend(copies);
+        let out = sequence_to_v1(&seq, &fp()).unwrap();
+        let inverse = V1Montaje::parse(out.clone(), Some(&fp())).unwrap();
+        assert_eq!(
+            inverse.flatten(false).iter().map(|p| (p.seq_ini, p.seq_fin, p.source_ini, p.source_fin)).collect::<Vec<_>>(),
+            vec![(0.0, 2.0, 51.0, 53.0), (2.0, 4.0, 51.0, 53.0)]
+        );
+        assert_eq!(out["clips"][0]["unknown"], raw["clips"][0]["unknown"]);
+        for i in 0..3 {
+            assert_eq!(out["clips"][i]["clip_id"], raw["clips"][i]["clip_id"]);
+            assert_eq!(out["clips"][i]["source_ini"], raw["clips"][i]["source_ini"]);
+            assert_eq!(out["clips"][i]["state"], "disabled");
+        }
+        assert_eq!(out["clips"][0]["tv2_archived_state"], "proposed");
+        assert_eq!(out["clips"][2]["tv2_archived_state"], "disabled");
+        assert_eq!(out["revision"], 1);
+        assert_eq!(out["next_id"], 12);
+        assert_eq!(out["tv2_conversion"]["mapping"][0]["v2_clip_id"], json!(seq.clips[0].id));
+        let reopened = inverse.to_sequence(&"a".into(), Rational::new(30, 1), 1920, 1080, 1);
+        assert_eq!(sequence_to_v1(&reopened, &fp()).unwrap(), out);
+        // An independently moved audio track or a gap is rejected, not flattened away.
+        seq.clips[1].position += Ticks::from_seconds(1);
+        assert!(sequence_to_v1(&seq, &fp()).is_err());
+        seq.clips.clear();
+        assert!(V1Montaje::parse(sequence_to_v1(&seq, &fp()).unwrap(), Some(&fp())).unwrap().flatten(false).is_empty());
     }
 
     /// `test_montaje.py::test_flatten_top_track_covers_bottom_at_start_middle_and_end`.

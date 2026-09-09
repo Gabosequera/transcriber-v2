@@ -38,6 +38,8 @@ pub fn draw(app: &mut TranscriptorApp, root: &mut egui::Ui) {
         viewer(app, ui);
     });
     dialogs(app, &ctx);
+    crate::author_ui::draw(app, &ctx);
+    crate::durable_exports::draw(app, &ctx);
     crate::ui_markers::draw(app, &ctx);
     toasts(app, &ctx);
 }
@@ -95,13 +97,24 @@ fn menu_bar(app: &mut TranscriptorApp, root: &mut egui::Ui) {
                     app.import_author_dialog();
                     ui.close();
                 }
+                if ui.button("Buscar y resolver marcas del autor…").clicked() {
+                    app.scan_author(false);
+                    ui.close();
+                }
                 if ui.button("Recuperar exportación V1 interrumpida…").clicked() {
                     app.recover_export_dialog();
                     ui.close();
                 }
+                if ui.button("Trabajos de exportación guardados…").clicked() {
+                    app.export_jobs_open = true;
+                    app.export_jobs_scanned = false;
+                    ui.close();
+                }
                 if ui
                     .button("Exportar montaje a JSON V1…")
-                    .on_hover_text("Conserva el original completo si la proyección no cambió; rechaza cambios sin inversa sin pérdida")
+                    .on_hover_text(
+                        "Exporta la edición contigua con audio enlazado y conserva los originales como material desactivado con procedencia",
+                    )
                     .clicked()
                 {
                     app.export_v1_dialog(true);
@@ -1121,25 +1134,61 @@ fn dialogs(app: &mut TranscriptorApp, ctx: &egui::Context) {
             }
         });
     }
-    if let Some(change) = &app.external.change {
+    if let Some(change) = &mut app.external.change {
         let diff = change.diff.human();
+        let mut apply = false;
+        let mut dismiss = false;
         egui::Window::new("Cambio externo en project.json").collapsible(false).show(ctx, |ui| {
             ui.label(diff);
-            ui.label("Se combinan cambios independientes. Las decisiones humanas y la evidencia permanecen protegidas.");
-            ui.horizontal(|ui| {
-                if ui.button("Aplicar cambio externo").clicked() {
-                    app.accept_external();
+            egui::ScrollArea::vertical().max_height(380.0).show(ui, |ui| {
+                for field in &change.fields {
+                    ui.collapsing(&field.path, |ui| {
+                        ui.label(format!("Local: {}", field.before.as_ref().map(|v| v.to_string()).unwrap_or_else(|| "ausente".into())));
+                        ui.label(format!("Externo: {}", field.after.as_ref().map(|v| v.to_string()).unwrap_or_else(|| "ausente".into())));
+                    });
                 }
-                if ui.button("Posponer esta versión").clicked() {
-                    app.external.dismiss();
+                for conflict in &change.conflicts {
+                    ui.separator();
+                    ui.label(format!("Conflicto: {}", conflict.path));
+                    ui.label(format!("Base: {:?}", conflict.base));
+                    ui.label(format!("Local: {:?}", conflict.local));
+                    ui.label(format!("Externo: {:?}", conflict.external));
+                    ui.horizontal(|ui| {
+                        for (choice, label) in [
+                            (tv2_application::reconcile::ConflictChoice::Local, "Conservar local"),
+                            (tv2_application::reconcile::ConflictChoice::External, "Usar externo"),
+                        ] {
+                            if ui.selectable_label(change.choices.get(&conflict.path) == Some(&choice), label).clicked() {
+                                change.choices.insert(conflict.path.clone(), choice);
+                            }
+                        }
+                    });
                 }
             });
+            ui.checkbox(&mut change.human_review, "Autorizar explícitamente cambios a mis decisiones editoriales (la evidencia sigue protegida)");
+            ui.horizontal(|ui| {
+                apply = ui
+                    .add_enabled(change.conflicts.iter().all(|c| change.choices.contains_key(&c.path)), egui::Button::new("Aplicar cambio externo"))
+                    .clicked();
+                dismiss = ui.button("Posponer esta versión").clicked();
+            });
         });
+        if apply {
+            app.accept_external();
+        }
+        if dismiss {
+            app.external.dismiss();
+        }
     }
     if let Some(error) = &app.external.error {
         egui::Window::new("Conflicto externo").collapsible(true).show(ctx, |ui| {
             ui.label(error);
             ui.label("Tu edición se conserva. La lectura se reintentará; también puedes guardar en otra carpeta.");
+        });
+    }
+    if let Some(error) = &app.external.watcher_error {
+        egui::Window::new("Aviso de vigilancia de archivos").show(ctx, |ui| {
+            ui.label(error);
         });
     }
     if let Some(candidate) = &app.recovery {
