@@ -1,3 +1,18 @@
+# Continuación 7 — nuevas operaciones
+
+- Archivo → Importar V1: lectura/probe en worker; Biblioteca permite cancelar. Cambiar proyecto o revisión impide aplicar un resultado viejo. Una carpeta reconocida inválida no modifica el proyecto.
+- Inspector o F2/Enter sobre item → editar texto, comentario, rangos fuente y padre. Borrador persistente; Aplicar confirma un batch. Rango por fila; padre vacío convierte en raíz. Error de base antigua conserva borrador para consulta, exige reabrirlo.
+- Copiar/cortar/pegar/duplicar items incluye descendientes y conserva multirrango. Raíces copiadas no conservan padres externos al grupo. Pegado exige capa del mismo medio. Clips conservan efectos, ganancia y enlace con IDs nuevos. Colisión rechaza toda la operación.
+- Ajustes → Atajos → Importar/Exportar keymap/1/Restaurar todos. Un archivo inválido no cambia ni guarda ajustes parciales.
+- Archivo → Exportar capa seleccionada a JSON V1 / Exportar montaje a JSON V1. Crea una carpeta nueva dentro del destino elegido, con **un documento**. Solo user/topics/ai y montaje importado intacto; otros casos muestran error explícito. Esto no exporta una carpeta de proyecto V1 completa.
+- Autosave/1 de proyectos guardados incluye auditoría y recibos; legacy sigue legible. Escritura en worker y recuperación explícita con undo. Guardar manual sigue síncrono.
+
+Controles y límites exactos en STATUS y evidence/continuacion-07.md. Pruebas físicas y generales aplazadas. No eludir Windows 4551.
+
+---
+
+## Instrucciones base e histórico
+
 # Desarrollo y ejecución portable
 
 Ejecutar los comandos desde la raíz del checkout, sea cual sea su nombre o unidad. Las rutas `G:/TODO` de `implementation/evidence/` describen el equipo anterior y no deben sustituirse masivamente: son evidencia histórica.

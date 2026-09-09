@@ -159,9 +159,11 @@ pub struct TranscriptorApp {
     pub _console_sink: ConsoleSink,
     pub export: ExportState,
     pub imports: crate::import_jobs::ImportJobs,
+    pub editorial_job: Option<crate::editorial_jobs::EditorialJob>,
     pub timeline_view: crate::ui_timeline::TimelineView,
     pub resolved: Arc<ResolvedTimeline>,
     pub resolved_revision: Option<(u64, ViewMode, Option<AssetId>)>,
+    pub item_clipboard: Option<(LayerId, AssetId, Vec<SemanticItem>)>,
     pub clipboard: Vec<tv2_domain::timeline::Clip>,
     pub new_layer_dialog: Option<String>,
     pub rename_dialog: Option<(String, RenameTarget)>,
@@ -172,6 +174,9 @@ pub struct TranscriptorApp {
     pub shortcut_editor: Option<crate::keymap::ShortcutEditor>,
     pub pending_close: bool,
     pub recovery: Option<Project>,
+    pub recovery_audit: Vec<tv2_application::session::JournalEvent>,
+    pub v1_export_job: Option<crossbeam_channel::Receiver<tv2_domain::error::DomainResult<PathBuf>>>,
+    pub autosave_job: Option<crossbeam_channel::Receiver<tv2_domain::error::DomainResult<()>>>,
     pub external: crate::external::ExternalMonitor,
     pub unsaved_recoveries: Vec<PathBuf>,
     unsaved_store: Option<ProjectStore>,
@@ -181,6 +186,7 @@ pub struct TranscriptorApp {
     pub script: Option<crate::scripting::ScriptRunner>,
     pub frame_count: u64,
     pub markers_open: bool,
+    pub item_editor: Option<crate::item_editor::ItemEditor>,
     pub marker_editor: Option<tv2_domain::timeline::Marker>,
 }
 
@@ -189,7 +195,6 @@ pub struct TranscriptorApp {
 pub enum RenameTarget {
     Clip(ClipId),
     Layer(LayerId),
-    Item(LayerId, ItemId),
     Track(TrackId),
     Project,
 }
@@ -238,6 +243,7 @@ impl TranscriptorApp {
         let mut app = TranscriptorApp {
             markers_open: false,
             marker_editor: None,
+            item_editor: None,
             session,
             store: None,
             tools,
@@ -264,6 +270,7 @@ impl TranscriptorApp {
             console_filter: tracing::Level::INFO,
             _console_sink: console_sink,
             imports: Default::default(),
+            editorial_job: None,
             export: ExportState {
                 open: false,
                 preset_idx: 1,
@@ -284,6 +291,7 @@ impl TranscriptorApp {
             }),
             resolved_revision: None,
             clipboard: Vec::new(),
+            item_clipboard: None,
             new_layer_dialog: None,
             rename_dialog: None,
             goto_dialog: None,
@@ -293,6 +301,9 @@ impl TranscriptorApp {
             shortcut_editor: None,
             pending_close: false,
             recovery: None,
+            recovery_audit: Vec::new(),
+            autosave_job: None,
+            v1_export_job: None,
             external: Default::default(),
             unsaved_recoveries: Self::find_unsaved_recoveries(),
             unsaved_store: None,
@@ -459,7 +470,7 @@ impl TranscriptorApp {
         }
     }
 
-    fn after_change(&mut self) {
+    pub(crate) fn after_change(&mut self) {
         // podar selección
         let clips: HashSet<ClipId> = self.project().sequences.iter().flat_map(|s| s.clips.iter().map(|c| c.id.clone())).collect();
         let items_ok: Vec<bool> = self.selection.items.iter().map(|(l, i)| self.project().layer(l).and_then(|l| l.item(i)).is_some()).collect();
@@ -550,11 +561,19 @@ impl TranscriptorApp {
 
     pub fn open_project_path(&mut self, path: &Path) {
         self.imports.cancel();
+        if let Some(job) = &self.editorial_job {
+            job.cancel.store(true, std::sync::atomic::Ordering::Release);
+        }
         let store = ProjectStore::from_user_path(path);
         match store.load() {
             Ok(mut project) => {
-                self.recovery = match store.recovery_candidate(&project) {
-                    Ok(candidate) => candidate,
+                self.recovery_audit.clear();
+                self.recovery = match store.recovery_with_audit(&project) {
+                    Ok(Some((candidate, events))) => {
+                        self.recovery_audit = events;
+                        Some(candidate)
+                    }
+                    Ok(None) => None,
                     Err(e) => {
                         self.report(e.with_action("autosave inválido; se abre la última versión guardada"));
                         None
@@ -572,7 +591,14 @@ impl TranscriptorApp {
                     }
                 }
                 let name = project.name.clone();
-                self.session = ProjectSession::new(project);
+                let session = match store.read_journal().and_then(|events| ProjectSession::with_audit(project, &events)) {
+                    Ok(session) => session,
+                    Err(e) => {
+                        self.report(e);
+                        return;
+                    }
+                };
+                self.session = session;
                 self.external = Default::default();
                 self.unsaved_store = None;
                 self.marker_editor = None;
@@ -612,7 +638,23 @@ impl TranscriptorApp {
             let abs = self.resolve_asset_path(a);
             a.path = store.portable_path(&abs);
         }
-        match store.save_with_journal(&project, self.session.pending_journal()) {
+        let mut events = if let Some(source) = &self.store {
+            if source.root != store.root {
+                match source.read_journal() {
+                    Ok(events) => events,
+                    Err(e) => {
+                        self.report(e);
+                        return false;
+                    }
+                }
+            } else {
+                Vec::new()
+            }
+        } else {
+            Vec::new()
+        };
+        events.extend_from_slice(self.session.pending_journal());
+        match store.save_with_journal(&project, &events) {
             Ok(()) => {
                 self.store = Some(store.clone());
                 self.session.mark_clean();
@@ -662,6 +704,9 @@ impl TranscriptorApp {
 
     pub fn new_project(&mut self) {
         self.imports.cancel();
+        if let Some(job) = &self.editorial_job {
+            job.cancel.store(true, std::sync::atomic::Ordering::Release);
+        }
         self.marker_editor = None;
         if let Some(media) = &mut self.media_view {
             media.clear();
@@ -769,87 +814,65 @@ impl TranscriptorApp {
     /// aplanado). Si ningún medio del proyecto coincide con el master, intenta el
     /// `media.path` del master (absoluto o relativo a la carpeta) y una ruta sugerida.
     pub fn import_v1_folder(&mut self, root: &Path, media_hint: Option<PathBuf>) {
-        let master_path = match tv2_v1compat::import::find_master(root) {
-            Some(p) => p,
-            None => {
-                self.toast(Severity::Error, format!("No hay *.editorial.master.json en {}", root.display()));
-                return;
-            }
-        };
-        let master = match tv2_v1compat::master::V1Master::load(&master_path) {
-            Ok(m) => m,
-            Err(e) => {
-                self.toast(Severity::Error, format!("Master V1 ilegible: {e}"));
-                return;
-            }
-        };
-        let mut asset = self.project().assets.iter().find(|a| a.fingerprint.same_identity(&master.fingerprint)).cloned();
-        if asset.is_none() {
-            let mut candidates: Vec<PathBuf> = Vec::new();
-            if let Some(h) = media_hint {
-                candidates.push(h);
-            }
-            let mp = PathBuf::from(&master.media_path);
-            if mp.is_absolute() {
-                candidates.push(mp.clone());
-            }
-            let mut bases: Vec<PathBuf> = vec![root.to_path_buf()];
-            if let Some(p) = master_path.parent() {
-                bases.push(p.to_path_buf());
-            }
-            if let Some(p) = root.parent() {
-                bases.push(p.to_path_buf());
-            }
-            for base in bases {
-                candidates.push(base.join(&mp));
-                if let Some(name) = mp.file_name() {
-                    candidates.push(base.join(name));
-                }
-            }
-            let Ok(tools) = self.tools.clone() else {
-                self.toast(Severity::Error, "FFmpeg no disponible");
-                return;
-            };
-            for c in candidates.into_iter().filter(|c| c.is_file()) {
-                let abs = std::path::absolute(&c).unwrap_or(c.clone());
-                let portable = match &self.store {
-                    Some(s) => s.portable_path(&abs),
-                    None => abs.to_string_lossy().replace('\\', "/"),
-                };
-                if let Ok(a) = tools.import(&abs, portable)
-                    && a.fingerprint.same_identity(&master.fingerprint)
-                {
-                    if self.exec(Command::ImportAsset { asset: a.clone() }) {
-                        asset = Some(a);
-                    }
-                    break;
-                }
-            }
+        if self.editorial_job.is_some() {
+            self.toast(Severity::Warn, "Hay una importación editorial en curso; espera o cancélala");
+            return;
         }
-        let Some(asset) = asset else {
+        match crate::editorial_jobs::EditorialJob::start(
+            self.project().project_id.clone(),
+            self.session.revision(),
+            root.to_path_buf(),
+            media_hint,
+            self.project().assets.clone(),
+            self.tools.as_ref().ok().cloned(),
+        ) {
+            Ok(job) => self.editorial_job = Some(job),
+            Err(e) => self.report(DomainError::process(format!("No se pudo iniciar importación V1: {e}"))),
+        }
+    }
+
+    pub fn poll_editorial_import(&mut self) {
+        let result = self.editorial_job.as_ref().and_then(|job| match job.result.try_recv() {
+            Ok(value) => Some(value),
+            Err(crossbeam_channel::TryRecvError::Empty) => None,
+            Err(crossbeam_channel::TryRecvError::Disconnected) => Some(Err(DomainError::process("El worker editorial terminó sin resultado"))),
+        });
+        let Some(result) = result else { return };
+        let job = self.editorial_job.take().unwrap();
+        if job.project != self.project().project_id || job.cancel.load(std::sync::atomic::Ordering::Acquire) {
+            return;
+        }
+        let crate::editorial_jobs::EditorialImport { asset, import } = match result {
+            Ok(value) => value,
+            Err(e) => {
+                if let Some(script) = &mut self.script {
+                    script.failed = true;
+                }
+                self.report(e);
+                return;
+            }
+        };
+        if job.revision != self.session.revision() {
             self.toast(
                 Severity::Warn,
-                format!("Ningún medio coincide con la identidad del master ({}). Importa el video original y repite.", master.media_path),
+                "El proyecto cambió durante la importación V1. Repite la importación sobre la revisión actual; no se aplicó nada.",
             );
-            return;
-        };
-        let import = match tv2_v1compat::import::read_v1_editorial(root, &asset) {
-            Ok(i) => i,
-            Err(e) => {
-                self.toast(Severity::Error, format!("Importación V1: {e}"));
-                return;
+            if let Some(script) = &mut self.script {
+                script.failed = true;
             }
-        };
+            return;
+        }
         for w in &import.report.warnings {
             self.toast(Severity::Warn, format!("V1: {w}"));
         }
-        let commands = tv2_v1compat::import::import_commands(&import, self.project(), &asset.id);
-        if commands.is_empty() {
-            self.toast(Severity::Warn, "La carpeta V1 no contiene capas, recortes ni montaje");
-            return;
+        let mut commands = Vec::new();
+        if self.project().asset(&asset.id).is_none() {
+            commands.push(Command::ImportAsset { asset: asset.clone() });
         }
+        commands.extend(tv2_v1compat::import::import_commands(&import, self.project(), &asset.id));
         let n = commands.len();
         let envelope = CommandEnvelope::human(Command::Batch { label: "Importar proyecto V1".into(), commands })
+            .with_base(job.revision)
             .with_actor(Actor::External { source: "import-v1".into() });
         if let Err(e) = self.session.execute(envelope) {
             self.report(e);
@@ -872,6 +895,53 @@ impl TranscriptorApp {
                 self.timeline_view.fit(d);
                 self.seek(Ticks::ZERO);
             }
+        }
+    }
+
+    pub fn export_v1_dialog(&mut self, montage: bool) {
+        if self.v1_export_job.is_some() {
+            self.toast(Severity::Warn, "Hay una exportación V1 en curso");
+            return;
+        }
+        let Some(directory) = rfd::FileDialog::new().set_title("Destino para una nueva carpeta de exportación V1").pick_folder() else { return };
+        let project = self.project().clone();
+        let layer = self.selection.layer.clone().or_else(|| self.selection.items.first().map(|(l, _)| l.clone()));
+        let sequence = self.sequence().map(|s| s.id.clone());
+        let (tx, rx) = crossbeam_channel::bounded(1);
+        let result = std::thread::Builder::new().name("v1-export".into()).spawn(move || {
+            let work = || -> tv2_domain::error::DomainResult<PathBuf> {
+                let (value, name) = if montage {
+                    let id = sequence.ok_or_else(|| DomainError::invalid("Selecciona una secuencia"))?;
+                    (tv2_v1compat::export::montage_document(&project, &id)?, "montaje.json".to_string())
+                } else {
+                    let id = layer.ok_or_else(|| DomainError::invalid("Selecciona una capa manual, de temas o AI"))?;
+                    (tv2_v1compat::export::layer_document(&project, &id)?, format!("{id}.json"))
+                };
+                let target = directory.join(format!("v1-export-r{}-{}", project.revision, tv2_domain::ids::random_hex12()));
+                // A new directory prevents overwriting any imported V1 document.
+                std::fs::create_dir(&target)?;
+                tv2_application::store::atomic_write(&target.join(name), &serde_json::to_vec_pretty(&value)?)?;
+                Ok(target)
+            };
+            let _ = tx.send(work());
+        });
+        match result {
+            Ok(_) => self.v1_export_job = Some(rx),
+            Err(e) => self.report(e.into()),
+        }
+    }
+
+    fn poll_v1_export(&mut self) {
+        let Some(job) = &self.v1_export_job else { return };
+        let result = match job.try_recv() {
+            Ok(value) => value,
+            Err(crossbeam_channel::TryRecvError::Empty) => return,
+            Err(crossbeam_channel::TryRecvError::Disconnected) => Err(DomainError::process("Worker de exportación V1 terminó sin resultado")),
+        };
+        self.v1_export_job = None;
+        match result {
+            Ok(path) => self.toast(Severity::Info, format!("Documento V1 exportado en {}", path.display())),
+            Err(e) => self.report(e),
         }
     }
 
@@ -1050,33 +1120,25 @@ impl TranscriptorApp {
             }
             "edit.undo" => self.undo(),
             "edit.redo" => self.redo(),
-            "edit.copy" => self.copy_selection(),
-            "edit.cut" => {
+            "edit.copy" => {
                 self.copy_selection();
-                self.delete_selection(false);
+            }
+            "edit.cut" => {
+                if self.copy_selection() {
+                    self.delete_selection(false);
+                }
             }
             "edit.paste" => self.paste_at_playhead(),
-            "edit.duplicate" => {
-                let ids = self.selection.clips.clone();
-                let mut new_sel = Vec::new();
-                for id in ids {
-                    let Some(c) = self.sequence().and_then(|s| s.clip(&id)).cloned() else { continue };
-                    match self.session.execute(CommandEnvelope::human(Command::DuplicateClip { clip_id: id, position: c.end(), track_id: None })) {
-                        Ok(r) => {
-                            new_sel.extend(r.effect.created.iter().map(|s| ClipId::new(s.clone())));
-                            self.after_change();
-                        }
-                        Err(e) => self.report(e),
-                    }
-                }
-                if !new_sel.is_empty() {
-                    self.selection.clips = new_sel;
-                }
-            }
+            "edit.duplicate" => self.duplicate_selection(),
             "tools.select" => self.tool = Tool::Select,
             "tools.cut" => self.tool = Tool::Cut,
             "tools.select_all" => {
-                if let Some(seq) = self.sequence() {
+                if let Some(layer_id) = self.selection.layer.clone() {
+                    if let Some(layer) = self.project().layer(&layer_id) {
+                        self.selection.items = layer.items.iter().map(|i| (layer_id.clone(), i.item_id.clone())).collect();
+                        self.selection.clips.clear();
+                    }
+                } else if let Some(seq) = self.sequence() {
                     let track = self.selection.clips.first().and_then(|c| seq.clip(c)).map(|c| c.track_id.clone());
                     self.selection.clips =
                         seq.clips.iter().filter(|c| track.as_ref().is_none_or(|t| &c.track_id == t)).map(|c| c.id.clone()).collect();
@@ -1352,10 +1414,10 @@ impl TranscriptorApp {
             for (l, i) in &self.selection.items {
                 by_layer.entry(l.clone()).or_default().push(i.clone());
             }
-            for (l, ids) in by_layer {
-                self.exec(Command::DeleteItems { layer_id: l, item_ids: ids });
+            let commands = by_layer.into_iter().map(|(l, ids)| Command::DeleteItems { layer_id: l, item_ids: ids }).collect();
+            if self.exec(Command::Batch { label: "Borrar items seleccionados".into(), commands }) {
+                self.selection.items.clear();
             }
-            self.selection.items.clear();
             return;
         }
         let ids = self.linked_selection();
@@ -1368,48 +1430,102 @@ impl TranscriptorApp {
         }
     }
 
-    fn copy_selection(&mut self) {
-        let Some(seq) = self.sequence() else { return };
-        let ids = self.linked_selection();
-        self.clipboard = ids.iter().filter_map(|c| seq.clip(c)).cloned().collect();
-        if self.clipboard.is_empty() {
-            self.toast(Severity::Warn, "Nada que copiar");
+    fn duplicate_selection(&mut self) {
+        if !self.copy_selection() {
+            return;
+        }
+        if let Some((layer_id, _, items)) = self.item_clipboard.clone() {
+            let position = items.iter().map(SemanticItem::end).max().unwrap();
+            match self.session.execute(CommandEnvelope::human(Command::PasteItems { layer_id: layer_id.clone(), items, position })) {
+                Ok(r) => {
+                    self.selection.items = r.effect.created.iter().map(|id| (layer_id.clone(), ItemId::new(id))).collect();
+                    self.after_change();
+                }
+                Err(e) => self.report(e),
+            }
         } else {
-            let n = self.clipboard.len();
-            self.toast(Severity::Info, format!("{n} clip(s) copiados"));
+            let position = self.clipboard.iter().map(|c| c.end()).max().unwrap();
+            match self.session.execute(CommandEnvelope::human(Command::PasteClips { clips: self.clipboard.clone(), position })) {
+                Ok(r) => {
+                    self.selection.clips = r.effect.created.iter().map(ClipId::new).collect();
+                    self.after_change();
+                }
+                Err(e) => self.report(e),
+            }
         }
     }
 
+    fn copy_selection(&mut self) -> bool {
+        if let Some((layer_id, _)) = self.selection.items.first() {
+            if self.selection.items.iter().any(|(l, _)| l != layer_id) {
+                self.toast(Severity::Warn, "Copia items de un solo carril cada vez");
+                return false;
+            }
+            let Some(layer) = self.project().layer(layer_id) else { return false };
+            if !layer.kind.is_editable() || layer.locked {
+                self.toast(Severity::Warn, "Esta evidencia es de solo lectura");
+                return false;
+            }
+            let mut ids: std::collections::HashSet<_> = self.selection.items.iter().map(|(_, i)| i.clone()).collect();
+            loop {
+                let old = ids.len();
+                for item in &layer.items {
+                    if item.parent_id.as_ref().is_some_and(|p| ids.contains(p)) {
+                        ids.insert(item.item_id.clone());
+                    }
+                }
+                if old == ids.len() {
+                    break;
+                }
+            }
+            let items: Vec<_> = layer.items.iter().filter(|i| ids.contains(&i.item_id)).cloned().collect();
+            if items.is_empty() {
+                return false;
+            }
+            self.item_clipboard = Some((layer.layer_id.clone(), layer.asset_id.clone(), items));
+            self.clipboard.clear();
+            self.toast(Severity::Info, "Items y descendientes copiados; al pegar se conservan sus rangos relativos");
+            return true;
+        }
+        let Some(seq) = self.sequence() else { return false };
+        let ids = self.linked_selection();
+        let clips: Vec<_> = ids.iter().filter_map(|c| seq.clip(c)).cloned().collect();
+        if clips.is_empty() {
+            self.toast(Severity::Warn, "Nada que copiar");
+            return false;
+        }
+        self.item_clipboard = None;
+        self.clipboard = clips;
+        self.toast(Severity::Info, format!("{} clip(s) copiados", self.clipboard.len()));
+        true
+    }
+
     fn paste_at_playhead(&mut self) {
+        if let Some((source_layer, asset, items)) = self.item_clipboard.clone() {
+            let layer_id = self.selection.layer.clone().unwrap_or(source_layer);
+            if self.project().layer(&layer_id).is_none_or(|l| l.asset_id != asset) {
+                self.toast(Severity::Warn, "El destino debe ser una capa del mismo medio");
+                return;
+            }
+            let Some(position) = self.view_time_to_source(self.playhead, &asset) else {
+                self.toast(Severity::Warn, "El playhead no corresponde al medio de los items");
+                return;
+            };
+            match self.session.execute(CommandEnvelope::human(Command::PasteItems { layer_id: layer_id.clone(), items, position })) {
+                Ok(r) => {
+                    self.selection.items = r.effect.created.iter().map(|id| (layer_id.clone(), ItemId::new(id))).collect();
+                    self.after_change();
+                }
+                Err(e) => self.report(e),
+            }
+            return;
+        }
         if self.clipboard.is_empty() {
             self.toast(Severity::Warn, "Portapapeles vacío");
             return;
         }
-        let base = self.clipboard.iter().map(|c| c.position).min().unwrap();
         let at = self.playhead.floor_to_frame(self.frame_rate());
-        let group_map: HashMap<String, String> =
-            self.clipboard.iter().filter_map(|c| c.link_group.clone()).map(|g| (g, format!("link-{}", tv2_domain::ids::random_hex12()))).collect();
-        let commands: Vec<Command> = self
-            .clipboard
-            .iter()
-            .map(|c| Command::AddClip {
-                track_id: c.track_id.clone(),
-                asset_id: c.asset_id.clone(),
-                source: c.source,
-                position: at + (c.position - base),
-                policy: MovePolicy::Reject,
-                clip_id: None,
-                link_group: c.link_group.as_ref().and_then(|g| group_map.get(g).cloned()),
-                audio_stream: c.audio_stream,
-                provenance: Some(tv2_domain::timeline::Provenance {
-                    origin: "paste".into(),
-                    parent_clip: Some(c.id.clone()),
-                    v1_clip_id: None,
-                    created_at: Some(tv2_domain::project::now_iso()),
-                }),
-            })
-            .collect();
-        match self.session.execute(CommandEnvelope::human(Command::Batch { label: "Pegar".into(), commands })) {
+        match self.session.execute(CommandEnvelope::human(Command::PasteClips { clips: self.clipboard.clone(), position: at })) {
             Ok(r) => {
                 self.selection.clips = r.effect.created.iter().map(|s| ClipId::new(s.clone())).collect();
                 self.after_change();
@@ -1420,8 +1536,15 @@ impl TranscriptorApp {
 
     fn open_rename_for_selection(&mut self) {
         if let Some((l, i)) = self.selection.items.first().cloned() {
-            let label = self.project().layer(&l).and_then(|l| l.item(&i)).map(|i| i.label.clone()).unwrap_or_default();
-            self.rename_dialog = Some((label, RenameTarget::Item(l, i)));
+            if let Some(layer) = self.project().layer(&l)
+                && layer.kind.is_editable()
+                && !layer.locked
+                && !layer.deleted
+                && let Some(item) = layer.item(&i)
+            {
+                self.item_editor =
+                    Some(crate::item_editor::ItemEditor::new(self.project().project_id.clone(), self.session.revision(), l.clone(), item));
+            }
         } else if let Some(c) = self.selection.clips.first().cloned() {
             let name = self.sequence().and_then(|s| s.clip(&c)).map(|c| c.name.clone()).unwrap_or_default();
             self.rename_dialog = Some((name, RenameTarget::Clip(c)));
@@ -1440,9 +1563,6 @@ impl TranscriptorApp {
             }
             RenameTarget::Layer(l) => {
                 self.exec(Command::SetLayerProps { layer_id: l, name: Some(text), color: None, visible: None, locked: None });
-            }
-            RenameTarget::Item(l, i) => {
-                self.exec(Command::SetItemProps { layer_id: l, item_id: i, label: Some(text), comment: None, ranges: None });
             }
             RenameTarget::Track(t) => {
                 self.exec(Command::SetTrackProps {
@@ -1962,35 +2082,40 @@ impl TranscriptorApp {
     }
 
     fn autosave(&mut self) {
+        if let Some(job) = &self.autosave_job {
+            match job.try_recv() {
+                Ok(result) => {
+                    self.autosave_job = None;
+                    if let Err(e) = result {
+                        self.report(e.with_action("Falló el autosave; guarda el proyecto"));
+                    }
+                }
+                Err(crossbeam_channel::TryRecvError::Empty) => return,
+                Err(crossbeam_channel::TryRecvError::Disconnected) => {
+                    self.autosave_job = None;
+                    self.report(DomainError::process("Worker de autosave terminó sin resultado"));
+                }
+            }
+        }
         if self.last_autosave.elapsed().as_secs() < 60 || !self.session.is_dirty() {
             return;
         }
         self.last_autosave = Instant::now();
-        if self.store.is_none() {
-            if self.unsaved_store.is_none() {
-                let name = format!("{}-{}.transcriptor", self.project().project_id, tv2_domain::ids::random_hex12());
-                self.unsaved_store = Some(ProjectStore::at(crate::paths::config_dir().join("recovery").join(name)));
-            }
-            if let Some(store) = &self.unsaved_store
-                && let Err(e) = store.save_with_journal(self.project(), self.session.pending_journal())
-            {
-                self.report(e.with_action("falló la recuperación automática; guarda el proyecto en otra carpeta"));
-            }
-            return;
+        let saved = self.store.is_some();
+        if !saved && self.unsaved_store.is_none() {
+            let name = format!("{}-{}.transcriptor", self.project().project_id, tv2_domain::ids::random_hex12());
+            self.unsaved_store = Some(ProjectStore::at(crate::paths::config_dir().join("recovery").join(name)));
         }
-        if let Some(store) = &self.store {
-            let path = store.root.join("autosave.json");
-            let result =
-                self.project().validate().and_then(|_| serde_json::to_vec_pretty(self.project()).map_err(DomainError::from)).and_then(|bytes| {
-                    if bytes.len() > 64 * 1024 * 1024 {
-                        Err(DomainError::invalid("autosave supera 64 MiB"))
-                    } else {
-                        tv2_application::store::atomic_write(&path, &bytes)
-                    }
-                });
-            if let Err(e) = result {
-                self.report(e.with_action("falló el autosave; guarda el proyecto"));
-            }
+        let store = self.store.as_ref().or(self.unsaved_store.as_ref()).unwrap().clone();
+        let project = self.project().clone();
+        let events = self.session.pending_journal().to_vec();
+        let (tx, rx) = crossbeam_channel::bounded(1);
+        match std::thread::Builder::new().name("project-autosave".into()).spawn(move || {
+            let result = if saved { store.save_autosave(&project, &events) } else { store.save_with_journal(&project, &events) };
+            let _ = tx.send(result);
+        }) {
+            Ok(_) => self.autosave_job = Some(rx),
+            Err(e) => self.report(DomainError::process(format!("No se pudo iniciar autosave: {e}"))),
         }
     }
 
@@ -2012,6 +2137,8 @@ impl eframe::App for TranscriptorApp {
         self.poll_player();
         self.poll_export();
         self.poll_import();
+        self.poll_editorial_import();
+        self.poll_v1_export();
         self.external.poll(self.store.as_ref(), self.session.project(), ctx);
         self.refresh_resolved();
         // archivos soltados sobre la ventana
@@ -2043,13 +2170,14 @@ impl eframe::App for TranscriptorApp {
             media.begin_frame();
         }
         crate::ui_panels::draw(self, root);
+        crate::item_editor::draw(self, ctx);
         if let Some(media) = &mut self.media_view {
             media.end_frame();
         }
         self.frame_count += 1;
         self.script_tick(ctx);
         self.autosave();
-        if self.session.is_dirty() {
+        if self.session.is_dirty() || self.autosave_job.is_some() || self.v1_export_job.is_some() {
             ctx.request_repaint_after(std::time::Duration::from_secs(1));
         }
         // toasts caducan
@@ -2058,7 +2186,12 @@ impl eframe::App for TranscriptorApp {
             self.pending_close = true;
             ctx.send_viewport_cmd(egui::ViewportCommand::CancelClose);
         }
-        if self.imports.busy() || self.player_snapshot.playing || self.export.running.is_some() || !self.toasts.is_empty() {
+        if self.imports.busy()
+            || self.editorial_job.is_some()
+            || self.player_snapshot.playing
+            || self.export.running.is_some()
+            || !self.toasts.is_empty()
+        {
             ctx.request_repaint_after(std::time::Duration::from_millis(16));
         }
         let _ = frame;
@@ -2077,6 +2210,9 @@ impl eframe::App for TranscriptorApp {
 impl TranscriptorApp {
     pub fn shutdown_workers(&mut self) {
         self.imports.cancel();
+        if let Some(job) = &self.editorial_job {
+            job.cancel.store(true, std::sync::atomic::Ordering::Release);
+        }
         self.imports.running.take();
         self.export.pending.clear();
         if let Some(job) = &self.export.running {

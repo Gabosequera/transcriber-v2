@@ -10,6 +10,7 @@
 //!   resultado observable es el de V1, no las reglas de composición V2.
 //! - La identidad del medio es la de V1 (`size + hash_muestreado + inventario_sha256`).
 
+pub mod export;
 pub mod import;
 pub mod layers;
 pub mod master;

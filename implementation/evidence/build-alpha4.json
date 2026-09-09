@@ -1,0 +1,10 @@
+{
+  "bytes": 23734784,
+  "elapsed": "2m51s",
+  "version": "2.0.0-alpha.4",
+  "executed": false,
+  "build": "cargo build --release --locked -p transcriptor",
+  "file": "C:\\Users\\gabri\\Todo\\transcriber-v2\\target\\release\\Transcriptor.exe",
+  "sha256": "AB86328C452F44D12B6962513B094577D79E316A9470BAA63E18DEF956F1BCE0",
+  "packaged": false
+}

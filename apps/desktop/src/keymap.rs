@@ -137,6 +137,30 @@ pub struct Keymap {
 }
 
 impl Keymap {
+    /// Import is all-or-nothing: never silently discard an unknown action or
+    /// invalid chord from a user's file.
+    pub fn import_json(bytes: &[u8]) -> Result<Self, String> {
+        if bytes.len() > 1024 * 1024 {
+            return Err("El keymap supera 1 MiB".into());
+        }
+        let file: KeymapFile = serde_json::from_slice(bytes).map_err(|e| e.to_string())?;
+        if file.schema != SCHEMA {
+            return Err(format!("Schema desconocido: {}", file.schema));
+        }
+        let candidate = Self::with_overrides(file.bindings);
+        if !candidate.warnings.is_empty() {
+            return Err(candidate.warnings.join("\n"));
+        }
+        if let Some((chord, first, second)) = candidate.conflicts.first() {
+            return Err(format!("{chord} está asignado a {first} y {second}"));
+        }
+        Ok(candidate)
+    }
+
+    pub fn export_json(&self) -> Result<Vec<u8>, serde_json::Error> {
+        serde_json::to_vec_pretty(&KeymapFile { schema: SCHEMA.into(), bindings: self.overrides.clone() })
+    }
+
     pub fn load() -> Keymap {
         let mut overrides = HashMap::new();
         let mut warnings = Vec::new();
@@ -514,6 +538,23 @@ pub struct ShortcutEditor {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn exchange_is_strict_and_roundtrips_disabled_actions() {
+        let defaults = Keymap::with_overrides(Default::default());
+        let edited = defaults.edited("transport.pause", Some("")).unwrap().edited("nav.goto", Some("Ctrl+Alt+G")).unwrap();
+        let imported = Keymap::import_json(&edited.export_json().unwrap()).unwrap();
+        assert!(imported.chords("transport.pause").is_empty());
+        assert_eq!(imported.resolve("Ctrl+Alt+G"), Some("nav.goto"));
+        for value in [
+            serde_json::json!({"schema":"keymap/2"}),
+            serde_json::json!({"schema":"keymap/1","bindings":{"unknown":[]}}),
+            serde_json::json!({"schema":"keymap/1","bindings":{"nav.goto":["space"]}}),
+            serde_json::json!({"schema":"keymap/1","bindings":{"nav.goto":["nonsense"]}}),
+        ] {
+            assert!(Keymap::import_json(&serde_json::to_vec(&value).unwrap()).is_err());
+        }
+    }
 
     #[test]
     fn editing_shortcuts_is_transactional_and_can_disable_and_restore() {

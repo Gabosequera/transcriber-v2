@@ -87,6 +87,18 @@ fn menu_bar(app: &mut TranscriptorApp, root: &mut egui::Ui) {
                     app.import_v1_dialog();
                     ui.close();
                 }
+                if ui.button("Exportar capa seleccionada a JSON V1…").clicked() {
+                    app.export_v1_dialog(false);
+                    ui.close();
+                }
+                if ui
+                    .button("Exportar montaje a JSON V1…")
+                    .on_hover_text("Conserva el original completo si la proyección no cambió; rechaza cambios sin inversa sin pérdida")
+                    .clicked()
+                {
+                    app.export_v1_dialog(true);
+                    ui.close();
+                }
                 ui.separator();
                 if ui.button("Salir").clicked() {
                     ctx.send_viewport_cmd(egui::ViewportCommand::Close);
@@ -228,6 +240,15 @@ fn library(app: &mut TranscriptorApp, ui: &mut egui::Ui) {
             ui.add(egui::Label::new(job.path.file_name().unwrap_or_default().to_string_lossy()).truncate())
                 .on_hover_text(job.path.display().to_string());
         }
+    }
+    if let Some(job) = &app.editorial_job {
+        ui.horizontal(|ui| {
+            ui.spinner();
+            ui.label("Leyendo proyecto V1…");
+            if ui.button("Cancelar importación V1").clicked() {
+                job.cancel.store(true, std::sync::atomic::Ordering::Release);
+            }
+        });
     }
     ui.heading("Biblioteca");
     ui.horizontal(|ui| {
@@ -542,26 +563,11 @@ fn inspector(app: &mut TranscriptorApp, ui: &mut egui::Ui) {
             if !editable {
                 ui.label("Evidencia de solo lectura / capa bloqueada");
             }
-            let mut label = item.label.clone();
-            if ui.add_enabled(editable, egui::TextEdit::singleline(&mut label)).lost_focus() && label != item.label {
-                app.exec(Command::SetItemProps {
-                    layer_id: layer_id.clone(),
-                    item_id: item_id.clone(),
-                    label: Some(label),
-                    comment: None,
-                    ranges: None,
-                });
-            }
-            let mut comment = item.comment.clone();
-            ui.label("Comentario:");
-            if ui.add_enabled(editable, egui::TextEdit::multiline(&mut comment)).lost_focus() && comment != item.comment {
-                app.exec(Command::SetItemProps {
-                    layer_id: layer_id.clone(),
-                    item_id: item_id.clone(),
-                    label: None,
-                    comment: Some(comment),
-                    ranges: None,
-                });
+            ui.label(&item.label);
+            ui.label(&item.comment);
+            if ui.add_enabled(editable, egui::Button::new("Editar texto, rangos y padre…")).clicked() {
+                app.item_editor =
+                    Some(crate::item_editor::ItemEditor::new(app.project().project_id.clone(), app.session.revision(), layer_id.clone(), &item));
             }
             let ranges: Vec<String> = item
                 .ranges
@@ -933,6 +939,52 @@ fn dialogs(app: &mut TranscriptorApp, ctx: &egui::Context) {
                 ui.text_edit_singleline(&mut app.shortcut_search);
                 ui.label(RichText::new(format!("Personalización: {}", crate::paths::keymap_file().display())).size(10.5).color(colors::TEXT_DIM));
             });
+            ui.horizontal(|ui| {
+                if ui.button("Importar keymap/1…").clicked()
+                    && let Some(path) = rfd::FileDialog::new().add_filter("Atajos JSON", &["json"]).pick_file()
+                {
+                    let result = std::fs::File::open(&path).map_err(|e| e.to_string()).and_then(|file| {
+                        use std::io::Read;
+                        let mut bytes = Vec::new();
+                        file.take(1024 * 1024 + 1).read_to_end(&mut bytes).map_err(|e| e.to_string())?;
+                        crate::keymap::Keymap::import_json(&bytes)
+                    });
+                    match result {
+                        Ok(keymap) => match crate::keymap::save_overrides(&keymap.overrides) {
+                            Ok(()) => {
+                                app.keymap = keymap;
+                                app.shortcut_editor = None;
+                                app.toast(Severity::Info, "Atajos importados y aplicados");
+                            }
+                            Err(e) => app.report(e.into()),
+                        },
+                        Err(e) => app.toast(Severity::Error, e),
+                    }
+                }
+                if ui.button("Exportar keymap/1…").clicked()
+                    && let Some(path) = rfd::FileDialog::new().add_filter("Atajos JSON", &["json"]).set_file_name("keymap.json").save_file()
+                {
+                    match app
+                        .keymap
+                        .export_json()
+                        .map_err(tv2_domain::DomainError::from)
+                        .and_then(|bytes| tv2_application::store::atomic_write(&path, &bytes))
+                    {
+                        Ok(()) => app.toast(Severity::Info, "Atajos exportados"),
+                        Err(e) => app.report(e),
+                    }
+                }
+                if ui.button("Restaurar todos").clicked() {
+                    let keymap = crate::keymap::Keymap::with_overrides(Default::default());
+                    match crate::keymap::save_overrides(&keymap.overrides) {
+                        Ok(()) => {
+                            app.keymap = keymap;
+                            app.shortcut_editor = None;
+                        }
+                        Err(e) => app.report(e.into()),
+                    }
+                }
+            });
             if !app.keymap.conflicts.is_empty() {
                 ui.label(RichText::new(format!("{} conflicto(s): gana el primero registrado", app.keymap.conflicts.len())).color(colors::WARN));
             }
@@ -1081,9 +1133,9 @@ fn dialogs(app: &mut TranscriptorApp, ctx: &egui::Context) {
                             asset.path = path.to_string_lossy().to_string();
                         }
                     }
-                    match app.session.recover(candidate) {
+                    match app.session.recover_with_audit(candidate, std::mem::take(&mut app.recovery_audit)) {
                         Ok(()) => {
-                            app.resolved_revision = None;
+                            app.after_change();
                             app.selection.clear();
                         }
                         Err(e) => app.report(e),

@@ -1,3 +1,23 @@
+# Decisiones de continuación 7
+
+## D-0035 · Import editorial asíncrono y estricto
+
+Un worker de lectura/probe prepara datos; GUI comprueba identidad y revisión capturadas y confirma todo en un batch externo protegido. Fallos de documentos reconocidos abortan, frente a importación parcial con avisos. Riesgo: edición concurrente exige repetir y clones grandes siguen en GUI. Prueba: import V1 inválido + test de worker compilado sin FFmpeg; aplicación no se ejecutó físicamente.
+
+## D-0036 · Edición y portapapeles por comandos comunes
+
+SetItemStructure cambia padre/rangos simultáneamente para evitar jerarquías transitoriamente inválidas; editor conserva borrador y base. PasteClips/PasteItems conservan propiedades y crean IDs nuevos, con un paso de undo. Copiar un árbol desliga sus raíces externas; conserva padres internos y descendientes. Alternativa rechazada: reconstrucción parcial de AddClip que perdía efectos y aceptación. Tests application de colisión/rollback/jerarquía/comentario/multirrango.
+
+## D-0037 · Recibos y autosave auditado
+
+Journal incorpora recibo opcional con proyecto/solicitud/resultado para cada clave idempotente. Reapertura valida coherencia; legacy sin recibo reserva la clave y falla retry explícitamente. No reproducir comandos para obtener IDs históricos. Autosave/1 combina proyecto y auditoría en un único replace; legacy project/1 sigue legible. Worker congela snapshot y eventos; guardado manual/apertura permanecen síncronos. Tests reopen, corrupción, retry, recuperación/undo y guardado posterior.
+
+## D-0038 · Export V1 limitado por reversibilidad
+
+Export documental GUI user/topics/ai; montaje sin cambios conserva original íntegro y digest de la proyección V2. Cambios de tiempo, efecto, audio o clips rechazan el inverso; no se simula reconstrucción del material tapado desde el flatten. La alternativa de descartar clips invisibles contraviene DAT-01. Riesgo: alcance limitado y duplicación de JSON; falta export de carpeta/montaje editado. Tests pérdida de precisión, original con campos desconocidos/disabled/oculto y mutaciones rechazadas.
+
+---
+
 # Decisiones de implementación
 
 Registro breve de decisiones rutinarias y reversibles. Las que cambian GUI, motor, persistencia o compatibilidad enlazan un ADR. Formato: ID, fecha, decisión, alternativas, riesgo, prueba que lo demuestra.

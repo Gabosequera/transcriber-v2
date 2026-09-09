@@ -265,6 +265,15 @@ pub struct JournalEvent {
     pub diff: DiffSummary,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub command: Option<Command>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub receipt: Option<Box<CommandReceipt>>,
+}
+
+#[derive(Clone, PartialEq, Debug, Serialize, Deserialize)]
+pub struct CommandReceipt {
+    pub project_id: String,
+    pub request: CommandEnvelope,
+    pub result: CommandResult,
 }
 
 pub struct ProjectSession {
@@ -273,12 +282,69 @@ pub struct ProjectSession {
     redo: VecDeque<HistoryEntry>,
     idempotency: HashMap<String, (CommandEnvelope, CommandResult)>,
     journal: Vec<JournalEvent>,
+    legacy_keys: std::collections::HashSet<String>,
     dirty: bool,
 }
 
 impl ProjectSession {
     pub fn new(project: Project) -> Self {
-        ProjectSession { project, undo: VecDeque::new(), redo: VecDeque::new(), idempotency: HashMap::new(), journal: Vec::new(), dirty: false }
+        ProjectSession {
+            project,
+            undo: VecDeque::new(),
+            redo: VecDeque::new(),
+            idempotency: HashMap::new(),
+            journal: Vec::new(),
+            legacy_keys: Default::default(),
+            dirty: false,
+        }
+    }
+
+    /// Rehydrate receipts without replaying commands or marking the file dirty.
+    /// Legacy keys remain reserved: old audit cannot reconstruct generated IDs.
+    pub fn with_audit(project: Project, events: &[JournalEvent]) -> DomainResult<Self> {
+        project.validate()?;
+        let mut session = Self::new(project);
+        session.restore_receipts(events)?;
+        Ok(session)
+    }
+
+    fn restore_receipts(&mut self, events: &[JournalEvent]) -> DomainResult<()> {
+        let mut ids = std::collections::HashSet::new();
+        for event in events {
+            if event.new_revision > self.revision() || event.new_revision <= event.base_revision || !ids.insert(&event.command_id) {
+                return Err(DomainError::invalid("auditoría incoherente con el proyecto"));
+            }
+            if let Some(receipt) = &event.receipt {
+                let request = &receipt.request;
+                let result = &receipt.result;
+                self.check_identity(request)?;
+                if receipt.project_id != self.project.project_id
+                    || request.idempotency_key != event.idempotency_key
+                    || request.idempotency_key.is_none()
+                    || request.command_id != event.command_id
+                    || result.command_id != event.command_id
+                    || request.actor != event.actor
+                    || event.command.as_ref() != Some(&request.command)
+                    || result.base_revision != event.base_revision
+                    || result.new_revision != event.new_revision
+                    || result.diff != event.diff
+                    || result.applied_at != event.at
+                    || result.replayed
+                    || event.kind != "command"
+                {
+                    return Err(DomainError::invalid("recibo idempotente incoherente con auditoría"));
+                }
+                let key = request.idempotency_key.as_ref().unwrap();
+                if self.legacy_keys.contains(key) || self.idempotency.insert(key.clone(), (request.clone(), result.clone())).is_some() {
+                    return Err(DomainError::invalid("clave idempotente duplicada en auditoría"));
+                }
+            } else if let Some(key) = &event.idempotency_key
+                && (self.idempotency.contains_key(key) || !self.legacy_keys.insert(key.clone()))
+            {
+                return Err(DomainError::invalid("clave idempotente duplicada en auditoría"));
+            }
+        }
+        Ok(())
     }
 
     pub fn project(&self) -> &Project {
@@ -309,7 +375,11 @@ impl ProjectSession {
                 return Err(DomainError::invalid("auditoría de recuperación incoherente"));
             }
         }
+        // Validate before any mutation, including recovery of receipt identity.
+        let restored = Self::with_audit(candidate.clone(), &events)?;
         self.recover(candidate)?;
+        self.idempotency.extend(restored.idempotency);
+        self.legacy_keys.extend(restored.legacy_keys);
         let mut journal = events;
         journal.append(&mut self.journal);
         self.journal = journal;
@@ -338,6 +408,7 @@ impl ProjectSession {
             idempotency_key: None,
             diff: DiffSummary::compute(&self.project, &candidate),
             command: None,
+            receipt: None,
         });
         self.undo.clear();
         self.redo.clear();
@@ -381,6 +452,7 @@ impl ProjectSession {
         let keep_history = keep_history && self.project.project_id == project.project_id;
         if !keep_history {
             self.idempotency.clear();
+            self.legacy_keys.clear();
             self.journal.clear();
         }
         self.project = project;
@@ -439,6 +511,9 @@ impl ProjectSession {
 
     pub fn execute(&mut self, envelope: CommandEnvelope) -> DomainResult<CommandResult> {
         self.check_identity(&envelope)?;
+        if envelope.idempotency_key.as_ref().is_some_and(|key| self.legacy_keys.contains(key)) {
+            return Err(DomainError::precondition("clave registrada en auditoría antigua sin recibo; no se repetirá la operación"));
+        }
         if let Some(key) = &envelope.idempotency_key
             && let Some((request, prev)) = self.idempotency.get(key)
         {
@@ -454,7 +529,7 @@ impl ProjectSession {
         }
         self.check_base(&envelope)?;
         if envelope.idempotency_key.is_some() && self.idempotency.len() >= 10_000 {
-            return Err(DomainError::not_available("límite de solicitudes idempotentes de la sesión; guarda y reabre el proyecto"));
+            return Err(DomainError::not_available("límite de 10000 solicitudes idempotentes; se requiere archivado de recibos"));
         }
         let before = self.project.clone();
         let mut after = self.project.clone();
@@ -497,6 +572,10 @@ impl ProjectSession {
             idempotency_key: envelope.idempotency_key.clone(),
             diff,
             command: Some(envelope.command.clone()),
+            receipt: envelope
+                .idempotency_key
+                .as_ref()
+                .map(|_| Box::new(CommandReceipt { project_id: after.project_id.clone(), request: envelope.clone(), result: result.clone() })),
         });
         self.project = after;
         self.dirty = true;
@@ -568,6 +647,7 @@ impl ProjectSession {
             idempotency_key: None,
             diff: diff.clone(),
             command: None,
+            receipt: None,
         });
         self.project = next;
         self.dirty = true;
@@ -592,6 +672,155 @@ mod tests {
 
     fn s(n: i64) -> Ticks {
         Ticks::from_seconds(n)
+    }
+
+    #[test]
+    fn paste_items_remaps_hierarchy_preserves_multirange_and_is_atomic() {
+        use tv2_domain::{LayerKind, SemanticItem, SemanticLayer};
+        let mut p = Project::new("copy");
+        p.assets.push(fake_video("a", 20));
+        let mut layer = SemanticLayer::new("a".into(), LayerKind::Topics, "topics");
+        let mut parent = SemanticItem::new(TimeRange::new(s(0), s(3)), "parent");
+        parent.ranges.push(TimeRange::new(s(5), s(7)));
+        let mut child = SemanticItem::new(TimeRange::new(s(1), s(2)), "child");
+        child.parent_id = Some(parent.item_id.clone());
+        child.comment = "preserved".into();
+        layer.items = vec![child.clone(), parent.clone()]; // order must not affect validation
+        p.layers.push(layer.clone());
+        let mut session = ProjectSession::new(p.clone());
+        let result = session
+            .execute(CommandEnvelope::human(Command::PasteItems { layer_id: layer.layer_id.clone(), items: layer.items.clone(), position: s(10) }))
+            .unwrap();
+        let after = session.project().layers[0].clone();
+        let copied_child = after.item(&tv2_domain::ItemId::new(&result.effect.created[0])).unwrap();
+        let copied_parent = after.item(&tv2_domain::ItemId::new(&result.effect.created[1])).unwrap();
+        assert_eq!(copied_child.parent_id, Some(copied_parent.item_id.clone()));
+        assert_eq!(copied_child.comment, child.comment);
+        assert_eq!(copied_child.start(), s(11));
+        assert_eq!(copied_parent.ranges, vec![TimeRange::new(s(10), s(13)), TimeRange::new(s(15), s(17))]);
+        assert!(
+            session.execute(CommandEnvelope::human(Command::PasteItems { layer_id: layer.layer_id, items: layer.items, position: s(19) })).is_err()
+        );
+        assert_eq!(session.project().layers[0], after);
+        session.undo(Actor::Human).unwrap();
+        assert_eq!(session.project().layers, p.layers);
+    }
+
+    #[test]
+    fn paste_preserves_clip_properties_and_links_after_cut_and_rolls_back_collisions() {
+        let (mut session, track) = session();
+        let result = session.execute(CommandEnvelope::human(add(&track, 0, 5, 0))).unwrap();
+        let id = ClipId::new(result.effect.created[0].clone());
+        let mut source = session.project().active().unwrap().clip(&id).unwrap().clone();
+        source.name = "Edited ñ".into();
+        source.enabled = false;
+        source.gain_db = -12.0;
+        source.transform.opacity = 0.4;
+        source.link_group = Some("original-group".into());
+        source.extra.insert("custom".into(), serde_json::json!({"keep":true}));
+        let mut second = source.clone();
+        second.id = ClipId::new("clipboard-second");
+        second.position = s(5);
+        session.execute(CommandEnvelope::human(Command::RemoveClips { clip_ids: vec![id], ripple: false })).unwrap();
+        let pasted = session.execute(CommandEnvelope::human(Command::PasteClips { clips: vec![source.clone(), second], position: s(10) })).unwrap();
+        let seq = session.project().active().unwrap();
+        let copies: Vec<_> = pasted.effect.created.iter().map(|id| seq.clip(&ClipId::new(id)).unwrap()).collect();
+        assert_eq!(copies[0].position, s(10));
+        assert_eq!(copies[1].position, s(15));
+        for c in &copies {
+            assert_eq!(c.name, source.name);
+            assert_eq!(c.gain_db, source.gain_db);
+            assert_eq!(c.transform, source.transform);
+            assert_eq!(c.extra, source.extra);
+            assert!(!c.enabled);
+            assert_ne!(c.link_group, source.link_group);
+        }
+        assert_eq!(copies[0].link_group, copies[1].link_group);
+        let before = session.project().clone();
+        // Second pasted clip collides; the first must roll back as well.
+        let mut collision = source.clone();
+        collision.id = ClipId::new("collision");
+        collision.position = s(10);
+        assert!(session.execute(CommandEnvelope::human(Command::PasteClips { clips: vec![source, collision], position: s(0) })).is_err());
+        assert_eq!(session.project(), &before);
+        session.undo(Actor::Human).unwrap();
+        assert!(session.project().active().unwrap().clips.is_empty());
+    }
+
+    #[test]
+    fn editorial_structure_validates_children_and_undoes_as_one_change() {
+        use tv2_domain::{LayerKind, SemanticItem, SemanticLayer};
+        let mut p = Project::new("editorial");
+        p.assets.push(tv2_domain::commands::tests_support::fake_video("a", 20));
+        let mut layer = SemanticLayer::new("a".into(), LayerKind::Topics, "topics");
+        let mut parent = SemanticItem::new(TimeRange::new(s(0), s(5)), "parent");
+        parent.ranges.push(TimeRange::new(s(10), s(15)));
+        let child = SemanticItem::new(TimeRange::new(s(1), s(2)), "child");
+        layer.items = vec![parent.clone(), child.clone()];
+        p.layers.push(layer.clone());
+        let mut session = ProjectSession::new(p.clone());
+        let structure = Command::SetItemStructure {
+            layer_id: layer.layer_id.clone(),
+            item_id: child.item_id.clone(),
+            parent_id: Some(parent.item_id.clone()),
+            ranges: vec![TimeRange::new(s(1), s(2)), TimeRange::new(s(11), s(12))],
+        };
+        session.execute(CommandEnvelope::human(structure)).unwrap();
+        let before = session.project().clone();
+        let cycle = Command::SetItemStructure {
+            layer_id: layer.layer_id.clone(),
+            item_id: parent.item_id.clone(),
+            parent_id: Some(child.item_id.clone()),
+            ranges: parent.ranges.clone(),
+        };
+        assert!(session.execute(CommandEnvelope::human(cycle)).is_err());
+        let orphan = Command::SetItemProps {
+            layer_id: layer.layer_id.clone(),
+            item_id: parent.item_id.clone(),
+            label: None,
+            comment: None,
+            ranges: Some(vec![TimeRange::new(s(0), s(3))]),
+        };
+        assert!(session.execute(CommandEnvelope::human(orphan)).is_err());
+        assert_eq!(session.project(), &before);
+        session.undo(Actor::Human).unwrap();
+        assert_eq!(session.project().layers, p.layers);
+        session.redo(Actor::Human).unwrap();
+        assert_eq!(session.project().layers, before.layers);
+    }
+
+    #[test]
+    fn receipts_survive_disk_reopen_and_do_not_repeat_generated_ids() {
+        let dir = tempfile::tempdir().unwrap();
+        let store = crate::ProjectStore::at(dir.path());
+        let mut session = ProjectSession::new(Project::new("original"));
+        let request = CommandEnvelope::human(Command::AddTrack {
+            sequence_id: None,
+            kind: tv2_domain::TrackKind::Video,
+            name: "generated".into(),
+            index: None,
+        })
+        .with_base(0)
+        .with_idempotency("durable");
+        let first = session.execute(request.clone()).unwrap();
+        store.save_with_journal(session.project(), session.pending_journal()).unwrap();
+        let reopened = crate::ProjectStore::at(dir.path());
+        let mut loaded = ProjectSession::with_audit(reopened.load().unwrap(), &reopened.read_journal().unwrap()).unwrap();
+        let before = loaded.project().clone();
+        let replay = loaded.execute(request.clone()).unwrap();
+        assert!(replay.replayed);
+        assert_eq!(replay.effect.created, first.effect.created);
+        assert_eq!(loaded.project(), &before);
+        assert!(loaded.pending_journal().is_empty());
+        let mut changed = request.clone();
+        changed.command = Command::RenameProject { name: "bad retry".into() };
+        assert!(loaded.execute(changed).is_err());
+        let mut corrupt = reopened.read_journal().unwrap();
+        corrupt[0].receipt.as_mut().unwrap().result.new_revision += 1;
+        assert!(ProjectSession::with_audit(before.clone(), &corrupt).is_err());
+        corrupt[0].receipt = None;
+        let mut legacy = ProjectSession::with_audit(before, &corrupt).unwrap();
+        assert!(legacy.execute(request).is_err());
     }
 
     #[test]

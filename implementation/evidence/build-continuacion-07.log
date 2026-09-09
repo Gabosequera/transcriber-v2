@@ -1,0 +1,6 @@
+   Compiling tv2-domain v2.0.0-alpha.4 (C:\Users\gabri\Todo\transcriber-v2\crates\domain)
+   Compiling tv2-v1compat v2.0.0-alpha.4 (C:\Users\gabri\Todo\transcriber-v2\crates\v1compat)
+   Compiling tv2-application v2.0.0-alpha.4 (C:\Users\gabri\Todo\transcriber-v2\crates\application)
+   Compiling tv2-media v2.0.0-alpha.4 (C:\Users\gabri\Todo\transcriber-v2\crates\media)
+   Compiling transcriptor v2.0.0-alpha.4 (C:\Users\gabri\Todo\transcriber-v2\apps\desktop)
+    Finished `release` profile [optimized + debuginfo] target(s) in 2m 51s

@@ -94,7 +94,7 @@ pub fn read_v1_editorial(root: &Path, asset: &Asset) -> V1Result<V1Import> {
                     }
                     layers.push(l);
                 }
-                Err(e) => report.warnings.push(format!("{}: {e}", p.display())),
+                Err(e) => return Err(invalid(format!("{}: {e}; no se importó la carpeta", p.display()))),
             }
         }
     }
@@ -106,7 +106,7 @@ pub fn read_v1_editorial(root: &Path, asset: &Asset) -> V1Result<V1Import> {
                 report.trims_layers = t.layers.len();
                 layers.extend(t.layers);
             }
-            Err(e) => report.warnings.push(format!("views/trims.json: {e}")),
+            Err(e) => return Err(invalid(format!("views/trims.json: {e}"))),
         }
     }
     let mut sequence = None;
@@ -120,7 +120,7 @@ pub fn read_v1_editorial(root: &Path, asset: &Asset) -> V1Result<V1Import> {
                 report.montage_pieces = seq.clips.iter().filter(|c| c.audio_stream.is_none()).count();
                 sequence = Some(seq);
             }
-            Err(e) => report.warnings.push(format!("views/montaje.json: {e}")),
+            Err(e) => return Err(invalid(format!("views/montaje.json: {e}"))),
         }
     }
     layers.extend(master.projections(&asset.id)?);
@@ -197,6 +197,8 @@ mod tests {
         let seq = project.active().unwrap();
         assert_eq!(seq.name, "Montaje V1");
         assert_eq!(seq.extent(), tv2_domain::time::Ticks::from_seconds(20));
+        std::fs::write(ed.join("layers").join("invalid.json"), "{broken").unwrap();
+        assert!(read_v1_editorial(dir.path(), &asset).is_err(), "recognized invalid documents must abort the whole import");
         // identidad distinta → rechazo explícito
         let other = fake_video("b", 100);
         assert!(read_v1_editorial(dir.path(), &other).is_err());

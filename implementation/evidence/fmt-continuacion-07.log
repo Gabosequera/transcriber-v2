@@ -1,0 +1,2 @@
+Comando: ./scripts/cargo.ps1 fmt --all --check
+Resultado de herramienta: exit_code=0; sin salida.

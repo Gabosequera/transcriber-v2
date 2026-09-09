@@ -280,8 +280,37 @@ impl V1Montaje {
                 seq.clips.push(make(at, Some(i as u32)));
             }
         }
+        // Keep covered/disabled clips, track metadata and unknown fields. The
+        // flattened projection alone cannot reconstruct these on export.
+        let projection = projection_digest(&seq);
+        seq.extra.insert("v1_original_montage".into(), self.raw.clone());
+        seq.extra.insert("v1_projection_digest".into(), json!(projection));
         seq
     }
+}
+
+fn projection_digest(sequence: &Sequence) -> String {
+    let mut projected = sequence.clone();
+    projected.extra.remove("v1_original_montage");
+    projected.extra.remove("v1_projection_digest");
+    tv2_domain::digest::digest_json(&serde_json::to_value(projected).expect("serializable sequence"))
+}
+
+/// Lossless inverse for an unchanged imported projection. Editing an occluded
+/// flattened montage requires a richer inverse; do not silently drop hidden
+/// material, independent audio, transforms, gaps or metadata.
+pub fn sequence_to_v1(sequence: &Sequence, fingerprint: &Fingerprint) -> V1Result<Value> {
+    let original = sequence
+        .extra
+        .get("v1_original_montage")
+        .ok_or_else(|| invalid("El montaje no conserva un original V1 reversible; reimporta el original o exporta multimedia"))?;
+    if sequence.extra.get("v1_projection_digest").and_then(Value::as_str) != Some(projection_digest(sequence).as_str()) {
+        return Err(invalid(
+            "El montaje fue editado en V2: no hay conversión inversa sin pérdida para estos cambios. No se exportó ningún documento",
+        ));
+    }
+    V1Montaje::parse(original.clone(), Some(fingerprint))?;
+    Ok(original.clone())
 }
 
 #[cfg(test)]
@@ -303,6 +332,32 @@ mod tests {
     }
 
     /// `test_montaje.py::test_flatten_top_track_covers_bottom_at_start_middle_and_end`.
+    #[test]
+    fn inverse_preserves_hidden_disabled_and_unknown_original_content() {
+        let mut raw = doc(vec![clip(1, "V1", 10.0, 30.0, 0.0), clip(2, "V2", 50.0, 70.0, 0.0), clip(3, "V1", 40.0, 45.0, 25.0)]);
+        raw["clips"][2]["state"] = json!("disabled");
+        raw["clips"][0]["future_field"] = json!({"keep":true});
+        raw["future_header"] = json!([1, 2, 3]);
+        let montage = V1Montaje::parse(raw.clone(), Some(&fp())).unwrap();
+        let seq = montage.to_sequence(&"asset-a".into(), Rational::new(30, 1), 1920, 1080, 1);
+        assert_eq!(sequence_to_v1(&seq, &fp()).unwrap(), raw);
+        for kind in 0..4 {
+            let mut changed = seq.clone();
+            match kind {
+                0 => changed.clips[0].source.start += Ticks::from_millis(100),
+                1 => changed.clips[0].transform.opacity = 0.5,
+                2 => changed.tracks[1].muted = true,
+                _ => {
+                    changed.clips.pop();
+                }
+            }
+            assert!(sequence_to_v1(&changed, &fp()).is_err());
+        }
+        let mut legacy = seq;
+        legacy.extra.remove("v1_original_montage");
+        assert!(sequence_to_v1(&legacy, &fp()).is_err());
+    }
+
     #[test]
     fn top_track_covers_bottom_at_start_middle_and_end() {
         let m = V1Montaje::parse(

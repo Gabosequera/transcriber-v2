@@ -157,6 +157,10 @@ pub enum Command {
         position: Ticks,
         track_id: Option<TrackId>,
     },
+    PasteClips {
+        clips: Vec<Clip>,
+        position: Ticks,
+    },
     SetClipEnabled {
         clip_ids: Vec<ClipId>,
         enabled: bool,
@@ -218,6 +222,11 @@ pub enum Command {
         layer_id: LayerId,
         item: SemanticItem,
     },
+    PasteItems {
+        layer_id: LayerId,
+        items: Vec<SemanticItem>,
+        position: Ticks,
+    },
     SetItemState {
         layer_id: LayerId,
         item_ids: Vec<ItemId>,
@@ -229,6 +238,12 @@ pub enum Command {
         label: Option<String>,
         comment: Option<String>,
         ranges: Option<Vec<TimeRange>>,
+    },
+    SetItemStructure {
+        layer_id: LayerId,
+        item_id: ItemId,
+        parent_id: Option<ItemId>,
+        ranges: Vec<TimeRange>,
     },
     DeleteItems {
         layer_id: LayerId,
@@ -316,6 +331,7 @@ impl Command {
                 }
             }
             Command::DuplicateClip { .. } => "Duplicar clip".into(),
+            Command::PasteClips { .. } => "Pegar clips".into(),
             Command::SetClipEnabled { enabled, .. } => {
                 if *enabled {
                     "Activar clip".into()
@@ -334,12 +350,14 @@ impl Command {
             Command::SetLayerProps { .. } => "Propiedades de capa".into(),
             Command::SetLayerOrder { .. } => "Ordenar carriles".into(),
             Command::AddItem { .. } => "Añadir tramo".into(),
+            Command::PasteItems { .. } => "Pegar items editoriales".into(),
             Command::SetItemState { state, .. } => match state {
                 ItemState::Accepted => "Aceptar".into(),
                 ItemState::Disabled => "Desactivar".into(),
                 ItemState::Proposed => "Activar".into(),
             },
             Command::SetItemProps { .. } => "Editar tramo".into(),
+            Command::SetItemStructure { .. } => "Editar rangos y jerarquía".into(),
             Command::DeleteItems { .. } => "Borrar tramos".into(),
             Command::ReplaceLayer { .. } => "Reemplazar capa".into(),
             Command::AddSequence { sequence, .. } => format!("Añadir secuencia {}", sequence.name),
@@ -1092,6 +1110,101 @@ impl Command {
                 validate_items(&items, duration, allow_points)?;
                 l.items = items;
                 l.revision = l.revision.checked_add(1).ok_or_else(|| DomainError::out_of_range("revisión de capa agotada"))?;
+                Ok(CommandEffect::new(self.label()).touch(item_id))
+            }
+            Command::PasteItems { layer_id, items, position } => {
+                let duration = layer_asset_duration(project, layer_id)?;
+                let layer = project.layer_mut(layer_id).ok_or_else(|| DomainError::not_found("capa", layer_id))?;
+                ensure_layer_editable(layer)?;
+                let base = items.iter().map(SemanticItem::start).min().ok_or_else(|| DomainError::invalid("portapapeles vacío"))?;
+                let mapping: std::collections::HashMap<_, _> = items.iter().map(|i| (i.item_id.clone(), ItemId::random())).collect();
+                if mapping.len() != items.len() {
+                    return Err(DomainError::invalid("item duplicado en portapapeles"));
+                }
+                let mut effect = CommandEffect::new(self.label());
+                let mut combined = layer.items.clone();
+                for source in items {
+                    let mut item = source.clone();
+                    item.item_id = mapping[&source.item_id].clone();
+                    item.parent_id = source.parent_id.as_ref().and_then(|p| mapping.get(p)).cloned();
+                    for range in &mut item.ranges {
+                        for t in [&mut range.start, &mut range.end] {
+                            t.0 =
+                                t.0.checked_sub(base.0)
+                                    .and_then(|d| position.0.checked_add(d))
+                                    .ok_or_else(|| DomainError::out_of_range("rango pegado desbordado"))?;
+                        }
+                    }
+                    item.edited = true;
+                    item.extra.insert("copied_from_item_id".into(), serde_json::json!(source.item_id));
+                    effect = effect.create(&item.item_id);
+                    combined.push(item);
+                }
+                validate_items(&combined, duration, layer.kind.allows_points())?;
+                layer.items = combined;
+                layer.revision = layer.revision.checked_add(1).ok_or_else(|| DomainError::out_of_range("revisión agotada"))?;
+                Ok(effect)
+            }
+            Command::PasteClips { clips, position } => {
+                let base = clips.iter().map(|c| c.position).min().ok_or_else(|| DomainError::invalid("portapapeles vacío"))?;
+                let mut ids = std::collections::HashSet::new();
+                let mut groups = std::collections::HashMap::new();
+                let mut effect = CommandEffect::new(self.label());
+                for source in clips {
+                    if !ids.insert(&source.id) {
+                        return Err(DomainError::invalid("clip duplicado en portapapeles"));
+                    }
+                    let offset = source
+                        .position
+                        .0
+                        .checked_sub(base.0)
+                        .and_then(|d| position.0.checked_add(d))
+                        .ok_or_else(|| DomainError::out_of_range("posición de pegado desbordada"))?;
+                    let id = ClipId::random();
+                    let group = source
+                        .link_group
+                        .as_ref()
+                        .map(|g| groups.entry(g.clone()).or_insert_with(|| format!("link-{}", crate::ids::random_hex12())).clone());
+                    Command::AddClip {
+                        track_id: source.track_id.clone(),
+                        asset_id: source.asset_id.clone(),
+                        source: source.source,
+                        position: Ticks(offset),
+                        policy: MovePolicy::Reject,
+                        clip_id: Some(id.clone()),
+                        link_group: group,
+                        audio_stream: source.audio_stream,
+                        provenance: Some(Provenance {
+                            origin: "paste".into(),
+                            parent_clip: Some(source.id.clone()),
+                            v1_clip_id: source.provenance.v1_clip_id.clone(),
+                            created_at: Some(crate::project::now_iso()),
+                        }),
+                    }
+                    .apply(project)?;
+                    let pasted = seq_of_clip_mut(project, &id)?.clip_mut(&id).unwrap();
+                    pasted.name = source.name.clone();
+                    pasted.enabled = source.enabled;
+                    pasted.gain_db = source.gain_db;
+                    pasted.transform = source.transform;
+                    pasted.extra = source.extra.clone();
+                    effect = effect.create(id);
+                }
+                project.validate()?;
+                Ok(effect)
+            }
+            Command::SetItemStructure { layer_id, item_id, parent_id, ranges } => {
+                let duration = layer_asset_duration(project, layer_id)?;
+                let layer = project.layer_mut(layer_id).ok_or_else(|| DomainError::not_found("capa", layer_id))?;
+                ensure_layer_editable(layer)?;
+                let mut items = layer.items.clone();
+                let item = items.iter_mut().find(|i| &i.item_id == item_id).ok_or_else(|| DomainError::not_found("item", item_id))?;
+                item.parent_id = parent_id.clone();
+                item.ranges = ranges.clone();
+                item.edited = true;
+                validate_items(&items, duration, layer.kind.allows_points())?;
+                layer.items = items;
+                layer.revision = layer.revision.checked_add(1).ok_or_else(|| DomainError::out_of_range("revisión de capa agotada"))?;
                 Ok(CommandEffect::new(self.label()).touch(item_id))
             }
             Command::DeleteItems { layer_id, item_ids } => {

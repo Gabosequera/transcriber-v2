@@ -1,3 +1,20 @@
+# Incremento vigente — continuación 7, alpha.4
+
+E2/E3 abiertas; E4 pendiente. Aceptación física aplazada no equivale a cierre de implementación. Evidencia exacta: `evidence/continuacion-07.md`.
+
+| ID | Incremento | Estado |
+|---|---|---|
+| UI-03/UI-04 | Import/export keymap/1; auditoría 69 V1/81 V2; copy/cut/paste/duplicate por contexto; Ctrl+A editorial | Parcial; keymap compila, GUI pendiente; aplicación prueba pegado y rollback |
+| LAY-02 | Editor persistente de comentario/rangos/padre; copias con jerarquía y procedencia | Implementado sin aceptación GUI; tests application pasan |
+| DAT-01/LAY-03 | Import worker/batch estricto; export de capa user/topics/ai y montaje original sin cambios | Parcial; tests V1 pasan; inverso editado/carpeta completa pendientes |
+| DAT-02/DAT-04 | Recibos durables, conservación al Save As, autosave con auditoría y worker | Parcial; tests reopen/recuperación pasan; historial/jobs/migraciones/multidocumento pendientes |
+| PERF-01 | IO/probe editorial y escritura autosave/export documental fuera de GUI | Parcial; clones/validación master, apertura/guardar manual siguen costosos |
+| AI-01/02 | Nuevos comandos comparten sesión/dry-run/protección/undo | Base interna; E4 pendiente |
+
+---
+
+## Registro anterior (continuación 6 e histórico)
+
 # Matriz de requisitos
 
 ## Incremento vigente — continuación 6, alpha.3

@@ -1,0 +1,839 @@
+{
+  "method": "AST read of V1 keymap only; regex of V2 registry. Registration is not functional acceptance. No V1 modules executed.",
+  "v1_count": 69,
+  "v2_count": 81,
+  "actions": [
+    {
+      "id": "transport.play_pause",
+      "label": "Play / pausa",
+      "defaults": [
+        "space"
+      ],
+      "registered_v2": true,
+      "defaults_v2": [
+        "space"
+      ],
+      "defaults_equal": true
+    },
+    {
+      "id": "transport.pause",
+      "label": "Pausa",
+      "defaults": [
+        "K"
+      ],
+      "registered_v2": true,
+      "defaults_v2": [
+        "K"
+      ],
+      "defaults_equal": true
+    },
+    {
+      "id": "transport.faster",
+      "label": "Más rápido (×1→×2→×3→×4→×8; pausado = play a ×1)",
+      "defaults": [
+        "L"
+      ],
+      "registered_v2": true,
+      "defaults_v2": [
+        "L"
+      ],
+      "defaults_equal": true
+    },
+    {
+      "id": "transport.slower",
+      "label": "Más lento (a ×1 pausa)",
+      "defaults": [
+        "J"
+      ],
+      "registered_v2": true,
+      "defaults_v2": [
+        "J"
+      ],
+      "defaults_equal": true
+    },
+    {
+      "id": "transport.rate_1",
+      "label": "Velocidad ×1",
+      "defaults": [
+        "1"
+      ],
+      "registered_v2": true,
+      "defaults_v2": [
+        "1"
+      ],
+      "defaults_equal": true
+    },
+    {
+      "id": "transport.rate_2",
+      "label": "Velocidad ×2",
+      "defaults": [
+        "2"
+      ],
+      "registered_v2": true,
+      "defaults_v2": [
+        "2"
+      ],
+      "defaults_equal": true
+    },
+    {
+      "id": "transport.rate_3",
+      "label": "Velocidad ×3",
+      "defaults": [
+        "3"
+      ],
+      "registered_v2": true,
+      "defaults_v2": [
+        "3"
+      ],
+      "defaults_equal": true
+    },
+    {
+      "id": "transport.rate_4",
+      "label": "Velocidad ×4",
+      "defaults": [
+        "4"
+      ],
+      "registered_v2": true,
+      "defaults_v2": [
+        "4"
+      ],
+      "defaults_equal": true
+    },
+    {
+      "id": "transport.skim",
+      "label": "Skim ×8 (solo fotogramas clave)",
+      "defaults": [
+        "Shift+L"
+      ],
+      "registered_v2": true,
+      "defaults_v2": [
+        "Shift+L"
+      ],
+      "defaults_equal": true
+    },
+    {
+      "id": "transport.play_from_item",
+      "label": "Play desde el item seleccionado (o el IN)",
+      "defaults": [
+        "Shift+space"
+      ],
+      "registered_v2": true,
+      "defaults_v2": [
+        "Shift+space"
+      ],
+      "defaults_equal": true
+    },
+    {
+      "id": "nav.frame_prev",
+      "label": "Fotograma anterior",
+      "defaults": [
+        "comma"
+      ],
+      "registered_v2": true,
+      "defaults_v2": [
+        "comma"
+      ],
+      "defaults_equal": true
+    },
+    {
+      "id": "nav.frame_next",
+      "label": "Fotograma siguiente",
+      "defaults": [
+        "period"
+      ],
+      "registered_v2": true,
+      "defaults_v2": [
+        "period"
+      ],
+      "defaults_equal": true
+    },
+    {
+      "id": "nav.frame_prev_10",
+      "label": "10 fotogramas atrás",
+      "defaults": [
+        "Shift+comma"
+      ],
+      "registered_v2": true,
+      "defaults_v2": [
+        "Shift+comma"
+      ],
+      "defaults_equal": true
+    },
+    {
+      "id": "nav.frame_next_10",
+      "label": "10 fotogramas adelante",
+      "defaults": [
+        "Shift+period"
+      ],
+      "registered_v2": true,
+      "defaults_v2": [
+        "Shift+period"
+      ],
+      "defaults_equal": true
+    },
+    {
+      "id": "nav.step_prev",
+      "label": "Paso atrás (0,5 s)",
+      "defaults": [
+        "Left"
+      ],
+      "registered_v2": true,
+      "defaults_v2": [
+        "Left"
+      ],
+      "defaults_equal": true
+    },
+    {
+      "id": "nav.step_next",
+      "label": "Paso adelante (0,5 s)",
+      "defaults": [
+        "Right"
+      ],
+      "registered_v2": true,
+      "defaults_v2": [
+        "Right"
+      ],
+      "defaults_equal": true
+    },
+    {
+      "id": "nav.step_prev_5",
+      "label": "Paso atrás (5 s)",
+      "defaults": [
+        "Shift+Left"
+      ],
+      "registered_v2": true,
+      "defaults_v2": [
+        "Shift+Left"
+      ],
+      "defaults_equal": true
+    },
+    {
+      "id": "nav.step_next_5",
+      "label": "Paso adelante (5 s)",
+      "defaults": [
+        "Shift+Right"
+      ],
+      "registered_v2": true,
+      "defaults_v2": [
+        "Shift+Right"
+      ],
+      "defaults_equal": true
+    },
+    {
+      "id": "nav.home",
+      "label": "Inicio del medio",
+      "defaults": [
+        "Home"
+      ],
+      "registered_v2": true,
+      "defaults_v2": [
+        "Home"
+      ],
+      "defaults_equal": true
+    },
+    {
+      "id": "nav.end",
+      "label": "Fin del medio",
+      "defaults": [
+        "End"
+      ],
+      "registered_v2": true,
+      "defaults_v2": [
+        "End"
+      ],
+      "defaults_equal": true
+    },
+    {
+      "id": "nav.prev_edge",
+      "label": "Borde anterior",
+      "defaults": [
+        "Up"
+      ],
+      "registered_v2": true,
+      "defaults_v2": [
+        "Up"
+      ],
+      "defaults_equal": true
+    },
+    {
+      "id": "nav.next_edge",
+      "label": "Borde siguiente",
+      "defaults": [
+        "Down"
+      ],
+      "registered_v2": true,
+      "defaults_v2": [
+        "Down"
+      ],
+      "defaults_equal": true
+    },
+    {
+      "id": "nav.prev_silence",
+      "label": "Silencio anterior",
+      "defaults": [
+        "Ctrl+Up"
+      ],
+      "registered_v2": true,
+      "defaults_v2": [
+        "Ctrl+Up"
+      ],
+      "defaults_equal": true
+    },
+    {
+      "id": "nav.next_silence",
+      "label": "Silencio siguiente",
+      "defaults": [
+        "Ctrl+Down"
+      ],
+      "registered_v2": true,
+      "defaults_v2": [
+        "Ctrl+Down"
+      ],
+      "defaults_equal": true
+    },
+    {
+      "id": "nav.goto",
+      "label": "Ir a tiempo…",
+      "defaults": [
+        "Ctrl+G"
+      ],
+      "registered_v2": true,
+      "defaults_v2": [
+        "Ctrl+G"
+      ],
+      "defaults_equal": true
+    },
+    {
+      "id": "nav.sel_start",
+      "label": "Inicio de la selección",
+      "defaults": [
+        "Shift+I"
+      ],
+      "registered_v2": true,
+      "defaults_v2": [
+        "Shift+I"
+      ],
+      "defaults_equal": true
+    },
+    {
+      "id": "nav.sel_end",
+      "label": "Fin de la selección",
+      "defaults": [
+        "Shift+O"
+      ],
+      "registered_v2": true,
+      "defaults_v2": [
+        "Shift+O"
+      ],
+      "defaults_equal": true
+    },
+    {
+      "id": "edit.split",
+      "label": "Dividir en el playhead",
+      "defaults": [
+        "S"
+      ],
+      "registered_v2": true,
+      "defaults_v2": [
+        "S"
+      ],
+      "defaults_equal": true
+    },
+    {
+      "id": "edit.trim_start",
+      "label": "Recortar inicio al playhead",
+      "defaults": [
+        "bracketleft"
+      ],
+      "registered_v2": true,
+      "defaults_v2": [
+        "bracketleft"
+      ],
+      "defaults_equal": true
+    },
+    {
+      "id": "edit.trim_end",
+      "label": "Recortar fin al playhead",
+      "defaults": [
+        "bracketright"
+      ],
+      "registered_v2": true,
+      "defaults_v2": [
+        "bracketright"
+      ],
+      "defaults_equal": true
+    },
+    {
+      "id": "edit.nudge_prev",
+      "label": "Empujar 1 fotograma atrás",
+      "defaults": [
+        "Alt+Left"
+      ],
+      "registered_v2": true,
+      "defaults_v2": [
+        "Alt+Left"
+      ],
+      "defaults_equal": true
+    },
+    {
+      "id": "edit.nudge_next",
+      "label": "Empujar 1 fotograma adelante",
+      "defaults": [
+        "Alt+Right"
+      ],
+      "registered_v2": true,
+      "defaults_v2": [
+        "Alt+Right"
+      ],
+      "defaults_equal": true
+    },
+    {
+      "id": "edit.nudge_prev_10",
+      "label": "Empujar 10 fotogramas atrás",
+      "defaults": [
+        "Alt+Shift+Left"
+      ],
+      "registered_v2": true,
+      "defaults_v2": [
+        "Alt+Shift+Left"
+      ],
+      "defaults_equal": true
+    },
+    {
+      "id": "edit.nudge_next_10",
+      "label": "Empujar 10 fotogramas adelante",
+      "defaults": [
+        "Alt+Shift+Right"
+      ],
+      "registered_v2": true,
+      "defaults_v2": [
+        "Alt+Shift+Right"
+      ],
+      "defaults_equal": true
+    },
+    {
+      "id": "edit.item_prev",
+      "label": "Item anterior del carril",
+      "defaults": [
+        "Shift+Tab"
+      ],
+      "registered_v2": true,
+      "defaults_v2": [
+        "Shift+Tab"
+      ],
+      "defaults_equal": true
+    },
+    {
+      "id": "edit.item_next",
+      "label": "Item siguiente del carril",
+      "defaults": [
+        "Tab"
+      ],
+      "registered_v2": true,
+      "defaults_v2": [
+        "Tab"
+      ],
+      "defaults_equal": true
+    },
+    {
+      "id": "edit.accept",
+      "label": "Aceptar (marca de revisión: se corta igual que un propuesto)",
+      "defaults": [
+        "E"
+      ],
+      "registered_v2": true,
+      "defaults_v2": [
+        "E"
+      ],
+      "defaults_equal": true
+    },
+    {
+      "id": "edit.accept_next",
+      "label": "Aceptar y pasar al siguiente",
+      "defaults": [
+        "Shift+E"
+      ],
+      "registered_v2": true,
+      "defaults_v2": [
+        "Shift+E"
+      ],
+      "defaults_equal": true
+    },
+    {
+      "id": "edit.toggle",
+      "label": "Desactivar (no se corta; en una marca cicla la decisión)",
+      "defaults": [
+        "X"
+      ],
+      "registered_v2": true,
+      "defaults_v2": [
+        "X"
+      ],
+      "defaults_equal": true
+    },
+    {
+      "id": "edit.activate",
+      "label": "Activar: vuelve a propuesto (se corta)",
+      "defaults": [
+        "P"
+      ],
+      "registered_v2": true,
+      "defaults_v2": [
+        "P"
+      ],
+      "defaults_equal": true
+    },
+    {
+      "id": "edit.delete",
+      "label": "Borrar",
+      "defaults": [
+        "Delete",
+        "BackSpace",
+        "D"
+      ],
+      "registered_v2": true,
+      "defaults_v2": [
+        "Delete",
+        "BackSpace",
+        "D"
+      ],
+      "defaults_equal": true
+    },
+    {
+      "id": "edit.edit",
+      "label": "Editar",
+      "defaults": [
+        "Return",
+        "F2"
+      ],
+      "registered_v2": true,
+      "defaults_v2": [
+        "Return",
+        "F2"
+      ],
+      "defaults_equal": true
+    },
+    {
+      "id": "edit.deselect",
+      "label": "Deseleccionar",
+      "defaults": [
+        "Escape"
+      ],
+      "registered_v2": true,
+      "defaults_v2": [
+        "Escape"
+      ],
+      "defaults_equal": true
+    },
+    {
+      "id": "edit.undo",
+      "label": "Deshacer",
+      "defaults": [
+        "Ctrl+Z"
+      ],
+      "registered_v2": true,
+      "defaults_v2": [
+        "Ctrl+Z"
+      ],
+      "defaults_equal": true
+    },
+    {
+      "id": "edit.redo",
+      "label": "Rehacer",
+      "defaults": [
+        "Ctrl+R",
+        "Ctrl+Shift+Z",
+        "Ctrl+Y"
+      ],
+      "registered_v2": true,
+      "defaults_v2": [
+        "Ctrl+R",
+        "Ctrl+Shift+Z",
+        "Ctrl+Y"
+      ],
+      "defaults_equal": true
+    },
+    {
+      "id": "tools.select",
+      "label": "Herramienta Selección",
+      "defaults": [
+        "A",
+        "V"
+      ],
+      "registered_v2": true,
+      "defaults_v2": [
+        "A",
+        "V"
+      ],
+      "defaults_equal": true
+    },
+    {
+      "id": "tools.cut",
+      "label": "Herramienta Corte",
+      "defaults": [
+        "B"
+      ],
+      "registered_v2": true,
+      "defaults_v2": [
+        "B"
+      ],
+      "defaults_equal": true
+    },
+    {
+      "id": "tools.select_all",
+      "label": "Seleccionar todo el carril",
+      "defaults": [
+        "Ctrl+A"
+      ],
+      "registered_v2": true,
+      "defaults_v2": [
+        "Ctrl+A"
+      ],
+      "defaults_equal": true
+    },
+    {
+      "id": "layers.new_lane",
+      "label": "Añadir capa…",
+      "defaults": [
+        "Ctrl+N"
+      ],
+      "registered_v2": true,
+      "defaults_v2": [
+        "Ctrl+N"
+      ],
+      "defaults_equal": true
+    },
+    {
+      "id": "view.zoom_in",
+      "label": "Zoom +",
+      "defaults": [
+        "plus",
+        "equal",
+        "KP_Add"
+      ],
+      "registered_v2": true,
+      "defaults_v2": [
+        "plus",
+        "equal",
+        "KP_Add"
+      ],
+      "defaults_equal": true
+    },
+    {
+      "id": "view.zoom_out",
+      "label": "Zoom −",
+      "defaults": [
+        "minus",
+        "KP_Subtract"
+      ],
+      "registered_v2": true,
+      "defaults_v2": [
+        "minus",
+        "KP_Subtract"
+      ],
+      "defaults_equal": true
+    },
+    {
+      "id": "view.fit",
+      "label": "Ver todo",
+      "defaults": [
+        "Shift+Z"
+      ],
+      "registered_v2": true,
+      "defaults_v2": [
+        "Shift+Z"
+      ],
+      "defaults_equal": true
+    },
+    {
+      "id": "view.zoom_sel",
+      "label": "Zoom a la selección",
+      "defaults": [
+        "Z"
+      ],
+      "registered_v2": true,
+      "defaults_v2": [
+        "Z"
+      ],
+      "defaults_equal": true
+    },
+    {
+      "id": "view.follow",
+      "label": "Seguir al playhead",
+      "defaults": [
+        "F"
+      ],
+      "registered_v2": true,
+      "defaults_v2": [
+        "F"
+      ],
+      "defaults_equal": true
+    },
+    {
+      "id": "view.center",
+      "label": "Centrar el playhead",
+      "defaults": [
+        "C"
+      ],
+      "registered_v2": true,
+      "defaults_v2": [
+        "C"
+      ],
+      "defaults_equal": true
+    },
+    {
+      "id": "view.skip_trims",
+      "label": "Saltar recortes al reproducir",
+      "defaults": [
+        "Shift+T"
+      ],
+      "registered_v2": true,
+      "defaults_v2": [
+        "Shift+T"
+      ],
+      "defaults_equal": true
+    },
+    {
+      "id": "loop.set_in",
+      "label": "Repetir: entrada en el playhead (o click derecho en la regla)",
+      "defaults": [],
+      "registered_v2": true,
+      "defaults_v2": [],
+      "defaults_equal": true
+    },
+    {
+      "id": "loop.set_out",
+      "label": "Repetir: salida en el playhead (o Ctrl+click derecho en la regla)",
+      "defaults": [],
+      "registered_v2": true,
+      "defaults_v2": [],
+      "defaults_equal": true
+    },
+    {
+      "id": "loop.clear",
+      "label": "Repetir: quitar el rango (o Shift+click derecho en la regla)",
+      "defaults": [],
+      "registered_v2": true,
+      "defaults_v2": [],
+      "defaults_equal": true
+    },
+    {
+      "id": "view.mode_montage",
+      "label": "Modo Fuente / Montaje",
+      "defaults": [
+        "Ctrl+M"
+      ],
+      "registered_v2": true,
+      "defaults_v2": [
+        "Ctrl+M"
+      ],
+      "defaults_equal": true
+    },
+    {
+      "id": "montage.add_selection",
+      "label": "Añadir al montaje el rango seleccionado (item, IN/OUT o rango a repetir)",
+      "defaults": [
+        "Ctrl+Shift+A"
+      ],
+      "registered_v2": true,
+      "defaults_v2": [
+        "Ctrl+Shift+A"
+      ],
+      "defaults_equal": true
+    },
+    {
+      "id": "montage.add_topic",
+      "label": "Añadir al montaje el tema seleccionado (todos sus tramos)",
+      "defaults": [
+        "Ctrl+Shift+T"
+      ],
+      "registered_v2": true,
+      "defaults_v2": [
+        "Ctrl+Shift+T"
+      ],
+      "defaults_equal": true
+    },
+    {
+      "id": "montage.reveal_source",
+      "label": "Ver el clip en la fuente (doble click en el clip)",
+      "defaults": [
+        "Ctrl+Shift+R"
+      ],
+      "registered_v2": true,
+      "defaults_v2": [
+        "Ctrl+Shift+R"
+      ],
+      "defaults_equal": true
+    },
+    {
+      "id": "montage.move_up",
+      "label": "Subir el clip a la pista de encima",
+      "defaults": [
+        "Ctrl+Shift+Up"
+      ],
+      "registered_v2": true,
+      "defaults_v2": [
+        "Ctrl+Shift+Up"
+      ],
+      "defaults_equal": true
+    },
+    {
+      "id": "montage.move_down",
+      "label": "Bajar el clip a la pista de abajo",
+      "defaults": [
+        "Ctrl+Shift+Down"
+      ],
+      "registered_v2": true,
+      "defaults_v2": [
+        "Ctrl+Shift+Down"
+      ],
+      "defaults_equal": true
+    },
+    {
+      "id": "montage.export",
+      "label": "Exportar montaje…",
+      "defaults": [],
+      "registered_v2": true,
+      "defaults_v2": [
+        "Ctrl+E"
+      ],
+      "defaults_equal": false
+    },
+    {
+      "id": "marks.point",
+      "label": "Marca puntual",
+      "defaults": [
+        "M"
+      ],
+      "registered_v2": true,
+      "defaults_v2": [
+        "M"
+      ],
+      "defaults_equal": true
+    },
+    {
+      "id": "marks.in",
+      "label": "IN de región",
+      "defaults": [
+        "I"
+      ],
+      "registered_v2": true,
+      "defaults_v2": [
+        "I"
+      ],
+      "defaults_equal": true
+    },
+    {
+      "id": "marks.out",
+      "label": "OUT de región",
+      "defaults": [
+        "O"
+      ],
+      "registered_v2": true,
+      "defaults_v2": [
+        "O"
+      ],
+      "defaults_equal": true
+    }
+  ]
+}

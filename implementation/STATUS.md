@@ -1,38 +1,35 @@
 # STATUS — Transcriptor V2
 
-Checkpoint **continuación 6, 2026-09-08**, fuentes `2.0.0-alpha.3`, desde main limpio en `7267880`. Objetivo global **incompleto**: implementar hasta E4 y parar antes de E5. Testing físico, regresión multimedia y revisión general siguen aplazados por el usuario.
+Checkpoint **continuación 7, fuentes `2.0.0-alpha.4`**, desde `main` limpio y sincronizado en `9287a02`. Objetivo hasta E4 **incompleto**; E5 no iniciada. Testing físico, multimedia y revisión general siguen aplazados por el usuario, separadamente del cierre de implementación.
 
 | Fase | Implementación | Aceptación |
 |---|---|---|
-| E0/E1 | Bases conservadas | Aceptadas históricamente en otro equipo |
-| E2 | Funcionalidad principal + acciones editoriales de este incremento | Regresión integrada, A/V, rendimiento e interacción pendientes |
-| E3 | Parcial; evidencia, validación y reconciliación ampliadas | Unitarios dirigidos; aceptación física pendiente |
-| E4 | Pendiente | Sin transporte MCP ni cliente conectado |
+| E0/E1 | Conservadas | Histórica |
+| E2 | Abierta: correcciones reales de portapapeles/contextos y editor de items | GUI/A-V/rendimiento pendientes |
+| E3 | Parcial: import worker, export documental limitado, recibos durables y autosave auditado | Unitarios dirigidos; física pendiente |
+| E4 | Pendiente | Sin MCP ni cliente conectado |
 | E5/E6 | Fuera del alcance vigente | No iniciar |
 
-## Implementado en esta continuación
+## Incremento implementado
 
-- `Project::validate`: schema/identidad, IDs duplicados, referencias, bases temporales, rangos, solapamientos, transformaciones, streams, jerarquías, tombstones y masters. Se usa al leer/guardar/recuperar y antes de confirmar previews/comandos. No requiere que los medios estén presentes. No sustituye auditoría exhaustiva de los argumentos aritméticos de todos los comandos.
-- `MasterEvidence` conserva el documento V1 completo y su digest. Importación proyecta palabras, intervenciones por pista, risas, arousal y emociones a capas de solo lectura con IDs estables y registro original en evidencia. No se reemplaza un master incorporado por otro contenido; la gestión explícita de versiones queda pendiente.
-- Protección común contra cambios de evidencia y decisiones humanas por actores externos, incluyendo batch/import/reconcile/undo externo. Edición respeta capas bloqueadas/de análisis. Tombstones no resucitan; rangos huérfanos inválidos se rechazan. Recortes conservan aceptación independientemente de activación al exportar/desactivar/reactivar.
-- `save_with_journal`: intención durable antes de publicar proyecto y auditoría; recuperación idempotente de fronteras proyecto/journal, rechazo de terceros contenidos externos, reparación exclusiva de cola JSONL truncada, rechazo de corrupción interna. GUI retiene eventos hasta guardado exitoso. No cubre todos los contratos V1.
-- Reconciliación de project.json: rescaneo cada 2 s en worker acotado, dos lecturas válidas iguales, merge de tres vías por IDs, conflicto de campos/orden y protección humana. GUI presenta resumen del diff y permite aplicar/posponer; aplicar revalida disco/sesión, usa Command::ReconcileProject y admite undo como nueva revisión. Sin watcher SO ni monitor de archivos V1 individuales ni editor de conflictos.
-- Autosave de proyectos sin carpeta en configuración/recovery, por sesión, recuperación al arrancar y conservación de auditoría. Primer Guardar pide destino normal. Autosave de proyectos ya guardados mantiene formato legado; errores visibles y repaint para cumplir el intervalo en reposo.
-- Salto de recortes en reproducción (Shift+T), sin alterar export: solo donde todos los clips contribuyentes están recortados; audio limitado antes del salto. Añadir tema completo, insertar multirrango sin huecos en un batch, navegar silencios importados y elegir ocurrencias desde inspector. Evidencia sin controles de edición activos.
-- Corregidas rutas relativas en sesión al completar importación multimedia y slicing de fingerprints cortos que podía provocar panic.
+- Import editorial V1 en worker único, canal acotado, cancelación y espera del scripting. Lee/probea fuera de GUI; valida proyecto/revisión al completar; medio/master/capas/montaje se confirman en un único batch. Documento reconocido inválido aborta la importación completa. El worker no escribe en V1. Una edición concurrente obliga a repetir la importación; no hay merge automático.
+- `SetItemStructure` + editor persistente de texto/comentarios/multirrango/padre desde inspector y F2/Enter. Validación de ciclos, rangos de hijos y referencias; un paso de undo. Un borrador con base vieja falla expresamente.
+- `PasteClips` conserva nombre, ganancia, transformación, enabled, extras y procedencia; IDs/grupos de enlace nuevos. Pegado y duplicación de selección enlazada son atómicos. `PasteItems` conserva comentarios/evidencia/multirrango, remapea padres internos y copia descendientes. Raíces copiadas se desligan del padre no copiado. Cortar no borra si Copiar falla; borrado multicapa es batch. Ctrl+A respeta capa seleccionada. No implica que todos los gestos editoriales estén completos.
+- Ajustes permite importar/exportar `keymap/1`, restaurar todo y aplicar inmediatamente. Importación completa rechaza schema, acción, acorde y conflictos inválidos. Auditoría estática: **69 acciones V1, 81 V2, ninguna V1 ausente**, único default añadido Ctrl+E en montage.export. Los conteos históricos 70/71 eran incorrectos; registro no acredita funcionamiento.
+- Archivo permite **exportar un documento de capa user/topics/ai** o un **montaje importado sin cambios**. Se escriben nuevas carpetas, en worker, sin sobrescribir originales. Montaje conserva ahora todo el JSON original (clips tapados/desactivados y campos desconocidos); el inverso rechaza edición V2, medios múltiples y proyectos antiguos sin original. Capas rechazan precisión submilisegundo y tipos que requieren adaptador autoritativo. No es exportación de carpeta V1 completa ni inverso de montajes editados.
+- Recibos idempotentes request/result/proyecto en journal; reapertura restaura resultado/IDs sin ejecutar otra vez. Claves antiguas sin recibo quedan reservadas y rechazan retry; no se inventa un resultado. Guardar como conserva auditoría previa. Historial undo/redo sigue en memoria.
+- `transcriptor-autosave/1` publica proyecto y auditoría juntos; lee autosave legado y recupera con recibos/undo. Autosave de ambos tipos de proyecto en worker. Guardar manual, abrir y descubrimiento recovery siguen síncronos. Snapshots/auditoría se clonan en GUI: PERF-01 no cerrado.
 
-## Controles y límites
+## Controles
 
-Evidencia en `evidence/continuacion-06.md` y logs enlazados. Unitarios application/V1 sin medios; Clippy de todos los targets y formato. Windows Control de aplicaciones bloqueó el binario de tests de dominio (4551); no se eludió la política. Tests desktop siguen sin ejecución en este host. No se ejecutaron GUI, medios, V1 ni datos personales.
+`evidence/continuacion-07.md`: **24 application + 15 V1compat pasan**, Clippy workspace/all-targets y formato. Tests desktop nuevos (keymap/worker) compilados por Clippy, no ejecutados. No se reintentó ni eludió el bloqueo Windows 4551 de dominio/desktop. Build release y publicación se registran al terminar en la evidencia y PUBLISH; no equivalen a GUI probada ni paquete aceptado.
 
-La [prerelease alpha.3](https://github.com/Gabosequera/transcriber-v2/releases/tag/v2.0.0-alpha.3) está publicada y verificada sobre `a6728e2` subido a main, solo fuentes y sin assets binarios. El build local release terminó en 6m30s y 32 tests application/V1compat pasan; Clippy/all-targets y formato OK. Compilar el exe no equivale a probarlo ni a preparar un paquete distribuible. Detalles en `PUBLISH.md`, `evidence/build-alpha3.json` y `evidence/publication-alpha3.json`.
+## Siguiente implementación concreta
 
-## Siguiente trabajo concreto
+1. **E2 real:** acciones semánticas S/dividir, bordes/nudge y ciclo X de autor aún no tienen paridad completa; gestión/orden/gestos de carriles e inventario de botones/contextos V1. Confirmar handlers con fixtures, no contar IDs como cierre. Incorporar estos recorridos al mismo núcleo de comandos.
+2. **E3 contratos:** chunks contiguos y adaptadores autor/bloques, export trims conservando cabecera/IDs/metadatos, orden de carriles, requests/passes/manifests/derivación. Inverso de montaje editado sin pérdida, export de carpeta completa y transacciones multidocumento. No reemplazar silenciosamente fuentes autoritativas con capas genéricas.
+3. **Durabilidad:** historial/jobs entre aperturas, migraciones versionadas de proyecto, archivado de auditoría conservando recibos, guardado/apertura en workers, watcher SO/documentos V1/diff detallado/resolución explícita. Autosave worker usa snapshot congelado pero no reduce clones/costes de validación de masters. Revisar dos instancias escribiendo autosave y cierre durante worker.
+4. **E4:** MCP específico, schemas/capabilities/queries paginadas, permisos por sesión/proyecto/operación, propuestas/base/digest/dry-run/diff/preview/apply, eventos/jobs/requests y cliente local conectado a GUI. Completar actor humano/AI para edited/aceptación. No añadir shell/SQL/reemplazo arbitrario de estado.
+5. Parar antes de E5. Si se interrumpe por contexto, commit/push/prerelease/traspaso. V1 y datos personales estrictamente solo lectura.
 
-1. **Paridad E2/E3:** inventario trazable de acciones V1; importador editorial V1 asíncrono (sigue haciendo IO/probe en GUI); import/export keymap; export V1 desde GUI y montaje inverso con rechazo de pérdidas; chunks contiguos, adaptadores autor/bloques, edición de jerarquías/multirrango, derivación/manifests/requests/passes y carriles completos. Preservar masters/proyecciones; no inferir modelos.
-2. **Durabilidad:** idempotencia entre aperturas e historial/jobs durables; migraciones explícitas; transacciones multidocumento V1. Auditoría de autosave de proyectos ya guardados. Pasar guardado/autosave y enumeración de recovery a workers; limitar/archivar auditoría sin perder reintentos. Watcher SO/archivos V1, diff detallado y resolución explícita. Lock cooperativo frente a editores ajenos.
-3. **Protecciones:** distinguir completamente actor humano/AI al marcar edited/aceptación; protección actual conservadora, no autorización E4. Cubrir recuperación/actores y contratos restantes. PERF-01 pendiente: copias/hash de masters y escaneo de items siguen costosos en proyectos grandes.
-4. **E4:** herramientas MCP específicas con schemas/capabilities, queries temporales paginadas, selección/transporte/jobs, permisos por sesión/proyecto/operación, propuestas con base/digest, dry-run/diff/preview/apply, eventos/auditoría, requests-respuestas JSON y cliente local conectado a GUI. Mismo núcleo; no herramienta genérica de shell/SQL/reemplazo de estado.
-5. Parar al completar implementación E4, antes de E5. Si se interrumpe por contexto, commit/push/prerelease/traspaso. No cerrar requisitos por documentación o compilación.
-
-Primer control: `./scripts/cargo.ps1 check --workspace --locked`. Leer este archivo, evidence/continuacion-06.md, matriz, RUN y traspaso vigente. Continuación 5 y sus evidencias permanecen como historia. V1 `../transcriber` estrictamente solo lectura.
+Lectura inicial: este STATUS, evidence/continuacion-07.md y continuacion-06.md, matriz, RUN, decisiones D-0035–D-0038 y traspaso final del prompt 00. Main incluye el registro posterior a la publicación; no reanudar desde el tag sin esos documentos.

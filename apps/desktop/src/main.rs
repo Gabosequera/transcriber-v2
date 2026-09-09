@@ -3,9 +3,11 @@
 
 mod app;
 mod console;
+mod editorial_jobs;
 #[cfg(test)]
 mod gesture_tests;
 mod import_jobs;
+mod item_editor;
 mod keymap;
 mod paths;
 mod scripting;

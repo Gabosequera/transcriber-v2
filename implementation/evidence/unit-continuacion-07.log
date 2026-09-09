@@ -1,0 +1,53 @@
+   Compiling tv2-v1compat v2.0.0-alpha.4 (C:\Users\gabri\Todo\transcriber-v2\crates\v1compat)
+    Finished `test` profile [optimized + debuginfo] target(s) in 3.41s
+     Running unittests src\lib.rs (target\debug\deps\tv2_application-b58306bd41f63280.exe)
+
+running 24 tests
+test session::tests::explicit_recovery_can_be_undone_without_rewinding_revision ... ok
+test reconcile::tests::stable_ids_merge_items_and_conflicting_order_is_rejected ... ok
+test session::tests::digest_checks_dry_run_and_apply_and_revision_cannot_overflow ... ok
+test session::tests::idempotency_rejects_changed_request_and_wrong_project_before_replay ... ok
+test session::tests::multiple_undo_redo_preserves_content_and_monotonic_revision ... ok
+test session::tests::stale_base_is_rejected_and_idempotent_retry_replays ... ok
+test protection::tests::agent_cannot_replace_delete_or_edit_a_human_decision_even_in_a_batch ... ok
+test session::tests::paste_items_remaps_hierarchy_preserves_multirange_and_is_atomic ... ok
+test reconcile::tests::merges_independent_changes_and_rejects_same_field_or_wrong_identity ... ok
+test session::tests::revisions_grow_and_undo_creates_new_revision ... ok
+test session::tests::undo_after_external_change_is_rejected_not_applied ... ok
+test session::tests::failed_batch_leaves_project_untouched_and_dry_run_does_not_commit ... ok
+test session::tests::editorial_structure_validates_children_and_undoes_as_one_change ... ok
+test session::tests::paste_preserves_clip_properties_and_links_after_cut_and_rolls_back_collisions ... ok
+test session::tests::receipts_survive_disk_reopen_and_do_not_repeat_generated_ids ... ok
+test store::tests::save_load_round_trip_and_atomic_replace ... ok
+test store::tests::journal_is_append_only_and_tolerates_truncated_tail ... ok
+test store::tests::invalid_external_json_is_never_overwritten_and_lock_is_enforced ... ok
+test store::tests::recovery_requires_matching_identity_and_newer_revision ... ok
+test store::tests::compare_and_save_rejects_second_instance_and_preserves_external_content ... ok
+test store::tests::invalid_recovery_does_not_change_observed_base_or_session ... ok
+test store::tests::autosave_publishes_audit_and_receipts_with_content_and_recovers_once ... ok
+test store::tests::recovery_finishes_each_commit_boundary_once_and_rejects_external_writes ... ok
+test store::tests::external_diff_revalidates_both_bases_and_is_undoable_then_saveable ... ok
+
+test result: ok. 24 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.50s
+
+     Running unittests src\lib.rs (target\debug\deps\tv2_v1compat-3be6f3fc23944190.exe)
+
+running 15 tests
+test layers::tests::rejects_other_media_and_bad_hierarchy ... ok
+test export::tests::editable_layer_roundtrip_preserves_hierarchy_comment_and_rejects_precision_loss ... ok
+test montaje::tests::gaps_and_repeated_source_mapping ... ok
+test montaje::tests::validation_rejects_overlap_in_same_track_and_other_media ... ok
+test montaje::tests::top_track_covers_bottom_at_start_middle_and_end ... ok
+test layers::tests::round_trip_preserves_ids_ranges_states_and_unknown_fields ... ok
+test trims::tests::states_follow_cut_state_and_export_union_ignores_acceptance ... ok
+test trims::tests::old_document_without_lane_gets_lane_by_origin ... ok
+test trims::tests::round_trip_is_canonically_identical ... ok
+test montaje::tests::conversion_to_v2_keeps_observable_result_and_provenance ... ok
+test trims::tests::disabled_cut_retains_acceptance_through_import_export_and_activation ... ok
+test montaje::tests::inverse_preserves_hidden_disabled_and_unknown_original_content ... ok
+test master::tests::parses_fixture_master_and_digest_ignores_chunks ... ok
+test master::tests::projections_preserve_original_records_and_have_stable_ids ... ok
+test import::tests::imports_folder_with_layers_trims_and_montage ... ok
+
+test result: ok. 15 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s
+

@@ -29,6 +29,13 @@ struct CommitIntent {
     events: Vec<JournalEvent>,
 }
 
+#[derive(serde::Serialize, serde::Deserialize)]
+struct AutosaveSnapshot {
+    schema: String,
+    project: Project,
+    events: Vec<JournalEvent>,
+}
+
 #[derive(Clone, Debug)]
 pub struct ProjectStore {
     pub root: PathBuf,
@@ -266,15 +273,48 @@ impl ProjectStore {
 
     /// A recovery snapshot is a candidate, never silently replaces user data.
     pub fn recovery_candidate(&self, saved: &Project) -> DomainResult<Option<Project>> {
+        Ok(self.recovery_with_audit(saved)?.map(|(project, _)| project))
+    }
+
+    pub fn save_autosave(&self, project: &Project, pending: &[JournalEvent]) -> DomainResult<()> {
+        project.validate()?;
+        let bytes = self.merged_journal(pending)?;
+        let events =
+            bytes.split(|b| *b == b'\n').filter(|line| !line.is_empty()).map(serde_json::from_slice).collect::<Result<Vec<JournalEvent>, _>>()?;
+        crate::ProjectSession::with_audit(project.clone(), &events)?;
+        let snapshot = AutosaveSnapshot { schema: "transcriptor-autosave/1".into(), project: project.clone(), events };
+        let bytes = serde_json::to_vec(&snapshot)?;
+        if bytes.len() as u64 > MAX_PROJECT_BYTES {
+            return Err(DomainError::invalid("autosave con auditoría supera 64 MiB"));
+        }
+        atomic_write(&self.root.join("autosave.json"), &bytes)
+    }
+
+    /// Legacy bare snapshots remain readable; new autosaves publish content and
+    /// audit together so recovery cannot lose successful idempotency receipts.
+    pub fn recovery_with_audit(&self, saved: &Project) -> DomainResult<Option<(Project, Vec<JournalEvent>)>> {
         let path = self.root.join("autosave.json");
         if !path.is_file() {
             return Ok(None);
         }
-        let candidate = Self::read_project(&path)?;
+        let mut bytes = Vec::new();
+        fs::File::open(&path)?.take(MAX_PROJECT_BYTES + 1).read_to_end(&mut bytes)?;
+        if bytes.len() as u64 > MAX_PROJECT_BYTES {
+            return Err(DomainError::invalid("autosave supera 64 MiB"));
+        }
+        let raw: serde_json::Value = serde_json::from_slice(&bytes)?;
+        let (candidate, events) = if raw["schema"] == "transcriptor-autosave/1" {
+            let snapshot: AutosaveSnapshot = serde_json::from_value(raw)?;
+            (snapshot.project, snapshot.events)
+        } else {
+            (Self::read_project(&path)?, vec![])
+        };
+        candidate.validate()?;
+        crate::ProjectSession::with_audit(candidate.clone(), &events)?;
         if candidate.project_id != saved.project_id || candidate.revision <= saved.revision {
             return Ok(None);
         }
-        Ok(Some(candidate))
+        Ok(Some((candidate, events)))
     }
 
     pub fn append_journal(&self, events: &[JournalEvent]) -> DomainResult<()> {
@@ -361,6 +401,31 @@ mod tests {
     use super::*;
 
     #[test]
+    fn autosave_publishes_audit_and_receipts_with_content_and_recovers_once() {
+        use crate::{Actor, CommandEnvelope, ProjectSession};
+        use tv2_domain::Command;
+        let dir = tempfile::tempdir().unwrap();
+        let store = ProjectStore::at(dir.path());
+        let original = Project::new("saved");
+        store.save(&original).unwrap();
+        let mut live = ProjectSession::new(original.clone());
+        let request = CommandEnvelope::human(Command::RenameProject { name: "autosaved".into() }).with_idempotency("recovery-key");
+        live.execute(request.clone()).unwrap();
+        store.save_autosave(live.project(), live.pending_journal()).unwrap();
+        assert_eq!(store.load().unwrap(), original);
+        let (project, events) = store.recovery_with_audit(&original).unwrap().unwrap();
+        let mut restored = ProjectSession::new(original);
+        restored.recover_with_audit(project, events).unwrap();
+        assert!(restored.execute(request.clone()).unwrap().replayed);
+        restored.undo(Actor::Human).unwrap();
+        assert_eq!(restored.project().name, "saved");
+        store.save_with_journal(restored.project(), restored.pending_journal()).unwrap();
+        let mut opened = ProjectSession::with_audit(store.load().unwrap(), &store.read_journal().unwrap()).unwrap();
+        assert!(opened.execute(request).unwrap().replayed);
+        assert_eq!(opened.project().name, "saved");
+    }
+
+    #[test]
     fn compare_and_save_rejects_second_instance_and_preserves_external_content() {
         let dir = tempfile::tempdir().unwrap();
         let first = ProjectStore::at(dir.path().join("proyecto ñ.transcriptor"));
@@ -441,6 +506,7 @@ mod tests {
             idempotency_key: None,
             diff: Default::default(),
             command: None,
+            receipt: None,
         };
         store.append_journal(std::slice::from_ref(&ev)).unwrap();
         store.append_journal(std::slice::from_ref(&ev)).unwrap();

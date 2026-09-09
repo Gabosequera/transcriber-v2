@@ -1,6 +1,6 @@
 # Construir Transcriptor V2: instrucciones de ejecución
 
-> **MARCADOR DE CONTINUACIÓN (actualizado 2026-09-08, continuación 6, alpha.3).**
+> **MARCADOR DE CONTINUACIÓN (continuación 7, alpha.4).**
 > Estado: **E0/E1 aceptadas históricamente · E2 abierta · E3 parcial · E4 pendiente · parar antes de E5.** Testing físico y revisión general aplazados.
 > Fuente de verdad del progreso: `implementation/STATUS.md`, `implementation/requirements-matrix.md`, `implementation/decisions.md` (D-0001…D-0021), `implementation/evidence/e0|e1|e2/`.
 > Al reanudar: lee el anexo «Traspaso al siguiente agente» al final de este archivo, luego `STATUS.md`, y continúa por el primer punto de «Qué sigue» sin rehacer lo verificado.
@@ -118,3 +118,14 @@ Después E4: tools MCP específicas y schemas, capacidades/queries temporales pa
 Entorno: scripts/cargo.ps1 descubre Rust/MSVC; '--' entre comillas al pasar argumentos Clippy. Logs exactos en evidence. Windows bloqueó tests de dominio (4551); tests desktop siguen sin ejecutar, no eludir la política. Tests application/V1 puros y build release local no acreditan GUI ni multimedia. No hay paquete nuevo aceptado. Fuente de publicación: PUBLISH y publication-alpha3.json.
 
 V1 y datos personales estrictamente solo lectura. Preservar evidencia histórica. Si se interrumpe por contexto, dejar commit/push/prerelease y traspaso; no declarar cumplido el objetivo mientras E3/E4 tengan pendientes.
+
+
+## Traspaso vigente — continuación 7 (sustituye al anterior)
+
+Reanudar desde main, no reiniciar E0/E1. Objetivo hasta E4 incompleto; E2 abierta, E3 parcial, E4 pendiente; parar antes de E5. Aceptación física/revisión general siguen aplazadas. Base de este incremento 9287a02; publicar checkpoint alpha.4 según PUBLISH/evidence.
+
+Leer STATUS, evidence/continuacion-07.md (y 06 histórico), matriz, RUN, decisiones D-0035–D-0038. Implementado: import editorial worker con revisión capturada y batch total; rechazo de docs reconocidos inválidos; editor persistente texto/comentario/rangos/padre con undo; portapapeles de items/árboles y clips preservando propiedades; cortar condicionado a copia, duplicación enlazada y borrado multicapa atómicos; Ctrl+A editorial; import/export keymap; export documental GUI limitado; original íntegro del montaje conservado; recibos idempotentes durables/reapertura/Save As; autosave auditado en worker.
+
+Pendientes de implementación reales: split/bordes/nudge semánticos, ciclo de marca autor y gestión/gestos/carriles; chunks/adaptadores autor/bloques/trims completo/derivación/manifests/requests/passes; export de carpeta e inverso de montajes editados; historial/jobs/migraciones y transacciones multidocumento; guardado/apertura workers, watcher V1 y resolución detallada de conflictos; actor AI/edited/aceptación; E4 completo con MCP específico/GUI/núcleo común. El export actual rechaza montajes editados, autor/bloques/trims y tiempos submilisegundo; no presentar ese rechazo como inverso completo.
+
+39 tests application/V1 pasan; Clippy/all-targets y fmt; build/publicación exactos en evidence/PUBLISH. Tests nuevos desktop compilados, no ejecutados; no reintentar moviendo binarios bloqueados ni cambiar política Windows. V1 bb7012c observado limpio, solo lectura de fuentes; datos personales intactos. Ningún medio/modelo nuevo ni instalación de dependencias. Al cortar por contexto: commit/push/prerelease/traspaso, sin declarar E2/E3/E4 cerradas.
