@@ -2,7 +2,7 @@
 
 Checkpoint autorizado de fuentes, con E2/E3 abiertas y E4 pendiente. Build local Windows completado con `cargo build --release --locked -p transcriptor` en 6m30s; ejecutable no lanzado ni empaquetado. Registro de tamaño/hash en `evidence/build-alpha3.json`. Unitarios alpha.3: 19 application + 13 V1compat pasan. Clippy/all-targets y formato en logs de continuación 6. Tests dominio bloqueados por Windows 4551; desktop/GUI/multimedia/revisión general siguen pendientes.
 
-Se prepara commit/push a main y prerelease `v2.0.0-alpha.3` con notas `evidence/release-notes-alpha3.md`. Sin assets binarios: no publicar el ejecutable local como paquete probado. Resultado remoto se registra en `evidence/publication-alpha3.json` tras confirmar publicación. El commit posterior de documentación deja el traspaso al día.
+Publicada y verificada [v2.0.0-alpha.3](https://github.com/Gabosequera/transcriber-v2/releases/tag/v2.0.0-alpha.3) sobre `a6728e2a361fd517d0b959609f8904f614d52977`, código/contexto subido a main. `isDraft=false`, `isPrerelease=true`, sin assets binarios; source archives de GitHub. Registro `evidence/publication-alpha3.json`, notas `evidence/release-notes-alpha3.md`. El commit posterior solo registra la publicación y el checkpoint; continuar desde main para incluirlo. V1 observado limpio al terminar. Objetivo global hasta E4 aún incompleto.
 
 ## Histórico — continuación 5, alpha.2
 

@@ -25,7 +25,7 @@ Checkpoint **continuación 6, 2026-09-08**, fuentes `2.0.0-alpha.3`, desde main 
 
 Evidencia en `evidence/continuacion-06.md` y logs enlazados. Unitarios application/V1 sin medios; Clippy de todos los targets y formato. Windows Control de aplicaciones bloqueó el binario de tests de dominio (4551); no se eludió la política. Tests desktop siguen sin ejecución en este host. No se ejecutaron GUI, medios, V1 ni datos personales.
 
-La prerelease es de fuentes. El build release local se registra separadamente: compilar no equivale a probarlo ni a preparar un paquete distribuible. Resultado exacto en `PUBLISH.md` y `evidence/publication-alpha3.json` cuando esté confirmado.
+La [prerelease alpha.3](https://github.com/Gabosequera/transcriber-v2/releases/tag/v2.0.0-alpha.3) está publicada y verificada sobre `a6728e2` subido a main, solo fuentes y sin assets binarios. El build local release terminó en 6m30s y 32 tests application/V1compat pasan; Clippy/all-targets y formato OK. Compilar el exe no equivale a probarlo ni a preparar un paquete distribuible. Detalles en `PUBLISH.md`, `evidence/build-alpha3.json` y `evidence/publication-alpha3.json`.
 
 ## Siguiente trabajo concreto
 

@@ -32,4 +32,4 @@ Protección actual no equivale a autorización MCP: edited/aceptación necesitan
 
 ## Publicación
 
-Checkpoint `v2.0.0-alpha.3`, prerelease de fuentes. Resultado remoto exacto en `publication-alpha3.json` y PUBLISH tras commit/push/release. Sin medios personales, runtimes o paquete multimedia sin validar.
+Checkpoint `v2.0.0-alpha.3` publicado y verificado, tag/target `a6728e2a361fd517d0b959609f8904f614d52977`, push a main completado. Prerelease no draft, sin assets binarios. Resultado remoto en `publication-alpha3.json` y PUBLISH. Sin medios personales, runtimes o paquete multimedia sin validar. V1 observado limpio al cierre. Parada por contexto con implementación E3 parcial/E4 pendiente; siguiente trabajo en STATUS/traspaso vigente.
