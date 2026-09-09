@@ -538,8 +538,12 @@ fn inspector(app: &mut TranscriptorApp, ui: &mut egui::Ui) {
             ui.label(RichText::new("Tramo semántico").strong());
             ui.label(format!("Capa: {} ({})", layer.name, layer.kind.v1_name()));
             ui.label(format!("ID: {}", item.item_id));
+            let editable = !layer.deleted && !layer.locked && layer.kind.is_editable();
+            if !editable {
+                ui.label("Evidencia de solo lectura / capa bloqueada");
+            }
             let mut label = item.label.clone();
-            if ui.text_edit_singleline(&mut label).lost_focus() && label != item.label {
+            if ui.add_enabled(editable, egui::TextEdit::singleline(&mut label)).lost_focus() && label != item.label {
                 app.exec(Command::SetItemProps {
                     layer_id: layer_id.clone(),
                     item_id: item_id.clone(),
@@ -550,7 +554,7 @@ fn inspector(app: &mut TranscriptorApp, ui: &mut egui::Ui) {
             }
             let mut comment = item.comment.clone();
             ui.label("Comentario:");
-            if ui.text_edit_multiline(&mut comment).lost_focus() && comment != item.comment {
+            if ui.add_enabled(editable, egui::TextEdit::multiline(&mut comment)).lost_focus() && comment != item.comment {
                 app.exec(Command::SetItemProps {
                     layer_id: layer_id.clone(),
                     item_id: item_id.clone(),
@@ -585,7 +589,7 @@ fn inspector(app: &mut TranscriptorApp, ui: &mut egui::Ui) {
                 }));
             });
             ui.horizontal(|ui| {
-                let can_accept = layer.kind.accepts_acceptance();
+                let can_accept = editable && layer.kind.accepts_acceptance();
                 let b = ui.add_enabled(can_accept, egui::Button::new("Aceptar (E)"));
                 if b.clicked() {
                     app.dispatch("edit.accept");
@@ -593,10 +597,10 @@ fn inspector(app: &mut TranscriptorApp, ui: &mut egui::Ui) {
                 if !can_accept {
                     b.on_hover_text("Los bloques no admiten aceptación (regla V1)");
                 }
-                if ui.button("Desactivar (X)").clicked() {
+                if ui.add_enabled(editable, egui::Button::new("Desactivar (X)")).clicked() {
                     app.dispatch("edit.toggle");
                 }
-                if ui.button("Activar (P)").clicked() {
+                if ui.add_enabled(editable, egui::Button::new("Activar (P)")).clicked() {
                     app.dispatch("edit.activate");
                 }
             });
@@ -608,9 +612,30 @@ fn inspector(app: &mut TranscriptorApp, ui: &mut egui::Ui) {
             if let Some(p) = &item.parent_id {
                 ui.label(format!("Padre: {p}"));
             }
-            if ui.button("Borrar tramo (tombstone)").clicked() {
+            if ui.add_enabled(editable, egui::Button::new("Borrar tramo (tombstone)")).clicked() {
                 app.dispatch("edit.delete");
             }
+            if !item.extra.is_empty() {
+                ui.collapsing("Evidencia y procedencia", |ui| {
+                    let text = serde_json::to_string_pretty(&item.extra).unwrap_or_default();
+                    ui.label(text);
+                });
+            }
+            let mut occurrences = app
+                .sequence()
+                .map(|seq| item.ranges.iter().flat_map(|r| seq.range_occurrences(&layer.asset_id, *r)).collect::<Vec<_>>())
+                .unwrap_or_default();
+            occurrences.sort_by_key(|o| (o.sequence.start, o.clip_id.clone()));
+            ui.collapsing(format!("Ocurrencias en secuencia ({})", occurrences.len()), |ui| {
+                egui::ScrollArea::vertical().max_height(200.0).show_rows(ui, 22.0, occurrences.len(), |ui, rows| {
+                    for row in rows {
+                        let o = &occurrences[row];
+                        if ui.button(format!("{} · {}", o.sequence.start.timecode_ms(), o.clip_id)).clicked() {
+                            app.reveal_occurrence(o.clip_id.clone(), o.sequence.start);
+                        }
+                    }
+                });
+            });
             return;
         }
         if let Some(clip_id) = app.selection.clips.first().cloned() {
@@ -727,8 +752,8 @@ fn inspector(app: &mut TranscriptorApp, ui: &mut egui::Ui) {
                 RichText::new(format!(
                     "Identidad: size {} · hash muestreado {}… · inventario {}…",
                     a.fingerprint.size,
-                    &a.fingerprint.hash_muestreado[..12],
-                    &a.fingerprint.inventario_sha256[..12]
+                    a.fingerprint.hash_muestreado.chars().take(12).collect::<String>(),
+                    a.fingerprint.inventario_sha256.chars().take(12).collect::<String>()
                 ))
                 .size(10.5)
                 .color(colors::TEXT_DIM),
@@ -1002,6 +1027,43 @@ fn dialogs(app: &mut TranscriptorApp, ctx: &egui::Context) {
             );
         });
         app.about_open = open;
+    }
+    if !app.unsaved_recoveries.is_empty() {
+        egui::Window::new("Proyectos sin guardar recuperables").collapsible(true).show(ctx, |ui| {
+            let paths = app.unsaved_recoveries.clone();
+            for path in paths {
+                ui.horizontal(|ui| {
+                    ui.label(path.file_name().unwrap_or_default().to_string_lossy());
+                    if ui.button("Recuperar").clicked() {
+                        app.recover_unsaved(path);
+                    }
+                });
+            }
+            if ui.button("Ocultar por ahora").clicked() {
+                app.unsaved_recoveries.clear();
+            }
+        });
+    }
+    if let Some(change) = &app.external.change {
+        let diff = change.diff.human();
+        egui::Window::new("Cambio externo en project.json").collapsible(false).show(ctx, |ui| {
+            ui.label(diff);
+            ui.label("Se combinan cambios independientes. Las decisiones humanas y la evidencia permanecen protegidas.");
+            ui.horizontal(|ui| {
+                if ui.button("Aplicar cambio externo").clicked() {
+                    app.accept_external();
+                }
+                if ui.button("Posponer esta versión").clicked() {
+                    app.external.dismiss();
+                }
+            });
+        });
+    }
+    if let Some(error) = &app.external.error {
+        egui::Window::new("Conflicto externo").collapsible(true).show(ctx, |ui| {
+            ui.label(error);
+            ui.label("Tu edición se conserva. La lectura se reintentará; también puedes guardar en otra carpeta.");
+        });
     }
     if let Some(candidate) = &app.recovery {
         let revision = candidate.revision;

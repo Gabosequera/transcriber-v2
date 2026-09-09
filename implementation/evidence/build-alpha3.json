@@ -1,0 +1,9 @@
+{
+  "version": "2.0.0-alpha.3",
+  "path": "target/release/Transcriptor.exe",
+  "size": 23111168,
+  "sha256": "663a45286371c36c0a3395af9bc048919031ffc2e40069985331af1ca6921c87",
+  "build": "cargo build --release --locked -p transcriptor",
+  "executed": false,
+  "packaged": false
+}

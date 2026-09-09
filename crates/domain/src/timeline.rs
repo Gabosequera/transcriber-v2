@@ -184,6 +184,13 @@ pub struct Marker {
     pub comment: String,
 }
 
+#[derive(Clone, PartialEq, Debug)]
+pub struct SourceOccurrence {
+    pub clip_id: ClipId,
+    pub source: TimeRange,
+    pub sequence: TimeRange,
+}
+
 /// Secuencia: lienzo, pistas, clips y marcadores.
 #[derive(Clone, PartialEq, Debug, Serialize, Deserialize)]
 pub struct Sequence {
@@ -204,6 +211,21 @@ pub struct Sequence {
 }
 
 impl Sequence {
+    pub fn range_occurrences(&self, asset: &AssetId, range: TimeRange) -> Vec<SourceOccurrence> {
+        let mut out = Vec::new();
+        for clip in self.clips.iter().filter(|c| &c.asset_id == asset && c.enabled) {
+            let intersection = if range.is_point() { clip.source.contains(range.start).then_some(range) } else { clip.source.intersection(&range) };
+            if let Some(source) = intersection {
+                out.push(SourceOccurrence {
+                    clip_id: clip.id.clone(),
+                    source,
+                    sequence: TimeRange::new(clip.position + (source.start - clip.source.start), clip.position + (source.end - clip.source.start)),
+                });
+            }
+        }
+        out.sort_by_key(|o| (o.sequence.start, o.clip_id.clone()));
+        out
+    }
     pub fn new(name: impl Into<String>, frame_rate: Rational, width: u32, height: u32, sample_rate: u32) -> Self {
         Sequence {
             id: SequenceId::random(),

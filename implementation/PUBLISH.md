@@ -1,4 +1,10 @@
-# Publicación de continuación 5 — alpha.2
+# Publicación de continuación 6 — alpha.3
+
+Checkpoint autorizado de fuentes, con E2/E3 abiertas y E4 pendiente. Build local Windows completado con `cargo build --release --locked -p transcriptor` en 6m30s; ejecutable no lanzado ni empaquetado. Registro de tamaño/hash en `evidence/build-alpha3.json`. Unitarios alpha.3: 19 application + 13 V1compat pasan. Clippy/all-targets y formato en logs de continuación 6. Tests dominio bloqueados por Windows 4551; desktop/GUI/multimedia/revisión general siguen pendientes.
+
+Se prepara commit/push a main y prerelease `v2.0.0-alpha.3` con notas `evidence/release-notes-alpha3.md`. Sin assets binarios: no publicar el ejecutable local como paquete probado. Resultado remoto se registra en `evidence/publication-alpha3.json` tras confirmar publicación. El commit posterior de documentación deja el traspaso al día.
+
+## Histórico — continuación 5, alpha.2
 
 El usuario autorizó commit/push/prerelease al cortar por contexto. Se publicó `v2.0.0-alpha.2` como **checkpoint de fuentes**, con avances parciales E3 y rutas portables. E4 pendiente. No incluye nuevo paquete Windows ni ejecutable probado; los source archives son los de GitHub. Clippy/formato y pruebas unitarias dirigidas no sustituyen testing real, aplazado expresamente. Publicación verificada: [v2.0.0-alpha.2](https://github.com/Gabosequera/transcriber-v2/releases/tag/v2.0.0-alpha.2), `draft=false`, `prerelease=true`, sin assets binarios adjuntos. Tag y target apuntan a `31d18437788fcd1da0155b478b538d1753d1b93d`, commit de código/contexto subido a origin/main. Registro: `evidence/publication-alpha2.json`. El commit posterior solo registra este resultado; continuar desde main para incluirlo.
 

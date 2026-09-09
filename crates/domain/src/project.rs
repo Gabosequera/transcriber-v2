@@ -47,6 +47,8 @@ pub struct Project {
     pub active_sequence: Option<SequenceId>,
     #[serde(default)]
     pub layers: Vec<SemanticLayer>,
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub masters: Vec<crate::evidence::MasterEvidence>,
     /// Orden de carriles semánticos en la UI (IDs de capa). Presentación.
     #[serde(default)]
     pub layer_order: Vec<LayerId>,
@@ -72,6 +74,7 @@ impl Project {
             active_sequence: Some(seq.id.clone()),
             sequences: vec![seq],
             layers: Vec::new(),
+            masters: Vec::new(),
             layer_order: Vec::new(),
             settings: ProjectSettings::default(),
             extra: Default::default(),

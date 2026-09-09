@@ -31,7 +31,13 @@ El wrapper usa `CARGO_HOME` si existe, o la instalación Rust del usuario. No ca
 
 Atajos: Ctrl+I importar, espacio reproducir/pausar, S dividir, Ctrl+N capa, I/O rango, Ctrl+Enter añadir tramo, Ctrl+S guardar, Ctrl+O abrir, Ctrl+E exportar. Ajustes/Atajos permite editar combinaciones separadas por `;`, capturar una tecla, dejar una acción sin atajo y restaurar defaults; los conflictos se rechazan antes de guardar.
 
-Al abrir un proyecto con autosave más reciente se ofrece recuperar. La recuperación es explícita y reversible con Deshacer. Si otra instancia o un editor externo cambió el archivo, guardar falla con conflicto: abrir la versión externa o guardar en otra carpeta. Todavía no hay watcher/reconciliación con diff ni durabilidad multidocumento completa.
+Al abrir un proyecto con autosave más reciente se ofrece recuperar con Deshacer. Los proyectos aún sin carpeta se guardan automáticamente en configuración/recovery; al arrancar se ofrecen candidatos y al recuperar se pide destino normal en el primer Guardar. No se borran originales ni archivos V1.
+
+Un lector de respaldo comprueba project.json cada 2 s en segundo plano. Cuando hay una versión válida estable, combina cambios independientes y muestra resumen del diff para Aplicar o Posponer. Rechaza conflictos de campos/orden, decisiones humanas y evidencia protegida; guardar no pisa la versión externa. Aplicar revalida ambos lados y admite Deshacer. Todavía faltan watcher del SO y reconciliación de documentos V1 individuales.
+
+Guardar confirma snapshot/auditoría mediante .pending-commit.json. Si se interrumpe, abrir completa la intención si el disco sigue en la base o destino esperado. Si hay un tercer contenido, se informa conflicto y se conserva todo. No borrar manualmente una intención pendiente. Atomicidad multidocumento V1 y archivado de auditoría siguen pendientes.
+
+Shift+T activa el salto de recortes durante revisión; no modifica export. Ctrl+Shift+A añade los rangos de un item/IN-OUT, sin incluir huecos de un multirrango. La acción «Añadir tema completo» utiliza el tema raíz. Inspector → Ocurrencias permite ir a cada repetición. Masters importados y sus proyecciones son evidencia de solo lectura.
 
 ## Guiones y fixtures (ejecución real aplazada)
 

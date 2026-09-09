@@ -62,19 +62,20 @@ pub enum LayerKind {
     Laughter,
     Arousal,
     Silence,
+    Signals,
     Other(String),
 }
 
 impl LayerKind {
     pub fn accepts_acceptance(&self) -> bool {
-        !matches!(self, LayerKind::Blocks | LayerKind::Transcript | LayerKind::Speakers)
+        self.is_editable() && !matches!(self, LayerKind::Blocks)
     }
     pub fn allows_points(&self) -> bool {
         // V1 persiste capas con `allow_points=False`; solo las marcas del autor (adaptador) llevan puntos.
         matches!(self, LayerKind::Author)
     }
     pub fn is_editable(&self) -> bool {
-        !matches!(self, LayerKind::Transcript | LayerKind::Speakers | LayerKind::Laughter | LayerKind::Arousal)
+        !matches!(self, LayerKind::Transcript | LayerKind::Speakers | LayerKind::Laughter | LayerKind::Arousal | LayerKind::Signals)
     }
     pub fn v1_name(&self) -> String {
         match self {
@@ -89,6 +90,7 @@ impl LayerKind {
             LayerKind::Laughter => "laughter".into(),
             LayerKind::Arousal => "arousal".into(),
             LayerKind::Silence => "silence".into(),
+            LayerKind::Signals => "signals".into(),
             LayerKind::Other(s) => s.clone(),
         }
     }
@@ -134,6 +136,11 @@ impl SemanticItem {
 
     pub fn start(&self) -> Ticks {
         self.ranges.iter().map(|r| r.start).min().unwrap_or(Ticks::ZERO)
+    }
+
+    /// Trims keep human acceptance independently of their enabled state.
+    pub fn is_human_accepted(&self) -> bool {
+        self.state == ItemState::Accepted || self.extra.get("accepted").and_then(|v| v.as_bool()) == Some(true)
     }
 
     pub fn end(&self) -> Ticks {

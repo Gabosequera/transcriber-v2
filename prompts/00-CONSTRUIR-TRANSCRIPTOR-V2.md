@@ -1,7 +1,7 @@
 # Construir Transcriptor V2: instrucciones de ejecución
 
-> **MARCADOR DE CONTINUACIÓN (actualizado 2026-09-08, continuación 3).**
-> Estado: **E0 cerrada · E1 cerrada (host) · E2 avanzada y abierta · E3–E6 pendientes.**
+> **MARCADOR DE CONTINUACIÓN (actualizado 2026-09-08, continuación 6, alpha.3).**
+> Estado: **E0/E1 aceptadas históricamente · E2 abierta · E3 parcial · E4 pendiente · parar antes de E5.** Testing físico y revisión general aplazados.
 > Fuente de verdad del progreso: `implementation/STATUS.md`, `implementation/requirements-matrix.md`, `implementation/decisions.md` (D-0001…D-0021), `implementation/evidence/e0|e1|e2/`.
 > Al reanudar: lee el anexo «Traspaso al siguiente agente» al final de este archivo, luego `STATUS.md`, y continúa por el primer punto de «Qué sigue» sin rehacer lo verificado.
 
@@ -105,28 +105,16 @@ Al reanudar, sigue el traspaso vigente al final de este archivo; E0/E1 no se rei
 
 ---
 
-## Traspaso vigente — continuación 5
+## Traspaso vigente — continuación 6
 
-### 1. Alcance
+Alcance: implementar hasta E4 y parar antes de E5. Testing físico, regresión multimedia y revisión general aplazados. Leer STATUS, evidence/continuacion-06.md, requirements-matrix, RUN y decisiones D-0030–D-0034. No rehacer E0/E1.
 
-El usuario reanudó el desarrollo desde otro equipo y autorizó completar **implementación hasta E4**, parando antes de E5. Testing real y revisión general quedan para otra iteración. Los antiguos requisitos de aceptación física siguen pendientes; no bloquear implementación en ellos ni declarar que pasaron. Al aproximarse al límite de contexto, preparar commit/push/prerelease y traspaso breve.
+Checkpoint alpha.3 desde main 7267880: validación de snapshots, master V1 completo y proyecciones protegidas, conservación de aceptación de recortes, protección humana, intención recuperable project/journal, reconciliación con rescaneo estable/merge/diff resumido/aprobación/undo, autosave de proyectos sin carpeta, salto de recortes, montaje de temas/multirrango y navegación de ocurrencias. E2/E3 abiertas, E4 pendiente. Compilar no equivale a aceptación.
 
-### 2. Estado
+Continuar por paridad V1 completa: import editorial asíncrono, inventario/atajos restantes, export GUI/montaje inverso sin pérdida, chunks/autor/bloques/jerarquías/derivación/manifests/requests/passes. Durabilidad: idempotencia/historial/jobs entre aperturas, migraciones y multidocumento V1, auditoría del autosave legado, workers de guardado, watcher SO/diff detallado/conflictos. Optimizar clones/hash de master e índices. Completar distinción de actor al marcar edited/aceptación; la protección actual no es autorización MCP.
 
-E0/E1 aceptadas históricamente. E2 funcional implementada con validación integrada pendiente. E3 parcial: esta continuación añade portabilidad de guiones, preparación MSVC, atajos editables, continuidad de undo/redo, identidad de reintentos/digest, guardado con control de cambios externos y recuperación ofrecida en GUI. **E4 aún pendiente.** No se integraron modelos.
+Después E4: tools MCP específicas y schemas, capacidades/queries temporales paginadas, permisos por sesión/proyecto/clase, propuestas/digests/dry-run/diff/preview/apply, eventos/auditoría, requests/respuestas JSON y cliente conectado a GUI con núcleo común. Nada de herramienta genérica de shell/SQL/estado.
 
-### 3. Fuentes autoritativas
+Entorno: scripts/cargo.ps1 descubre Rust/MSVC; '--' entre comillas al pasar argumentos Clippy. Logs exactos en evidence. Windows bloqueó tests de dominio (4551); tests desktop siguen sin ejecutar, no eludir la política. Tests application/V1 puros y build release local no acreditan GUI ni multimedia. No hay paquete nuevo aceptado. Fuente de publicación: PUBLISH y publication-alpha3.json.
 
-Leer `implementation/STATUS.md`, `implementation/evidence/continuacion-05.md`, `implementation/requirements-matrix.md` y `implementation/RUN.md`. El traspaso anterior está archivado en `implementation/evidence/traspaso-continuacion-04.md`; sus rutas G:/TODO son históricas.
-
-### 4. Entorno
-
-Descubrir raíz desde scripts; no usar rutas del equipo anterior. `scripts/cargo.ps1` descubre Rust/Visual Studio y configura MSVC x64. Los JSON de tests son plantillas que se materializan con `prepare_script.py` o `prepare_regression.py`. FFmpeg por variable explícita, copia local o PATH. Los goldens V1 históricos requieren bytes originales o regeneración explícita mediante V1 aislado.
-
-### 5. Próximo trabajo
-
-Completar E3: validación integral al cargar/recuperar; auditoría y atomicidad multidocumento ante fallos; autosave de proyectos nuevos; reconciliación externa con diff y protección humana; master y contratos V1 completos/export GUI/montaje inverso; chunks/jerarquías/evidencia/derivación/ocurrencias y acciones V1 restantes. Después E4: herramientas MCP específicas, catálogo/schema, consultas paginadas, permisos, propuestas/dry-run/apply/eventos y cliente local conectado a GUI. Nunca una herramienta genérica de shell/SQL/estado.
-
-### 6. Restricciones
-
-V1 y datos personales solo lectura. Preservar evidencia y licencias. El commit de checkpoint no certifica E3/E4 ni una release binaria validada. Guardar contexto antes de parar; no entrar en E5/E6.
+V1 y datos personales estrictamente solo lectura. Preservar evidencia histórica. Si se interrumpe por contexto, dejar commit/push/prerelease y traspaso; no declarar cumplido el objetivo mientras E3/E4 tengan pendientes.

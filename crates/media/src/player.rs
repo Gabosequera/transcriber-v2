@@ -57,6 +57,7 @@ pub enum PlayerCommand {
     SetRate(f64),
     StepFrames(i64),
     SetLoop(Option<TimeRange>),
+    SetSkipRanges(Vec<TimeRange>),
     SetMuted(bool),
     Shutdown,
 }
@@ -184,6 +185,7 @@ fn run(tools: FfmpegTools, rx: Receiver<PlayerCommand>, shared: Arc<Shared>, wak
     let mut rate = 1.0f64;
     let mut generation: u64 = 0;
     let mut loop_range: Option<TimeRange> = None;
+    let mut skip_ranges: Vec<TimeRange> = Vec::new();
     let mut muted = false;
     let mut mixer: Option<AudioMixer> = None;
     let mut clock: Option<Clock> = None;
@@ -323,6 +325,13 @@ fn run(tools: FfmpegTools, rx: Receiver<PlayerCommand>, shared: Arc<Shared>, wak
                     dirty = true;
                 }
                 PlayerCommand::SetLoop(l) => loop_range = l,
+                PlayerCommand::SetSkipRanges(mut ranges) => {
+                    ranges.retain(|r| r.start >= Ticks::ZERO && r.end > r.start);
+                    skip_ranges = tv2_domain::layers::merge_intervals(&mut ranges);
+                    generation = next_generation(&audio_out, generation);
+                    mixer = None;
+                    clock = None;
+                }
                 PlayerCommand::SetMuted(m) => {
                     muted = m;
                     generation = next_generation(&audio_out, generation);
@@ -340,6 +349,16 @@ fn run(tools: FfmpegTools, rx: Receiver<PlayerCommand>, shared: Arc<Shared>, wak
         };
 
         // 2. reproducción: avanzar el reloj
+        if playing && let Some(target) = tv2_domain::review::skip_target(&skip_ranges, position) {
+            position = target.min(timeline.duration);
+            if position >= timeline.duration || loop_range.is_some_and(|l| position >= l.end) {
+                playing = false;
+            }
+            generation = next_generation(&audio_out, generation);
+            mixer = None;
+            clock = None;
+            dirty = true;
+        }
         if playing {
             let audio_possible = audio_out.is_some() && !muted && rate <= 4.0 && timeline.pieces.iter().any(|p| !p.audio.is_empty());
             if clock.is_none() {
@@ -358,7 +377,16 @@ fn run(tools: FfmpegTools, rx: Receiver<PlayerCommand>, shared: Arc<Shared>, wak
                 let target_queue = (out_rate as f64 * 0.4) as u64;
                 let mut guard = 0;
                 while a.queued() < target_queue && guard < 8 {
-                    let mut buf = vec![0f32; 1024 * CHANNELS];
+                    if tv2_domain::review::skip_target(&skip_ranges, m.cursor()).is_some() {
+                        break;
+                    }
+                    let boundary = skip_ranges.iter().find(|r| r.start > m.cursor()).map(|r| r.start);
+                    let frames =
+                        boundary.map(|b| (((b - m.cursor()).as_seconds_f64() / rate * out_rate as f64).ceil() as usize).min(1024)).unwrap_or(1024);
+                    if frames == 0 {
+                        break;
+                    }
+                    let mut buf = vec![0f32; frames * CHANNELS];
                     let n = m.mix(&mut buf);
                     if n == 0 {
                         break;
@@ -379,6 +407,18 @@ fn run(tools: FfmpegTools, rx: Receiver<PlayerCommand>, shared: Arc<Shared>, wak
                 c.anchor_pos + Ticks((c.anchor_instant.elapsed().as_secs_f64() * c.rate * tv2_domain::time::FLICKS_PER_SECOND as f64).round() as i64)
             };
             position = new_pos;
+            if let Some(target) = tv2_domain::review::skip_target(&skip_ranges, position) {
+                position = target.min(timeline.duration);
+                generation = next_generation(&audio_out, generation);
+                mixer = None;
+                clock = None;
+                // A fully trimmed loop cannot spin forever.
+                if loop_range
+                    .is_some_and(|l| position >= l.end && tv2_domain::review::skip_target(&skip_ranges, l.start).is_some_and(|end| end >= l.end))
+                {
+                    playing = false;
+                }
+            }
             // loop / fin
             if let Some(l) = loop_range
                 && position >= l.end

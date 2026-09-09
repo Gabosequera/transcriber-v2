@@ -2,6 +2,26 @@
 
 Registro breve de decisiones rutinarias y reversibles. Las que cambian GUI, motor, persistencia o compatibilidad enlazan un ADR. Formato: ID, fecha, decisión, alternativas, riesgo, prueba que lo demuestra.
 
+## D-0030 · 2026-09-08 · Validación de snapshots y evidencia original
+
+Validar estructura al cargar, recuperar y confirmar previews/comandos; IDs/referencias antes de operaciones temporales, invariantes de composición/capas y digest/identidad del master. Master V1 completo en Project.masters; proyecciones derivadas de solo lectura con registro original en extra.evidence. Se rechaza reemplazo de evidencia incorporada. Alternativa de editar las proyecciones descartada por divergencia. Schema project/1 se amplía con campo opcional; proyectos anteriores sin masters siguen legibles. No es sistema general de migraciones. Riesgo: coste de clones/hash en grandes masters, medir/optimizar pendiente. Tests validation (compilados, ejecución bloqueada), master/import y protection.
+
+## D-0031 · 2026-09-08 · Intención durable para proyecto y auditoría
+
+Publicar .pending-commit.json con snapshot/base/eventos antes de reemplazar project.json y journal.jsonl. Load completa idempotentemente si disco coincide con base o destino; un tercer contenido produce conflicto. Journal deduplica command_id iguales, rechaza contenido distinto/corrupción interna y solo repara cola incompleta. GUI drena eventos únicamente tras commit exitoso. Alternativa de append después de guardar perdía auditoría ante crash/error (after_change aún drenaba prematuramente, pese al texto de continuación 5). Prueba: store::recovery_finishes_each_commit_boundary_once_and_rejects_external_writes. Límite: lock cooperativo, no pérdida de energía/multidocumento V1/idempotencia durable. Reescritura journal limitada a 64 MiB; archivado pendiente.
+
+## D-0032 · 2026-09-08 · Reconciliación explícita con dos bases
+
+Guardar baseline leído; worker toma dos lecturas estables y prepara merge de tres vías. Colecciones con IDs se combinan por identidad, rangos/listas restantes son atómicos; orden concurrente incompatible falla. Resumen de diff en GUI, aplicar revalida sesión y disco y ejecuta Command::ReconcileProject como actor externo. Baseline CAS se avanza solo tras éxito; undo conserva nueva revisión. Sin sobrescribir decisiones humanas/evidencia. Alternativa de reload completo pierde edición local. Tests reconcile y external_diff_revalidates_both_bases_and_is_undoable_then_saveable. Rescaneo 2 s sin watcher SO; falta diff detallado/resolución y documentos V1.
+
+## D-0033 · 2026-09-08 · Recortes, evidencia y montaje multirrango
+
+Aceptación de recorte persiste aunque esté desactivado; reactivar conserva revisión humana. V1 enabled determina corte. Salto de revisión se deriva de timeline resuelto: solo salta intersección de trims de todos los contribuyentes; no oculta medios independientes ni modifica export. Player limita audio antes de frontera. Tema/selección añade sus rangos reales en un batch, sin convertir gaps en contenido. Inspector navega intersecciones por clip incluso repetido. Tests trims y review (este último compilado/no ejecutado); A/V e interacción pendientes. Protección de transiciones se aplica a actores externos; distinguir completamente autoría edited/aceptación queda para E4.
+
+## D-0034 · 2026-09-08 · Recuperación de proyectos aún sin guardar
+
+Store separado en configuración/recovery, nombre aleatorio por sesión/proyecto; conserva snapshot y auditoría sin elegir por el usuario un destino normal. Inicio enumera candidatos; recuperación explícita crea revisión nueva y primer Guardar pide carpeta. Guardado exitoso marca recovery como resuelto sin borrar archivos. No se modifica V1 ni datos personales. Autosave legado de proyectos guardados conserva JSON anterior, todavía sin journal. Riesgo pendiente: IO síncrono de autosave/guardado/enumeración; trasladar a workers y probar múltiples instancias. Se compila GUI, no se acredita interacción física.
+
 ## D-0026 · 2026-09-08 · Reanudación en otro equipo y alcance hasta E4
 
 El usuario aplaza testing real/revisión general y autoriza implementación hasta E4. Las fases distinguen implementación de aceptación. Preparadores materializan `${WORKSPACE}`/`${OUTPUT}` en carpetas nuevas; evidencia histórica no se reescribe. MSVC se descubre con vswhere y Developer PowerShell; conservar lock/versiones del proyecto. Prueba dirigida de expansión en Unicode y compilación; medios reales diferidos.

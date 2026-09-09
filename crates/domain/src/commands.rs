@@ -44,6 +44,16 @@ pub enum Command {
     RenameProject {
         name: String,
     },
+    SetSkipTrims {
+        enabled: bool,
+    },
+    /// Validated external snapshot, routed through the same session/history.
+    ReconcileProject {
+        project: Box<Project>,
+    },
+    AttachMaster {
+        master: crate::evidence::MasterEvidence,
+    },
     ImportAsset {
         asset: Asset,
     },
@@ -277,6 +287,9 @@ impl Command {
     pub fn label(&self) -> String {
         match self {
             Command::RenameProject { .. } => "Renombrar proyecto".into(),
+            Command::SetSkipTrims { .. } => "Saltar recortes al reproducir".into(),
+            Command::ReconcileProject { .. } => "Reconciliar archivo externo".into(),
+            Command::AttachMaster { .. } => "Incorporar master original".into(),
             Command::ImportAsset { asset } => format!("Importar {}", asset.name),
             Command::RemoveAsset { .. } => "Quitar medio".into(),
             Command::RelinkAsset { .. } => "Reenlazar medio".into(),
@@ -353,6 +366,29 @@ impl Command {
                 project.name = name.trim().to_string();
                 Ok(CommandEffect::new(self.label()))
             }
+            Command::SetSkipTrims { enabled } => {
+                project.settings.skip_trims_on_play = *enabled;
+                Ok(CommandEffect::new(self.label()))
+            }
+            Command::ReconcileProject { project: candidate } => {
+                if project.project_id != candidate.project_id {
+                    return Err(DomainError::precondition("el archivo externo pertenece a otro proyecto"));
+                }
+                candidate.validate()?;
+                *project = candidate.as_ref().clone();
+                Ok(CommandEffect::new(self.label()))
+            }
+            Command::AttachMaster { master } => {
+                master.validate(project)?;
+                if let Some(existing) = project.masters.iter().find(|m| m.asset_id == master.asset_id) {
+                    if existing != master {
+                        return Err(DomainError::precondition("el master original está protegido; importa el nuevo análisis como otra versión"));
+                    }
+                } else {
+                    project.masters.push(master.clone());
+                }
+                Ok(CommandEffect::new(self.label()).touch(&master.asset_id))
+            }
             Command::ImportAsset { asset } => {
                 if project.assets.iter().any(|a| a.id == asset.id) {
                     return Err(DomainError::invalid(format!("el asset {} ya existe", asset.id)));
@@ -370,7 +406,9 @@ impl Command {
                 if project.assets.len() == before {
                     return Err(DomainError::not_found("asset", asset_id));
                 }
+                let removed: Vec<_> = project.layers.iter().filter(|l| &l.asset_id == asset_id).map(|l| l.layer_id.clone()).collect();
                 project.layers.retain(|l| &l.asset_id != asset_id);
+                project.layer_order.retain(|id| !removed.contains(id));
                 Ok(CommandEffect::new(self.label()).touch(asset_id))
             }
             Command::RelinkAsset { asset_id, path, asset } => {
@@ -949,11 +987,12 @@ impl Command {
             }
             Command::DeleteLayer { layer_id } => {
                 let l = project.layer_mut(layer_id).ok_or_else(|| DomainError::not_found("capa", layer_id))?;
+                ensure_layer_editable(l)?;
                 if l.deleted {
                     return Err(DomainError::not_found("capa", layer_id));
                 }
                 l.deleted = true;
-                l.revision += 1;
+                l.revision = l.revision.checked_add(1).ok_or_else(|| DomainError::out_of_range("revisión de capa agotada"))?;
                 Ok(CommandEffect::new(self.label()).touch(layer_id))
             }
             Command::SetLayerProps { layer_id, name, color, visible, locked } => {
@@ -976,7 +1015,7 @@ impl Command {
                 if let Some(v) = locked {
                     l.locked = *v;
                 }
-                l.revision += 1;
+                l.revision = l.revision.checked_add(1).ok_or_else(|| DomainError::out_of_range("revisión de capa agotada"))?;
                 Ok(CommandEffect::new(self.label()).touch(layer_id))
             }
             Command::SetLayerOrder { layer_ids } => {
@@ -989,9 +1028,7 @@ impl Command {
             Command::AddItem { layer_id, item } => {
                 let duration = layer_asset_duration(project, layer_id)?;
                 let l = project.layer_mut(layer_id).ok_or_else(|| DomainError::not_found("capa", layer_id))?;
-                if l.locked || !l.kind.is_editable() {
-                    return Err(DomainError::precondition("la capa no admite edición manual"));
-                }
+                ensure_layer_editable(l)?;
                 if l.deleted_item_ids.contains(&item.item_id) {
                     return Err(DomainError::precondition(format!("el item {} fue borrado (tombstone)", item.item_id)));
                 }
@@ -999,11 +1036,12 @@ impl Command {
                 items.push(item.clone());
                 validate_items(&items, duration, l.kind.allows_points())?;
                 l.items = items;
-                l.revision += 1;
+                l.revision = l.revision.checked_add(1).ok_or_else(|| DomainError::out_of_range("revisión de capa agotada"))?;
                 Ok(CommandEffect::new(self.label()).create(&item.item_id))
             }
             Command::SetItemState { layer_id, item_ids, state } => {
                 let l = project.layer_mut(layer_id).ok_or_else(|| DomainError::not_found("capa", layer_id))?;
+                ensure_layer_editable(l)?;
                 if *state == ItemState::Accepted && !l.kind.accepts_acceptance() {
                     return Err(DomainError::not_available(format!(
                         "los {} no admiten aceptación",
@@ -1013,26 +1051,31 @@ impl Command {
                         }
                     )));
                 }
+                let trims = l.kind == LayerKind::Trims;
                 let mut effect = CommandEffect::new(self.label());
                 for id in item_ids {
                     let it = l.item_mut(id).ok_or_else(|| DomainError::not_found("item", id))?;
-                    if it.state != *state {
-                        it.state = *state;
+                    let target = if trims && *state == ItemState::Proposed && it.is_human_accepted() { ItemState::Accepted } else { *state };
+                    if it.state != target {
+                        let accepted = it.is_human_accepted() || target == ItemState::Accepted;
+                        it.state = target;
+                        if trims {
+                            it.extra.insert("accepted".into(), serde_json::json!(accepted));
+                            it.extra.insert("enabled".into(), serde_json::json!(target.is_enabled()));
+                        }
                         it.edited = true;
                         effect = effect.touch(id);
                     }
                 }
                 if !effect.affected.is_empty() {
-                    l.revision += 1;
+                    l.revision = l.revision.checked_add(1).ok_or_else(|| DomainError::out_of_range("revisión de capa agotada"))?;
                 }
                 Ok(effect)
             }
             Command::SetItemProps { layer_id, item_id, label, comment, ranges } => {
                 let duration = layer_asset_duration(project, layer_id)?;
                 let l = project.layer_mut(layer_id).ok_or_else(|| DomainError::not_found("capa", layer_id))?;
-                if l.locked {
-                    return Err(DomainError::precondition("la capa está bloqueada"));
-                }
+                ensure_layer_editable(l)?;
                 let allow_points = l.kind.allows_points();
                 let mut items = l.items.clone();
                 let it = items.iter_mut().find(|i| &i.item_id == item_id).ok_or_else(|| DomainError::not_found("item", item_id))?;
@@ -1048,14 +1091,12 @@ impl Command {
                 it.edited = true;
                 validate_items(&items, duration, allow_points)?;
                 l.items = items;
-                l.revision += 1;
+                l.revision = l.revision.checked_add(1).ok_or_else(|| DomainError::out_of_range("revisión de capa agotada"))?;
                 Ok(CommandEffect::new(self.label()).touch(item_id))
             }
             Command::DeleteItems { layer_id, item_ids } => {
                 let l = project.layer_mut(layer_id).ok_or_else(|| DomainError::not_found("capa", layer_id))?;
-                if l.locked {
-                    return Err(DomainError::precondition("la capa está bloqueada"));
-                }
+                ensure_layer_editable(l)?;
                 let mut effect = CommandEffect::new(self.label());
                 let mut to_delete: Vec<ItemId> = Vec::new();
                 for id in item_ids {
@@ -1083,7 +1124,7 @@ impl Command {
                     }
                     effect = effect.touch(id);
                 }
-                l.revision += 1;
+                l.revision = l.revision.checked_add(1).ok_or_else(|| DomainError::out_of_range("revisión de capa agotada"))?;
                 Ok(effect)
             }
             Command::ReplaceLayer { layer } => {
@@ -1091,14 +1132,29 @@ impl Command {
                     project.asset(&layer.asset_id).map(|a| a.duration()).ok_or_else(|| DomainError::not_found("asset", &layer.asset_id))?;
                 let mut incoming = layer.clone();
                 if let Some(existing) = project.layer(&layer.layer_id) {
+                    if existing.deleted && !incoming.deleted {
+                        return Err(DomainError::precondition("una capa borrada no puede resucitar por importación"));
+                    }
+                    if existing.asset_id != incoming.asset_id || existing.kind != incoming.kind {
+                        return Err(DomainError::precondition("una capa existente no puede cambiar de medio o tipo"));
+                    }
+                    if (existing.locked || !existing.kind.is_editable()) && existing != &incoming {
+                        return Err(DomainError::precondition("la capa está protegida contra reemplazo"));
+                    }
                     // no resucitar tombstones
-                    let dead: Vec<ItemId> = existing.deleted_item_ids.clone();
+                    let mut dead: Vec<ItemId> = existing.deleted_item_ids.clone();
                     incoming.items.retain(|i| !dead.contains(&i.item_id));
                     let mut removed_children = true;
                     while removed_children {
-                        let ids: Vec<ItemId> = incoming.items.iter().map(|i| i.item_id.clone()).collect();
+                        let children: Vec<_> = incoming
+                            .items
+                            .iter()
+                            .filter(|i| i.parent_id.as_ref().is_some_and(|p| dead.contains(p)))
+                            .map(|i| i.item_id.clone())
+                            .collect();
+                        dead.extend(children);
                         let before = incoming.items.len();
-                        incoming.items.retain(|i| i.parent_id.as_ref().is_none_or(|p| ids.contains(p)));
+                        incoming.items.retain(|i| !dead.contains(&i.item_id));
                         removed_children = incoming.items.len() != before;
                     }
                     for d in dead {
@@ -1106,7 +1162,7 @@ impl Command {
                             incoming.deleted_item_ids.push(d);
                         }
                     }
-                    incoming.revision = existing.revision + 1;
+                    incoming.revision = existing.revision.checked_add(1).ok_or_else(|| DomainError::out_of_range("revisión de capa agotada"))?;
                 }
                 validate_layer(&incoming, duration)?;
                 let id = incoming.layer_id.clone();
@@ -1123,25 +1179,12 @@ impl Command {
                 if project.sequence(&sequence.id).is_some() {
                     return Err(DomainError::invalid(format!("la secuencia {} ya existe", sequence.id)));
                 }
-                for c in &sequence.clips {
-                    let asset = project.asset(&c.asset_id).ok_or_else(|| DomainError::not_found("asset", &c.asset_id))?;
-                    validate_source(asset, &c.source)?;
-                    if sequence.track(&c.track_id).is_none() {
-                        return Err(DomainError::not_found("pista", &c.track_id));
-                    }
-                }
-                for t in &sequence.tracks {
-                    for c in sequence.clips.iter().filter(|c| c.track_id == t.id) {
-                        if let Some(o) = sequence.clips.iter().find(|o| o.id != c.id && o.track_id == t.id && o.range().overlaps(&c.range())) {
-                            return Err(DomainError::overlap(format!("{} se solapa con {} en {}", c.id, o.id, t.name)));
-                        }
-                    }
-                }
                 let id = sequence.id.clone();
                 project.sequences.push(sequence.clone());
                 if *activate {
                     project.active_sequence = Some(id.clone());
                 }
+                project.validate()?;
                 Ok(CommandEffect::new(self.label()).create(id))
             }
             Command::SetActiveSequence { sequence_id } => {
@@ -1176,17 +1219,25 @@ fn ensure_unlocked(track: &Track) -> DomainResult<()> {
     }
 }
 
-fn validate_source(asset: &Asset, source: &TimeRange) -> DomainResult<()> {
+fn ensure_layer_editable(layer: &SemanticLayer) -> DomainResult<()> {
+    if layer.deleted || layer.locked || !layer.kind.is_editable() {
+        Err(DomainError::precondition("la capa está borrada, bloqueada o es evidencia de solo lectura"))
+    } else {
+        Ok(())
+    }
+}
+
+pub(crate) fn validate_source(asset: &Asset, source: &TimeRange) -> DomainResult<()> {
     if !source.is_ordered() || source.is_point() || source.start.is_negative() {
         return Err(DomainError::out_of_range("rango fuente inválido"));
     }
-    if asset.kind != crate::asset::AssetKind::Image && source.end > asset.duration() + Ticks::from_millis(1) {
+    if asset.kind != crate::asset::AssetKind::Image && source.end.0 as i128 > asset.duration().0 as i128 + Ticks::from_millis(1).0 as i128 {
         return Err(DomainError::out_of_range(format!("el rango fuente termina en {} pero el medio dura {}", source.end, asset.duration())));
     }
     Ok(())
 }
 
-fn check_track_compat(track: &Track, asset: &Asset, audio_stream: Option<u32>) -> DomainResult<()> {
+pub(crate) fn check_track_compat(track: &Track, asset: &Asset, audio_stream: Option<u32>) -> DomainResult<()> {
     match track.kind {
         TrackKind::Video if !asset.has_video() => Err(DomainError::precondition("el medio no tiene video para una pista de video")),
         TrackKind::Audio if !asset.has_audio() => Err(DomainError::precondition("el medio no tiene audio para una pista de audio")),

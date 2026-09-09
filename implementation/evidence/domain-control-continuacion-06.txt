@@ -1,0 +1,10 @@
+Resumen transcrito del resultado de herramienta, 2026-09-08 (no log nativo de Cargo).
+Comando: ./scripts/cargo.ps1 test -p tv2-domain -p tv2-application -p tv2-v1compat --lib --locked
+Version: 2.0.0-alpha.2, durante implementacion continuacion 6.
+Application: 16 passed; 0 failed (intermedio, antes de las 3 pruebas reconcile).
+Running unittests src/lib.rs (target/debug/deps/tv2_domain-7e35141021bf74e1.exe)
+could not execute process ... (never executed)
+Una directiva de Control de aplicaciones bloqueo este archivo. (os error 4551)
+Cargo exit code: 1. No se eludio la politica.
+Tests dominio compilados con Clippy/all-targets, sin ejecucion acreditada.
+V1compat se ejecuto despues en un comando separado; resultado final en unit-continuacion-06.log.

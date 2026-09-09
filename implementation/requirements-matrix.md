@@ -1,5 +1,22 @@
 # Matriz de requisitos
 
+## Incremento vigente — continuación 6, alpha.3
+
+E2/E3 siguen abiertas y E4 pendiente. Las filas históricas siguientes conservan su evidencia de otro equipo; no implican aceptación de este build. Evidencia del incremento: `evidence/continuacion-06.md` y logs enlazados allí.
+
+| ID | Implementación añadida | Estado / control |
+|---|---|---|
+| DAT-01 / LAY-04 | Master original completo con digest y proyecciones de palabras/intervenciones/señales protegidas | Parcial; tests master/import V1. Export completo, chunks y versionado de master pendientes |
+| LAY-01 / LAY-02 | Aceptación de trims separada de enabled; capas de análisis/bloqueadas y decisiones humanas protegidas; tombstones de descendientes | Parcial; tests V1/protection. Edición completa de jerarquías/chunks/derivación pendiente |
+| MED-02 / UI-04 | Shift+T salta trims; navegación de silencios importados; añadir tema y multirrango sin sus huecos | Implementado sin aceptación física; Clippy/all-targets. Tests review de dominio compilados, no ejecutados por bloqueo 4551 |
+| LAY-03 | Inspector muestra y permite elegir cada ocurrencia por clip/rango | Implementado sin aceptación GUI; montaje inverso/export V1 pendientes |
+| DAT-02 | Validación de snapshots; intención recuperable proyecto+journal; recuperación de autosave de proyectos sin carpeta | Parcial; tests store de tres fronteras y corrupción. Multidocumento V1/migraciones/idempotencia durable pendientes |
+| DAT-03 / DAT-04 | Rescaneo estable en worker, merge de tres vías, resumen de diff/aprobación en GUI, revalidación de ambas bases y undo | Parcial; tests reconcile/store pasan. Watcher SO/documentos V1/editor de conflictos y flujo físico pendientes |
+| AI-01 / AI-02 | Protección humana/evidencia común para cambios externos, imports y batches | Base interna; permisos/MCP/propuestas/capabilities/cliente E4 aún pendientes |
+| OPS-01 / PKG-01 | Build release local y prerelease de fuentes | Control exacto en build-continuacion-06.log/PUBLISH. No es paquete binario aceptado |
+
+## Registro histórico — continuación 5
+
 **Actualización continuación 5:** implementación hasta E4 autorizada; testing real y revisión general aplazados por el usuario. E3 parcial/E4 pendiente. Se conservan las filas/evidencia histórica debajo. Nuevos alcances:
 
 | ID | Incremento alpha.2 | Estado y evidencia |

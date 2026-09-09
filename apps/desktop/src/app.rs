@@ -172,6 +172,9 @@ pub struct TranscriptorApp {
     pub shortcut_editor: Option<crate::keymap::ShortcutEditor>,
     pub pending_close: bool,
     pub recovery: Option<Project>,
+    pub external: crate::external::ExternalMonitor,
+    pub unsaved_recoveries: Vec<PathBuf>,
+    unsaved_store: Option<ProjectStore>,
     pub source_asset: Option<AssetId>,
     pub last_autosave: Instant,
     pub dirty_title: bool,
@@ -290,6 +293,9 @@ impl TranscriptorApp {
             shortcut_editor: None,
             pending_close: false,
             recovery: None,
+            external: Default::default(),
+            unsaved_recoveries: Self::find_unsaved_recoveries(),
+            unsaved_store: None,
             source_asset: None,
             last_autosave: Instant::now(),
             dirty_title: true,
@@ -320,6 +326,53 @@ impl TranscriptorApp {
 
     pub fn project(&self) -> &Project {
         self.session.project()
+    }
+
+    fn find_unsaved_recoveries() -> Vec<PathBuf> {
+        let Ok(entries) = std::fs::read_dir(crate::paths::config_dir().join("recovery")) else {
+            return vec![];
+        };
+        let mut paths: Vec<_> = entries
+            .filter_map(Result::ok)
+            .map(|e| e.path())
+            .filter(|p| p.join("project.json").is_file() && !p.join("resolved.json").exists())
+            .collect();
+        paths.sort();
+        paths
+    }
+
+    pub fn recover_unsaved(&mut self, root: PathBuf) {
+        if self.session.is_dirty() {
+            self.toast(Severity::Warn, "Guarda el proyecto actual antes de recuperar otro");
+            return;
+        }
+        let store = ProjectStore::at(root.clone());
+        match store.load() {
+            Ok(candidate) => {
+                // Recovery starts with a new editable session and no normal save
+                // destination. Its first Save opens the destination dialog.
+                let mut empty = Project::new(candidate.name.clone());
+                empty.project_id = candidate.project_id.clone();
+                let mut session = ProjectSession::new(empty);
+                match store.read_journal().and_then(|events| session.recover_with_audit(candidate, events)) {
+                    Ok(()) => {
+                        self.player_send(PlayerCommand::Pause);
+                        self.session = session;
+                        self.store = None;
+                        self.unsaved_store = Some(store);
+                        self.unsaved_recoveries.retain(|p| p != &root);
+                        self.external = Default::default();
+                        self.selection = Selection::default();
+                        self.source_asset = self.project().assets.first().map(|a| a.id.clone());
+                        self.resolved_revision = None;
+                        self.after_change();
+                        self.seek(Ticks::ZERO);
+                    }
+                    Err(e) => self.report(e),
+                }
+            }
+            Err(e) => self.report(e),
+        }
     }
 
     pub fn sequence(&self) -> Option<&Sequence> {
@@ -422,12 +475,6 @@ impl TranscriptorApp {
             self.selection.layer = None;
         }
         self.dirty_title = true;
-        if let Some(store) = &self.store {
-            let events = self.session.drain_journal();
-            if let Err(e) = store.append_journal(&events) {
-                tracing::warn!("journal: {e}");
-            }
-        }
     }
 
     /// Timeline resuelta del modo actual; se recalcula solo si cambió la revisión o el modo.
@@ -481,7 +528,9 @@ impl TranscriptorApp {
         self.resolved_revision = Some(key);
         let assets = Arc::new(self.asset_sources());
         if let Some(pl) = &self.player {
+            let skips = if self.project().settings.skip_trims_on_play { tv2_domain::review::skip_ranges(self.project(), &resolved) } else { vec![] };
             pl.send(PlayerCommand::SetTimeline { timeline: resolved, assets });
+            pl.send(PlayerCommand::SetSkipRanges(skips));
         }
     }
 
@@ -524,6 +573,8 @@ impl TranscriptorApp {
                 }
                 let name = project.name.clone();
                 self.session = ProjectSession::new(project);
+                self.external = Default::default();
+                self.unsaved_store = None;
                 self.marker_editor = None;
                 if let Some(media) = &mut self.media_view {
                     media.clear();
@@ -561,14 +612,16 @@ impl TranscriptorApp {
             let abs = self.resolve_asset_path(a);
             a.path = store.portable_path(&abs);
         }
-        match store.save(&project) {
+        match store.save_with_journal(&project, self.session.pending_journal()) {
             Ok(()) => {
                 self.store = Some(store.clone());
                 self.session.mark_clean();
-                if let Err(e) = store.append_journal(self.session.pending_journal()) {
-                    self.report(e.with_action("el proyecto se guardó, pero no se pudo completar la auditoría"));
-                } else {
-                    self.session.drain_journal();
+                self.session.drain_journal();
+                if let Some(recovery) = self.unsaved_store.take() {
+                    let resolved = serde_json::json!({"saved_to": store.root, "revision": project.revision});
+                    if let Err(e) = tv2_application::store::atomic_write(&recovery.root.join("resolved.json"), resolved.to_string().as_bytes()) {
+                        self.report(e.with_action("guardado completo; el autosave seguirá apareciendo como recuperable"));
+                    }
                 }
                 self.ui.last_project = Some(store.root.to_string_lossy().to_string());
                 self.toast(Severity::Info, format!("Guardado en {}", store.root.display()));
@@ -578,6 +631,19 @@ impl TranscriptorApp {
             Err(e) => {
                 self.report(e);
                 false
+            }
+        }
+    }
+
+    pub fn accept_external(&mut self) {
+        if let (Some(store), Some(change)) = (self.store.clone(), self.external.change.take()) {
+            match store.accept_external(&mut self.session, change) {
+                Ok(()) => {
+                    self.external = Default::default();
+                    self.after_change();
+                    self.toast(Severity::Info, "Cambio externo aplicado; disponible en Deshacer");
+                }
+                Err(e) => self.report(e),
             }
         }
     }
@@ -654,7 +720,7 @@ impl TranscriptorApp {
             if job.project == self.project().project_id && !job.cancel.load(std::sync::atomic::Ordering::Acquire) {
                 match value {
                     Ok(mut asset) => {
-                        asset.path = self.store.as_ref().map(|s| s.portable_path(&job.path)).unwrap_or(asset.path);
+                        asset.path = job.path.to_string_lossy().replace('\\', "/");
                         if let Some(existing) = self.project().assets.iter().find(|a| a.fingerprint.same_identity(&asset.fingerprint)) {
                             self.toast(Severity::Warn, format!("«{}» ya está en la biblioteca como «{}»", asset.name, existing.name));
                         } else {
@@ -783,7 +849,12 @@ impl TranscriptorApp {
             return;
         }
         let n = commands.len();
-        if self.exec(Command::Batch { label: "Importar proyecto V1".into(), commands }) {
+        let envelope = CommandEnvelope::human(Command::Batch { label: "Importar proyecto V1".into(), commands })
+            .with_actor(Actor::External { source: "import-v1".into() });
+        if let Err(e) = self.session.execute(envelope) {
+            self.report(e);
+        } else {
+            self.after_change();
             self.source_asset = Some(asset.id.clone());
             self.resolved_revision = None;
             let r = &import.report;
@@ -915,7 +986,7 @@ impl TranscriptorApp {
                     None => self.toast(Severity::Info, "No hay más bordes en esa dirección"),
                 }
             }
-            "nav.prev_silence" | "nav.next_silence" => self.toast(Severity::Warn, "Navegar por silencios requiere una capa de silencios (E5)"),
+            "nav.prev_silence" | "nav.next_silence" => self.navigate_silence(action == "nav.next_silence"),
             "nav.goto" => self.goto_dialog = Some(self.playhead.timecode_ms()),
             "nav.sel_start" => {
                 if let Some(r) = self.selected_range() {
@@ -1029,7 +1100,12 @@ impl TranscriptorApp {
                 self.toast(Severity::Info, if on { "Seguir al playhead: sí" } else { "Seguir al playhead: no" });
             }
             "view.center" => self.timeline_view.center_on(self.playhead),
-            "view.skip_trims" => self.toast(Severity::Warn, "Saltar recortes al reproducir llega con las capas de recortes V1 (E3)"),
+            "view.skip_trims" => {
+                let enabled = !self.project().settings.skip_trims_on_play;
+                if self.exec(Command::SetSkipTrims { enabled }) {
+                    self.toast(Severity::Info, if enabled { "Saltar recortes: activado" } else { "Saltar recortes: desactivado" });
+                }
+            }
             "loop.set_in" => self.set_loop_edge(true),
             "loop.set_out" => self.set_loop_edge(false),
             "loop.clear" => {
@@ -1038,7 +1114,7 @@ impl TranscriptorApp {
             }
             "view.mode_montage" => self.toggle_view(),
             "montage.add_selection" => self.add_selection_to_sequence(),
-            "montage.add_topic" => self.toast(Severity::Warn, "Añadir tema completo requiere capas de temas (E3)"),
+            "montage.add_topic" => self.add_topic_to_sequence(),
             "montage.reveal_source" => self.reveal_in_source(),
             "montage.move_up" => self.nudge(Ticks::ZERO, 1),
             "montage.move_down" => self.nudge(Ticks::ZERO, -1),
@@ -1460,28 +1536,90 @@ impl TranscriptorApp {
             self.toast(Severity::Warn, "No hay medio fuente");
             return;
         };
-        let range = if self.view == ViewMode::Source {
+        let ranges = if self.view == ViewMode::Source {
             match (self.in_point, self.out_point) {
-                (Some(i), Some(o)) if i < o => Some(TimeRange::new(i, o)),
-                _ => self
-                    .selection
-                    .items
-                    .first()
-                    .and_then(|(l, i)| self.project().layer(l).and_then(|l| l.item(i)).map(|it| TimeRange::new(it.start(), it.end()))),
+                (Some(i), Some(o)) if i < o => Some(vec![TimeRange::new(i, o)]),
+                _ => self.selection.items.first().and_then(|(l, i)| self.project().layer(l).and_then(|l| l.item(i)).map(|it| it.ranges.clone())),
             }
         } else {
-            self.selection
-                .items
-                .first()
-                .and_then(|(l, i)| self.project().layer(l).and_then(|l| l.item(i)).map(|it| TimeRange::new(it.start(), it.end())))
+            self.selection.items.first().and_then(|(l, i)| self.project().layer(l).and_then(|l| l.item(i)).map(|it| it.ranges.clone()))
         };
-        let Some(range) = range else {
+        let Some(ranges) = ranges else {
             self.toast(Severity::Warn, "Marca IN/OUT (I/O) o selecciona un tramo");
             return;
         };
-        let pos = self.sequence().map(|s| s.extent()).unwrap_or(Ticks::ZERO);
-        if self.exec(Command::InsertAssetLinked { asset_id: asset, position: pos, video_track: None, source: Some(range) }) {
-            self.toast(Severity::Info, format!("Añadido a la secuencia en {}", pos.timecode_ms()));
+        self.append_source_ranges(asset, ranges, "Añadir selección multirrango");
+    }
+
+    fn add_topic_to_sequence(&mut self) {
+        let selected = self.selection.items.first().and_then(|(l, i)| self.project().layer(l).map(|l| (l, i)));
+        let Some((layer, id)) = selected.filter(|(l, _)| l.kind == LayerKind::Topics) else {
+            self.toast(Severity::Warn, "Selecciona un tema o subtema");
+            return;
+        };
+        let Some(mut item) = layer.item(id) else {
+            return;
+        };
+        for _ in 0..tv2_domain::layers::MAX_HIERARCHY_DEPTH {
+            let Some(parent) = item.parent_id.as_ref().and_then(|id| layer.item(id)) else {
+                break;
+            };
+            item = parent;
+        }
+        self.append_source_ranges(layer.asset_id.clone(), item.ranges.clone(), "Añadir tema completo");
+    }
+
+    fn append_source_ranges(&mut self, asset: AssetId, ranges: Vec<TimeRange>, label: &str) {
+        let mut position = self.sequence().map(|s| s.extent()).unwrap_or(Ticks::ZERO);
+        let mut commands = Vec::new();
+        for range in ranges {
+            if range.end <= range.start {
+                self.toast(Severity::Warn, "Un punto no tiene duración para montaje");
+                return;
+            }
+            commands.push(Command::InsertAssetLinked { asset_id: asset.clone(), position, video_track: None, source: Some(range) });
+            let Some(next) = position.0.checked_add(range.duration().0) else {
+                self.toast(Severity::Error, "Duración de secuencia agotada");
+                return;
+            };
+            position = Ticks(next);
+        }
+        if self.exec(Command::Batch { label: label.into(), commands }) {
+            self.toast(Severity::Info, "Rangos añadidos en una sola operación de Deshacer");
+        }
+    }
+
+    pub fn reveal_occurrence(&mut self, clip: ClipId, time: Ticks) {
+        self.view = ViewMode::Sequence;
+        self.selection.clips = vec![clip];
+        self.player_send(PlayerCommand::Pause);
+        self.resolved_revision = None;
+        self.refresh_resolved();
+        self.seek(time);
+        self.timeline_view.center_on(time);
+    }
+
+    fn navigate_silence(&mut self, next: bool) {
+        let mut positions = Vec::new();
+        for layer in self.project().layers.iter().filter(|l| !l.deleted && l.kind == LayerKind::Silence) {
+            for range in layer.items.iter().flat_map(|i| &i.ranges) {
+                match self.view {
+                    ViewMode::Source if self.source_asset.as_ref() == Some(&layer.asset_id) => positions.push(range.start),
+                    ViewMode::Sequence => {
+                        if let Some(seq) = self.sequence() {
+                            positions.extend(seq.range_occurrences(&layer.asset_id, *range).iter().map(|o| o.sequence.start));
+                        }
+                    }
+                    _ => {}
+                }
+            }
+        }
+        positions.sort();
+        positions.dedup();
+        let target = if next { positions.into_iter().find(|t| *t > self.playhead) } else { positions.into_iter().rev().find(|t| *t < self.playhead) };
+        match target {
+            Some(t) => self.seek(t),
+            None => self.toast(Severity::Info, "No hay otro silencio importado en esa dirección"),
         }
     }
 
@@ -1828,14 +1966,30 @@ impl TranscriptorApp {
             return;
         }
         self.last_autosave = Instant::now();
+        if self.store.is_none() {
+            if self.unsaved_store.is_none() {
+                let name = format!("{}-{}.transcriptor", self.project().project_id, tv2_domain::ids::random_hex12());
+                self.unsaved_store = Some(ProjectStore::at(crate::paths::config_dir().join("recovery").join(name)));
+            }
+            if let Some(store) = &self.unsaved_store
+                && let Err(e) = store.save_with_journal(self.project(), self.session.pending_journal())
+            {
+                self.report(e.with_action("falló la recuperación automática; guarda el proyecto en otra carpeta"));
+            }
+            return;
+        }
         if let Some(store) = &self.store {
             let path = store.root.join("autosave.json");
-            if let Ok(text) = serde_json::to_string_pretty(self.project()) {
-                if let Err(e) = tv2_application::store::atomic_write(&path, text.as_bytes()) {
-                    tracing::warn!("autosave: {e}");
-                } else {
-                    tracing::debug!("autosave en {}", path.display());
-                }
+            let result =
+                self.project().validate().and_then(|_| serde_json::to_vec_pretty(self.project()).map_err(DomainError::from)).and_then(|bytes| {
+                    if bytes.len() > 64 * 1024 * 1024 {
+                        Err(DomainError::invalid("autosave supera 64 MiB"))
+                    } else {
+                        tv2_application::store::atomic_write(&path, &bytes)
+                    }
+                });
+            if let Err(e) = result {
+                self.report(e.with_action("falló el autosave; guarda el proyecto"));
             }
         }
     }
@@ -1858,6 +2012,7 @@ impl eframe::App for TranscriptorApp {
         self.poll_player();
         self.poll_export();
         self.poll_import();
+        self.external.poll(self.store.as_ref(), self.session.project(), ctx);
         self.refresh_resolved();
         // archivos soltados sobre la ventana
         let dropped: Vec<PathBuf> = ctx.input(|i| i.raw.dropped_files.iter().map(|f| f.path().to_path_buf()).collect());
@@ -1894,6 +2049,9 @@ impl eframe::App for TranscriptorApp {
         self.frame_count += 1;
         self.script_tick(ctx);
         self.autosave();
+        if self.session.is_dirty() {
+            ctx.request_repaint_after(std::time::Duration::from_secs(1));
+        }
         // toasts caducan
         self.toasts.retain(|t| t.at.elapsed().as_secs_f32() < if t.severity == Severity::Error { 10.0 } else { 5.0 });
         if ctx.input(|i| i.viewport().close_requested()) && self.session.is_dirty() && !self.pending_close {

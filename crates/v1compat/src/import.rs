@@ -32,6 +32,7 @@ pub struct V1ImportReport {
 }
 
 pub struct V1Import {
+    pub master: tv2_domain::evidence::MasterEvidence,
     pub report: V1ImportReport,
     pub layers: Vec<SemanticLayer>,
     pub sequence: Option<Sequence>,
@@ -122,17 +123,25 @@ pub fn read_v1_editorial(root: &Path, asset: &Asset) -> V1Result<V1Import> {
             Err(e) => report.warnings.push(format!("views/montaje.json: {e}")),
         }
     }
-    Ok(V1Import { report, layers, sequence })
+    layers.extend(master.projections(&asset.id)?);
+    Ok(V1Import { master: master.evidence(&asset.id), report, layers, sequence })
 }
 
 /// Comandos para incorporar la importación a un proyecto (batch todo-o-nada).
 pub fn import_commands(import: &V1Import, project: &Project, _asset_id: &AssetId) -> Vec<Command> {
-    let mut cmds = Vec::new();
+    let mut cmds = vec![Command::AttachMaster { master: import.master.clone() }];
     for l in &import.layers {
         let mut layer = l.clone();
         if let Some(existing) = project.layer(&layer.layer_id) {
             // conservar el orden/visibilidad locales
             layer.visible = existing.visible;
+            if !layer.kind.is_editable()
+                && existing.items == layer.items
+                && existing.extra == layer.extra
+                && existing.source_master_digest == layer.source_master_digest
+            {
+                continue;
+            }
         }
         cmds.push(Command::ReplaceLayer { layer });
     }
@@ -183,7 +192,8 @@ mod tests {
         assert!(import.report.warnings.is_empty(), "{:?}", import.report.warnings);
         let cmds = import_commands(&import, &project, &asset.id);
         Command::Batch { label: "v1".into(), commands: cmds }.apply(&mut project).unwrap();
-        assert_eq!(project.layers.len(), 2);
+        assert_eq!(project.layers.len(), 12);
+        assert_eq!(project.masters.len(), 1);
         let seq = project.active().unwrap();
         assert_eq!(seq.name, "Montaje V1");
         assert_eq!(seq.extent(), tv2_domain::time::Ticks::from_seconds(20));

@@ -1,6 +1,4 @@
-//! `editorial-master/1`: se lee lo necesario para identidad, duración y nombre;
-//! el documento completo se conserva como `serde_json::Value` (transcripción,
-//! señales y conversación se proyectan a capas en E3/E5).
+//! `editorial-master/1`: original evidence plus read-only temporal projections.
 
 use crate::{V1Result, invalid, secs_to_ticks};
 use serde_json::Value;
@@ -28,6 +26,9 @@ impl V1Master {
         }
         let media = raw.get("media").ok_or_else(|| invalid("master sin `media`"))?;
         let duration = media.get("duration").and_then(|v| v.as_f64()).ok_or_else(|| invalid("master sin `media.duration`"))?;
+        if !duration.is_finite() || duration <= 0.0 || duration > Ticks::MAX.as_seconds_f64() {
+            return Err(invalid("duración de master inválida"));
+        }
         let fingerprint = parse_fingerprint(media.get("fingerprint").ok_or_else(|| invalid("master sin `media.fingerprint`"))?)?;
         Ok(V1Master {
             project_name: raw.pointer("/project/name").and_then(|v| v.as_str()).unwrap_or("proyecto").to_string(),
@@ -53,6 +54,72 @@ impl V1Master {
             obj.remove("chunks");
         }
         digest_json(&canonical)
+    }
+
+    pub fn evidence(&self, asset_id: &tv2_domain::AssetId) -> tv2_domain::evidence::MasterEvidence {
+        tv2_domain::evidence::MasterEvidence { asset_id: asset_id.clone(), source_digest: self.source_master_digest(), document: self.raw.clone() }
+    }
+
+    /// Project words, utterances/speakers and signals without rewriting the
+    /// master. Original records and IDs remain available in each item's evidence.
+    pub fn projections(&self, asset_id: &tv2_domain::AssetId) -> V1Result<Vec<tv2_domain::SemanticLayer>> {
+        use tv2_domain::{ItemId, ItemState, LayerId, LayerKind, SemanticItem, SemanticLayer, TimeRange};
+        let mut layers = Vec::new();
+        let Some(tracks) = self.raw.get("tracks").and_then(Value::as_object) else {
+            return Ok(layers);
+        };
+        for (track_id, track) in tracks {
+            for (field, id_key, kind, label) in [
+                ("words", "word_id", LayerKind::Transcript, "Palabras"),
+                ("utterances", "utterance_id", LayerKind::Speakers, "Intervenciones"),
+                ("laughter", "event_id", LayerKind::Laughter, "Risas"),
+                ("arousal", "event_id", LayerKind::Arousal, "Arousal"),
+                ("emotions", "event_id", LayerKind::Signals, "Emociones"),
+            ] {
+                let Some(value) = track.get(field) else {
+                    continue;
+                };
+                let records = value.as_array().ok_or_else(|| invalid(format!("tracks/{track_id}/{field} no es una lista")))?;
+                if records.is_empty() {
+                    continue;
+                }
+                let key = digest_json(&serde_json::json!([asset_id, track_id, field]));
+                let mut layer = SemanticLayer::new(asset_id.clone(), kind, format!("{label} · {track_id}"));
+                layer.layer_id = LayerId::new(format!("master-{}", &key[..24]));
+                layer.locked = true;
+                layer.source_master_digest = Some(self.source_master_digest());
+                layer.extra.insert("master_projection".into(), serde_json::json!({"track_id":track_id,"collection":field}));
+                for record in records {
+                    let id = record.get(id_key).and_then(Value::as_str).ok_or_else(|| invalid(format!("{field}: falta {id_key}")))?;
+                    let start = record.get("t_ini").and_then(Value::as_f64).ok_or_else(|| invalid(format!("{id}: falta t_ini")))?;
+                    let end = record.get("t_fin").and_then(Value::as_f64).ok_or_else(|| invalid(format!("{id}: falta t_fin")))?;
+                    if !start.is_finite() || !end.is_finite() || start < 0.0 || end <= start || end > self.duration.as_seconds_f64() {
+                        return Err(invalid(format!("{id}: rango de evidencia inválido")));
+                    }
+                    let item_id = if tv2_domain::ids::is_valid_v1_id(id) {
+                        ItemId::new(id)
+                    } else {
+                        ItemId::new(format!("evidence-{}", &digest_json(&serde_json::json!(id))[..24]))
+                    };
+                    let mut extra = serde_json::Map::new();
+                    extra.insert("evidence".into(), record.clone());
+                    layer.items.push(SemanticItem {
+                        item_id,
+                        label: record.get("text").and_then(Value::as_str).unwrap_or(id).to_string(),
+                        comment: String::new(),
+                        state: ItemState::Proposed,
+                        edited: false,
+                        parent_id: None,
+                        ranges: vec![TimeRange::new(secs_to_ticks(start), secs_to_ticks(end))],
+                        origin: Some("master-v1".into()),
+                        extra,
+                    });
+                }
+                tv2_domain::layers::validate_layer(&layer, self.duration).map_err(|e| invalid(e.to_string()))?;
+                layers.push(layer);
+            }
+        }
+        Ok(layers)
     }
 }
 
@@ -118,5 +185,17 @@ mod tests {
         raw2["chunks"] = serde_json::json!([{"x": 1}]);
         raw2["generated_at"] = serde_json::json!("2026");
         assert_eq!(V1Master::parse(raw2).unwrap().source_master_digest(), d1);
+    }
+
+    #[test]
+    fn projections_preserve_original_records_and_have_stable_ids() {
+        let master = V1Master::parse(fixtures::master(12.0)).unwrap();
+        let layers = master.projections(&"asset-a".into()).unwrap();
+        assert_eq!(layers.len(), 10);
+        assert_eq!(master.projections(&"asset-a".into()).unwrap(), layers);
+        assert!(layers.iter().all(|l| l.locked && !l.kind.is_editable()));
+        let words = layers.iter().find(|l| l.name == "Palabras · A").unwrap();
+        assert_eq!(words.items[0].extra["evidence"], master.raw["tracks"]["A"]["words"][0]);
+        assert_eq!(master.evidence(&"asset-a".into()).document, fixtures::master(12.0));
     }
 }

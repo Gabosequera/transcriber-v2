@@ -10,12 +10,15 @@ pub mod asset;
 pub mod commands;
 pub mod digest;
 pub mod error;
+pub mod evidence;
 pub mod ids;
 pub mod layers;
 pub mod project;
 pub mod resolve;
+pub mod review;
 pub mod time;
 pub mod timeline;
+pub mod validation;
 
 pub use asset::{Asset, AssetKind, AudioStreamInfo, Fingerprint, MediaProbe, VideoStreamInfo};
 pub use commands::{ClipEdge, Command, CommandEffect, MovePolicy};

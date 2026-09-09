@@ -31,3 +31,4 @@ fn main() -> eframe::Result {
     let options = eframe::NativeOptions { viewport, renderer: eframe::Renderer::Wgpu, ..Default::default() };
     eframe::run_native("Transcriptor V2", options, Box::new(move |cc| Ok(Box::new(app::TranscriptorApp::new(cc, console_sink, console_rx)))))
 }
+mod external;

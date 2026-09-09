@@ -177,7 +177,7 @@ pub fn trims_to_v1(t: &V1Trims, fingerprint: &Fingerprint) -> Value {
             c.insert("origin".into(), json!(it.origin.clone().unwrap_or_else(|| "user".into())));
             c.insert("lane".into(), json!(layer.lane.clone().unwrap_or_else(|| "main".into())));
             c.insert("enabled".into(), json!(it.state.is_enabled()));
-            c.insert("accepted".into(), json!(it.state == ItemState::Accepted));
+            c.insert("accepted".into(), json!(it.is_human_accepted()));
             c.insert("edited".into(), json!(it.edited));
             c.insert("reason".into(), json!(it.comment));
             for (k, v) in &it.extra {
@@ -233,6 +233,25 @@ mod tests {
         let t = trims_from_v1(&raw, &AssetId::new("a"), Some(&fp())).unwrap();
         let back = trims_to_v1(&t, &fp());
         assert_eq!(digest_json(&back), digest_json(&raw), "\n{}\n{}", back, raw);
+    }
+
+    #[test]
+    fn disabled_cut_retains_acceptance_through_import_export_and_activation() {
+        use tv2_domain::{Command, Project};
+        let mut raw = doc();
+        raw["cuts"][0]["enabled"] = json!(false);
+        let mut t = trims_from_v1(&raw, &AssetId::new("a"), Some(&fp())).unwrap();
+        assert_eq!(trims_to_v1(&t, &fp()), raw);
+        let l = t.layers.iter().find(|l| l.lane.as_deref() == Some("main")).unwrap();
+        let mut p = Project::new("review");
+        p.layers = t.layers.clone();
+        Command::SetItemState { layer_id: l.layer_id.clone(), item_ids: vec!["cut-000001".into()], state: ItemState::Proposed }
+            .apply(&mut p)
+            .unwrap();
+        t.layers = p.layers;
+        let exported = trims_to_v1(&t, &fp());
+        assert_eq!(exported["cuts"][0]["enabled"], true);
+        assert_eq!(exported["cuts"][0]["accepted"], true);
     }
 
     #[test]

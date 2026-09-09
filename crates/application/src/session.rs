@@ -150,7 +150,8 @@ pub struct DiffSummary {
 impl DiffSummary {
     pub fn compute(before: &Project, after: &Project) -> DiffSummary {
         let mut d = DiffSummary {
-            project_changed: before.name != after.name
+            project_changed: before.masters != after.masters
+                || before.name != after.name
                 || before.settings != after.settings
                 || before.extra != after.extra
                 || before.active_sequence != after.active_sequence
@@ -300,8 +301,25 @@ impl ProjectSession {
         &self.journal
     }
 
+    /// Preserve original audit when recovering a separate unsaved-project store.
+    pub fn recover_with_audit(&mut self, candidate: Project, events: Vec<JournalEvent>) -> DomainResult<()> {
+        let mut ids = std::collections::HashSet::new();
+        for event in &events {
+            if event.new_revision > candidate.revision || event.new_revision <= event.base_revision || !ids.insert(&event.command_id) {
+                return Err(DomainError::invalid("auditoría de recuperación incoherente"));
+            }
+        }
+        self.recover(candidate)?;
+        let mut journal = events;
+        journal.append(&mut self.journal);
+        self.journal = journal;
+        Ok(())
+    }
+
     /// Explicit human recovery; preserve the saved snapshot as one undo step.
     pub fn recover(&mut self, mut candidate: Project) -> DomainResult<()> {
+        candidate.validate()?;
+        crate::protection::check_transition(&self.project, &candidate, &Actor::Human)?;
         if candidate.project_id != self.project.project_id {
             return Err(DomainError::precondition("autosave pertenece a otro proyecto"));
         }
@@ -413,6 +431,8 @@ impl ProjectSession {
         self.check_base(envelope)?;
         let mut copy = self.project.clone();
         let effect = envelope.command.apply(&mut copy)?;
+        copy.validate()?;
+        crate::protection::check_transition(&self.project, &copy, &envelope.actor)?;
         let diff = DiffSummary::compute(&self.project, &copy);
         Ok(DryRunResult { base_revision: self.project.revision, effect, diff, preview: copy })
     }
@@ -439,8 +459,10 @@ impl ProjectSession {
         let before = self.project.clone();
         let mut after = self.project.clone();
         let effect = envelope.command.apply(&mut after)?;
+        after.validate()?;
+        crate::protection::check_transition(&before, &after, &envelope.actor)?;
         let base = before.revision;
-        after.revision = base.checked_add(1).ok_or_else(|| DomainError::out_of_range("revisión agotada"))?;
+        after.revision = base.max(after.revision).checked_add(1).ok_or_else(|| DomainError::out_of_range("revisión agotada"))?;
         after.updated_at = now_iso();
         let diff = DiffSummary::compute(&before, &after);
         let result = CommandResult {
@@ -486,6 +508,11 @@ impl ProjectSession {
 
     pub fn undo(&mut self, actor: Actor) -> DomainResult<CommandResult> {
         self.revision().checked_add(1).ok_or_else(|| DomainError::out_of_range("revisión agotada"))?;
+        if !matches!(actor, Actor::Human)
+            && let Some(entry) = self.undo.back()
+        {
+            crate::protection::check_transition(&self.project, &entry.before, &actor)?;
+        }
         let entry = self.undo.pop_back().ok_or_else(|| DomainError::new(ErrorCode::Empty, "nada que deshacer"))?;
         if entry.expect != self.project.revision {
             let err = DomainError::stale(entry.expect, self.project.revision)
@@ -504,6 +531,11 @@ impl ProjectSession {
 
     pub fn redo(&mut self, actor: Actor) -> DomainResult<CommandResult> {
         self.revision().checked_add(1).ok_or_else(|| DomainError::out_of_range("revisión agotada"))?;
+        if !matches!(actor, Actor::Human)
+            && let Some(entry) = self.redo.back()
+        {
+            crate::protection::check_transition(&self.project, &entry.after, &actor)?;
+        }
         let entry = self.redo.pop_back().ok_or_else(|| DomainError::new(ErrorCode::Empty, "nada que rehacer"))?;
         if entry.expect != self.project.revision {
             return Err(DomainError::stale(entry.expect, self.project.revision));
