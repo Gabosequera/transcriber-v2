@@ -1,4 +1,6 @@
-# Publicación en preparación — continuación 10, alpha.7
+# Publicación verificada — continuación 10, alpha.7
+
+Publicado [v2.0.0-alpha.7](https://github.com/Gabosequera/transcriber-v2/releases/tag/v2.0.0-alpha.7), código/tag `293556e8ed0a0ac1ceeff602fbc82722aa6c8337`, main subido. Prerelease no draft, sin assets; verificación en `evidence/publication-alpha7.json`. El trabajo continúa con conservación de carpetas documentales E3.
 
 Checkpoint de fuentes autorizado por el encargo vigente. 45 application tests ejecutados/pasan; V1compat bloqueado Windows 4551 antes de ejecutarse, sin reintento. Clippy/all-targets, check, fmt y build release en evidence/continuacion-10.md y logs. Ejecutable no lanzado, sin paquete binario nuevo aceptado.
 
