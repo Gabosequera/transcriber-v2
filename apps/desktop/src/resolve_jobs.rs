@@ -6,6 +6,13 @@ use tv2_domain::{AssetId, Clip, ClipId, Project, Rational, ResolvedTimeline, Seq
 use tv2_media::{player::PlayerCommand, render::AssetSource};
 
 type Key = (u64, ViewMode, Option<AssetId>);
+
+pub fn step_target(position: Ticks, frames: i64, rate: Rational, duration: Ticks) -> Ticks {
+    // Match PlayerCommand::StepFrames even when a seek is queued at a subframe
+    // position while the new composition is being calculated.
+    (position.floor_to_frame(rate) + Ticks(rate.frame_duration().0 * frames)).clamp(Ticks::ZERO, duration.max(Ticks::ZERO))
+}
+
 struct Output {
     key: Key,
     project: Project,
@@ -128,4 +135,20 @@ fn resolve(project: &Project, view: ViewMode, source: Option<&AssetId>) -> Resol
         duration: Ticks::ZERO,
         pieces: vec![],
     })
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn deferred_frame_steps_use_the_same_grid_as_the_player() {
+        let rate = Rational::new(30_000, 1001);
+        let frame = rate.frame_duration();
+        let source = frame + Ticks(123);
+        assert_eq!(step_target(source, 1, rate, Ticks::from_seconds(10)), frame + frame);
+        assert_eq!(step_target(source, -1, rate, Ticks::from_seconds(10)), Ticks::ZERO);
+        assert_eq!(step_target(Ticks(123), -10, rate, Ticks::from_seconds(10)), Ticks::ZERO);
+        assert_eq!(step_target(source, 10, rate, frame + frame), frame + frame);
+    }
 }

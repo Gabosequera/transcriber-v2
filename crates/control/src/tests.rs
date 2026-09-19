@@ -220,6 +220,70 @@ fn proposal_idempotency_detects_conflicting_payload() {
     assert_eq!(call(&mut engine, &mut session, &host, "tv2_propose", args)["isError"], true);
 }
 #[test]
+fn failed_history_commit_revokes_review_and_exposes_reprepare() {
+    let (mut engine, mut session, host) = fixture();
+    session.execute(CommandEnvelope::human(Command::RenameProject { name: "Changed".into() })).unwrap();
+    let args = json!({"revision":session.revision(),"digest":session.digest().unwrap(),"idempotency_key":"history-fails","command":{"type":"undo"}});
+    let result = call(&mut engine, &mut session, &host, "tv2_propose", args);
+    assert_eq!(result["isError"], false);
+    let p = &result["structuredContent"];
+    engine.review(p["id"].as_str().unwrap(), true, &session).unwrap();
+    let mut history = session.history_snapshot();
+    history.undo.back_mut().unwrap().command_id = "replacement-entry".into();
+    session.restore_history(history).unwrap();
+    let before = session.project().clone();
+    let apply = json!({"proposal_id":p["id"],"preview_digest":p["preview_digest"],"idempotency_key":"history-fails"});
+    assert_eq!(call(&mut engine, &mut session, &host, "tv2_apply", apply)["isError"], true);
+    assert_eq!(session.project(), &before);
+    let summary = engine.proposals().pop().unwrap();
+    assert!(summary.needs_revalidation && !summary.reviewed && !summary.automatic_eligible);
+    assert!(summary.receipt.is_none());
+    let reprepare = json!({"proposal_id":p["id"],"revision":session.revision(),"digest":session.digest().unwrap(),"idempotency_key":"history-retry"});
+    assert_eq!(call(&mut engine, &mut session, &host, "tv2_reprepare", reprepare)["isError"], false);
+}
+#[test]
+fn history_proposals_use_worker_snapshot_review_receipts_and_exact_preview() {
+    let (engine, mut session, host) = fixture();
+    session.execute(CommandEnvelope::human(Command::RenameProject { name: "Human rename".into() })).unwrap();
+    let request = json!({"jsonrpc":"2.0","id":1,"method":"tools/call","params":{"name":"tv2_propose","arguments":{
+        "session_id":engine.session_id(),"project_id":session.project().project_id,"revision":session.revision(),
+        "digest":session.digest().unwrap(),"idempotency_key":"undo-worker","command":{"type":"undo"}}}});
+    assert!(engine.preparation_needs_history(&request));
+    let (mut engine, response) = engine.handle_background(session.preparation_snapshot(), host.clone(), request);
+    assert_eq!(response["result"]["isError"], false, "{response}");
+    let p = &response["result"]["structuredContent"];
+    let apply = json!({"proposal_id":p["id"],"preview_digest":p["preview_digest"],"idempotency_key":"undo-worker"});
+    assert_eq!(call(&mut engine, &mut session, &host, "tv2_apply", apply.clone())["isError"], true);
+    engine.review(p["id"].as_str().unwrap(), true, &session).unwrap();
+    let result = call(&mut engine, &mut session, &host, "tv2_apply", apply.clone());
+    assert_eq!(result["isError"], false, "{result}");
+    assert_eq!(result["structuredContent"]["matches_preview"], true);
+    assert_eq!(session.project().name, "Synthetic MCP fixture");
+    assert_eq!(call(&mut engine, &mut session, &host, "tv2_apply", apply)["structuredContent"]["replayed"], true);
+    let verified = verify_ready(&mut engine, &mut session, &host, &p["id"]);
+    assert_eq!(verified["structuredContent"]["receipt_in_project_journal"], true);
+    assert_eq!(verified["structuredContent"]["matches_preview"], true);
+    assert!(Permissions::automatic_command_types().iter().any(|name| name == "redo"));
+    assert!(crate::schema::parse_command(json!({"type":"batch","label":"nested history","commands":[{"type":"undo"}]})).is_err());
+}
+#[test]
+fn stale_proposals_can_be_rejected_to_release_preparation_capacity() {
+    let (mut engine, mut session, host) = fixture();
+    let proposals: Vec<_> = (0..32).map(|i| proposal(&mut engine, &mut session, &host, &format!("queued-{i}"))).collect();
+    session.execute(CommandEnvelope::human(Command::RenameProject { name: "Local edit".into() })).unwrap();
+    let args = json!({"revision":session.revision(),"digest":session.digest().unwrap(),"idempotency_key":"new-base","command":{"type":"rename_project","name":"Next"}});
+    assert_eq!(call(&mut engine, &mut session, &host, "tv2_propose", args.clone())["isError"], true);
+    let id = proposals[0]["id"].as_str().unwrap();
+    assert!(engine.review(id, true, &session).is_err());
+    engine.review(id, false, &session).unwrap();
+    let rejected = engine.proposals().into_iter().find(|p| p.id == id).unwrap();
+    assert!(rejected.rejected && !rejected.reviewed && !rejected.automatic_eligible);
+    assert!(engine.review(id, true, &session).is_err());
+    assert_eq!(call(&mut engine, &mut session, &host, "tv2_propose", args)["isError"], false);
+    assert_eq!(session.project().name, "Local edit");
+    assert_eq!(session.revision(), 1);
+}
+#[test]
 fn restored_requests_keep_diff_but_require_new_preview_and_review() {
     let (mut engine, mut session, host) = fixture();
     let root = tempfile::tempdir().unwrap();
@@ -240,6 +304,8 @@ fn restored_requests_keep_diff_but_require_new_preview_and_review() {
     assert!(restored_summary.needs_revalidation);
     assert_eq!(restored_summary.diff, old["diff"]);
     assert!(restored.review(&restored_summary.id, true, &session).is_err());
+    restored.review(&restored_summary.id, false, &session).unwrap();
+    assert!(restored.proposals()[0].rejected);
     let args = json!({"proposal_id":old["id"],"revision":session.revision(),"digest":session.digest().unwrap(),"idempotency_key":"after_restart"});
     let result = call(&mut restored, &mut session, &host, "tv2_reprepare", args);
     assert_eq!(result["isError"], false, "{result}");
@@ -265,8 +331,8 @@ fn background_proposal_cannot_overwrite_concurrent_gui_edit() {
     let (engine, mut session, host) = fixture();
     let request = json!({"jsonrpc":"2.0","id":1,"method":"tools/call","params":{"name":"tv2_propose","arguments":{"session_id":engine.session_id(),"project_id":session.project().project_id,"revision":session.revision(),"digest":session.digest().unwrap(),"idempotency_key":"background","command":{"type":"rename_project","name":"Background"}}}});
     assert!(ControlEngine::is_background_request(&request));
-    let project = session.project().clone();
-    let worker = std::thread::spawn(move || engine.handle_background(project, host, request));
+    let snapshot = session.preparation_snapshot();
+    let worker = std::thread::spawn(move || engine.handle_background(snapshot, host, request));
     session.execute(CommandEnvelope::human(Command::RenameProject { name: "Concurrent human edit".into() })).unwrap();
     let (mut engine, result) = worker.join().unwrap();
     assert_eq!(result["result"]["isError"], false);

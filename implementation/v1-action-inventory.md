@@ -1,3 +1,9 @@
+# Revisión de recorridos — continuación 13
+
+Se conserva el inventario de alpha.9. La revisión posterior corrige pérdida de precisión en ItemEditor y borradores obsoletos de marcadores; iguala StepFrames diferido al player y mueve ocurrencias del inspector a consulta lazy en worker. No se declara aceptación de interacción. MCP añade undo/redo preparados mediante el núcleo de sesión; no atribuye autoría humana al cliente ni permite eludir pistas bloqueadas/tombstones. Los rechazos de propuestas obsoletas y los errores RPC del cliente tienen camino explícito. Detalles por requisito/símbolo/dependencia en [continuación 13](evidence/continuacion-13.md).
+
+---
+
 # Inventario vigente — integración E2/E3 posterior a alpha.8
 
 Revisión de fuentes del 2026-09-09. V1 se consulta como texto de solo lectura; no se ejecutó su UI. Este apartado sustituye las declaraciones de pendientes de los apartados históricos. El inventario AST de 140 constructores/bindings y el registro histórico de 69 acciones sirven para localizar controles, **no prueban paridad de interacción ni rendimiento**. La aceptación GUI, multimedia, NLE y de gestos sigue aplazada; E5 no se inicia.

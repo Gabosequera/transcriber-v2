@@ -3948,7 +3948,7 @@ dependencies = [
 
 [[package]]
 name = "transcriptor"
-version = "2.0.0-alpha.9"
+version = "2.0.0-alpha.10"
 dependencies = [
  "anyhow",
  "crossbeam-channel",
@@ -3980,7 +3980,7 @@ checksum = "d2df906b07856748fa3f6e0ad0cbaa047052d4a7dd609e231c4f72cee8c36f31"
 
 [[package]]
 name = "tv2-application"
-version = "2.0.0-alpha.9"
+version = "2.0.0-alpha.10"
 dependencies = [
  "hex",
  "serde",
@@ -3994,7 +3994,7 @@ dependencies = [
 
 [[package]]
 name = "tv2-control"
-version = "2.0.0-alpha.9"
+version = "2.0.0-alpha.10"
 dependencies = [
  "crossbeam-channel",
  "serde",
@@ -4006,7 +4006,7 @@ dependencies = [
 
 [[package]]
 name = "tv2-domain"
-version = "2.0.0-alpha.9"
+version = "2.0.0-alpha.10"
 dependencies = [
  "hex",
  "rand 0.10.2",
@@ -4018,7 +4018,7 @@ dependencies = [
 
 [[package]]
 name = "tv2-media"
-version = "2.0.0-alpha.9"
+version = "2.0.0-alpha.10"
 dependencies = [
  "cpal",
  "crossbeam-channel",
@@ -4036,7 +4036,7 @@ dependencies = [
 
 [[package]]
 name = "tv2-v1compat"
-version = "2.0.0-alpha.9"
+version = "2.0.0-alpha.10"
 dependencies = [
  "hex",
  "serde",

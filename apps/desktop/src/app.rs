@@ -212,7 +212,8 @@ pub struct TranscriptorApp {
     pub frame_count: u64,
     pub markers_open: bool,
     pub item_editor: Option<crate::item_editor::ItemEditor>,
-    pub marker_editor: Option<tv2_domain::timeline::Marker>,
+    pub marker_editor: Option<crate::ui_markers::MarkerEditor>,
+    pub inspector_epoch: u64,
 }
 
 #[derive(Clone, Debug)]
@@ -268,6 +269,7 @@ impl TranscriptorApp {
         let mut app = TranscriptorApp {
             markers_open: false,
             marker_editor: None,
+            inspector_epoch: 0,
             item_editor: None,
             session,
             store: None,
@@ -417,6 +419,7 @@ impl TranscriptorApp {
                     Ok(()) => {
                         self.player_send(PlayerCommand::Pause);
                         self.session = session;
+                        self.inspector_epoch = self.inspector_epoch.wrapping_add(1);
                         self.store = None;
                         self.unsaved_store = Some(store);
                         self.unsaved_recoveries.retain(|p| p != &root);
@@ -706,6 +709,7 @@ impl TranscriptorApp {
             media.clear();
         }
         self.session = ProjectSession::new(Project::new("Sin título"));
+        self.inspector_epoch = self.inspector_epoch.wrapping_add(1);
         self.resolver.playing.set(Some(false));
         if let Some(player) = &self.player {
             player.send(PlayerCommand::Pause);
@@ -995,8 +999,13 @@ impl TranscriptorApp {
                     self.resolver.playing.set(Some(false));
                 }
                 PlayerCommand::StepFrames(frames) => {
-                    let at = self.resolver.seek.get().unwrap_or(self.playhead) + Ticks::from_frames(*frames, self.frame_rate());
-                    self.resolver.seek.set(Some(at.clamp(Ticks::ZERO, self.duration().max(Ticks::ZERO))));
+                    let at = crate::resolve_jobs::step_target(
+                        self.resolver.seek.get().unwrap_or(self.playhead),
+                        *frames,
+                        self.frame_rate(),
+                        self.duration(),
+                    );
+                    self.resolver.seek.set(Some(at));
                     self.resolver.playing.set(Some(false));
                     return;
                 }

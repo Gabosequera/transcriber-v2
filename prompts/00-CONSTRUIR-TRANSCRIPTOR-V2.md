@@ -1,5 +1,11 @@
 # Construir Transcriptor V2: instrucciones de ejecución
 
+> **TRASPASO VIGENTE: continuación 13, alpha.10 (19 septiembre 2026).** Continuar desde main, conservando E0/E1 y toda alpha.9. E2/E3/E4 integradas con correcciones posteriores; aceptación no declarada. Leer STATUS, evidence/continuacion-13.md, requirements-matrix, RUN, control.md, inventario y D-0062–D-0065. Este bloque prevalece sobre los marcadores históricos siguientes.
+>
+> Corregido: precisión de rangos y marcadores stale; frame step y worker de ocurrencias; árbol de publicación documental; protección de pistas/tombstones/identidad; temporales multimedia exclusivos, no reemplazo concurrente, RF64, verificación cancelable y stderr acotado; undo/redo MCP preparados con recibos/pilas durables, rechazo de obsoletas, recuperación de apply fallido, hash local en worker y errores stdio. Backlog por requisito/símbolo/dependencia en evidencia13; no otra brecha concreta abierta identificada en los recorridos examinados.
+>
+> 80 unitarios application y 3 integraciones pasan; cliente sintético pasa; check/Clippy workspace all-targets y formato correctos. Build/prerelease exactos en evidencia13/PUBLISH. No se ejecutan dominio/desktop/V1compat/control bloqueados4551 ni se cambia política/ruta/nombre. GUI/multimedia/revisión general/PERF físico aplazados; recorridos reproducibles en RUN/control.md. V1/datos personales solo lectura. No iniciar E5, Python/Torch/modelos/inferencia. La aceptación aplazada y suites bloqueadas pueden revelar defectos nuevos; compilación no equivale a aceptación.
+
 > **MARCADOR DE CONTINUACIÓN (continuación 7, alpha.4).**
 > Estado: **E0/E1 aceptadas históricamente · E2 abierta · E3 parcial · E4 pendiente · parar antes de E5.** Testing físico y revisión general aplazados.
 > Fuente de verdad del progreso: `implementation/STATUS.md`, `implementation/requirements-matrix.md`, `implementation/decisions.md` (D-0001…D-0021), `implementation/evidence/e0|e1|e2/`.

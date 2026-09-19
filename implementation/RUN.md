@@ -1,3 +1,21 @@
+# Continuación 13 — regresiones preparadas, aceptación aplazada
+
+Estos recorridos se ejecutarán cuando se autorice aceptación física. No lanzar ahora editor ni multimedia; tampoco suites domain/desktop/V1compat/control bloqueadas por Windows 4551.
+
+1. Abrir un item con bordes submilisegundo en fixture sintética; cambiar solo etiqueta/comentario, guardar/reabrir y comprobar ticks exactos. Cambiar un borde debe conservar el otro; quitar una fila de multirrango no debe trasladar su base a otra.
+2. Buscar posición subframe, provocar recomposición y dar paso de fotograma; comparar con el paso desde composición estable. Ambos usan floor_to_frame y los mismos límites.
+3. Expandir ocurrencias de un item repetido/multirrango; cambiar selección, ejecutar una decisión Author que convierta punto en región y abrir otra copia divergente con iguales IDs/revisión. Deben aparecer solo ocurrencias de la sesión y rango vigentes. Colapsar evita iniciar consultas.
+4. Abrir borrador de marcador y cambiar el proyecto mediante núcleo/MCP; guardar queda bloqueado, conserva borrador para consulta y exige reabrir. Editar solo texto no modifica sus ticks.
+5. En una exportación futura, crear el destino desde otro productor durante el render: no debe reemplazarlo. Dos exportaciones al mismo destino no comparten audio ni staging; los archivos antiguos `.nombre.write-test`, `.nombre.audio.wav` y `.nombre.partial` deben permanecer intactos. Cancelar durante verificación conserva el destino ausente y limpia únicamente temporales propios.
+6. Exportar mezcla de más de 4 GiB cuando se permitan medios; inspeccionar duración, principio/final, audio y ausencia de truncamiento RIFF/RF64. Las pruebas de cabecera compiladas no sustituyen esta ejecución.
+7. Publicar fixture documental con `tree` y `TREE/child.json`, o directorio bajo archivo: debe rechazar antes de crear intención/output. Una intención inválida inyectada en fixture debe conservarse intacta y rechazar recovery sin publicar parcialmente.
+8. Desde propuestas externas intentar desbloquear→editar→rebloquear, reconciliar clips en pista bloqueada, eliminar capa vacía con tombstones y reasignar su asset/tipo: todo falla sin revisión parcial. La persona puede desbloquear explícitamente mediante GUI y deshacer su cambio.
+9. MCP: rechazar propuestas obsoletas o restauradas libera su preparación; aprobar sigue exigiendo base vigente. Proponer `{"type":"undo"}` y `{"type":"redo"}` por el flujo normal, revisar, aplicar, verificar y repetir clave. Debe mover las pilas, subir revisión una vez y conservar actor Agent; rechazo de protección humana no se convierte en permiso por aprobar. Guardar/reabrir mantiene recibos. Undo/redo dentro de batch se rechazan.
+
+Ver [evidencia 13](evidence/continuacion-13.md) y [control.md](control.md) para implementación, comprobaciones permitidas y límites.
+
+---
+
 # Guía vigente — integración E2/E3 posterior a alpha.8
 
 Fuentes revisadas el 2026-09-09. **Estos recorridos GUI, multimedia, NLE y de rendimiento están preparados para aceptación posterior; no se ejecutan en esta continuación.** No ejecutar V1, modelos ni los tests de dominio/V1compat/desktop bloqueados por Windows 4551, ni copiar sus binarios a otra ubicación para eludirlo. Los apartados históricos inferiores no autorizan esas ejecuciones.

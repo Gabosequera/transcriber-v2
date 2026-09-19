@@ -293,9 +293,18 @@ impl ControlEngine {
     }
     /// Move this engine to a worker with an immutable project snapshot. The GUI
     /// can continue editing; proposal review/apply subsequently checks its base.
-    pub fn handle_background(mut self, project: tv2_domain::Project, host: HostState, message: Value) -> (Self, Value) {
+    pub fn preparation_needs_history(&self, message: &Value) -> bool {
+        let args = &message["params"]["arguments"];
+        let command = match message["params"]["name"].as_str() {
+            Some("tv2_propose") => Some(&args["command"]),
+            Some("tv2_reprepare") => args["proposal_id"].as_str().and_then(|id| self.proposals.get(id)).map(|p| &p.summary.command),
+            _ => None,
+        };
+        command.is_some_and(|c| matches!(c["type"].as_str(), Some("undo" | "redo")))
+    }
+    pub fn handle_background(mut self, mut session: ProjectSession, host: HostState, message: Value) -> (Self, Value) {
         let response = if Self::is_background_request(&message) {
-            self.handle(&mut ProjectSession::new(project), &host, message, |_| Err("Host action cannot run in background query".into()))
+            self.handle(&mut session, &host, message, |_| Err("Host action cannot run in background query".into()))
         } else {
             json!({"jsonrpc":"2.0","id":message["id"],"error":{"code":-32600,"message":"Request requires live host session"}})
         };
@@ -336,9 +345,13 @@ impl ControlEngine {
         if p.summary.receipt.is_some() {
             return Err("Proposal already applied".into());
         }
-        let prepared = p.prepared.as_ref().ok_or("Proposal restored without executable state; use tv2_reprepare first")?;
-        if p.summary.base_revision != session.revision() || !prepared.matches_base(session.project()) {
-            return Err("E_STALE_REVISION: recreate the proposal against current content".into());
+        // Refusal never executes content. It must remain available after a
+        // local edit or restart, so obsolete snapshots cannot exhaust capacity.
+        if approve {
+            let prepared = p.prepared.as_ref().ok_or("Proposal restored without executable state; use tv2_reprepare first")?;
+            if p.summary.base_revision != session.revision() || !prepared.matches_base(session.project()) {
+                return Err("E_STALE_REVISION: recreate the proposal against current content".into());
+            }
         }
         p.summary.reviewed = approve;
         p.summary.rejected = !approve;
@@ -660,7 +673,20 @@ impl ControlEngine {
         }
         let prepared = p.prepared.take().ok_or("Proposal has no prepared command")?;
         let mut preview = prepared.preview().clone();
-        let result = session.commit_prepared(prepared).map_err(err)?;
+        let result = match session.commit_prepared(prepared) {
+            Ok(result) => result,
+            Err(error) => {
+                // A failed atomic commit consumes the opaque prepared value.
+                // Make its recovery path visible rather than leaving an approved
+                // proposal which can no longer be applied or revalidated in UI.
+                p.summary.reviewed = false;
+                p.summary.automatic_eligible = false;
+                p.summary.needs_revalidation = true;
+                let error = err(error);
+                self.event("proposal_commit_failed", json!({"proposal_id":id,"error":error,"needs_revalidation":true}));
+                return Err(error);
+            }
+        };
         let receipt = json!(result);
         // Commit changes only these envelope metadata fields; compare every
         // other field exactly before reusing the worker's preview digest.

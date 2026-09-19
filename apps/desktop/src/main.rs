@@ -13,6 +13,7 @@ mod gesture_preview;
 #[cfg(test)]
 mod gesture_tests;
 mod import_jobs;
+mod inspector_occurrences;
 mod item_editor;
 mod keymap;
 mod paths;

@@ -11,6 +11,26 @@ use std::{
     time::Duration,
 };
 
+/// Drena el pipe completo para no bloquear al hijo, conservando solo diagnóstico
+/// reciente. FFmpeg puede emitir progreso durante horas; no debe crecer la RAM.
+pub(crate) fn read_stderr_tail(mut reader: impl io::Read) -> io::Result<Vec<u8>> {
+    const LIMIT: usize = 16 * 1024;
+    let mut tail = Vec::with_capacity(LIMIT);
+    let mut buffer = [0u8; 8192];
+    loop {
+        let count = match reader.read(&mut buffer) {
+            Err(error) if error.kind() == io::ErrorKind::Interrupted => continue,
+            result => result?,
+        };
+        if count == 0 {
+            return Ok(tail);
+        }
+        let excess = (tail.len() + count).saturating_sub(LIMIT);
+        tail.drain(..excess);
+        tail.extend_from_slice(&buffer[..count]);
+    }
+}
+
 pub(crate) struct CancellableChild {
     child: Arc<Mutex<Child>>,
     done: Arc<AtomicBool>,
@@ -59,13 +79,7 @@ impl CancellableChild {
         use std::io::Read;
         let stderr = self.stderr.take();
         std::thread::scope(|scope| {
-            let reader = scope.spawn(move || {
-                let mut bytes = Vec::new();
-                if let Some(mut pipe) = stderr {
-                    pipe.read_to_end(&mut bytes)?;
-                }
-                Ok::<_, io::Error>(bytes)
-            });
+            let reader = scope.spawn(move || stderr.map(read_stderr_tail).unwrap_or_else(|| Ok(Vec::new())));
             let mut stdout = Vec::new();
             if let Some(mut pipe) = self.stdout.take() {
                 pipe.read_to_end(&mut stdout)?;
@@ -100,6 +114,14 @@ impl Drop for CancellableChild {
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[test]
+    fn stderr_is_drained_but_only_retains_bounded_tail() {
+        let mut bytes = vec![b'x'; 1_000_000];
+        bytes.extend_from_slice(b"final diagnostic");
+        let tail = read_stderr_tail(bytes.as_slice()).unwrap();
+        assert_eq!(tail.len(), 16 * 1024);
+        assert_eq!(tail, bytes[bytes.len() - 16 * 1024..]);
+    }
     #[test]
     fn cancellation_unblocks_ffmpeg_waiting_for_input() {
         use std::io::Read;

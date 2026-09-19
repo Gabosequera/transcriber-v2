@@ -406,24 +406,20 @@ impl ExportJob {
         std::fs::create_dir_all(dir).map_err(|e| {
             DomainError::io(format!("no se puede crear la carpeta de destino {}: {e}", dir.display())).with_action("elige una carpeta accesible")
         })?;
-        // comprobar que el destino es escribible antes de renderizar (fallo temprano y explicable)
-        {
-            let probe = dir.join(format!(".{}.write-test", req.destination.file_name().map(|n| n.to_string_lossy().to_string()).unwrap_or_default()));
-            std::fs::write(&probe, b"ok")
-                .map_err(|e| DomainError::io(format!("no se puede escribir en {}: {e}", dir.display())).with_action("elige otra carpeta"))?;
-            let _ = std::fs::remove_file(&probe);
-        }
-        let staging =
-            dir.join(format!(".{}.partial", req.destination.file_name().map(|n| n.to_string_lossy().to_string()).unwrap_or_else(|| "export".into())));
-        let _ = std::fs::remove_file(&staging);
+        // Cada intento posee su carpeta: tampoco toca temporales de otra instancia.
+        // Crearla comprueba escritura sin truncar un archivo de nombre predecible.
+        let work = tempfile::Builder::new()
+            .prefix(".tv2-export-")
+            .tempdir_in(dir)
+            .map_err(|e| DomainError::io(format!("no se puede preparar la exportación en {}: {e}", dir.display())))?;
+        let staging = work.path().join("output.partial");
         let fps = req.preset.frame_rate.unwrap_or(req.timeline.frame_rate);
         let sample_rate = req.preset.sample_rate.unwrap_or(req.timeline.sample_rate).max(8000);
         let has_audio = req.timeline.pieces.iter().any(|p| !p.audio.is_empty());
 
         // 1) audio → WAV temporal (misma mezcla que el visor, rate 1)
         progress(ExportProgress { stage: "mezclando audio".into(), ..Default::default() });
-        let audio_tmp = dir.join(format!(".{}.audio.wav", req.destination.file_name().map(|n| n.to_string_lossy().to_string()).unwrap_or_default()));
-        let _cleanup = CleanupPaths(vec![audio_tmp.clone(), staging.clone()]);
+        let audio_tmp = work.path().join("audio.wav");
         let total_frames_audio = ((range.duration().as_seconds_f64()) * sample_rate as f64).round() as u64;
         {
             let mut mixer = AudioMixer::new(tools.clone(), req.timeline.clone(), req.assets.clone(), sample_rate, range.start, 1.0);
@@ -489,10 +485,13 @@ impl ExportJob {
 
         // 3) verificación y publicación
         progress(ExportProgress { stage: "verificando".into(), fraction: 0.98, ..Default::default() });
-        let probe = match tools.probe(&staging) {
+        let probe = match tools.probe_cancellable(&staging, cancel.clone()) {
             Ok(p) => p,
             Err(e) => {
                 let _ = std::fs::remove_file(&staging);
+                if cancel.load(Ordering::Relaxed) {
+                    return Err(DomainError::new(ErrorCode::Cancelled, "exportación cancelada"));
+                }
                 return Err(DomainError::process(format!("la salida no es legible: {e}")));
             }
         };
@@ -528,9 +527,7 @@ impl ExportJob {
             let _ = std::fs::remove_file(&staging);
             return Err(DomainError::process(format!("la salida lleva audio {} y el preset esperaba {want}; no se publicó", a.codec)));
         }
-        std::fs::rename(&staging, &req.destination)
-            .map_err(|e| DomainError::io(format!("no se pudo publicar {}: {e}", req.destination.display())))?;
-        let sha256 = file_sha256(&req.destination)?;
+        let sha256 = publish_verified_output(&staging, &req.destination, cancel)?;
         progress(ExportProgress {
             stage: "listo".into(),
             fraction: 1.0,
@@ -583,11 +580,8 @@ impl ExportJob {
         let mut stdin = child.stdin.take().expect("stdin");
         let stderr = child.stderr.take().expect("stderr");
         let err_tail = std::thread::spawn(move || {
-            use std::io::Read;
-            let mut s = String::new();
-            let mut r = stderr;
-            let _ = r.read_to_string(&mut s);
-            s.chars().rev().take(1500).collect::<Vec<_>>().into_iter().rev().collect::<String>()
+            let bytes = crate::process::read_stderr_tail(stderr).unwrap_or_default();
+            String::from_utf8_lossy(&bytes).into_owned()
         });
         let mut renderer = TimelineRenderer::new(tools.clone(), req.timeline.clone(), req.assets.clone(), w, h);
         renderer.cancel = cancel.clone();
@@ -642,15 +636,17 @@ impl ExportJob {
         let mut cmd = tools.ffmpeg_cmd();
         cmd.arg("-y").arg("-i").arg(audio);
         cmd.args(&req.preset.audio_args);
+        if req.preset.muxer() == "wav" {
+            cmd.args(["-rf64", "auto"]);
+        }
         cmd.arg("-f").arg(req.preset.muxer());
         cmd.arg(staging);
         cmd.stdout(Stdio::null()).stderr(Stdio::piped());
         let mut process = crate::process::CancellableChild::spawn(&mut cmd, cancel.clone()).map_err(|e| DomainError::process(e.to_string()))?;
-        let mut stderr = process.stderr.take().expect("stderr");
-        let mut tail = String::new();
-        std::io::Read::read_to_string(&mut stderr, &mut tail)?;
+        let stderr = process.stderr.take().expect("stderr");
+        let tail = crate::process::read_stderr_tail(stderr)?;
         if !process.wait()?.success() {
-            return Err(DomainError::process(format!("FFmpeg: {}", tail.trim())));
+            return Err(DomainError::process(format!("FFmpeg: {}", String::from_utf8_lossy(&tail).trim())));
         }
         Ok(0)
     }
@@ -662,19 +658,25 @@ struct WavWriter {
     sample_rate: u32,
 }
 
-struct CleanupPaths(Vec<PathBuf>);
-impl Drop for CleanupPaths {
-    fn drop(&mut self) {
-        for path in &self.0 {
-            let _ = std::fs::remove_file(path);
-        }
+fn publish_verified_output(staging: &Path, destination: &Path, cancel: &AtomicBool) -> DomainResult<String> {
+    // Hash y flush antes de la frontera de publicación; un fallo no deja salida final.
+    let sha256 = file_sha256_cancellable(staging, cancel)?;
+    std::fs::File::options().write(true).open(staging)?.sync_all()?;
+    if cancel.load(Ordering::Relaxed) {
+        return Err(DomainError::new(ErrorCode::Cancelled, "exportación cancelada"));
     }
+    // La comprobación inicial exists() no protege frente a otro productor.
+    // persist_noclobber conserva el destino incluso si apareció durante el render.
+    tempfile::TempPath::try_from_path(staging)?
+        .persist_noclobber(destination)
+        .map_err(|e| DomainError::io(format!("no se pudo publicar {} sin sobrescribir: {e}", destination.display())))?;
+    Ok(sha256)
 }
 
 impl WavWriter {
     fn create(path: &Path, sample_rate: u32) -> DomainResult<WavWriter> {
         let mut file = std::fs::File::create(path)?;
-        file.write_all(&[0u8; 44])?;
+        file.write_all(&[0u8; 92])?;
         Ok(WavWriter { file, frames: 0, sample_rate })
     }
 
@@ -690,20 +692,7 @@ impl WavWriter {
 
     fn finish(mut self) -> DomainResult<()> {
         use std::io::Seek;
-        let data_len = self.frames * CHANNELS as u64 * 4;
-        let mut h = Vec::with_capacity(44);
-        h.extend_from_slice(b"RIFF");
-        h.extend_from_slice(&((36 + data_len) as u32).to_le_bytes());
-        h.extend_from_slice(b"WAVEfmt ");
-        h.extend_from_slice(&16u32.to_le_bytes());
-        h.extend_from_slice(&3u16.to_le_bytes()); // IEEE float
-        h.extend_from_slice(&(CHANNELS as u16).to_le_bytes());
-        h.extend_from_slice(&self.sample_rate.to_le_bytes());
-        h.extend_from_slice(&(self.sample_rate * CHANNELS as u32 * 4).to_le_bytes());
-        h.extend_from_slice(&((CHANNELS * 4) as u16).to_le_bytes());
-        h.extend_from_slice(&32u16.to_le_bytes());
-        h.extend_from_slice(b"data");
-        h.extend_from_slice(&(data_len as u32).to_le_bytes());
+        let h = wav_header(self.frames, self.sample_rate)?;
         self.file.seek(std::io::SeekFrom::Start(0))?;
         self.file.write_all(&h)?;
         self.file.flush()?;
@@ -711,13 +700,55 @@ impl WavWriter {
     }
 }
 
+// Reserva ds64/JUNK y fact desde el inicio para que no se desborden los tamaños
+// RIFF al mezclar proyectos largos. El payload permanece IEEE float estéreo.
+fn wav_header(frames: u64, sample_rate: u32) -> DomainResult<Vec<u8>> {
+    let data_len = frames.checked_mul(CHANNELS as u64 * 4).ok_or_else(|| DomainError::invalid("audio demasiado largo"))?;
+    let riff_len = data_len.checked_add(84).ok_or_else(|| DomainError::invalid("audio demasiado largo"))?;
+    let rf64 = riff_len > u32::MAX as u64;
+    let mut h = Vec::with_capacity(92);
+    h.extend_from_slice(if rf64 { b"RF64" } else { b"RIFF" });
+    h.extend_from_slice(&(if rf64 { u32::MAX } else { riff_len as u32 }).to_le_bytes());
+    h.extend_from_slice(b"WAVE");
+    h.extend_from_slice(if rf64 { b"ds64" } else { b"JUNK" });
+    h.extend_from_slice(&28u32.to_le_bytes());
+    h.extend_from_slice(&riff_len.to_le_bytes());
+    h.extend_from_slice(&data_len.to_le_bytes());
+    h.extend_from_slice(&frames.to_le_bytes());
+    h.extend_from_slice(&0u32.to_le_bytes());
+    h.extend_from_slice(b"fmt ");
+    h.extend_from_slice(&16u32.to_le_bytes());
+    h.extend_from_slice(&3u16.to_le_bytes()); // IEEE float
+    h.extend_from_slice(&(CHANNELS as u16).to_le_bytes());
+    h.extend_from_slice(&sample_rate.to_le_bytes());
+    h.extend_from_slice(&(sample_rate * CHANNELS as u32 * 4).to_le_bytes());
+    h.extend_from_slice(&((CHANNELS * 4) as u16).to_le_bytes());
+    h.extend_from_slice(&32u16.to_le_bytes());
+    h.extend_from_slice(b"fact");
+    h.extend_from_slice(&4u32.to_le_bytes());
+    h.extend_from_slice(&(if rf64 { u32::MAX } else { frames as u32 }).to_le_bytes());
+    h.extend_from_slice(b"data");
+    h.extend_from_slice(&(if rf64 { u32::MAX } else { data_len as u32 }).to_le_bytes());
+    Ok(h)
+}
+
 pub fn file_sha256(path: &Path) -> DomainResult<String> {
+    file_sha256_cancellable(path, &AtomicBool::new(false))
+}
+
+fn file_sha256_cancellable(path: &Path, cancel: &AtomicBool) -> DomainResult<String> {
     use sha2::{Digest, Sha256};
     use std::io::Read;
+    if cancel.load(Ordering::Relaxed) {
+        return Err(DomainError::new(ErrorCode::Cancelled, "exportación cancelada"));
+    }
     let mut f = std::fs::File::open(path)?;
     let mut h = Sha256::new();
     let mut buf = vec![0u8; 1 << 20];
     loop {
+        if cancel.load(Ordering::Relaxed) {
+            return Err(DomainError::new(ErrorCode::Cancelled, "exportación cancelada"));
+        }
         let n = f.read(&mut buf)?;
         if n == 0 {
             break;
@@ -733,6 +764,50 @@ mod tests {
     use tv2_domain::commands::Command;
     use tv2_domain::project::Project;
     use tv2_domain::time::TimeRange;
+
+    #[test]
+    fn temporary_audio_header_preserves_sizes_above_four_gibibytes() {
+        let small = wav_header(48000, 48000).unwrap();
+        assert_eq!(small.len(), 92);
+        assert_eq!(&small[..4], b"RIFF");
+        assert_eq!(u32::from_le_bytes(small[4..8].try_into().unwrap()), 384084);
+        assert_eq!(&small[12..16], b"JUNK");
+        assert_eq!(&small[84..88], b"data");
+        let frames = 600_000_000u64;
+        let large = wav_header(frames, 48000).unwrap();
+        assert_eq!(large.len(), 92);
+        assert_eq!(&large[..4], b"RF64");
+        assert_eq!(&large[12..16], b"ds64");
+        assert_eq!(u64::from_le_bytes(large[20..28].try_into().unwrap()), 4_800_000_084);
+        assert_eq!(u64::from_le_bytes(large[28..36].try_into().unwrap()), 4_800_000_000);
+        assert_eq!(u64::from_le_bytes(large[36..44].try_into().unwrap()), frames);
+        assert_eq!(&large[88..92], &u32::MAX.to_le_bytes());
+        assert!(wav_header(u64::MAX, 48000).is_err());
+    }
+
+    #[test]
+    fn publication_preserves_destination_created_after_render_started() {
+        let dir = tempfile::tempdir().unwrap();
+        let staging = dir.path().join("output.partial");
+        let destination = dir.path().join("output.mp4");
+        std::fs::write(&staging, b"new output").unwrap();
+        std::fs::write(&destination, b"concurrent output").unwrap();
+        assert!(publish_verified_output(&staging, &destination, &AtomicBool::new(false)).is_err());
+        assert_eq!(std::fs::read(&destination).unwrap(), b"concurrent output");
+    }
+
+    #[test]
+    fn publication_checks_cancellation_before_creating_destination() {
+        let dir = tempfile::tempdir().unwrap();
+        let staging = dir.path().join("output.partial");
+        let destination = dir.path().join("output.mp4");
+        std::fs::write(&staging, b"verified output").unwrap();
+        assert_eq!(publish_verified_output(&staging, &destination, &AtomicBool::new(true)).unwrap_err().code, ErrorCode::Cancelled);
+        assert!(!destination.exists());
+        let expected = file_sha256(&staging).unwrap();
+        assert_eq!(publish_verified_output(&staging, &destination, &AtomicBool::new(false)).unwrap(), expected);
+        assert_eq!(std::fs::read(&destination).unwrap(), b"verified output");
+    }
 
     fn fixture(name: &str) -> PathBuf {
         PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../../tests/fixtures/media").join(name)

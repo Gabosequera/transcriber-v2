@@ -1,3 +1,11 @@
+# Continuación 13 — fuentes alpha.10
+
+Prerelease de fuentes del incremento E2/E3/E4 sobre alpha.9. La autorización vigente permite commit, push y prerelease; no se adjunta el ejecutable local sin aceptación física. Notas: [release-alpha10](evidence/release-alpha10.md). Backlog, pruebas y restricciones: [continuación 13](evidence/continuacion-13.md). Estado remoto exacto se registra tras publicar y verificar.
+
+80 unitarios application y 3 integraciones correctos; cliente sintético PASS; check/Clippy workspace all-targets y formato correctos. Tests domain/desktop/V1compat/control bloqueados4551 no se ejecutan/reintentan; multimedia tampoco. Build local sin lanzamiento, no paquete nuevo aceptado. E5 no iniciada; E2/E3/E4 no declaradas físicamente aceptadas.
+
+---
+
 # Publicación verificada — continuación 11, alpha.8
 
 Publicado y verificado [v2.0.0-alpha.8](https://github.com/Gabosequera/transcriber-v2/releases/tag/v2.0.0-alpha.8), código/tag `2355655a658cc512ac5ed612c4950275873eef10`, main subido. Prerelease no draft, assets vacíos; registro `evidence/publication-alpha8.json`. Build release 2m21s, no ejecutado. Este commit posterior solo registra publicación; continuar desde main para incluirlo. Objetivo hasta E4 incompleto.

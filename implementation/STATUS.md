@@ -1,3 +1,19 @@
+# Estado vigente — continuación 13, fuentes alpha.10
+
+Se continúa desde `main`/`origin/main` limpio en `a60e31f`, preservando alpha.9. E2/E3/E4 siguen siendo etapas del mismo proyecto. Se corrigieron las brechas demostradas por revisión de código y pruebas sintéticas; no se declara aceptación física ni se inicia E5. Detalle y backlog clasificado: [continuación 13](evidence/continuacion-13.md).
+
+| Etapa | Incremento implementado | Verificación / aceptación |
+|---|---|---|
+| E2 | Tiempos exactos al editar items; marcadores con base; StepFrames coherente; ocurrencias lazy en worker e invalidación por sesión/revisión; temporales exclusivos, publicación sin reemplazo, RF64, verificación cancelable y stderr acotado | Tests nuevos desktop/media solo compilados. GUI, equivalencia audiovisual, audio largo y PERF físico aplazados |
+| E3 | Árbol documental validado antes de intención/recovery; protección de pistas bloqueadas y de identidad/tombstones de capas frente a batch/reconcile externos | Regresiones application ejecutadas; carpetas V1/copias, concurrencia real y crash físico aplazados |
+| E4 | Undo/redo preparados con actor/permisos/recibos/pilas durables; rechazo de obsoletas; recuperación de apply fallido; revalidación local en worker; errores RPC del cliente | Núcleo application y cliente sintético ejecutados; control solo compilado; cliente conectado a GUI aplazado |
+
+No quedan brechas de implementación demostradas abiertas en el backlog revisado de esta continuación. La verificación automática domain/desktop/V1compat/control permanece bloqueada por Windows 4551, sin reintentos ni cambios de rutas/políticas. Las etapas no están aceptadas globalmente: siguen pendientes los recorridos físicos de RUN/control.md y las mediciones PERF-01. Límites deliberados de continuación 12 conservados. Resultados integrados/build/publicación exactos al pie de la evidencia 13.
+
+Verificación integrada: **80 unitarios application + 3 integraciones correctos**; cliente sintético PASS; check workspace/all-targets (9,52 s), Clippy/all-targets `-D warnings` (4,71 s) y formato correctos. Pruebas domain/desktop/V1compat/control/media solo compiladas. Ejecutable release no lanzado ni adjunto como asset.
+
+---
+
 # Estado vigente — E2/E3/E4 integradas, alpha.9
 
 La implementación del alcance pedido está integrada en el mismo proyecto Rust. **Se distingue código implementado de aceptación: las etapas no se declaran aceptadas físicamente.** E0/E1 se conservan y E5 no se inicia. La referencia detallada es [continuacion-12](evidence/continuacion-12.md); el inventario V1 y RUN describen comportamientos y recorridos, no solo handlers.

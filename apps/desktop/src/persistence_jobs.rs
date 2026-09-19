@@ -94,6 +94,7 @@ impl TranscriptorApp {
                     self.report(warning);
                 }
                 self.session = session;
+                self.inspector_epoch = self.inspector_epoch.wrapping_add(1);
                 self.resolver.playing.set(Some(false));
                 if let Some(player) = &self.player {
                     player.send(tv2_media::player::PlayerCommand::Pause);

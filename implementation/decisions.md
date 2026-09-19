@@ -1,3 +1,21 @@
+## D-0062 · Continuación 13: precisión y borradores ligados a su base
+
+El editor de items conserva el tiempo original por fila y por borde mientras su texto visible no cambie; editar una etiqueta no cuantiza tiempos a milisegundos. El editor de marcadores conserva proyecto/revisión/secuencia y rechaza borradores obsoletos. StepFrames diferido usa la misma cuadrícula que el player. Ocurrencias del inspector se consultan al desplegar, en un único worker; el resultado depende de sesión/selección/revisión y no se dibuja obsoleto. Estos cambios corrigen pérdidas y trabajo repetido; no acreditan latencias físicas.
+
+## D-0063 · Protección editorial por transición y árbol publicable
+
+Agent/External no pueden eludir una pista bloqueada desbloqueando/editando/rebloqueando dentro de un batch ni sustituyendo el proyecto. Se comparan pista y clips del estado inicial con el final. La reconciliación no puede borrar una capa con tombstones ni cambiar su medio/tipo. La persona mantiene sus comandos explícitos. Las publicaciones documentales validan el árbol completo antes de persistir intención y antes de recuperar: ningún archivo puede actuar como directorio de otra entrada, incluidos aliases ASCII Windows.
+
+## D-0064 · Temporales de exportación exclusivos y audio largo
+
+Cada exportación crea su carpeta temporal exclusiva dentro del destino. No trunca archivos predictibles de prueba/audio ni borra el staging de otra instancia. Hash/flush preceden a `persist_noclobber`; un destino aparecido durante render permanece intacto. Probe y hash admiten cancelación; no se promete interrumpir una llamada OS bloqueada. El WAV temporal reserva ds64/fact y pasa a RF64 cuando RIFF excede u32; WAV final pide RF64 automático al muxer. stderr se drena conservando solo 16 KiB. Referencia: [FFmpeg wavenc](https://www.ffmpeg.org/doxygen/7.1/wavenc_8c_source.html). Pruebas nuevas compiladas, no multimedia ejecutada ni crash físico certificado.
+
+## D-0065 · Historial preparado y rechazo de propuestas obsoletas
+
+Undo/redo externos son comandos de sesión, únicamente de nivel superior: no se ejecutan en batches de proyecto. Preparan el extremo exacto del historial y su efecto, y el commit comprueba tanto proyecto como entrada histórica. Conservan actor Agent, protecciones, revisión nueva, movimiento real entre pilas y recibo idempotente durable. Revisión local o autorización automática explícita de cada tipo siguen siendo necesarias; no habilitan borrar decisiones humanas ni resucitar tombstones. Rechazar una propuesta local no ejecuta contenido y sigue disponible aunque la base sea obsoleta o la preparación no sobreviva al reinicio. Errores HTTP del puente stdio producen error RPC correlacionado, sin reintentar mutaciones cuyo resultado sea incierto.
+
+---
+
 # Decisiones de continuación 12 — durabilidad
 
 Estas decisiones sustituyen los límites de implementación anteriores que nombran expresamente. La evidencia final es [application-continuacion-12-final.log](evidence/application-continuacion-12-final.log): 70 unitarios correctos y tres integraciones de bloques correctas. El [log previo](evidence/application-continuacion-12.log) conserva la ejecución de 68 y el fallo/corrección de una fixture. No equivalen a aceptación física, multimedia ni cierre de E2/E3/E4.

@@ -1,3 +1,20 @@
+# Matriz vigente — continuación 13, alpha.10
+
+La implementación de alpha.9 se conserva. [Backlog 13](evidence/continuacion-13.md) identifica requisito, símbolo, defecto, comportamiento y dependencia; separa código corregido, ejecución permitida, bloqueo automático y aceptación aplazada.
+
+| Requisitos | Incremento | Estado verificable |
+|---|---|---|
+| UI-03/04, MED-02/03/05, LAY-02 | Precisión de rangos, borrador de marcador, frame step y ocurrencias de inspector | Implementado; desktop/tests compilados, interacción aplazada |
+| EXP-01/03, DAT-02, PERF-01 | Temporales exclusivos, no reemplazo de salida concurrente, RF64, cancelación de verificación, stderr 16 KiB | Implementado; tests media compilados, ejecución multimedia aplazada |
+| DAT-02/03/04, LAY-02, AI-02 | Árbol publicable, pistas bloqueadas, identidad/tombstones de capa | Regresiones application ejecutadas; aceptación de concurrencia/crash real aplazada |
+| AI-01/02/03/04 | Undo/redo preparados, pilas/recibos, rechazo obsoleto y revalidación después de error | Núcleo application ejecutado; tests control compilados por bloqueo4551; GUI/cliente real aplazados |
+| AI-04, OPS-01 | Error RPC stdio correlacionado y UTF-8, sin retry de mutaciones | Script sintético ejecutado; no sustituye servicio conectado al editor |
+| PERF-01 | Consultas inspector y hash local reprepare fuera de GUI | Implementado; snapshot inicial y otros costes lineales documentados; benchmark físico pendiente |
+
+No hay otra brecha concreta de implementación identificada en este backlog. Esta afirmación no convierte los requisitos obligatorios bloqueados/sin aceptación en opcionales ni declara las etapas aceptadas. E5 permanece fuera de alcance.
+
+---
+
 # Matriz vigente — integración E2/E3/E4, continuación12
 
 Las siguientes filas describen implementación actual. Las comprobaciones exactas del último árbol están en [continuacion-12](evidence/continuacion-12.md). Ninguna fila declara aceptación GUI/multimedia ni habilita E5.

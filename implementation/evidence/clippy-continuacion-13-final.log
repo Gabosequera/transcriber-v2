@@ -1,0 +1,6 @@
+    Checking tv2-control v2.0.0-alpha.10 (C:\Users\gabri\Todo\transcriber-v2\crates\control)
+    Checking tv2-v1compat v2.0.0-alpha.10 (C:\Users\gabri\Todo\transcriber-v2\crates\v1compat)
+    Checking tv2-media v2.0.0-alpha.10 (C:\Users\gabri\Todo\transcriber-v2\crates\media)
+    Checking tv2-domain v2.0.0-alpha.10 (C:\Users\gabri\Todo\transcriber-v2\crates\domain)
+    Checking transcriptor v2.0.0-alpha.10 (C:\Users\gabri\Todo\transcriber-v2\apps\desktop)
+    Finished `dev` profile [optimized + debuginfo] target(s) in 4.71s

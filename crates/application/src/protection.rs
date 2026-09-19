@@ -80,6 +80,21 @@ pub(crate) fn check_transition(before: &Project, after: &Project, actor: &Actor)
         let next_clips: std::collections::HashMap<_, _> =
             after.sequences.iter().flat_map(|sequence| &sequence.clips).map(|clip| (&clip.id, clip)).collect();
         for sequence in &before.sequences {
+            let next_sequence = after.sequences.iter().find(|next| next.id == sequence.id);
+            for track in sequence.tracks.iter().filter(|track| track.locked) {
+                let unchanged = next_sequence.is_some_and(|next| {
+                    next.tracks.iter().find(|candidate| candidate.id == track.id) == Some(track)
+                        && sequence
+                            .clips
+                            .iter()
+                            .filter(|clip| clip.track_id == track.id)
+                            .eq(next.clips.iter().filter(|clip| clip.track_id == track.id))
+                });
+                if !unchanged {
+                    return Err(DomainError::precondition("una operación externa no puede cambiar una pista bloqueada o sus clips")
+                        .with("track_id", track.id.to_string()));
+                }
+            }
             for clip in &sequence.clips {
                 if clip.extra.get("v1").is_some_and(|v| v["edited"] == true || v["state"] == "accepted")
                     && next_clips.get(&clip.id).copied() != Some(clip)
@@ -117,6 +132,12 @@ pub(crate) fn check_transition(before: &Project, after: &Project, actor: &Actor)
         if matches!(actor, Actor::Human) {
             continue;
         }
+        if next.is_none() && (layer.deleted || !layer.deleted_item_ids.is_empty()) {
+            return Err(DomainError::precondition("la operación externa eliminaría una capa con tombstones"));
+        }
+        if next.is_some_and(|next| next.asset_id != layer.asset_id || next.kind != layer.kind) {
+            return Err(DomainError::precondition("una operación externa no puede cambiar el medio o tipo de una capa existente"));
+        }
         if layer.deleted && next.is_some_and(|n| !n.deleted) {
             return Err(DomainError::precondition("no se puede resucitar una capa borrada"));
         }
@@ -146,6 +167,40 @@ mod tests {
     use crate::session::{CommandEnvelope, ProjectSession};
     use tv2_domain::commands::tests_support::fake_video;
     use tv2_domain::{Command, ItemState, LayerKind, SemanticItem, SemanticLayer, Ticks, TimeRange};
+
+    #[test]
+    fn external_reconcile_preserves_layer_identity_and_tombstones() {
+        let mut project = Project::new("layer identity");
+        project.assets.extend([fake_video("a", 10), fake_video("b", 10)]);
+        let mut layer = SemanticLayer::new("a".into(), LayerKind::User, "Review");
+        layer.deleted_item_ids.push("deleted-item".into());
+        project.layers.push(layer.clone());
+        let mut candidates = Vec::new();
+        let mut missing = project.clone();
+        missing.layers.clear();
+        candidates.push(missing);
+        let mut moved = project.clone();
+        moved.layers[0].asset_id = "b".into();
+        candidates.push(moved);
+        let mut changed_kind = project.clone();
+        changed_kind.layers[0].kind = LayerKind::Topics;
+        candidates.push(changed_kind);
+        let mut deleted_project = project.clone();
+        deleted_project.layers[0].deleted = true;
+        deleted_project.layers[0].deleted_item_ids.clear();
+        let mut missing_deleted = deleted_project.clone();
+        missing_deleted.layers.clear();
+        for (base, candidate) in candidates.into_iter().map(|candidate| (project.clone(), candidate)).chain([(deleted_project, missing_deleted)]) {
+            for actor in [Actor::Agent { name: "test".into() }, Actor::External { source: "proposal".into() }] {
+                let mut session = ProjectSession::new(base.clone());
+                let envelope = CommandEnvelope::human(Command::ReconcileProject { project: Box::new(candidate.clone()) }).with_actor(actor);
+                assert!(session.dry_run(&envelope).is_err());
+                assert!(session.execute(envelope).is_err());
+                assert_eq!(session.project(), &base);
+                assert!(session.pending_journal().is_empty());
+            }
+        }
+    }
 
     #[test]
     fn clip_editorial_decisions_cover_linked_streams_and_protect_human_review() {
@@ -191,6 +246,52 @@ mod tests {
         );
         session.undo(Actor::Human).unwrap();
         assert!(session.project().active().unwrap().clips.iter().all(|c| !c.extra.contains_key("v1")));
+    }
+
+    #[test]
+    fn external_batches_cannot_unlock_or_reconcile_locked_track_contents() {
+        let mut project = Project::new("locked external");
+        project.assets.push(fake_video("a", 10));
+        let mut session = ProjectSession::new(project);
+        session
+            .execute(CommandEnvelope::human(Command::InsertAssetLinked {
+                asset_id: "a".into(),
+                position: Ticks::ZERO,
+                video_track: None,
+                source: None,
+            }))
+            .unwrap();
+        let clip = session.project().active().unwrap().clips[0].clone();
+        let lock = |locked| Command::SetTrackProps {
+            track_id: clip.track_id.clone(),
+            name: None,
+            muted: None,
+            solo: None,
+            locked: Some(locked),
+            visible: None,
+            gain_db: None,
+            height: None,
+        };
+        session.execute(CommandEnvelope::human(lock(true))).unwrap();
+        let base = session.project().clone();
+        let edit = Command::SetClipProps { clip_id: clip.id.clone(), name: Some("external edit".into()), gain_db: None, transform: None };
+        let mut reconciled = base.clone();
+        reconciled.active_mut().unwrap().clips[0].name = "external edit".into();
+        let commands = [
+            lock(false),
+            Command::Batch { label: "unlock-edit-relock".into(), commands: vec![lock(false), edit.clone(), lock(true)] },
+            Command::ReconcileProject { project: Box::new(reconciled) },
+        ];
+        for command in commands {
+            let envelope = CommandEnvelope::human(command).with_actor(Actor::Agent { name: "test".into() });
+            assert!(session.dry_run(&envelope).is_err());
+            assert!(session.execute(envelope).is_err());
+            assert_eq!(session.project(), &base);
+        }
+        session.execute(CommandEnvelope::human(Command::Batch { label: "human unlock and edit".into(), commands: vec![lock(false), edit] })).unwrap();
+        session.undo(Actor::Human).unwrap();
+        assert_eq!(session.project().active().unwrap().tracks, base.active().unwrap().tracks);
+        assert_eq!(session.project().active().unwrap().clips, base.active().unwrap().clips);
     }
 
     #[test]

@@ -64,13 +64,34 @@ function Send-Rpc([object]$Request) {
     Invoke-RestMethod -Method Post -Uri $Endpoint -Headers $headers -ContentType 'application/json' -Body $bytes -TimeoutSec 35
 }
 if ($Stdio) {
+    [Console]::InputEncoding = [System.Text.UTF8Encoding]::new($false)
+    [Console]::OutputEncoding = [System.Text.UTF8Encoding]::new($false)
     # MCP stdio bridge: one JSON-RPC message per line, diagnostics on stderr.
+    function Write-RpcFailure([object]$Id, [int]$Code, [string]$Message) {
+        [Console]::WriteLine((@{jsonrpc='2.0';id=$Id;error=@{code=$Code;message=$Message}} | ConvertTo-Json -Depth 100 -Compress))
+    }
     while ($null -ne ($line = [Console]::ReadLine())) {
         try {
             $request = $line | ConvertFrom-Json -AsHashtable
+        } catch {
+            Write-RpcFailure $null -32700 'Invalid JSON.'
+            continue
+        }
+        if ($request -isnot [System.Collections.IDictionary] -or $request.jsonrpc -ne '2.0' -or $request.method -isnot [string]) {
+            Write-RpcFailure $null -32600 'Invalid JSON-RPC request.'
+            continue
+        }
+        try {
             $result = Send-Rpc $request
             if ($null -ne $result) { [Console]::WriteLine(($result | ConvertTo-Json -Depth 100 -Compress)) }
-        } catch { [Console]::Error.WriteLine($_.Exception.Message) }
+        } catch {
+            [Console]::Error.WriteLine($_.Exception.Message)
+            # Do not strand the caller's request when HTTP fails. Never retry a
+            # mutation: the host may already have committed before a timeout.
+            if ($request.Contains('id')) {
+                Write-RpcFailure $request.id -32000 'Local HTTP request failed; execution status is unknown. Query the receipt before retrying a mutation.'
+            }
+        }
     }
     exit
 }

@@ -358,6 +358,7 @@ pub struct PreparedCommand {
     after: Project,
     effect: tv2_domain::CommandEffect,
     diff: DiffSummary,
+    history_entry: Option<HistoryEntry>,
 }
 impl PreparedCommand {
     /// Exact immutable base equality, including content changed without a new
@@ -387,6 +388,14 @@ pub struct ProjectSession {
 }
 
 impl ProjectSession {
+    /// Worker snapshot for proposal preparation. Only the next undo/redo entries
+    /// are needed; receipts and the rest of the history stay in the live session.
+    pub fn preparation_snapshot(&self) -> Self {
+        let mut snapshot = Self::new(self.project.clone());
+        snapshot.undo.extend(self.undo.back().cloned());
+        snapshot.redo.extend(self.redo.back().cloned());
+        snapshot
+    }
     pub fn history_snapshot(&self) -> DurableHistory {
         DurableHistory {
             schema: "transcriptor-history/1".into(),
@@ -832,16 +841,45 @@ impl ProjectSession {
         self.check_base(&envelope)?;
         let before = self.project.clone();
         let mut after = before.clone();
-        let effect = envelope.command.apply(&mut after)?;
-        crate::protection::attribute(&before, &mut after, &envelope.actor)?;
+        let history_entry = match envelope.command {
+            Command::Undo => Some(self.undo.back().ok_or_else(|| DomainError::new(ErrorCode::Empty, "nada que deshacer"))?.clone()),
+            Command::Redo => Some(self.redo.back().ok_or_else(|| DomainError::new(ErrorCode::Empty, "nada que rehacer"))?.clone()),
+            _ => None,
+        };
+        let effect = if let Some(entry) = &history_entry {
+            if entry.expect != before.revision {
+                return Err(DomainError::stale(entry.expect, before.revision));
+            }
+            after = if matches!(envelope.command, Command::Undo) { entry.before.clone() } else { entry.after.clone() };
+            // Historical metadata is not a new editorial state or revision.
+            after.revision = before.revision;
+            after.updated_at.clone_from(&before.updated_at);
+            if !matches!(envelope.actor, Actor::Human) {
+                let mut attributed = after.clone();
+                crate::protection::attribute(&before, &mut attributed, &envelope.actor)?;
+                if attributed != after {
+                    return Err(DomainError::precondition("la restauración atribuiría una edición humana al agente"));
+                }
+            }
+            CommandEffect { label: format!("{} {}", envelope.command.label(), entry.label), ..Default::default() }
+        } else {
+            let effect = envelope.command.apply(&mut after)?;
+            crate::protection::attribute(&before, &mut after, &envelope.actor)?;
+            effect
+        };
         self.validation.lock().map_err(|_| DomainError::io("caché de validación no disponible"))?.validate(&after)?;
-        crate::protection::check_transition(&before, &after, &envelope.actor)?;
+        // Local human history has the same trusted restoration semantics as
+        // undo()/redo(), including undo of a source-bundle enrichment. Agents
+        // retain strict evidence and human-decision protection.
+        if history_entry.is_none() || !matches!(envelope.actor, Actor::Human) {
+            crate::protection::check_transition(&before, &after, &envelope.actor)?;
+        }
         let diff = DiffSummary::compute(&before, &after);
-        Ok(PreparedCommand { envelope, before, after, effect, diff })
+        Ok(PreparedCommand { envelope, before, after, effect, diff, history_entry })
     }
 
     pub fn commit_prepared(&mut self, prepared: PreparedCommand) -> DomainResult<CommandResult> {
-        let PreparedCommand { envelope, before, mut after, effect, diff } = prepared;
+        let PreparedCommand { envelope, before, mut after, effect, diff, history_entry } = prepared;
         self.check_identity(&envelope)?;
         if let Some(key) = &envelope.idempotency_key {
             if let Some(stored) = self.idempotency.get(key) {
@@ -871,6 +909,12 @@ impl ProjectSession {
         if before != self.project {
             return Err(DomainError::precondition("la base del comando preparado cambió"));
         }
+        if let Some(entry) = &history_entry {
+            let current = if matches!(envelope.command, Command::Undo) { self.undo.back() } else { self.redo.back() };
+            if current != Some(entry) {
+                return Err(DomainError::precondition("la entrada de historial preparada cambió"));
+            }
+        }
         let base = before.revision;
         after.revision = base.max(after.revision).checked_add(1).ok_or_else(|| DomainError::out_of_range("revisión agotada"))?;
         after.updated_at = now_iso();
@@ -890,18 +934,29 @@ impl ProjectSession {
             .as_ref()
             .map(|_| crate::receipt_cache::StoredReceipt::new(envelope.clone(), result.clone(), self.idempotency.len(), &mut self.receipt_spill))
             .transpose()?;
-        self.undo.push_back(HistoryEntry {
-            label: effect.label.clone(),
-            actor: envelope.actor.clone(),
-            command_id: envelope.command_id.clone(),
-            before,
-            after: after.clone(),
-            expect: after.revision,
-        });
+        if let Some(mut entry) = history_entry {
+            let (source, destination) =
+                if matches!(envelope.command, Command::Undo) { (&mut self.undo, &mut self.redo) } else { (&mut self.redo, &mut self.undo) };
+            source.pop_back();
+            if let Some(next) = source.back_mut() {
+                next.expect = after.revision;
+            }
+            entry.expect = after.revision;
+            destination.push_back(entry);
+        } else {
+            self.undo.push_back(HistoryEntry {
+                label: effect.label.clone(),
+                actor: envelope.actor.clone(),
+                command_id: envelope.command_id.clone(),
+                before,
+                after: after.clone(),
+                expect: after.revision,
+            });
+            self.redo.clear();
+        }
         while self.undo.len() > HISTORY_DEPTH {
             self.undo.pop_front();
         }
-        self.redo.clear();
         self.journal.push(JournalEvent {
             at: after.updated_at.clone(),
             command_id: envelope.command_id.clone(),
@@ -1015,6 +1070,145 @@ mod tests {
 
     fn s(n: i64) -> Ticks {
         Ticks::from_seconds(n)
+    }
+
+    #[test]
+    fn prepared_history_commands_keep_preview_stacks_actor_and_durable_retry() {
+        let mut session = ProjectSession::new(Project::new("original"));
+        session.execute(CommandEnvelope::human(Command::RenameProject { name: "edited".into() })).unwrap();
+        let mut undo = CommandEnvelope::human(Command::Undo)
+            .with_actor(Actor::Agent { name: "history-client".into() })
+            .with_base(session.revision())
+            .with_idempotency("history-undo");
+        undo.precondition_digest = Some(session.digest().unwrap());
+        let prepared = session.preparation_snapshot().prepare_command(undo.clone()).unwrap();
+        assert_eq!(prepared.preview().name, "original");
+        assert_eq!(session.project().name, "edited");
+        let diff = prepared.diff();
+        let result = session.commit_prepared(prepared).unwrap();
+        assert_eq!(result.diff, diff);
+        assert_eq!(session.project().name, "original");
+        assert!(session.undo_label().is_none());
+        assert!(session.redo_label().is_some());
+        assert!(matches!(session.pending_journal().last().unwrap().actor, Actor::Agent { .. }));
+        let history = session.history_snapshot();
+        history.validate(session.project()).unwrap();
+        assert!(session.execute(undo.clone()).unwrap().replayed);
+        assert_eq!(session.history_snapshot(), history);
+        let dir = tempfile::tempdir().unwrap();
+        let store = crate::ProjectStore::at(dir.path());
+        store.save_checkpoint(session.project(), session.pending_journal(), Some(&history)).unwrap();
+        let mut loaded = store.load_session().unwrap();
+        assert!(loaded.execute(undo).unwrap().replayed);
+        let redo = CommandEnvelope::human(Command::Redo)
+            .with_actor(Actor::Agent { name: "history-client".into() })
+            .with_base(loaded.revision())
+            .with_idempotency("history-redo");
+        let prepared = loaded.preparation_snapshot().prepare_command(redo.clone()).unwrap();
+        assert_eq!(prepared.preview().name, "edited");
+        loaded.commit_prepared(prepared).unwrap();
+        assert!(loaded.execute(redo).unwrap().replayed);
+        assert_eq!(loaded.project().name, "edited");
+        assert!(loaded.redo_label().is_none());
+        loaded.history_snapshot().validate(loaded.project()).unwrap();
+        assert_eq!(loaded.revision(), 3);
+    }
+
+    #[test]
+    fn prepared_history_interleaves_local_history_and_survives_autosave_recovery() {
+        let dir = tempfile::tempdir().unwrap();
+        let store = crate::ProjectStore::at(dir.path());
+        let mut session = ProjectSession::new(Project::new("original"));
+        for name in ["one", "two", "three"] {
+            session.execute(CommandEnvelope::human(Command::RenameProject { name: name.into() })).unwrap();
+        }
+        let agent = |command, revision, key| {
+            CommandEnvelope::human(command).with_actor(Actor::Agent { name: "history".into() }).with_base(revision).with_idempotency(key)
+        };
+        session.execute(agent(Command::Undo, session.revision(), "undo-three")).unwrap();
+        assert_eq!(session.project().name, "two");
+        session.undo(Actor::Human).unwrap();
+        assert_eq!(session.project().name, "one");
+        let redo = agent(Command::Redo, session.revision(), "redo-two");
+        session.commit_prepared(session.preparation_snapshot().prepare_command(redo.clone()).unwrap()).unwrap();
+        assert_eq!(session.project().name, "two");
+        store.save_checkpoint(session.project(), session.pending_journal(), Some(&session.history_snapshot())).unwrap();
+        let mut loaded = store.load_session().unwrap();
+        assert_eq!(loaded.history_snapshot().undo.len(), 2);
+        assert_eq!(loaded.history_snapshot().redo.len(), 1);
+        assert!(loaded.execute(redo).unwrap().replayed);
+        loaded.redo(Actor::Human).unwrap();
+        assert_eq!(loaded.project().name, "three");
+        let undo = agent(Command::Undo, loaded.revision(), "undo-three-again");
+        loaded.commit_prepared(loaded.preparation_snapshot().prepare_command(undo.clone()).unwrap()).unwrap();
+        store.save_autosave_checkpoint(loaded.project(), loaded.pending_journal(), Some(&loaded.history_snapshot())).unwrap();
+        let mut recovered = store.load_session().unwrap();
+        let checkpoint = store.recovery_checkpoint(recovered.project()).unwrap().unwrap();
+        recovered.recover_checkpoint(checkpoint.project, checkpoint.events, checkpoint.history).unwrap();
+        let revision = recovered.revision();
+        assert!(recovered.execute(undo).unwrap().replayed);
+        assert_eq!(recovered.revision(), revision);
+        assert_eq!(recovered.project().name, "two");
+        assert_eq!(recovered.history_snapshot().undo.len(), 2);
+        assert_eq!(recovered.history_snapshot().redo.len(), 1);
+        recovered.redo(Actor::Human).unwrap();
+        assert_eq!(recovered.project().name, "three");
+        recovered.history_snapshot().validate(recovered.project()).unwrap();
+    }
+
+    #[test]
+    fn prepared_history_rejects_stale_base_changed_entry_and_nested_batch_atomically() {
+        let mut session = ProjectSession::new(Project::new("original"));
+        session.execute(CommandEnvelope::human(Command::RenameProject { name: "edited".into() })).unwrap();
+        let request = CommandEnvelope::human(Command::Undo).with_base(session.revision());
+        let prepared = session.prepare_command(request.clone()).unwrap();
+        let mut history = session.history_snapshot();
+        history.undo.back_mut().unwrap().command_id = "different-history-entry".into();
+        session.restore_history(history).unwrap();
+        let before = session.project().clone();
+        assert!(session.commit_prepared(prepared).is_err());
+        assert_eq!(session.project(), &before);
+        let prepared = session.prepare_command(request.clone()).unwrap();
+        session.execute(CommandEnvelope::human(Command::RenameProject { name: "new local edit".into() })).unwrap();
+        let before = session.project().clone();
+        let history = session.history_snapshot();
+        assert!(session.commit_prepared(prepared).is_err());
+        assert!(session.prepare_command(request).is_err());
+        let nested = Command::Batch {
+            label: "outer".into(),
+            commands: vec![
+                Command::RenameProject { name: "must roll back".into() },
+                Command::Batch { label: "inner".into(), commands: vec![Command::Undo] },
+            ],
+        };
+        assert!(session.execute(CommandEnvelope::human(nested)).is_err());
+        let mut bad_digest = CommandEnvelope::human(Command::Undo).with_base(session.revision());
+        bad_digest.precondition_digest = Some("stale".into());
+        assert!(session.prepare_command(bad_digest).is_err());
+        assert_eq!(session.project(), &before);
+        assert_eq!(session.history_snapshot(), history);
+    }
+
+    #[test]
+    fn prepared_history_agent_cannot_remove_or_resurrect_human_decisions() {
+        use tv2_domain::{LayerKind, SemanticItem, SemanticLayer};
+        let mut project = Project::new("human-history");
+        project.assets.push(fake_video("a", 10));
+        let layer = SemanticLayer::new("a".into(), LayerKind::User, "Review");
+        let layer_id = layer.layer_id.clone();
+        project.layers.push(layer);
+        let mut session = ProjectSession::new(project);
+        let item = SemanticItem::new(TimeRange::new(s(0), s(1)), "Human choice");
+        let item_id = item.item_id.clone();
+        session.execute(CommandEnvelope::human(Command::AddItem { layer_id: layer_id.clone(), item })).unwrap();
+        let agent = |command| CommandEnvelope::human(command).with_actor(Actor::Agent { name: "test".into() });
+        assert!(session.prepare_command(agent(Command::Undo)).is_err());
+        session.execute(CommandEnvelope::human(Command::DeleteItems { layer_id, item_ids: vec![item_id] })).unwrap();
+        let before = session.project().clone();
+        let history = session.history_snapshot();
+        assert!(session.prepare_command(agent(Command::Undo)).is_err());
+        assert_eq!(session.project(), &before);
+        assert_eq!(session.history_snapshot(), history);
     }
 
     #[test]

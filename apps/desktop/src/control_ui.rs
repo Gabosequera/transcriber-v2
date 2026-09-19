@@ -12,6 +12,7 @@ pub struct ControlUi {
     request: String,
     response: String,
     pending_json: Option<Value>,
+    pending_local_reprepare: Option<String>,
     error: Option<String>,
     background: Option<crossbeam_channel::Receiver<BackgroundResult>>,
     restore: Option<crossbeam_channel::Receiver<Result<ControlEngine, String>>>,
@@ -79,6 +80,7 @@ impl TranscriptorApp {
             control.background = None;
             control.restore = None;
             control.pending_json = None;
+            control.pending_local_reprepare = None;
             control.import = None;
             control.import_tickets.clear();
         }
@@ -156,20 +158,43 @@ impl TranscriptorApp {
             // Bounded requests per frame keep playback/keyboard serviced.
             for _ in 0..4 {
                 let request = control.service.as_ref().and_then(|s| s.try_recv());
+                let local_reprepare = if request.is_none() && control.pending_json.is_none() { control.pending_local_reprepare.take() } else { None };
                 let message = match &request {
                     Some(r) => Some(r.message.clone()),
-                    None => control.pending_json.take(),
+                    None => control.pending_json.take().or_else(|| local_reprepare.as_ref().map(|id| json!({
+                        "jsonrpc":"2.0","id":"local-reprepare","method":"tools/call","params":{"name":"tv2_reprepare","arguments":{
+                            "session_id":control.engine.as_ref().unwrap().session_id(),"project_id":self.project().project_id,
+                            "proposal_id":id,"revision":self.session.revision(),"idempotency_key":format!("reprepare-{}",tv2_domain::ids::random_hex12())
+                        }}}))),
                 };
-                let Some(message) = message else { break };
+                let Some(mut message) = message else { break };
                 let Some(mut engine) = control.engine.take() else { break };
                 let mut host = self.control_host_state();
                 host.jobs.extend(control.import_tickets.iter().map(|t| json!({"id":t.id,"kind":"import","state":t.state,"revision":t.revision})));
                 if ControlEngine::is_background_request(&message) {
-                    let project = self.project().clone();
+                    let snapshot = if engine.preparation_needs_history(&message) {
+                        self.session.preparation_snapshot()
+                    } else {
+                        tv2_application::ProjectSession::new(self.project().clone())
+                    };
                     let wake = ctx.clone();
                     let (tx, rx) = crossbeam_channel::bounded(1);
                     match std::thread::Builder::new().name("mcp-query-prepare".into()).spawn(move || {
-                        let (engine, response) = engine.handle_background(project, host, message.clone());
+                        // This flag is local UI state, never a JSON/MCP field.
+                        // Hash the exact worker snapshot; remote requests still
+                        // must supply their own digest and pass the closed schema.
+                        if local_reprepare.is_some() {
+                            match snapshot.digest() {
+                                Ok(digest) => message["params"]["arguments"]["digest"] = json!(digest),
+                                Err(error) => {
+                                    let response = json!({"jsonrpc":"2.0","id":message["id"],"error":{"code":-32603,"message":error.to_string()}});
+                                    let _ = tx.send(BackgroundResult { engine, message, response, request });
+                                    wake.request_repaint();
+                                    return;
+                                }
+                            }
+                        }
+                        let (engine, response) = engine.handle_background(snapshot, host, message.clone());
                         let _ = tx.send(BackgroundResult { engine, message, response, request });
                         wake.request_repaint();
                     }) {
@@ -308,7 +333,7 @@ pub fn draw(app: &mut TranscriptorApp, ctx: &egui::Context) {
                 let service = state.service.as_ref().unwrap();
                 ui.monospace(service.endpoint());
                 if ui.button("Copiar token de esta sesión").clicked() { ctx.copy_text(service.token().to_string()); }
-                if ui.button("Detener servicio y revocar permisos").clicked() { state.service = None; state.engine = None; state.background=None;state.restore=None; }
+                if ui.button("Detener servicio y revocar permisos").clicked() { state.service = None; state.engine = None; state.background=None;state.restore=None;state.pending_json=None;state.pending_local_reprepare=None; }
             }
             if state.background.is_some() || state.restore.is_some() {ui.spinner();ui.label("Preparando consulta/propuesta en segundo plano…");}
             for ticket in &mut state.import_tickets {
@@ -350,16 +375,16 @@ pub fn draw(app: &mut TranscriptorApp, ctx: &egui::Context) {
                 egui::ScrollArea::vertical().max_height(290.0).show(ui,|ui| {
                     for proposal in engine.proposals() {
                         let stale = (proposal.base_revision != app.session.revision() || proposal.needs_revalidation) && proposal.receipt.is_none();
-                        ui.collapsing(format!("{} · revisión {} · {}",proposal.id,proposal.base_revision,if proposal.receipt.is_some(){"aplicada"}else if stale{"obsoleta"}else if proposal.rejected{"rechazada"}else if proposal.reviewed{"revisada"}else{"pendiente"}),|ui| {
+                        ui.collapsing(format!("{} · revisión {} · {}",proposal.id,proposal.base_revision,if proposal.receipt.is_some(){"aplicada"}else if proposal.rejected{"rechazada"}else if stale{"obsoleta"}else if proposal.reviewed{"revisada"}else{"pendiente"}),|ui| {
                             ui.monospace(serde_json::to_string_pretty(&proposal.command).unwrap_or_default());
                             ui.monospace(serde_json::to_string_pretty(&proposal.diff).unwrap_or_default());
                             ui.label(format!("Digest de preview: {}",proposal.preview_digest));
                             if proposal.automatic_eligible{ui.label("Dentro del alcance automático autorizado localmente");}
                             if stale && ui.button("Repreparar sobre la revisión actual").clicked(){
-                                match app.session.digest(){Ok(digest)=>state.pending_json=Some(json!({"jsonrpc":"2.0","id":"local-reprepare","method":"tools/call","params":{"name":"tv2_reprepare","arguments":{"session_id":engine.session_id(),"project_id":app.project().project_id,"proposal_id":proposal.id,"revision":app.session.revision(),"digest":digest,"idempotency_key":format!("reprepare-{}",tv2_domain::ids::random_hex12())}}})),Err(e)=>state.error=Some(e.to_string())}
+                                state.pending_local_reprepare=Some(proposal.id.clone());
                             }
                             for (label,approve) in [("Aprobar esta propuesta",true),("Rechazar",false)] {
-                                if ui.add_enabled(!stale && proposal.receipt.is_none(),egui::Button::new(label)).clicked()
+                                if ui.add_enabled(proposal.receipt.is_none() && !proposal.rejected && (!approve || !stale),egui::Button::new(label)).clicked()
                                     && let Err(e) = engine.review(&proposal.id,approve,&app.session) { state.error=Some(e); }
                             }
                         });
@@ -386,7 +411,7 @@ pub fn draw(app: &mut TranscriptorApp, ctx: &egui::Context) {
         });
     }
     app.control = state;
-    if app.control.pending_json.is_some() {
+    if app.control.pending_json.is_some() || app.control.pending_local_reprepare.is_some() {
         ctx.request_repaint();
     }
 }

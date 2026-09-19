@@ -109,6 +109,10 @@ fn build_command_schema() -> Value {
         schema = leaf.clone();
         schema["oneOf"].as_array_mut().unwrap().push(batch);
     }
+    // History is a session operation, never a child of a project-only batch.
+    for kind in ["undo", "redo"] {
+        schema["oneOf"].as_array_mut().unwrap().push(command(kind, json!({}), &[]));
+    }
     schema
 }
 pub(crate) fn parse_command(value: Value) -> Result<Command, String> {

@@ -738,8 +738,8 @@ fn inspector(app: &mut TranscriptorApp, ui: &mut egui::Ui) {
         if let Some((layer_id, item_id)) = app.selection.items.first().cloned() {
             let Some(layer) = app.project().layer(&layer_id) else { return };
             let Some(item) = layer.item(&item_id).cloned() else { return };
-            let (layer_name, layer_kind, layer_asset, editable) =
-                (layer.name.clone(), layer.kind.clone(), layer.asset_id.clone(), !layer.deleted && !layer.locked && layer.kind.is_editable());
+            let (layer_name, layer_kind, editable) =
+                (layer.name.clone(), layer.kind.clone(), !layer.deleted && !layer.locked && layer.kind.is_editable());
             ui.label(RichText::new("Tramo semántico").strong());
             ui.label(format!("Capa: {} ({})", layer_name, layer_kind.v1_name()));
             ui.label(format!("ID: {}", item.item_id));
@@ -810,20 +810,8 @@ fn inspector(app: &mut TranscriptorApp, ui: &mut egui::Ui) {
                     ui.label(text);
                 });
             }
-            let mut occurrences = app
-                .sequence()
-                .map(|seq| item.ranges.iter().flat_map(|r| seq.range_occurrences(&layer_asset, *r)).collect::<Vec<_>>())
-                .unwrap_or_default();
-            occurrences.sort_by_key(|o| (o.sequence.start, o.clip_id.clone()));
-            ui.collapsing(format!("Ocurrencias en secuencia ({})", occurrences.len()), |ui| {
-                egui::ScrollArea::vertical().max_height(200.0).show_rows(ui, 22.0, occurrences.len(), |ui, rows| {
-                    for row in rows {
-                        let o = &occurrences[row];
-                        if ui.button(format!("{} · {}", o.sequence.start.timecode_ms(), o.clip_id)).clicked() {
-                            app.reveal_occurrence(o.clip_id.clone(), o.sequence.start);
-                        }
-                    }
-                });
+            ui.collapsing("Ocurrencias en secuencia", |ui| {
+                crate::inspector_occurrences::draw(app, ui, &layer_id, &item_id);
             });
             return;
         }

@@ -120,6 +120,7 @@ pub fn publish_with_directories(
 ) -> DomainResult<()> {
     let _lock = lock(root)?;
     finish(root, None)?;
+    validate_path_tree(documents.keys().chain(files.keys()).map(String::as_str), directories)?;
     let mut seen = HashSet::new();
     let mut entries = Vec::new();
     for directory in directories {
@@ -162,6 +163,20 @@ pub fn recover(root: &Path) -> DomainResult<()> {
     let _lock = lock(root)?;
     finish(root, None)
 }
+// Validate the complete namespace before persisting an intent or writing any
+// recovered entry. Checking individual paths does not detect a file used as a
+// directory by a different entry, including Windows case aliases.
+fn validate_path_tree<'a>(files: impl Iterator<Item = &'a str>, directories: &BTreeSet<String>) -> DomainResult<()> {
+    let files: HashSet<_> = files.map(str::to_ascii_lowercase).collect();
+    for path in files.iter().cloned().chain(directories.iter().map(|path| path.to_ascii_lowercase())) {
+        for (index, _) in path.match_indices('/') {
+            if files.contains(&path[..index]) {
+                return Err(DomainError::invalid("un archivo de publicación no puede ser directorio de otra entrada"));
+            }
+        }
+    }
+    Ok(())
+}
 fn finish(root: &Path, stop_after: Option<usize>) -> DomainResult<()> {
     let Some(raw) = read(&root.join(INTENT))? else {
         return Ok(());
@@ -173,6 +188,7 @@ fn finish(root: &Path, stop_after: Option<usize>) -> DomainResult<()> {
     {
         return Err(DomainError::invalid("intención inválida"));
     }
+    validate_path_tree(intent.entries.iter().map(|entry| entry.path.as_str()), &intent.directories)?;
     let mut seen = HashSet::new();
     for directory in &intent.directories {
         let target = safe_path(root, directory)?;
@@ -283,6 +299,32 @@ pub(crate) fn copy_verified(file: &SourceFile, target: &Path, before: &Option<St
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[test]
+    fn rejects_file_ancestors_before_persisting_or_recovering_any_output() {
+        for directories in [BTreeSet::new(), BTreeSet::from(["TREE/nested".into()])] {
+            let temp = tempfile::tempdir().unwrap();
+            let root = temp.path().join("output");
+            create(&root).unwrap();
+            let mut documents = BTreeMap::from([("tree".into(), "parent".into())]);
+            if directories.is_empty() {
+                documents.insert("TREE/child.json".into(), "child".into());
+            }
+            assert!(publish_with_directories(&root, &documents, &BTreeMap::new(), &directories).is_err());
+            assert!(!root.join(INTENT).exists(), "invalid request must not block subsequent publication");
+            assert!(!root.join("tree").exists(), "no partial output from invalid request");
+            let intent = Intent {
+                schema: "transcriptor-documents/3".into(),
+                id: "0123456789ab".into(),
+                directories,
+                entries: documents.into_iter().map(|(path, after)| Entry { path, before: None, after, file: None }).collect(),
+            };
+            let bytes = serde_json::to_vec(&intent).unwrap();
+            crate::store::atomic_write(&root.join(INTENT), &bytes).unwrap();
+            assert!(recover(&root).is_err());
+            assert!(!root.join("tree").exists());
+            assert_eq!(fs::read(root.join(INTENT)).unwrap(), bytes);
+        }
+    }
     #[test]
     fn empty_directories_recover_with_documents_and_reject_path_conflicts() {
         let temp = tempfile::tempdir().unwrap();

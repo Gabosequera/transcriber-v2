@@ -10,10 +10,37 @@ pub struct ItemEditor {
     label: String,
     comment: String,
     parent: String,
-    ranges: Vec<(String, String)>,
+    ranges: Vec<RangeDraft>,
     confidence: Option<String>,
     pending: Option<crossbeam_channel::Receiver<Result<PreparedCommand, String>>>,
     error: Option<String>,
+}
+
+struct RangeDraft {
+    start: String,
+    end: String,
+    original: Option<TimeRange>,
+}
+
+impl RangeDraft {
+    fn from_range(range: TimeRange) -> Self {
+        Self { start: range.start.timecode_ms(), end: range.end.timecode_ms(), original: Some(range) }
+    }
+
+    fn parse(&self) -> Result<TimeRange, String> {
+        // Display precision must not change an untouched boundary. Keep the
+        // original attached to this row so removing another row cannot rebind it.
+        let boundary = |text: &str, original: Option<Ticks>, label: &str| {
+            original
+                .filter(|time| text == time.timecode_ms())
+                .or_else(|| crate::ui_panels::parse_time(text))
+                .ok_or_else(|| format!("{label} inválido: {text}"))
+        };
+        Ok(TimeRange::new(
+            boundary(&self.start, self.original.map(|range| range.start), "Inicio")?,
+            boundary(&self.end, self.original.map(|range| range.end), "Fin")?,
+        ))
+    }
 }
 
 impl ItemEditor {
@@ -26,7 +53,7 @@ impl ItemEditor {
             label: item.label.clone(),
             comment: item.comment.clone(),
             parent: item.parent_id.as_ref().map(ToString::to_string).unwrap_or_default(),
-            ranges: item.ranges.iter().map(|r| (r.start.timecode_ms(), r.end.timecode_ms())).collect(),
+            ranges: item.ranges.iter().copied().map(RangeDraft::from_range).collect(),
             confidence: item.extra.get("confidence").filter(|value| !value.is_null()).map(ToString::to_string),
             pending: None,
             error: None,
@@ -34,15 +61,7 @@ impl ItemEditor {
     }
 
     fn command(&self, block: bool) -> Result<Command, String> {
-        let ranges = self
-            .ranges
-            .iter()
-            .map(|(a, b)| {
-                let start = crate::ui_panels::parse_time(a).ok_or_else(|| format!("Inicio inválido: {a}"))?;
-                let end = crate::ui_panels::parse_time(b).ok_or_else(|| format!("Fin inválido: {b}"))?;
-                Ok(TimeRange::new(start, end))
-            })
-            .collect::<Result<Vec<_>, String>>()?;
+        let ranges = self.ranges.iter().map(RangeDraft::parse).collect::<Result<Vec<_>, String>>()?;
         let mut commands = vec![
             Command::SetItemStructure {
                 layer_id: self.layer.clone(),
@@ -129,10 +148,10 @@ pub fn draw(app: &mut TranscriptorApp, ctx: &egui::Context) {
             }
             ui.label("Rangos fuente: segundos o HH:MM:SS.mmm. Deben estar ordenados y dentro del padre.");
             let mut remove = None;
-            for (n, (a, b)) in editor.ranges.iter_mut().enumerate() {
+            for (n, range) in editor.ranges.iter_mut().enumerate() {
                 ui.horizontal(|ui| {
-                    ui.add_enabled(!fixed_edges.0, egui::TextEdit::singleline(a).desired_width(145.0));
-                    ui.add_enabled(!fixed_edges.1, egui::TextEdit::singleline(b).desired_width(145.0));
+                    ui.add_enabled(!fixed_edges.0, egui::TextEdit::singleline(&mut range.start).desired_width(145.0));
+                    ui.add_enabled(!fixed_edges.1, egui::TextEdit::singleline(&mut range.end).desired_width(145.0));
                     if !block && ui.small_button("Quitar").clicked() {
                         remove = Some(n);
                     }
@@ -142,7 +161,7 @@ pub fn draw(app: &mut TranscriptorApp, ctx: &egui::Context) {
                 editor.ranges.remove(n);
             }
             if !block && ui.button("Añadir rango").clicked() {
-                editor.ranges.push((String::new(), String::new()));
+                editor.ranges.push(RangeDraft { start: String::new(), end: String::new(), original: None });
             }
             if ui.button("Aplicar como un cambio").clicked() {
                 match editor.command(block) {
@@ -193,5 +212,32 @@ pub fn draw(app: &mut TranscriptorApp, ctx: &egui::Context) {
     }
     if open && !completed {
         app.item_editor = Some(editor);
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn text_only_edit_preserves_exact_submillisecond_ranges() {
+        let exact = TimeRange::new(Ticks(123456789), Ticks(987654321));
+        let item = SemanticItem::new(exact, "Antes");
+        let mut editor = ItemEditor::new("project".into(), 1, LayerId::new("layer"), &item);
+        editor.label = "Después".into();
+        let Command::Batch { commands, .. } = editor.command(false).unwrap() else { panic!("expected batch") };
+        let Command::SetItemStructure { ranges, .. } = &commands[0] else { panic!("expected structure") };
+        assert_eq!(ranges, &[exact]);
+    }
+
+    #[test]
+    fn editing_one_boundary_preserves_the_other_and_removing_rows_keeps_identity() {
+        let exact = TimeRange::new(Ticks(123456789), Ticks(987654321));
+        let mut rows = vec![RangeDraft::from_range(TimeRange::new(Ticks::ZERO, Ticks(1))), RangeDraft::from_range(exact)];
+        rows.remove(0);
+        rows[0].start = "0.5".into();
+        assert_eq!(rows[0].parse().unwrap(), TimeRange::new(Ticks::from_seconds_f64(0.5), exact.end));
+        rows[0].start = "inválido".into();
+        assert!(rows[0].parse().is_err());
     }
 }

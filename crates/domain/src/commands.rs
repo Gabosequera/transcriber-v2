@@ -40,6 +40,9 @@ pub enum ClipEdge {
 #[derive(Clone, PartialEq, Debug, Serialize, Deserialize)]
 #[serde(tag = "type", rename_all = "snake_case")]
 pub enum Command {
+    /// Session history operations; never executable in a project-only batch.
+    Undo,
+    Redo,
     // ---- proyecto / assets ----
     RenameProject {
         name: String,
@@ -355,6 +358,8 @@ impl Command {
     /// Etiqueta corta para historial/menú.
     pub fn label(&self) -> String {
         match self {
+            Command::Undo => "Deshacer".into(),
+            Command::Redo => "Rehacer".into(),
             Command::RenameProject { .. } => "Renombrar proyecto".into(),
             Command::SetSkipTrims { .. } => "Saltar recortes al reproducir".into(),
             Command::ReconcileProject { .. } => "Reconciliar archivo externo".into(),
@@ -442,6 +447,7 @@ impl Command {
     /// copia y descarta si falla.
     pub fn apply(&self, project: &mut Project) -> DomainResult<CommandEffect> {
         match self {
+            Command::Undo | Command::Redo => Err(DomainError::precondition("undo/redo requieren la sesión y no se admiten dentro de un batch")),
             Command::RenameProject { name } => {
                 if name.trim().is_empty() {
                     return Err(DomainError::invalid("el nombre no puede estar vacío"));
