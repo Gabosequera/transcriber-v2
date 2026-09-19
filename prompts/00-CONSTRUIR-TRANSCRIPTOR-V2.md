@@ -202,3 +202,6 @@ La siguiente actividad preparada es la aceptación de los recorridos RUN/control
 
 
 Publicación confirmada: [v2.0.0-alpha.9](https://github.com/Gabosequera/transcriber-v2/releases/tag/v2.0.0-alpha.9), código/tag 0fc6ae2184ce642b222ec6764d0edf9796096592; prerelease pública no draft, sin assets binarios. Verificación en evidence/publication-alpha9.json. Main incluye después el commit documental de este registro; el tag conserva exactamente el código compilado. La publicación no declara aceptación física ni inicia E5.
+
+
+Publicación confirmada: [v2.0.0-alpha.10](https://github.com/Gabosequera/transcriber-v2/releases/tag/v2.0.0-alpha.10), código/tag `9180b5f4165eea9d596c4ba78a2798fc5bc254bf`; prerelease no draft, sin assets binarios. Registro remoto: `implementation/evidence/publication-alpha10.json`. Main incluye después el commit documental de esta verificación; el tag conserva el código compilado. No declara aceptación física ni inicia E5.

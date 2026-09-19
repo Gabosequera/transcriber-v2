@@ -54,3 +54,6 @@ Estado del backlog de implementación revisado: todas las brechas demostradas de
 All-targets comprueba también los seis tests desktop nuevos, los tres control nuevos (25 totales) y los cuatro media nuevos; **no se ejecutaron**. No se ejecutó ningún FFmpeg/FFprobe, editor ni suite bloqueada. V1 observado limpio al terminar las comprobaciones. Ver detalles [E2](continuacion-13-e2.md) y [E4](continuacion-13-e4.md).
 
 Build release final correcto: `scripts/cargo.ps1 build --release --locked -p transcriptor`, 3 min 03 s de Cargo / 185,77 s con wrapper. Ejecutable de 30.676.992 bytes, SHA-256 `9d391dbcb776ae1d61e5f7fceee91b1a1cd3f7e0958eeebee3f7e9977050fb46`. [Metadata](build-alpha10.json) y [log](build-continuacion-13.log). Ejecutable **no lanzado**, no asset binario de prerelease. Publicación de fuentes autorizada; identidad remota se añade tras verificarla.
+
+
+Publicación confirmada: [v2.0.0-alpha.10](https://github.com/Gabosequera/transcriber-v2/releases/tag/v2.0.0-alpha.10), código/tag `9180b5f4165eea9d596c4ba78a2798fc5bc254bf`; prerelease no draft, sin assets binarios. Registro remoto: `implementation/evidence/publication-alpha10.json`. Main incluye después el commit documental de esta verificación; el tag conserva el código compilado. No declara aceptación física ni inicia E5.

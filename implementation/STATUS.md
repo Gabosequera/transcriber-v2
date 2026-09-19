@@ -1,5 +1,7 @@
 # Estado vigente — continuación 13, fuentes alpha.10
 
+Publicación confirmada: [v2.0.0-alpha.10](https://github.com/Gabosequera/transcriber-v2/releases/tag/v2.0.0-alpha.10), código/tag `9180b5f4165eea9d596c4ba78a2798fc5bc254bf`; prerelease no draft, sin assets binarios. Registro remoto: `implementation/evidence/publication-alpha10.json`. Main incluye después el commit documental de esta verificación; el tag conserva el código compilado. No declara aceptación física ni inicia E5.
+
 Se continúa desde `main`/`origin/main` limpio en `a60e31f`, preservando alpha.9. E2/E3/E4 siguen siendo etapas del mismo proyecto. Se corrigieron las brechas demostradas por revisión de código y pruebas sintéticas; no se declara aceptación física ni se inicia E5. Detalle y backlog clasificado: [continuación 13](evidence/continuacion-13.md).
 
 | Etapa | Incremento implementado | Verificación / aceptación |

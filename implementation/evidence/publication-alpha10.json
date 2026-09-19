@@ -1,0 +1,11 @@
+{
+  "assets": [],
+  "isDraft": false,
+  "isPrerelease": true,
+  "publishedAt": "2026-09-19T14:15:42Z",
+  "tagName": "v2.0.0-alpha.10",
+  "targetCommitish": "9180b5f4165eea9d596c4ba78a2798fc5bc254bf",
+  "url": "https://github.com/Gabosequera/transcriber-v2/releases/tag/v2.0.0-alpha.10",
+  "verified_tag_commit": "9180b5f4165eea9d596c4ba78a2798fc5bc254bf",
+  "binary_executed": false
+}

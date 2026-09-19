@@ -1,5 +1,7 @@
 # Continuación 13 — fuentes alpha.10
 
+Publicación confirmada: [v2.0.0-alpha.10](https://github.com/Gabosequera/transcriber-v2/releases/tag/v2.0.0-alpha.10), código/tag `9180b5f4165eea9d596c4ba78a2798fc5bc254bf`; prerelease no draft, sin assets binarios. Registro remoto: `implementation/evidence/publication-alpha10.json`. Main incluye después el commit documental de esta verificación; el tag conserva el código compilado. No declara aceptación física ni inicia E5.
+
 Prerelease de fuentes del incremento E2/E3/E4 sobre alpha.9. La autorización vigente permite commit, push y prerelease; no se adjunta el ejecutable local sin aceptación física. Notas: [release-alpha10](evidence/release-alpha10.md). Backlog, pruebas y restricciones: [continuación 13](evidence/continuacion-13.md). Estado remoto exacto se registra tras publicar y verificar.
 
 80 unitarios application y 3 integraciones correctos; cliente sintético PASS; check/Clippy workspace all-targets y formato correctos. Tests domain/desktop/V1compat/control bloqueados4551 no se ejecutan/reintentan; multimedia tampoco. Build local sin lanzamiento, no paquete nuevo aceptado. E5 no iniciada; E2/E3/E4 no declaradas físicamente aceptadas.
