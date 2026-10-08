@@ -1,0 +1,17 @@
+[package]
+name = "tv2-application"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license-file.workspace = true
+description = "Capa de aplicación de Transcriptor V2: sesión de proyecto, envelopes de comando, revisiones, undo/redo, idempotencia, persistencia JSON atómica y journal."
+
+[dependencies]
+tv2-domain = { path = "../domain" }
+serde = { workspace = true }
+serde_json = { workspace = true }
+thiserror = { workspace = true }
+tempfile = { workspace = true }
+tracing = { workspace = true }
+
+[dev-dependencies]

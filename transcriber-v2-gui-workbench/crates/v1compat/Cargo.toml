@@ -1,0 +1,18 @@
+[package]
+name = "tv2-v1compat"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license-file.workspace = true
+description = "Adaptador de compatibilidad con los contratos JSON de Transcriptor V1 (editorial-master/1, editorial-layer/1, editorial-trims/1, editorial-montaje/1): lectura, conversión explícita al dominio V2 y escritura."
+
+[dependencies]
+tv2-domain = { path = "../domain" }
+serde = { workspace = true }
+serde_json = { workspace = true }
+thiserror = { workspace = true }
+tracing = { workspace = true }
+
+[dev-dependencies]
+tempfile = { workspace = true }
+tv2-media = { path = "../media" }

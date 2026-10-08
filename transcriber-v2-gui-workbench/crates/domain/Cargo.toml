@@ -1,0 +1,17 @@
+[package]
+name = "tv2-domain"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license-file.workspace = true
+description = "Dominio de Transcriptor V2: tiempo, assets, timeline, capas semánticas, comandos y resolución. Sin GUI ni multimedia."
+
+[dependencies]
+serde = { workspace = true }
+serde_json = { workspace = true }
+thiserror = { workspace = true }
+rand = { workspace = true }
+sha2 = { workspace = true }
+hex = { workspace = true }
+
+[dev-dependencies]

@@ -1,0 +1,13 @@
+Respaldo de codigo fuente — 2026-10-08
+
+Origen: C:/Users/gabri/Todo/transcriber-v2-gui-workbench
+Rama: backup/transcriber-v2-gui-2026-10-08
+
+Los 55 archivos originales de codigo, manifests, Cargo.lock, licencia y README
+se conservaron sin modificar. Este directorio contiene su propio workspace Rust.
+Ejecutar cargo desde este directorio, como explica README.md.
+El proyecto transcriber-v2 completo se conserva en la raiz de esta misma rama
+y en main. La mencion ../transcriber-v2 del README describe la ubicacion original.
+
+Excluidos: target/ (compilaciones) y .runtime/ (estado local, logs y captura de GUI).
+El respaldo conserva las fuentes; no incluye los binarios o entornos instalados.
