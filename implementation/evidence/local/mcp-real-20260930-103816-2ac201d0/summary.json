@@ -1,0 +1,15 @@
+{
+  "accepted": true,
+  "finished_at": "2026-09-30T10:38:30.9576390-04:00",
+  "started_at": "2026-09-30T10:38:16.7989780-04:00",
+  "build": {
+    "sha256": "8BA5193593D6D7EAF406169BF88158AF3ECDBF98A6D4FC5F25CC9AC9C4AABD26",
+    "path": "C:\\Users\\gabri\\Todo\\transcriber-v2\\target\\release\\Transcriptor.exe"
+  },
+  "authorization": "trusted local --script grants scoped automatic commands; no remote permission escalation",
+  "fixture": {
+    "sha256": "FFB48C13E1B626EC2F73C3144147B689A153CF4A3D5017CE233FD5B3A4061F67",
+    "path": "C:\\Users\\gabri\\Todo\\transcriber-v2\\tests\\fixtures\\media\\fixture-a.mp4"
+  },
+  "schema": "tv2-real-mcp-acceptance/1"
+}

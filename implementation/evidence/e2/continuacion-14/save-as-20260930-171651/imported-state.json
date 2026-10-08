@@ -1,0 +1,363 @@
+{
+  "revision": 1,
+  "view": "Sequence",
+  "playhead_ms": 0,
+  "player": {
+    "position_ms": 0,
+    "playing": false,
+    "rate": 1.0,
+    "generation": 3,
+    "buffering": false,
+    "decode_ms": 176.95169067382812,
+    "audio_available": true
+  },
+  "last_frame": {
+    "position_ms": 0,
+    "w": 846,
+    "h": 476,
+    "generation": 3
+  },
+  "clips": [
+    {
+      "id": "clip-000001-0",
+      "track": "V1",
+      "position_ms": 0,
+      "source_start_ms": 1000,
+      "source_end_ms": 3000,
+      "enabled": true,
+      "link": "link-v1-clip-000001-0"
+    },
+    {
+      "id": "clip-000001-0-a0",
+      "track": "A1",
+      "position_ms": 0,
+      "source_start_ms": 1000,
+      "source_end_ms": 3000,
+      "enabled": true,
+      "link": "link-v1-clip-000001-0"
+    },
+    {
+      "id": "clip-000003-1",
+      "track": "V1",
+      "position_ms": 2000,
+      "source_start_ms": 6000,
+      "source_end_ms": 7000,
+      "enabled": true,
+      "link": "link-v1-clip-000003-1"
+    },
+    {
+      "id": "clip-000003-1-a0",
+      "track": "A1",
+      "position_ms": 2000,
+      "source_start_ms": 6000,
+      "source_end_ms": 7000,
+      "enabled": true,
+      "link": "link-v1-clip-000003-1"
+    },
+    {
+      "id": "clip-000001-2",
+      "track": "V1",
+      "position_ms": 3000,
+      "source_start_ms": 4000,
+      "source_end_ms": 5000,
+      "enabled": true,
+      "link": "link-v1-clip-000001-2"
+    },
+    {
+      "id": "clip-000001-2-a0",
+      "track": "A1",
+      "position_ms": 3000,
+      "source_start_ms": 4000,
+      "source_end_ms": 5000,
+      "enabled": true,
+      "link": "link-v1-clip-000001-2"
+    },
+    {
+      "id": "clip-000002-3",
+      "track": "V1",
+      "position_ms": 4000,
+      "source_start_ms": 9000,
+      "source_end_ms": 11000,
+      "enabled": true,
+      "link": "link-v1-clip-000002-3"
+    },
+    {
+      "id": "clip-000002-3-a0",
+      "track": "A1",
+      "position_ms": 4000,
+      "source_start_ms": 9000,
+      "source_end_ms": 11000,
+      "enabled": true,
+      "link": "link-v1-clip-000002-3"
+    },
+    {
+      "id": "clip-000004-4",
+      "track": "V1",
+      "position_ms": 6000,
+      "source_start_ms": 1000,
+      "source_end_ms": 2000,
+      "enabled": true,
+      "link": "link-v1-clip-000004-4"
+    },
+    {
+      "id": "clip-000004-4-a0",
+      "track": "A1",
+      "position_ms": 6000,
+      "source_start_ms": 1000,
+      "source_end_ms": 2000,
+      "enabled": true,
+      "link": "link-v1-clip-000004-4"
+    }
+  ],
+  "layers": [
+    {
+      "id": "layer-demo-notas",
+      "name": "Notas manuales",
+      "items": [
+        {
+          "id": "item-breve",
+          "label": "Breve",
+          "state": "proposed",
+          "ranges": [
+            [
+              7.25,
+              7.5
+            ]
+          ]
+        },
+        {
+          "id": "item-off",
+          "label": "Descartado",
+          "state": "disabled",
+          "ranges": [
+            [
+              8.0,
+              9.0
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "id": "layer-demo-topics",
+      "name": "Temas",
+      "items": [
+        {
+          "id": "item-tema-1",
+          "label": "Saludo",
+          "state": "accepted",
+          "ranges": [
+            [
+              0.5,
+              4.0
+            ],
+            [
+              9.0,
+              11.0
+            ]
+          ]
+        },
+        {
+          "id": "item-sub-1",
+          "label": "PresentaciÃ³n",
+          "state": "proposed",
+          "ranges": [
+            [
+              1.0,
+              2.0
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "id": "trims-main",
+      "name": "Recortes",
+      "items": [
+        {
+          "id": "cut-000001",
+          "label": "cut-000001",
+          "state": "accepted",
+          "ranges": [
+            [
+              2.0,
+              2.5
+            ]
+          ]
+        },
+        {
+          "id": "cut-000003",
+          "label": "cut-000003",
+          "state": "disabled",
+          "ranges": [
+            [
+              8.5,
+              9.0
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "id": "trims-ai",
+      "name": "Cortes sugeridos (AI)",
+      "items": [
+        {
+          "id": "cut-000002",
+          "label": "cut-000002",
+          "state": "proposed",
+          "ranges": [
+            [
+              4.0,
+              4.8
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "id": "master-557e897564e152f95147951e",
+      "name": "Palabras · A",
+      "items": [
+        {
+          "id": "A-w-000100",
+          "label": "hola",
+          "state": "proposed",
+          "ranges": [
+            [
+              1.0,
+              1.4
+            ]
+          ]
+        },
+        {
+          "id": "A-w-000150",
+          "label": "mundo",
+          "state": "proposed",
+          "ranges": [
+            [
+              1.5,
+              1.9
+            ]
+          ]
+        },
+        {
+          "id": "A-w-000500",
+          "label": "bien",
+          "state": "proposed",
+          "ranges": [
+            [
+              5.0,
+              5.4
+            ]
+          ]
+        },
+        {
+          "id": "A-w-001000",
+          "label": "fin",
+          "state": "proposed",
+          "ranges": [
+            [
+              10.0,
+              10.5
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "id": "master-2548261cd75cc5d5c3c4d833",
+      "name": "Intervenciones · A",
+      "items": [
+        {
+          "id": "A-u-000001",
+          "label": "hola mundo",
+          "state": "proposed",
+          "ranges": [
+            [
+              1.0,
+              1.9
+            ]
+          ]
+        },
+        {
+          "id": "A-u-000002",
+          "label": "bien",
+          "state": "proposed",
+          "ranges": [
+            [
+              5.0,
+              5.4
+            ]
+          ]
+        },
+        {
+          "id": "A-u-000003",
+          "label": "fin",
+          "state": "proposed",
+          "ranges": [
+            [
+              10.0,
+              10.5
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "id": "master-1c293ee066e823beee9a697e",
+      "name": "Palabras · B",
+      "items": [
+        {
+          "id": "B-w-000300",
+          "label": "sÃ­",
+          "state": "proposed",
+          "ranges": [
+            [
+              3.0,
+              3.3
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "id": "master-745e2863f314b8bc83d8ca90",
+      "name": "Intervenciones · B",
+      "items": [
+        {
+          "id": "B-u-000001",
+          "label": "sÃ­",
+          "state": "proposed",
+          "ranges": [
+            [
+              3.0,
+              3.3
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "id": "master-ccdccb993066ca3868ef245c",
+      "name": "Risas · B",
+      "items": [
+        {
+          "id": "B-laugh-00001",
+          "label": "B-laugh-00001",
+          "state": "proposed",
+          "ranges": [
+            [
+              6.0,
+              7.0
+            ]
+          ]
+        }
+      ]
+    }
+  ],
+  "toasts": [
+    "V1 importado: 2 capas, 2 carriles de recortes, 5 tramos de montaje (12 comandos)"
+  ],
+  "undo": "Importar proyecto V1"
+}

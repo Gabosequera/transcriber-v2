@@ -1,0 +1,21 @@
+{
+  "revision": 0,
+  "view": "Sequence",
+  "playhead_ms": 0,
+  "player": {
+    "position_ms": 0,
+    "playing": false,
+    "rate": 1.0,
+    "generation": 0,
+    "buffering": false,
+    "decode_ms": 0.0,
+    "audio_available": false
+  },
+  "last_frame": null,
+  "clips": [],
+  "layers": [],
+  "toasts": [
+    "ruta documental no portable: aux"
+  ],
+  "undo": null
+}

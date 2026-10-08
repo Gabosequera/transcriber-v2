@@ -1,4 +1,16 @@
-# Continuación 13 — regresiones preparadas, aceptación aplazada
+# Recorridos vigentes — continuación 14
+
+El encargo del2026-09-30 autoriza GUI/multimedia/crashes/PERF y E5 local; sustituye el aplazamiento de las secciones históricas inferiores. V1/medios personales solo lectura. Suites y DLLs bloqueadas4551 no se reintentan sin cambio causal; nunca mover/renombrar binarios ni desactivar protecciones.
+
+Build humano abierto: `target/release/Transcriptor.exe`, alpha.11, SHA256 `349df668c006a1565613ad6770edd918fb514243b5e2b32888469335f2837c36`, PID6868, configuración `.local/acceptance-human-alpha11-20260930-104004`. Guardado manual confirmado por captura «Revisión9 guardada» y archivo revision9. Prueba corta pendiente: reproducir unos segundos y pulsar K, confirmar audio y parada de imagen/sonido. Después velocidad2x/foco al escribir `Prueba ñ @ €`. No cerrar ventana ni sobrescribir exe. Previews masivos/puntos y ajuste inspector posteriores aún no están en ese exe.
+
+Recorridos automáticos ejecutados y sus límites: [E2](evidence/continuacion-14-e2.md), [E3](evidence/continuacion-14-e3.md), [MCP nativo](evidence/continuacion-14-e4.md), [E5 Python/host/intensidad](evidence/continuacion-14-e5-python.md). PERF1000clips/20000tramos y RF64 físico4.300.800.114bytes/6:13:20 pasaron con349df; no repetir sin cambio que lo justifique. La revisión MCP visible, documentación V1, DPI/IME/gestos/audio físico y compatibilidad NLE siguen pendientes.
+
+MMS usa otro entorno `.local/e5-alignment-venv`, worker `workers/python/alignment_worker.py` y modelo `.local/models/mms-fa/model.pt`. Primera alineación real de voz inventada/transcript conocido correcta; no sustituye ASR. Integración del supervisor/DAG en curso. Preparación explícita del recurso, licencias y locks: `workers/python/README.md`; no instalar Python/modelos al arrancar el editor.
+
+---
+
+# Histórico — continuación 13, regresiones preparadas y aceptación aplazada
 
 Estos recorridos se ejecutarán cuando se autorice aceptación física. No lanzar ahora editor ni multimedia; tampoco suites domain/desktop/V1compat/control bloqueadas por Windows 4551.
 
@@ -186,7 +198,25 @@ Guardar confirma snapshot/auditoría mediante .pending-commit.json. Si se interr
 
 Shift+T activa el salto de recortes durante revisión; no modifica export. Ctrl+Shift+A añade los rangos de un item/IN-OUT, sin incluir huecos de un multirrango. La acción «Añadir tema completo» utiliza el tema raíz. Inspector → Ocurrencias permite ir a cada repetición. Masters importados y sus proyecciones son evidencia de solo lectura.
 
-## Guiones y fixtures (ejecución real aplazada)
+## Autorización vigente y análisis local — continuación 14
+
+El encargo 2026-09-30 autoriza ejecución real GUI/multimedia/PERF/crashes propios y E5. Los aplazamientos históricos indicados debajo quedan sustituidos; los resultados exactos y pendientes están en [continuación14](evidence/continuacion-14.md). V1/datos personales solo lectura; config/cache/logs de pruebas aislados. Las suites previamente bloqueadas4551 no se reintentan sin demostrar cambio causal.
+
+`scripts/diagnose-code-integrity.ps1` genera un informe de solo lectura; la persona puede ejecutarlo en PowerShell administrativo para que CiTool liste las políticas efectivas. No modifica protecciones ni autoriza excepciones. PyAV quedó bloqueado en la primera inferencia tiny; no repetir ASR ni imports nativos hasta resolver esa causa. Metadata hello/paquetes instalados no equivale a inferencia aceptada.
+
+Archivo → Analizar audio local permite elegir medio/idioma/runtime/modelo CPU, iniciar/cancelar y revisar jobs. Python es opcional para editar/reproducir/guardar manualmente. La primera integración usa `.local/e5-venv`, worker `workers/python/worker.py` y tiny `.local/models/whisper-tiny`; lock y revision/model SHA en evidencia. Los resultados conservados solo se incorporan por botón explícito y comando común preparado; nunca se cambia el proyecto desde Python.
+
+Aceptación nativa MCP con fixture propia y autorización local acotada:
+
+```powershell
+& scripts/test-mcp-editor-scripted.ps1
+```
+
+El script inicia exclusivamente su editor/config/proyecto sintético, grants rename/undo/redo desde guion local, valida HTTP/apply/verify/replay/stale, revoca y reinicia read-only. Token solo en memoria por NamedPipe CurrentUserOnly. No representa revisión visual humana. Para revisión manual de propuestas, usar `scripts/test-mcp-editor.ps1 -Stage Prepare -Interactive` con endpoint/token del panel, siguiendo RUN/control.md.
+
+La prueba independiente del host Python/Windows Job Object es `scripts/test-e5-host.ps1`; ejercita hello/EOF/cancel y procesos propios sin importar PyAV. Su fixture de protocolo no acredita inferencia. Las pruebas Python independientes y su extracción real figuran en [evidenciaE5](evidence/continuacion-14-e5-python.md).
+
+## Guiones y fixtures
 
 Los JSON bajo `tests/scripts/` son **plantillas**, no se pasan directamente al ejecutable. `${WORKSPACE}` se resuelve a este checkout; `${OUTPUT}` a una carpeta nueva. La preparación no ejecuta la aplicación y no equivale a una prueba aceptada.
 

@@ -1,0 +1,242 @@
+{
+  "protocol": "tv2-worker/1",
+  "accepted_host_smoke": true,
+  "inference_accepted": false,
+  "elapsed_seconds": 3.7518653,
+  "hello": {
+    "capabilities": {
+      "arousal": false,
+      "devices": [
+        "cpu"
+      ],
+      "extract": true,
+      "forced_alignment": false,
+      "heuristics": {
+        "algorithm": "v1-intensity-pauses-ava-conversation/1",
+        "implemented": true,
+        "runtime_state": "stdlib_ready"
+      },
+      "laughter": false,
+      "transcribe": {
+        "implemented": true,
+        "installed": true,
+        "runtime_state": "not_loaded"
+      },
+      "word_intensity": {
+        "implemented": true,
+        "input": "normalized WAV and ASR words",
+        "runtime_state": "stdlib_ready"
+      }
+    },
+    "dependencies": {
+      "anyio": "4.15.1",
+      "av": "19.0.0",
+      "certifi": "2026.7.22",
+      "cffi": "2.1.1",
+      "click": "8.5.0",
+      "colorama": "0.4.6",
+      "ctranslate2": "4.8.1",
+      "faster-whisper": "1.2.1",
+      "filelock": "4.0.7",
+      "flatbuffers": "25.12.19",
+      "fsspec": "2026.9.0",
+      "h11": "0.16.0",
+      "hf-xet": "1.6.0",
+      "httpcore": "1.0.9",
+      "httpx": "0.28.1",
+      "huggingface-hub": "1.33.0",
+      "idna": "3.20",
+      "numpy": "2.4.6",
+      "onnxruntime": "1.30.0",
+      "packaging": "26.3",
+      "protobuf": "7.36.2",
+      "pycparser": "3.0",
+      "pyyaml": "6.0.3",
+      "setuptools": "84.0.0",
+      "soundfile": "0.14.0",
+      "tokenizers": "0.23.2",
+      "tqdm": "4.70.1",
+      "typing-extensions": "4.16.0"
+    },
+    "dependency_status": "installed_not_verified_for_native_execution",
+    "protocol": "tv2-worker/1",
+    "python": "3.12.13",
+    "runtime_verification": "versions_verified; native inference loads on explicit run"
+  },
+  "pre_cancel_error": {
+    "code": "CANCELLED",
+    "message": "Análisis cancelado"
+  },
+  "eof": {
+    "worker_pid": 29244,
+    "hello": {
+      "id": "hello",
+      "protocol": "tv2-worker/1",
+      "result": {
+        "capabilities": {
+          "arousal": false,
+          "devices": [
+            "cpu"
+          ],
+          "extract": true,
+          "forced_alignment": false,
+          "heuristics": {
+            "algorithm": "v1-intensity-pauses-ava-conversation/1",
+            "implemented": true,
+            "runtime_state": "stdlib_ready"
+          },
+          "laughter": false,
+          "transcribe": {
+            "implemented": true,
+            "installed": true,
+            "runtime_state": "not_loaded"
+          },
+          "word_intensity": {
+            "implemented": true,
+            "input": "normalized WAV and ASR words",
+            "runtime_state": "stdlib_ready"
+          }
+        },
+        "dependencies": {
+          "anyio": "4.15.1",
+          "av": "19.0.0",
+          "certifi": "2026.7.22",
+          "cffi": "2.1.1",
+          "click": "8.5.0",
+          "colorama": "0.4.6",
+          "ctranslate2": "4.8.1",
+          "faster-whisper": "1.2.1",
+          "filelock": "4.0.7",
+          "flatbuffers": "25.12.19",
+          "fsspec": "2026.9.0",
+          "h11": "0.16.0",
+          "hf-xet": "1.6.0",
+          "httpcore": "1.0.9",
+          "httpx": "0.28.1",
+          "huggingface-hub": "1.33.0",
+          "idna": "3.20",
+          "numpy": "2.4.6",
+          "onnxruntime": "1.30.0",
+          "packaging": "26.3",
+          "protobuf": "7.36.2",
+          "pycparser": "3.0",
+          "pyyaml": "6.0.3",
+          "setuptools": "84.0.0",
+          "soundfile": "0.14.0",
+          "tokenizers": "0.23.2",
+          "tqdm": "4.70.1",
+          "typing-extensions": "4.16.0"
+        },
+        "dependency_status": "installed_not_verified_for_native_execution",
+        "protocol": "tv2-worker/1",
+        "python": "3.12.13",
+        "runtime_verification": "versions_verified; native inference loads on explicit run"
+      }
+    },
+    "eof_exit_code": 0
+  },
+  "tree": {
+    "transport_fixture_only": true,
+    "inference_exercised": false,
+    "event": {
+      "protocol": "tv2-worker/1",
+      "event": "progress",
+      "job_id": "job-65c3cb2302d4",
+      "stage": "owned-native-child",
+      "fraction": 0,
+      "worker_pid": 29336,
+      "ffmpeg_pid": 27788
+    },
+    "error": {
+      "code": "CANCELLED",
+      "message": "Análisis cancelado"
+    },
+    "worker_handle_signaled": true,
+    "ffmpeg_handle_signaled": true,
+    "job": {
+      "schema": "transcriptor-job/1",
+      "id": "job-65c3cb2302d4",
+      "project_id": "proj-ea83f0fef836",
+      "revision": 0,
+      "state": "cancelled",
+      "payload_digest": "0426d3a3b4b9404ab338cc8d5edba63c1d9cebeac0692fcde80eab9d5522887b",
+      "payload": {
+        "project_digest": "b7d657e92481a866322f5cad9892fef2aacb8a5e29846ceae23c39514541d4b7",
+        "asset": {
+          "id": "asset-60e9e3118a96",
+          "kind": "audio",
+          "name": "multistream.mkv",
+          "path": "C:\\Users\\gabri\\Todo\\transcriber-v2\\.local\\e5-python-tests-20260930\\fixtures\\multistream.mkv",
+          "probe": {
+            "container": "matroska",
+            "duration": 7212643200,
+            "start_time": 0,
+            "audio": [
+              {
+                "stream_index": 0,
+                "audio_index": 0,
+                "codec": "pcm_s16le",
+                "channels": 1,
+                "channel_layout": "",
+                "sample_rate": 16000,
+                "start_time": 0,
+                "title": ""
+              },
+              {
+                "stream_index": 1,
+                "audio_index": 1,
+                "codec": "pcm_s16le",
+                "channels": 1,
+                "channel_layout": "",
+                "sample_rate": 16000,
+                "start_time": 176400000,
+                "title": ""
+              }
+            ],
+            "size": 627061
+          },
+          "fingerprint": {
+            "size": 627061,
+            "mtime_ns": 1790775877209278400,
+            "hash_muestreado": "2d9a36c6848627b6a11121cde0827948e2cc39c7160fc1c4b5db0e2fc5d6899e",
+            "inventario_sha256": "aa88507a5de20bb233492302c639671d743b6565e4ceb336045cbc8e1d2919d7"
+          },
+          "missing": false
+        },
+        "source_path": "C:\\Users\\gabri\\Todo\\transcriber-v2\\.local\\e5-python-tests-20260930\\fixtures\\multistream.mkv",
+        "source_sha256": "1562864a6004e595fabc30f18a08b0c129c0ce83800fdd3bed88b2cec09bd5a1",
+        "model_digest": "3dff5642c8dd933e5ea720bb911c774406ad9b5800b16d319b59ed3bb7ff5643",
+        "worker_sha256": "391b80a23a699d08ac9faa3e446463e54a8ba844272e447136af8aebac387322",
+        "runtime": {
+          "python": "C:\\Users\\gabri\\Todo\\transcriber-v2\\.local\\e5-venv\\Scripts\\python.exe",
+          "worker": "C:\\Users\\gabri\\Todo\\transcriber-v2\\.local\\e5-host-suspended-20260930-01\\transport-only-owned-child.py",
+          "model": "C:\\Users\\gabri\\Todo\\transcriber-v2\\.local\\models\\whisper-tiny",
+          "work_root": "C:\\Users\\gabri\\Todo\\transcriber-v2\\.local\\e5-host-suspended-20260930-01\\work\\tree-fixture"
+        },
+        "parameters": {
+          "language": "es",
+          "device": "cpu",
+          "threads": 2,
+          "beam_size": 5,
+          "steps": [
+            "extract",
+            "transcribe"
+          ]
+        },
+        "ffmpeg_path": "C:\\Users\\gabri\\AppData\\Local\\Microsoft\\WinGet\\Packages\\Gyan.FFmpeg_Microsoft.Winget.Source_8wekyb3d8bbwe\\ffmpeg-8.1.2-full_build\\bin\\ffmpeg.exe"
+      },
+      "updated_at": "2026-09-30T15:33:10+00:00",
+      "result": null,
+      "error": "[Cancelled] Análisis cancelado",
+      "attempts": [
+        {
+          "started_at": "2026-09-30T15:33:08+00:00",
+          "ended_at": "2026-09-30T15:33:10+00:00",
+          "state": "cancelled",
+          "result": null,
+          "error": "[Cancelled] Análisis cancelado"
+        }
+      ]
+    }
+  }
+}

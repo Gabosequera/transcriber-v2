@@ -1,3 +1,65 @@
+## D-0066 · Continuación 14: autorización y evidencia de ejecución
+
+El encargo actual sustituye las prohibiciones históricas de GUI/multimedia/crash/PERF y de iniciar E5. Se ejecutan solo fixtures inventadas/copias V2 aisladas; V1/datos personales siguen de solo lectura. Un PASS de núcleo, metadata instalada o build no equivale a aceptación humana/inferencia. Los binarios previamente bloqueados4551 no se reintentan sin cambio causal; diagnóstico administrativo de solo lectura requiere intervención de la persona, nunca bypass de políticas/rutas/nombres.
+
+## D-0067 · Autosave compatible con mtime y objetivo seek estable
+
+El campo público `mtime_ns: Option<i128>` y su representación JSON entero permanecen compatibles; su deserializador lee el rango JSON i64/u64 y amplía sin pérdida, evitando el rechazo i128 de Serde ContentDeserializer dentro del enum Command. Mtime real/history/audit/Save/reopen tienen regresión ejecutada. El seek pausado conserva el último destino hasta el frame esperado y descarta anteriores; el guion WaitFrame congela ese destino y falla al timeout, sin aceptar playhead alterado por un frame viejo.
+
+## D-0068 · Worker local aislado y resultados ligados a evidencia
+
+El editor manual no requiere Python ni descarga modelos al abrirse. E5 usa runtime/version-lock/modelo/hash y protocolo cerrados, CPU/offline, sin credenciales. Rust administra lease/cancel/procesos propios y Windows Job Object; Python produce artefactos declarados, no edita el proyecto. Rust verifica bindings/hash/rutas y lee solo los bytes declarados, sin importar siblings. Incorporar exige preview/comando común/actor External/protecciones e idempotencia; revisar contra nueva base requiere acción local explícita. La cache extracción/transcribe/master usa dependencias separadas y hash antes de reutilizar. La inferencia tiny bloqueada por PyAV no genera un resultado válido ni autoriza repetirla sin cambio causal.
+
+## D-0070 · TCP Windows y diagnósticos sin secretos
+
+El socket HTTP aceptado pasa explícitamente a bloqueante antes de aplicar deadlines: Windows hereda de la escucha el modo no bloqueante y una lectura inmediata podía resetear initialize. El diagnóstico conserva fase fija, IO kind y código OS; el cliente solo identifica método/tool/ID acotado o hash, tiempo y tipos/código de excepción, sin argumentos, endpoint, headers o token. No se reintentan mutaciones de resultado incierto. Prueba TCP con envío fraccionado/demorado y recorrido nativo completo correctos; los primeros fallos quedan archivados.
+
+## D-0071 · Derivación determinista y MMS separado
+
+Intensidad/pausas/invocaciones/conversación enriquecen una copia por hashes sin modificar raw ASR ni decisiones humanas. Los tests PCM analíticos y la importación de master inventado prueban sus fórmulas y contrato; no acreditan ASR real. MMS se prepara como etapa standalone en un segundo entorno CPU con lock exacto y pesos locales verificados, licencia CC-BY-NC4; el SHA medido no se presenta como firma upstream. Debe conservar lineage/transcript original, errores parciales explícitos y tiempos limitados a la fuente. Integración del DAG/Rust/GUI requiere otro incremento verificable.
+
+## D-0072 · Escritura cancelable al worker y revisión recuperable
+
+El supervisor serializa requests con límite1MiB, entrega a un writer acotado y espera ACK con plazo/cancel. El análisis no conserva el JobObject en un write bloqueante; Drop termina su árbol y el lease registra Cancelled. Cancel/shutdown también tienen plazos y el grace de cierre incluye la escritura. El caso nativo sin lectura de stdin y su descendiente propio prueba esta frontera, separado de inferencia. Entre lectura/parse/proyecciones/preparación se comprueba cancel; después de prepare también, sin aplicar automáticamente. Un preview obsoleto conserva el resultado para revisión explícita sobre la nueva base.
+
+El launcher de un venv puede crear el intérprete antes del handshake. Por ello Windows crea el proceso propio con CREATE_SUSPENDED, lo asigna al JobObject y reanuda exclusivamente su hilo principal retenido; un fallo termina ese proceso sin iniciar trabajo. Esto cierra la carrera anterior a hello. Referencias: [flags de creación](https://learn.microsoft.com/en-us/windows/win32/procthread/process-creation-flags) y [ResumeThread](https://learn.microsoft.com/en-us/windows/win32/api/processthreadsapi/nf-processthreadsapi-resumethread). Smoke real y cancelación con backpressure repetidos PASS; no cambia políticas de seguridad.
+
+## D-0073 · Geometría densa y ocurrencias bajo demanda
+
+El escenario1000clips/20000tramos demostró que pintar cada repetición de un tramo como geometría independiente excedía el límite GPU. El índice conserva rangos fuente y mappings, proyecta solo consultas visibles y agrega el dibujo denso por cobertura de píxel/estado/selección. Modelo, tiempos, IDs y consultas de selección/gestos permanecen exactos. Se exige repetir el caso original; no reducir la fixture ni ampliar límites de GPU para ocultar el fallo. Un preview de arrastre masivo no se declara ilimitado por arreglar el pintado estable.
+
+## D-0074 · Inicialización nativa sin lectura bloqueante del stdin Windows
+
+El diagnóstico mínimo reprodujo que una lectura stdin bloqueante en otro hilo retiene un bloqueo CRT que necesita la inicialización NumPy dentro de Torch. Importar en el hilo principal no resolvía el problema; liberar stdin sí. PeekNamedPipe seguido de os.read de los bytes disponibles permite importar mientras el canal espera órdenes, conservando envelopes parciales y límite1MiB. Arousal real pasó con las mismas versiones, sin downgrade ni cambio de seguridad. ASR y MMS reciben el lector probado y conservan resultados/hashes históricos; el cambio no autoriza repetir PyAV bloqueado.
+
+## D-0075 · Generación editorial posterior a etapas inmutables
+
+La integración en desarrollo consume recibos finales ASR/alineación/arousal/risas con ascendencia exacta y valida entradas antes/después. El finalizador stdlib recalcula intensidad y heurísticas cuando cambian tiempos, produce otro master y conserva los resultados anteriores. No reemplaza automáticamente un master ya adjunto ni decisiones humanas. Su incorporación reutiliza la frontera prepare/commit común y exige revisión explícita si cambió el proyecto. Finalización/proyección no equivale a ASR real ni a generación LLM. Los resultados de pruebas se registran por incremento; esta decisión no acredita una implementación aún sin verificar.
+
+## D-0076 · Workflow durable y revisión editorial local
+
+El workflow registra sus hijos antes de ejecutarlos, no adopta etapas antiguas por coincidencia superficial y sólo reutiliza resultados cuya ascendencia, recursos y derivados se verifican de nuevo. Reanudar es explícito. La validación de un checkpoint es de sólo lectura, incluso frente a junctions Windows. La GUI prepara sobre el snapshot exacto y conserva resultados obsoletos para revisión en lugar de aplicar contra otra base. Los temas requieren mapa validado de primera pasada, confirmación local y ejecución explícita de la segunda; nunca se encadenan automáticamente desde la interfaz.
+
+## D-0077 · Presupuesto y perfil numérico del modelo editorial
+
+Un fallo nativo durante carga no acredita inferencia. Las pruebas grandes usan un árbol propio y límite8GiB; no se amplía el límite para ocultar una asignación fallida. El intento INT8 secuencial produjo salida inválida y degradó logits del modelo real; se conserva como fallo. El perfil vigente construye Qwen2 completamente en meta, restaura el único buffer RoPE esperado y carga pesos BF16 por tensor a FP32, con atención SDPA en CPU. Valida inventario, formas, tamaños y alias del embedding/cabeza; comprueba cancelación y plazo durante lecturas acotadas. El prototipo pasó1905tokens y generación corta dentro del límite, sin acreditar aún propuestas editoriales completas. WorkerSHA, modelo, lock y parámetros vinculan cache/recibos. El runtime editorial separado preserva el acústico; los fallos y restricciones de calidad se conservan en la evidencia.
+
+El host06 confirmó generación dentro del presupuesto al fijar OMP/MKL a2 antes de imports, igualando el diagnóstico; aún rechazó formato/contenido. La generación JSON fija repetition_penalty1 para no penalizar puntuación presente en el prompt. Las restricciones y cambios de perfil quedan ligados al hash del worker; no se reparan silenciosamente salidas inválidas.
+
+Host07 agotó memoria en la segunda pasada y produjo duplicados en la primera. Se conserva el límite: prefill256 retiene todo el contexto en cache hastaN−1 y generate recibe IDs/máscara completos; no recorta entradas. Penalización1.1 se aplica sólo a tokens generados, conservando builtin1.0. Micro diminuto verifica equivalencia numérica y tokens; el host real debe verificar consumo y salida. Si la generación retorna por plazo, el texto parcial se guarda únicamente como diagnóstico antes de propagar E_TIMEOUT; cancelación mantiene prioridad y no se publica propuesta ni recibo de éxito.
+
+## D-0078 · Cobertura explícita de conversación en temas locales
+
+`complete:true` no demuestra que una LLM cubra el ámbito. El adaptador local exige que la unión de rangos del mapa validado después de snap cubra todas las palabras de todas las pistas que intersectan el scope, recortadas a éste y con tolerancia1ms. Permite huecos sin palabras: temas no es la partición temporal continua de chunks. Sin palabras en el ámbito se informa contexto insuficiente. Esta comprobación también protege el mapa anterior al validar segunda pasada y las recuperaciones por la misma ruta; la conservación exacta de IDs/rangos sigue en el contrato común. No cambia importación V1 ni afirma calidad temática, que requiere revisión humana. La plantilla del modelo usa límites reales para evitar copiar tiempos ilustrativos.
+
+Se rechaza además contenido duplicado bajo IDs distintos después de snap; título normalizado en espacios/case, comentario y padre exactos, unión exacta de rangos. Recurrencias con rangos diferentes siguen válidas. No se deduplica ni reescribe la salida del modelo. La plantilla de segunda pasada incluye source_item_ids y rangos reales de todos los items previos; jamás sustituye esos rangos por el scope completo.
+
+## D-0069 · Aceptación MCP nativa con autorización local acotada
+
+El guion de aceptación puede configurar el mismo servicio/permisos que la GUI, exclusivamente desde `--script` local solicitado. El cliente remoto no concede permisos. Automatismos limitados a rename/undo/redo, revocación y reinicio read-only; tokens pasan por NamedPipe CurrentUserOnly a memoria del proceso de prueba y no a logs/archivos. Esto prueba transporte/estado/mutaciones reales y no se presenta como revisión visual humana.
+
+---
+
 ## D-0062 · Continuación 13: precisión y borradores ligados a su base
 
 El editor de items conserva el tiempo original por fila y por borde mientras su texto visible no cambie; editar una etiqueta no cuantiza tiempos a milisegundos. El editor de marcadores conserva proyecto/revisión/secuencia y rechaza borradores obsoletos. StepFrames diferido usa la misma cuadrícula que el player. Ocurrencias del inspector se consultan al desplegar, en un único worker; el resultado depende de sesión/selección/revisión y no se dibuja obsoleto. Estos cambios corrigen pérdidas y trabajo repetido; no acreditan latencias físicas.

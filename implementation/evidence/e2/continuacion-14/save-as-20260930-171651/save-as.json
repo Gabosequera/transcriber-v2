@@ -1,0 +1,67 @@
+[
+  {
+    "op": "import_v1",
+    "path": "C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/save-as-20260930-171651/synthetic-editorial",
+    "media": "C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/save-as-20260930-171651/media/fixture-a.mp4"
+  },
+  {
+    "op": "wait",
+    "ms": 1500
+  },
+  {
+    "op": "assert",
+    "revision": 1,
+    "layers": 4,
+    "items": 7
+  },
+  {
+    "op": "dump",
+    "path": "C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/save-as-20260930-171651/imported-state.json"
+  },
+  {
+    "op": "new_layer",
+    "name": "Human portability edit"
+  },
+  {
+    "op": "set_in",
+    "t": 2.000001
+  },
+  {
+    "op": "set_out",
+    "t": 4.000002
+  },
+  {
+    "op": "add_range"
+  },
+  {
+    "op": "assert",
+    "revision": 3,
+    "layers": 5,
+    "items": 8
+  },
+  {
+    "op": "save",
+    "path": "C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/save-as-20260930-171651/origin.transcriptor"
+  },
+  {
+    "op": "await_signal",
+    "path": "C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/save-as-20260930-171651/saved-a.signal",
+    "ms": 30000
+  },
+  {
+    "op": "save",
+    "path": "C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/save-as-20260930-171651/save-as.transcriptor"
+  },
+  {
+    "op": "await_signal",
+    "path": "C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/save-as-20260930-171651/saved-b.signal",
+    "ms": 30000
+  },
+  {
+    "op": "screenshot",
+    "path": "C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/save-as-20260930-171651/save-as-native.png"
+  },
+  {
+    "op": "quit"
+  }
+]

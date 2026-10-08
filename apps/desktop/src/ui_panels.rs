@@ -59,6 +59,7 @@ pub fn draw(app: &mut TranscriptorApp, root: &mut egui::Ui) {
     crate::editorial_review::draw(app, &ctx);
     crate::conversation_ui::draw(app, &ctx);
     crate::durable_exports::draw(app, &ctx);
+    crate::pipeline_ui::draw(app, &ctx);
     crate::ui_markers::draw(app, &ctx);
     command_palette(app, &ctx);
     toasts(app, &ctx);
@@ -213,6 +214,10 @@ fn menu_bar(app: &mut TranscriptorApp, root: &mut egui::Ui) {
                 }
                 if ui.button("Control externo y propuestas MCP…").clicked() {
                     app.control.open = true;
+                    ui.close();
+                }
+                if ui.button("Analizar audio local…").clicked() {
+                    app.analysis.open = true;
                     ui.close();
                 }
                 if item(ui, app, "editorial.review") {
@@ -764,7 +769,7 @@ fn inspector(app: &mut TranscriptorApp, ui: &mut egui::Ui) {
                 })
                 .collect();
             ui.label(format!("Rangos (tiempo fuente): {}", ranges.join(" | ")));
-            ui.horizontal(|ui| {
+            ui.horizontal_wrapped(|ui| {
                 ui.label("Estado:");
                 let state_label = match item.state {
                     ItemState::Proposed => "propuesto (se aplica)",
@@ -777,7 +782,7 @@ fn inspector(app: &mut TranscriptorApp, ui: &mut egui::Ui) {
                     _ => colors::WARN,
                 }));
             });
-            ui.horizontal(|ui| {
+            ui.horizontal_wrapped(|ui| {
                 let can_accept = editable && layer_kind.accepts_acceptance();
                 let b = ui.add_enabled(can_accept, egui::Button::new("Aceptar (E)"));
                 if b.clicked() {
@@ -1009,7 +1014,7 @@ fn inspector(app: &mut TranscriptorApp, ui: &mut egui::Ui) {
         } else {
             ui.label(RichText::new("Sin guardar (Ctrl+S)").size(10.5).color(colors::WARN));
         }
-        ui.horizontal(|ui| {
+        ui.horizontal_wrapped(|ui| {
             let u = app.session.undo_label().map(|s| s.to_string());
             if ui.add_enabled(u.is_some(), egui::Button::new(format!("Deshacer {}", u.clone().unwrap_or_default()))).clicked() {
                 app.undo();

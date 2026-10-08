@@ -1,0 +1,100 @@
+{
+  "prepared_only": true,
+  "native_llm_inference": false,
+  "gui_exercised": false,
+  "asr_inference": false,
+  "speech_invented_over_synthetic_video": true,
+  "real_speech_alignment_accepted": false,
+  "new_probe_fabricated": false,
+  "original_common_import": "C:\\Users\\gabri\\Todo\\transcriber-v2\\implementation\\evidence\\e2\\continuacion-14\\save-as-20260930-171900\\save-as.log",
+  "source_store": "C:\\Users\\gabri\\Todo\\transcriber-v2\\implementation\\evidence\\e2\\continuacion-14\\save-as-20260930-171900\\withdrawn-origin.transcriptor",
+  "fixture_store": "C:\\Users\\gabri\\Todo\\transcriber-v2\\.local\\editorial-montage-video-fixture-01\\fixture.transcriptor",
+  "source_unchanged": true,
+  "project_files_byte_identical": true,
+  "source_manifest": {
+    ".write.lock": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "audit/index.json": {
+      "bytes": 164,
+      "sha256": "9faebe3225dba28c74a4b72186f753d06a082b3ab6b369caf79c8887ecf3d8d5"
+    },
+    "audit/segments/dcb466c6a65b013fc1fe8eda5163b8de29b564046b3933f241aedae3331cd289.jsonl": {
+      "bytes": 25932,
+      "sha256": "dcb466c6a65b013fc1fe8eda5163b8de29b564046b3933f241aedae3331cd289"
+    },
+    "evidence/c2b3fcbf9b1f74d46d3cf20d2f9c2411ce61cefc591de9eb4663e475e1ef65fa.json": {
+      "bytes": 121284,
+      "sha256": "c2b3fcbf9b1f74d46d3cf20d2f9c2411ce61cefc591de9eb4663e475e1ef65fa"
+    },
+    "history.json": {
+      "bytes": 45043,
+      "sha256": "a7563c817d41c1aade97a6592280edf7972d7d04d94432d1f29ef79392f20328"
+    },
+    "project.json": {
+      "bytes": 42224,
+      "sha256": "ff7463f32fbbe14572ea3a3efd75dab61d24e5c7b198a81467f367dd23590fa3"
+    },
+    "source-bundles/72ca659fb4a3a467a780dacc32c5462d402822ef15c7fe7e16813aec7b32a9da": {
+      "bytes": 35651584,
+      "sha256": "72ca659fb4a3a467a780dacc32c5462d402822ef15c7fe7e16813aec7b32a9da"
+    },
+    "source-bundles/c2b3fcbf9b1f74d46d3cf20d2f9c2411ce61cefc591de9eb4663e475e1ef65fa": {
+      "bytes": 121284,
+      "sha256": "c2b3fcbf9b1f74d46d3cf20d2f9c2411ce61cefc591de9eb4663e475e1ef65fa"
+    }
+  },
+  "media": {
+    "portable_path": "media/fixture-a.mp4",
+    "source": "C:\\Users\\gabri\\Todo\\transcriber-v2\\implementation\\evidence\\e2\\continuacion-14\\save-as-20260930-171900\\media\\fixture-a.mp4",
+    "copy": "C:\\Users\\gabri\\Todo\\transcriber-v2\\.local\\editorial-montage-video-fixture-01\\media\\fixture-a.mp4",
+    "sha256": "ffb48c13e1b626ec2f73c3144147b689a153cf4a3d5017ce233fd5b3a4061f67",
+    "bytes": 2129706
+  },
+  "first_master_asset_id": "asset-8a7b1d48d9ab",
+  "asset_id": "asset-8a7b1d48d9ab",
+  "video_probe": {
+    "stream_index": 0,
+    "codec": "h264",
+    "width": 640,
+    "height": 360,
+    "rotation": 0,
+    "frame_rate": {
+      "num": 30,
+      "den": 1
+    },
+    "avg_frame_rate": {
+      "num": 30,
+      "den": 1
+    },
+    "time_base": {
+      "num": 1,
+      "den": 15360
+    },
+    "start_time": 0,
+    "pix_fmt": "yuv420p",
+    "nb_frames": 360,
+    "duration": 8467200000,
+    "variable_frame_rate": false
+  },
+  "fingerprint": {
+    "size": 2129706,
+    "mtime_ns": 1790774357811100300,
+    "hash_muestreado": "326bad7e9be71813ec86c3ea4c09e9575fccba40590be89f4c4012ce20ff82f7",
+    "inventario_sha256": "77aae5a1df8f009ed8f55643e2949f7ff3340026398608631ea992eae8a58d70"
+  },
+  "master_sha256": "c2b3fcbf9b1f74d46d3cf20d2f9c2411ce61cefc591de9eb4663e475e1ef65fa",
+  "master_bytes": 121284,
+  "master_source_digest": "da54b4ca821fc8c8582734ef5483127c8530c0b1ed4eb6e3f3f6546f27bf90e3",
+  "revision": 3,
+  "worker_sha256": "b58e715b55cc428666f99f0f48be644f60c8bf37387f32cf2d6a261d1376fe11",
+  "script_sha256": "570e01b3e764bd97765034a413b4fe71707277c4b368edf309b4593c6609a24a",
+  "conservative_prompt_projection_bytes": 11608,
+  "context_cap": 65536,
+  "root_extension_not_projected": true,
+  "tokenization_exercised": false,
+  "sizing_is_not_authoritative_bound_request": true,
+  "copied_data_bytes": 38137221,
+  "budget_bytes": 67108864
+}

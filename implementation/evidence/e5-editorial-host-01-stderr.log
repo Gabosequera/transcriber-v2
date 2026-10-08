@@ -1,0 +1,1 @@
+Error: DomainError { code: Invalid, message: "Worker Python: {\"code\":\"E_ARGUMENT\",\"message\":\"Path escapes owned directory\"}", context: [], action: None }

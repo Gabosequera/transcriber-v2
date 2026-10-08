@@ -1,0 +1,7 @@
+Traceback (most recent call last):
+  File "C:\Users\gabri\Todo\transcriber-v2\tests\scripts\probe_editorial_qwen_fp32.py", line 130, in <module>
+    child()
+  File "C:\Users\gabri\Todo\transcriber-v2\tests\scripts\probe_editorial_qwen_fp32.py", line 44, in child
+    assert sha(path) == expected
+           ^^^^^^^^^^^^^^^^^^^^^
+AssertionError

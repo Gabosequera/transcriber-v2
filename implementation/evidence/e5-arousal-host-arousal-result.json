@@ -1,0 +1,18 @@
+{
+  "job_id": "job-9df2fbd58fa5",
+  "project_id": "proj-5789225831cf",
+  "revision": 1,
+  "project_digest": "fd3aa86252b56c5d2ea37ab05ee0e747d267fdfdc39976e108a58fb0079439e8",
+  "asset_id": "asset-76f1df4dc491",
+  "normalized_audio_sha256": "90f6dfc24eca1116f879c5269e0dbec6cc5e0687e7bcd89ccea11344f641397a",
+  "transcript_sha256": "a93c30c93a7c8d5aae569a2e2d796beb5d8c0e0bfa3dab0bc02f748d9e9d9456",
+  "model_digest": "18f38ce13568ec98a0173603e4bf653097e802ac8fb3c7fa34df751c97a3a36e",
+  "manifest_sha256": "93c9c89093955b3a515b80825457b9c49049707edb737e896b2bd1eb111c4de4",
+  "source_sha256": "90f6dfc24eca1116f879c5269e0dbec6cc5e0687e7bcd89ccea11344f641397a",
+  "source_duration_ticks": 6725073600,
+  "timebase": "canonical-normalized-pcm/1",
+  "arousal_path": "arousal/arousal-words.json",
+  "artifacts": {
+    "arousal/arousal-words.json": "b08b69aa500d384953c390b5aac8ffee433d0b3e4d8615f19389083d3e91637a"
+  }
+}

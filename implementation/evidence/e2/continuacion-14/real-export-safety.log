@@ -1,0 +1,29 @@
+   Compiling tv2-media v2.0.0-alpha.10 (C:\Users\gabri\Todo\transcriber-v2\crates\media)
+    Finished `test` profile [optimized + debuginfo] target(s) in 10.29s
+     Running unittests src\lib.rs (target\debug\deps\tv2_media-670b66e91bf28d1a.exe)
+
+running 3 tests
+test export::tests::real_export_cancellation_during_verification_cleans_only_owned_temporaries ... ok
+
+thread 'export::tests::concurrent_real_exports_to_one_destination_use_distinct_workspaces' (22396) panicked at crates\media\src\export.rs:899:9:
+assertion `left == right` failed
+  left: 0
+ right: 1
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+test export::tests::concurrent_real_exports_to_one_destination_use_distinct_workspaces ... FAILED
+
+thread 'export::tests::real_export_preserves_concurrent_destination_and_legacy_temporaries' (21048) panicked at crates\media\src\export.rs:836:9:
+assertion `left == right` failed
+  left: Io
+ right: Precondition
+test export::tests::real_export_preserves_concurrent_destination_and_legacy_temporaries ... FAILED
+
+failures:
+
+failures:
+    export::tests::concurrent_real_exports_to_one_destination_use_distinct_workspaces
+    export::tests::real_export_preserves_concurrent_destination_and_legacy_temporaries
+
+test result: FAILED. 1 passed; 2 failed; 0 ignored; 0 measured; 33 filtered out; finished in 0.67s
+
+error: test failed, to rerun pass `-p tv2-media --lib`

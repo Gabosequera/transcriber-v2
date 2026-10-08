@@ -1,0 +1,47 @@
+{
+  "revision": 2,
+  "view": "Sequence",
+  "playhead_ms": 2033,
+  "player": {
+    "position_ms": 2033,
+    "playing": false,
+    "rate": 1.0,
+    "generation": 13,
+    "buffering": false,
+    "decode_ms": 22.855300903320312,
+    "audio_available": true
+  },
+  "last_frame": {
+    "position_ms": 2033,
+    "w": 790,
+    "h": 444,
+    "generation": 13
+  },
+  "clips": [
+    {
+      "id": "clip-15cf2e185719",
+      "track": "V1",
+      "position_ms": 0,
+      "source_start_ms": 0,
+      "source_end_ms": 12000,
+      "enabled": true,
+      "link": "link-c226ba794156"
+    },
+    {
+      "id": "clip-16aa89d898a7",
+      "track": "A1",
+      "position_ms": 0,
+      "source_start_ms": 0,
+      "source_end_ms": 12000,
+      "enabled": true,
+      "link": "link-c226ba794156"
+    }
+  ],
+  "layers": [],
+  "toasts": [
+    "×4 · audio acelerado con tono preservado (atempo)",
+    "×8 · skim de fotogramas clave · sin audio",
+    "×1 · audio normal"
+  ],
+  "undo": "Insertar medio"
+}

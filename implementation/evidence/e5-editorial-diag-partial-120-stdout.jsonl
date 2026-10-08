@@ -1,0 +1,25 @@
+{"pagefile": 324964352, "peak_pagefile": 324964352, "phase": "before_constructor", "private": 324964352, "rss": 280006656, "sum_parameter_cpu_bytes": 0, "vms": 324964352}
+{"pagefile": 2280853504, "peak_pagefile": 2280853504, "phase": "after_constructor_before_gc", "private": 2280853504, "rss": 286896128, "sum_parameter_cpu_bytes": 0, "vms": 2280853504}
+{"pagefile": 2280853504, "peak_pagefile": 2280853504, "phase": "after_constructor_after_gc", "private": 2280853504, "rss": 286896128, "sum_parameter_cpu_bytes": 0, "vms": 2280853504}
+{"bf16_payload_bytes": 3087428608, "embedding_first": true, "max_tensor_bf16_bytes": 466747392, "phase": "stream_header_verified", "tensor_count": 338, "whole_archive_mmap": false}
+{"buffer_bytes": 466747392, "pagefile": 2748514304, "peak_pagefile": 2748547072, "phase": "embedding_buffer_allocated", "private": 2748514304, "rss": 753651712, "sum_parameter_cpu_bytes": 0, "vms": 2748514304}
+{"pagefile": 3689914368, "peak_pagefile": 3689922560, "phase": "embedding_converted", "private": 3689914368, "rss": 1687433216, "sum_parameter_cpu_bytes": 0, "vms": 3689914368}
+{"assignment_shares_storage": true, "pagefile": 3689914368, "peak_pagefile": 3689922560, "phase": "embedding_assigned", "private": 3689914368, "rss": 1687437312, "sum_parameter_cpu_bytes": 933494784, "vms": 3689914368}
+{"loaded": 1, "pagefile": 3222253568, "peak_pagefile": 3689922560, "phase": "stream_after_delete_before_gc", "private": 3222253568, "rss": 1220685824, "sum_parameter_cpu_bytes": 933494784, "vms": 3222253568}
+{"loaded": 1, "pagefile": 3222253568, "peak_pagefile": 3689922560, "phase": "stream_after_delete_after_gc", "private": 3222253568, "rss": 1220685824, "sum_parameter_cpu_bytes": 933494784, "vms": 3222253568}
+{"loaded": 20, "pagefile": 3559247872, "peak_pagefile": 3689922560, "phase": "stream_after_delete_before_gc", "private": 3559247872, "rss": 1575546880, "sum_parameter_cpu_bytes": 1287422976, "vms": 3559247872}
+{"loaded": 20, "pagefile": 3559247872, "peak_pagefile": 3689922560, "phase": "stream_after_delete_after_gc", "private": 3559247872, "rss": 1575546880, "sum_parameter_cpu_bytes": 1287422976, "vms": 3559247872}
+{"loaded": 40, "pagefile": 3962691584, "peak_pagefile": 3990274048, "phase": "stream_after_delete_before_gc", "private": 3962691584, "rss": 1893539840, "sum_parameter_cpu_bytes": 1605175296, "vms": 3962691584}
+{"loaded": 40, "pagefile": 3962691584, "peak_pagefile": 3990274048, "phase": "stream_after_delete_after_gc", "private": 3962691584, "rss": 1893539840, "sum_parameter_cpu_bytes": 1605175296, "vms": 3962691584}
+{"loaded": 60, "pagefile": 4265271296, "peak_pagefile": 4292853760, "phase": "stream_after_delete_before_gc", "private": 4265271296, "rss": 2156462080, "sum_parameter_cpu_bytes": 1867878400, "vms": 4265271296}
+{"loaded": 60, "pagefile": 4265271296, "peak_pagefile": 4292853760, "phase": "stream_after_delete_after_gc", "private": 4265271296, "rss": 2156462080, "sum_parameter_cpu_bytes": 1867878400, "vms": 4265271296}
+{"loaded": 80, "pagefile": 4702330880, "peak_pagefile": 4729913344, "phase": "stream_after_delete_before_gc", "private": 4702330880, "rss": 2512199680, "sum_parameter_cpu_bytes": 2223379456, "vms": 4702330880}
+{"loaded": 80, "pagefile": 4702330880, "peak_pagefile": 4729913344, "phase": "stream_after_delete_after_gc", "private": 4702330880, "rss": 2512199680, "sum_parameter_cpu_bytes": 2223379456, "vms": 4702330880}
+{"loaded": 100, "pagefile": 5105770496, "peak_pagefile": 5133352960, "phase": "stream_after_delete_before_gc", "private": 5105770496, "rss": 2830213120, "sum_parameter_cpu_bytes": 2541131776, "vms": 5105770496}
+{"loaded": 100, "pagefile": 5105770496, "peak_pagefile": 5133352960, "phase": "stream_after_delete_after_gc", "private": 5105770496, "rss": 2830213120, "sum_parameter_cpu_bytes": 2541131776, "vms": 5105770496}
+{"loaded": 120, "pagefile": 5408350208, "peak_pagefile": 5435932672, "phase": "stream_after_delete_before_gc", "private": 5408350208, "rss": 3093114880, "sum_parameter_cpu_bytes": 2803834880, "vms": 5408350208}
+{"loaded": 120, "pagefile": 5408350208, "peak_pagefile": 5435932672, "phase": "stream_after_delete_after_gc", "private": 5408350208, "rss": 3093114880, "sum_parameter_cpu_bytes": 2803834880, "vms": 5408350208}
+{"loaded": 120, "pagefile": 5408350208, "peak_pagefile": 5435932672, "phase": "partial_model_complete", "private": 5408350208, "rss": 3093114880, "sum_parameter_cpu_bytes": 2803834880, "vms": 5408350208}
+{"pagefile": 4400152576, "peak_pagefile": 5435932672, "phase": "after_model_delete_before_gc", "private": 4400152576, "rss": 2266615808, "sum_parameter_cpu_bytes": 0, "vms": 4400152576}
+{"pagefile": 4400152576, "peak_pagefile": 5435932672, "phase": "after_model_delete_after_gc", "private": 4400152576, "rss": 2266615808, "sum_parameter_cpu_bytes": 0, "vms": 4400152576}
+{"editorial_accepted": false, "forward_count": 0, "generated_tokens": 0, "loaded_tensors": 120, "phase": "finished", "resource_hashes_unchanged": true}

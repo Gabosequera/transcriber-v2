@@ -1,0 +1,24 @@
+   Compiling tv2-application v2.0.0-alpha.10 (C:\Users\gabri\Todo\transcriber-v2\crates\application)
+    Finished `test` profile [optimized + debuginfo] target(s) in 11.86s
+     Running unittests src\lib.rs (target\debug\deps\tv2_application-761e5409f1147582.exe)
+
+running 2 tests
+
+thread 'protection::tests::imported_disabled_items_are_protected_without_edited_or_accepted_flags' (22108) panicked at crates\application\src\protection.rs:198:17:
+disabled decision must not be changed by agente:test
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+thread 'protection::tests::imported_disabled_clips_are_protected_without_edited_or_accepted_flags' (7256) panicked at crates\application\src\protection.rs:228:13:
+disabled montage must not be changed by agente:test
+test protection::tests::imported_disabled_items_are_protected_without_edited_or_accepted_flags ... FAILED
+test protection::tests::imported_disabled_clips_are_protected_without_edited_or_accepted_flags ... FAILED
+
+failures:
+
+failures:
+    protection::tests::imported_disabled_clips_are_protected_without_edited_or_accepted_flags
+    protection::tests::imported_disabled_items_are_protected_without_edited_or_accepted_flags
+
+test result: FAILED. 0 passed; 2 failed; 0 ignored; 0 measured; 80 filtered out; finished in 0.00s
+
+error: test failed, to rerun pass `-p tv2-application --lib`

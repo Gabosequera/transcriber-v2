@@ -1,0 +1,12 @@
+test_01_invalid_envelopes_recover_and_shutdown (__main__.ProtocolTests.test_01_invalid_envelopes_recover_and_shutdown) ... ok
+test_02_fragmented_line_does_not_dispatch_before_newline (__main__.ProtocolTests.test_02_fragmented_line_does_not_dispatch_before_newline) ... ok
+test_03_exact_line_limit_is_accepted (__main__.ProtocolTests.test_03_exact_line_limit_is_accepted) ... ok
+test_04_oversized_unterminated_line_errors_and_exits (__main__.ProtocolTests.test_04_oversized_unterminated_line_errors_and_exits) ... ok
+test_05_incomplete_eof_rejected_and_exits (__main__.ProtocolTests.test_05_incomplete_eof_rejected_and_exits) ... ok
+test_06_live_idle_eof_exits_without_response (__main__.ProtocolTests.test_06_live_idle_eof_exits_without_response) ... ok
+test_07_real_hello_cancel_identity_and_live_eof (__main__.ProtocolTests.test_07_real_hello_cancel_identity_and_live_eof) ... ok
+
+----------------------------------------------------------------------
+Ran 7 tests in 5.345s
+
+OK

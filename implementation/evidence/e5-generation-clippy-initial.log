@@ -1,0 +1,27 @@
+    Checking tv2-pipeline v2.0.0-alpha.11 (C:\Users\gabri\Todo\transcriber-v2\crates\pipeline)
+error: called `unwrap` on `samples` after checking its variant with `is_some`
+   --> crates\pipeline\src\arousal.rs:412:23
+    |
+411 |         if format && samples.is_some() {
+    |                      ----------------- the check is happening here
+412 |             return Ok(samples.unwrap());
+    |                       ^^^^^^^^^^^^^^^^
+    |
+    = help: try using `if let` or `match`
+    = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.98.0/index.html#unnecessary_unwrap
+    = note: `-D clippy::unnecessary-unwrap` implied by `-D warnings`
+    = help: to override `-D warnings` add `#[allow(clippy::unnecessary_unwrap)]`
+
+error: manual implementation of `.is_multiple_of()`
+   --> crates\pipeline\src\arousal.rs:406:16
+    |
+406 |             if length % 2 != 0 {
+    |                ^^^^^^^^^^^^^^^ help: replace with: `!length.is_multiple_of(2)`
+    |
+    = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.98.0/index.html#manual_is_multiple_of
+    = note: `-D clippy::manual-is-multiple-of` implied by `-D warnings`
+    = help: to override `-D warnings` add `#[allow(clippy::manual_is_multiple_of)]`
+
+error: could not compile `tv2-pipeline` (lib) due to 2 previous errors
+warning: build failed, waiting for other jobs to finish...
+error: could not compile `tv2-pipeline` (lib test) due to 2 previous errors

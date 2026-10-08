@@ -18,6 +18,7 @@ mod item_editor;
 mod keymap;
 mod paths;
 mod persistence_jobs;
+mod pipeline_ui;
 mod resolve_jobs;
 mod scripting;
 mod semantic_jobs;

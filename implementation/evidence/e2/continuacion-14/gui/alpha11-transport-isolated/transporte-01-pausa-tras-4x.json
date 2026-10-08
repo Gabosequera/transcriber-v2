@@ -1,0 +1,48 @@
+{
+  "revision": 2,
+  "view": "Sequence",
+  "playhead_ms": 7867,
+  "player": {
+    "position_ms": 7867,
+    "playing": false,
+    "rate": 4.0,
+    "generation": 6,
+    "buffering": false,
+    "decode_ms": 1.1720999479293823,
+    "audio_available": true
+  },
+  "last_frame": {
+    "position_ms": 7867,
+    "w": 790,
+    "h": 444,
+    "generation": 6
+  },
+  "clips": [
+    {
+      "id": "clip-81103c43ddad",
+      "track": "V1",
+      "position_ms": 0,
+      "source_start_ms": 0,
+      "source_end_ms": 12000,
+      "enabled": true,
+      "link": "link-c0ee3f3993c0"
+    },
+    {
+      "id": "clip-1a011627e105",
+      "track": "A1",
+      "position_ms": 0,
+      "source_start_ms": 0,
+      "source_end_ms": 12000,
+      "enabled": true,
+      "link": "link-c0ee3f3993c0"
+    }
+  ],
+  "layers": [],
+  "toasts": [
+    "Importado fixture-a.mp4: video · 640×360 · 30.000 fps · h264 · 1 pista(s) de audio 48000 Hz 1 can. · 00:00:12.000",
+    "Insertado en 00:00:00.000",
+    "×3 · audio acelerado con tono preservado (atempo)",
+    "×4 · audio acelerado con tono preservado (atempo)"
+  ],
+  "undo": "Insertar medio"
+}

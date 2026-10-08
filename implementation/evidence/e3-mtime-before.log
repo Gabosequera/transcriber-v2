@@ -1,0 +1,19 @@
+   Compiling tv2-application v2.0.0-alpha.10 (C:\Users\gabri\Todo\transcriber-v2\crates\application)
+    Finished `test` profile [optimized + debuginfo] target(s) in 23.09s
+     Running unittests src\lib.rs (target\debug\deps\tv2_application-761e5409f1147582.exe)
+
+running 1 test
+
+thread 'store::tests::file_mtime_roundtrips_through_import_audit_checkpoint_history_and_autosave' (23656) panicked at crates\application\src\store.rs:712:78:
+tagged ImportAsset with real nanosecond mtime must decode: Error("i128 is not supported", line: 1, column: 909)
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+test store::tests::file_mtime_roundtrips_through_import_audit_checkpoint_history_and_autosave ... FAILED
+
+failures:
+
+failures:
+    store::tests::file_mtime_roundtrips_through_import_audit_checkpoint_history_and_autosave
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 82 filtered out; finished in 0.01s
+
+error: test failed, to rerun pass `-p tv2-application --lib`

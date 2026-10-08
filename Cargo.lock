@@ -3948,7 +3948,7 @@ dependencies = [
 
 [[package]]
 name = "transcriptor"
-version = "2.0.0-alpha.10"
+version = "2.0.0-alpha.11"
 dependencies = [
  "anyhow",
  "crossbeam-channel",
@@ -3968,6 +3968,7 @@ dependencies = [
  "tv2-control",
  "tv2-domain",
  "tv2-media",
+ "tv2-pipeline",
  "tv2-v1compat",
  "windows-sys 0.61.2",
 ]
@@ -3980,7 +3981,7 @@ checksum = "d2df906b07856748fa3f6e0ad0cbaa047052d4a7dd609e231c4f72cee8c36f31"
 
 [[package]]
 name = "tv2-application"
-version = "2.0.0-alpha.10"
+version = "2.0.0-alpha.11"
 dependencies = [
  "hex",
  "serde",
@@ -3994,7 +3995,7 @@ dependencies = [
 
 [[package]]
 name = "tv2-control"
-version = "2.0.0-alpha.10"
+version = "2.0.0-alpha.11"
 dependencies = [
  "crossbeam-channel",
  "serde",
@@ -4006,7 +4007,7 @@ dependencies = [
 
 [[package]]
 name = "tv2-domain"
-version = "2.0.0-alpha.10"
+version = "2.0.0-alpha.11"
 dependencies = [
  "hex",
  "rand 0.10.2",
@@ -4018,7 +4019,7 @@ dependencies = [
 
 [[package]]
 name = "tv2-media"
-version = "2.0.0-alpha.10"
+version = "2.0.0-alpha.11"
 dependencies = [
  "cpal",
  "crossbeam-channel",
@@ -4035,8 +4036,27 @@ dependencies = [
 ]
 
 [[package]]
+name = "tv2-pipeline"
+version = "2.0.0-alpha.11"
+dependencies = [
+ "crossbeam-channel",
+ "hex",
+ "serde",
+ "serde_json",
+ "sha2",
+ "tempfile",
+ "tracing",
+ "tracing-subscriber",
+ "tv2-application",
+ "tv2-domain",
+ "tv2-media",
+ "tv2-v1compat",
+ "windows-sys 0.61.2",
+]
+
+[[package]]
 name = "tv2-v1compat"
-version = "2.0.0-alpha.10"
+version = "2.0.0-alpha.11"
 dependencies = [
  "hex",
  "serde",

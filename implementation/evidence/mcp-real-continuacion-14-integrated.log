@@ -1,0 +1,10 @@
+{"rpc_id":1,"elapsed_ms":144,"method":"initialize","status":"complete","tool":"none","schema":"tv2-mcp-client-diagnostic/1"}
+{"rpc_id":"none","elapsed_ms":18,"method":"notifications/initialized","status":"complete","tool":"none","schema":"tv2-mcp-client-diagnostic/1"}
+{"rpc_id":2,"elapsed_ms":70,"method":"tools/list","status":"complete","tool":"none","schema":"tv2-mcp-client-diagnostic/1"}
+{"rpc_id":1,"exceptions":[{"type":"System.Net.Http.HttpRequestException"},{"type":"System.IO.IOException"},{"native_error":10054,"type":"System.Net.Sockets.SocketException","socket_error":"ConnectionReset"}],"elapsed_ms":47,"method":"initialize","status":"failed","tool":"none","schema":"tv2-mcp-client-diagnostic/1"}
+Invoke-RestMethod: C:\Users\gabri\Todo\transcriber-v2\scripts\mcp-client.ps1:81
+Line |
+  81 |          Invoke-RestMethod -Method Post -Uri $Endpoint -Headers $heade …
+     |          ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+     | Unable to read data from the transport connection: Se ha forzado la interrupción de una conexión existente por
+     | el host remoto..

@@ -1,0 +1,37 @@
+paso 1: ImportV1 { path: "C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/save-as-20260930-171534/synthetic-editorial", media: Some("C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/save-as-20260930-171534/media/fixture-a.mp4") }
+paso 2: Wait { ms: 1500 }
+  toast: Error: ruta documental no portable: aux
+paso 3: Assert { markers: None, clips: None, layers: Some(4), items: Some(7), revision: Some(1), playing: None, rate: None, position: None, tracks: None }
+ASSERT layers: esperado 4, real 0
+ASSERT items: esperado 7, real 0
+ASSERT revision: esperado 1, real 0
+  toast: Error: ruta documental no portable: aux
+paso 4: Dump { path: "C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/save-as-20260930-171534/imported-state.json" }
+estado volcado en C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/save-as-20260930-171534/imported-state.json
+  toast: Error: ruta documental no portable: aux
+paso 5: NewLayer { name: "Human portability edit" }
+  toast: Warn: Importa un medio antes de crear capas
+paso 6: SetIn { t: 2.000001 }
+  toast: Warn: Importa un medio antes de crear capas
+paso 7: SetOut { t: 4.000002 }
+  toast: Warn: Importa un medio antes de crear capas
+paso 8: AddRange
+  toast: Warn: Selecciona una capa (clic en su nombre) y marca IN/OUT
+paso 9: Assert { markers: None, clips: None, layers: Some(5), items: Some(8), revision: Some(3), playing: None, rate: None, position: None, tracks: None }
+ASSERT layers: esperado 5, real 0
+ASSERT items: esperado 8, real 0
+ASSERT revision: esperado 3, real 0
+  toast: Warn: Selecciona una capa (clic en su nombre) y marca IN/OUT
+paso 10: Save { path: "C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/save-as-20260930-171534/origin.transcriptor" }
+  toast: Warn: Selecciona una capa (clic en su nombre) y marca IN/OUT
+paso 11: AwaitSignal { path: "C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/save-as-20260930-171534/saved-a.signal", ms: 30000 }
+  toast: Info: Revisión 0 guardada en C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/save-as-20260930-171534/origin.transcriptor
+ERROR: señal no recibida antes del timeout: C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/save-as-20260930-171534/saved-a.signal
+paso 12: Save { path: "C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/save-as-20260930-171534/save-as.transcriptor" }
+paso 13: AwaitSignal { path: "C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/save-as-20260930-171534/saved-b.signal", ms: 30000 }
+  toast: Info: Revisión 0 guardada en C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/save-as-20260930-171534/save-as.transcriptor
+paso 14: Screenshot { path: "C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/save-as-20260930-171534/save-as-native.png" }
+captura guardada en C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/save-as-20260930-171534/save-as-native.png (1920×1080)
+paso 15: Quit
+quit; fallos=true
+guion terminado; fallos=true

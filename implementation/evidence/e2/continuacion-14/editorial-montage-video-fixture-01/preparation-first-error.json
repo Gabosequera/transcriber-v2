@@ -1,0 +1,8 @@
+{
+  "stage": "stdlib diagnostic prompt projection, before destination creation",
+  "native_or_ml_executed": false,
+  "error": "KeyError: 'trim_mode'",
+  "cause": "Preparer called messages_for(documents, 'montage', {}) although rules dictionary constructs its trims entry eagerly.",
+  "correction": "Diagnostic call supplies trim_mode='content'; production worker unchanged.",
+  "initial_size_suspicion_corrected": "121284-byte root synthetic_extension is excluded by real prompt_context; conservative projection passes at11608bytes."
+}

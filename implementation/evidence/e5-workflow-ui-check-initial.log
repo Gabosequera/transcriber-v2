@@ -1,0 +1,23 @@
+    Checking tv2-pipeline v2.0.0-alpha.11 (C:\Users\gabri\Todo\transcriber-v2\crates\pipeline)
+    Checking tv2-v1compat v2.0.0-alpha.11 (C:\Users\gabri\Todo\transcriber-v2\crates\v1compat)
+    Checking tv2-media v2.0.0-alpha.11 (C:\Users\gabri\Todo\transcriber-v2\crates\media)
+    Checking tv2-application v2.0.0-alpha.11 (C:\Users\gabri\Todo\transcriber-v2\crates\application)
+    Checking tv2-control v2.0.0-alpha.11 (C:\Users\gabri\Todo\transcriber-v2\crates\control)
+error[E0282]: type annotations needed for `Result<WorkflowResult, _>`
+   --> crates\pipeline\src\workflow.rs:565:9
+    |
+565 |     let outcome = (|| {
+    |         ^^^^^^^
+...
+630 |         Err(error) if error.code == ErrorCode::Cancelled => JobState::Cancelled,
+    |                       ---------- type must be known at this point
+    |
+help: consider giving `outcome` an explicit type, where the type for type parameter `E` is specified
+    |
+565 |     let outcome: Result<_, E> = (|| {
+    |                ++++++++++++++
+
+For more information about this error, try `rustc --explain E0282`.
+error: could not compile `tv2-pipeline` (lib) due to 1 previous error
+warning: build failed, waiting for other jobs to finish...
+error: could not compile `tv2-pipeline` (lib test) due to 1 previous error

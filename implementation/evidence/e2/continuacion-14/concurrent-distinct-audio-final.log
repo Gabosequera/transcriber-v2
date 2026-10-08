@@ -1,0 +1,10 @@
+   Compiling tv2-media v2.0.0-alpha.11 (C:\Users\gabri\Todo\transcriber-v2\crates\media)
+    Finished `test` profile [optimized + debuginfo] target(s) in 11.50s
+     Running unittests src\lib.rs (target\debug\deps\tv2_media-0444bb3b07bce197.exe)
+error: test failed, to rerun pass `-p tv2-media --lib`
+
+Caused by:
+  could not execute process `C:\Users\gabri\Todo\transcriber-v2\target\debug\deps\tv2_media-0444bb3b07bce197.exe concurrent_real_exports --nocapture` (never executed)
+
+Caused by:
+  Una directiva de Control de aplicaciones bloqueó este archivo. (os error 4551)

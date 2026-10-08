@@ -1,0 +1,32 @@
+   Compiling tv2-pipeline v2.0.0-alpha.11 (C:\Users\gabri\Todo\transcriber-v2\crates\pipeline)
+    Finished `test` profile [optimized + debuginfo] target(s) in 13.27s
+     Running unittests src\lib.rs (target\debug\deps\tv2_pipeline-b70692bd12085e6c.exe)
+
+running 24 tests
+test editorial::tests::local_topics_coverage_union_allows_only_one_millisecond_rounding ... ok
+test editorial::tests::local_topics_duplicate_key_normalizes_title_and_exact_range_union_after_snap ... ok
+test editorial::tests::context_redacts_personal_locators_preserves_original_and_rejects_added_documents ... ok
+test editorial::tests::local_topics_missing_words_are_insufficient_context_not_success ... ok
+test editorial::tests::local_topics_allow_recurrences_distinct_parents_and_distinct_comments ... ok
+test editorial::tests::model_proposals_preserve_human_items_and_tombstones_through_common_command ... ok
+test editorial::tests::local_topics_coverage_uses_adjusted_map_and_clips_words_to_scope ... ok
+test editorial::tests::local_topics_reject_nine_observed_duplicate_copies_without_repairing_them ... ok
+test editorial::tests::montage_pass_and_digest_reject_rebinding_and_unexplained_repetition ... ok
+test editorial::tests::deep_trims_require_selected_lane_and_current_trims_digest ... ok
+test editorial::tests::recovered_second_pass_cannot_inherit_an_incomplete_old_map ... ok
+test editorial::tests::recovered_second_pass_cannot_inherit_duplicate_first_map_content ... ok
+test editorial::tests::local_topics_require_all_spoken_intervals_but_allow_silent_gaps ... ok
+test editorial::tests::human_attribution_and_destructive_flags_are_rejected_before_normalization ... ok
+test editorial::tests::requests_parameters_and_snapshot_are_bound_to_canonical_scope_and_pass ... ok
+test editorial::tests::topics_advance_uses_validated_map_and_only_second_pass_creates_proposals ... ok
+test editorial::tests::topics_reject_wrong_pass_digest_omission_duplication_and_changed_ranges ... ok
+test editorial::tests::unconfigured_and_missing_backend_do_not_claim_inference_or_create_work ... ok
+test editorial::tests::configured_files_are_unverified_and_hash_swaps_are_rejected_before_execution ... ok
+test editorial::tests::result_requires_real_inference_declaration_and_closed_receipt_fields ... ok
+test editorial::tests::payload_tampering_fails_before_claim_and_explicit_cancel_is_durable_without_backend ... ok
+test editorial::tests::live_job_cannot_be_claimed_by_another_local_request ... ok
+test editorial::tests::owned_input_references_are_sha_bound_and_traversal_or_alteration_fails ... ok
+test editorial::tests::cached_succeeded_receipt_and_continue_topics_revalidate_word_coverage ... ok
+
+test result: ok. 24 passed; 0 failed; 0 ignored; 0 measured; 28 filtered out; finished in 0.06s
+

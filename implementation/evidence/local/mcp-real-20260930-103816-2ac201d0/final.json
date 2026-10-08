@@ -1,0 +1,46 @@
+{
+  "revision": 5,
+  "view": "Sequence",
+  "playhead_ms": 0,
+  "player": {
+    "position_ms": 0,
+    "playing": false,
+    "rate": 1.0,
+    "generation": 9,
+    "buffering": false,
+    "decode_ms": 105.43000030517578,
+    "audio_available": true
+  },
+  "last_frame": {
+    "position_ms": 0,
+    "w": 732,
+    "h": 412,
+    "generation": 9
+  },
+  "clips": [
+    {
+      "id": "clip-b85ec5c9935e",
+      "track": "V1",
+      "position_ms": 0,
+      "source_start_ms": 0,
+      "source_end_ms": 12000,
+      "enabled": true,
+      "link": "link-6016e78eebf6"
+    },
+    {
+      "id": "clip-41f43f6804c8",
+      "track": "A1",
+      "position_ms": 0,
+      "source_start_ms": 0,
+      "source_end_ms": 12000,
+      "enabled": true,
+      "link": "link-6016e78eebf6"
+    }
+  ],
+  "layers": [],
+  "toasts": [
+    "Revisión 5 guardada en C:\\Users\\gabri\\Todo\\transcriber-v2\\implementation\\evidence\\local\\mcp-real-20260930-103816-2ac201d0\\fixture.transcriptor",
+    "Proyecto «Aceptación MCP árbol 00344913» abierto (revisión 5)"
+  ],
+  "undo": "Renombrar proyecto"
+}

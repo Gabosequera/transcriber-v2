@@ -1,0 +1,35 @@
+test_alignment_recalculates_intensity_pauses_and_conversation (__main__.FinalizationTests.test_alignment_recalculates_intensity_pauses_and_conversation) ... ok
+test_base_only_does_not_claim_optional_inference_and_preserves_chunks (__main__.FinalizationTests.test_base_only_does_not_claim_optional_inference_and_preserves_chunks) ... ok
+test_cancel_before_and_during_assembly_preserves_base (__main__.FinalizationTests.test_cancel_before_and_during_assembly_preserves_base) ... ok
+test_canonical_audio_may_end_before_video_source (__main__.FinalizationTests.test_canonical_audio_may_end_before_video_source) ... ok
+test_fallback_alignment_does_not_claim_mms (__main__.FinalizationTests.test_fallback_alignment_does_not_claim_mms) ... ok
+test_final_timing_recalculates_cross_track_overlap (__main__.FinalizationTests.test_final_timing_recalculates_cross_track_overlap) ... ok
+test_full_assembly_is_immutable_and_preserves_asr_extensions (__main__.FinalizationTests.test_full_assembly_is_immutable_and_preserves_asr_extensions) ... ok
+test_host_injected_verified_derivation_is_reused (__main__.FinalizationTests.test_host_injected_verified_derivation_is_reused) ... ok
+test_import_is_stdlib_only (__main__.FinalizationTests.test_import_is_stdlib_only) ... ok
+test_inventory_hash_is_not_full_source_identity (__main__.FinalizationTests.test_inventory_hash_is_not_full_source_identity) ... ok
+test_rejects_audio_longer_than_source_clock (__main__.FinalizationTests.test_rejects_audio_longer_than_source_clock) ... ERROR
+test_rejects_duplicate_ids_across_tracks (__main__.FinalizationTests.test_rejects_duplicate_ids_across_tracks) ... ok
+test_rejects_invalid_closed_structure_ranges_and_nonfinite (__main__.FinalizationTests.test_rejects_invalid_closed_structure_ranges_and_nonfinite) ... ok
+test_rejects_mutated_stage_identity_text_probability_and_original_times (__main__.FinalizationTests.test_rejects_mutated_stage_identity_text_probability_and_original_times) ... ok
+test_rejects_pcm_changed_during_derivation (__main__.FinalizationTests.test_rejects_pcm_changed_during_derivation) ... ok
+test_rejects_preexisting_chunks_with_alignment (__main__.FinalizationTests.test_rejects_preexisting_chunks_with_alignment) ... ok
+test_rejects_stale_stage_lineage_times_audio_and_source (__main__.FinalizationTests.test_rejects_stale_stage_lineage_times_audio_and_source) ... ok
+
+======================================================================
+ERROR: test_rejects_audio_longer_than_source_clock (__main__.FinalizationTests.test_rejects_audio_longer_than_source_clock)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\gabri\Todo\transcriber-v2\tests\scripts\test_e5_finalize.py", line 112, in test_rejects_audio_longer_than_source_clock
+    final = finalize.assemble_master(self.base, self.full_inputs())
+  File "C:\Users\gabri\Todo\transcriber-v2\workers\python\finalize.py", line 185, in assemble_master
+    fail(0 < pcm_duration <= duration + 1 / 16000 + 1e-9, "Canonical PCM exceeds the source clock", "E_PRECONDITION")
+    ~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\gabri\Todo\transcriber-v2\workers\python\finalize.py", line 66, in fail
+    raise FinalizeError(code, message)
+test_finalizer.FinalizeError: Canonical PCM exceeds the source clock
+
+----------------------------------------------------------------------
+Ran 17 tests in 0.340s
+
+FAILED (errors=1)

@@ -1,0 +1,38 @@
+{
+  "tools": {
+    "jsonrpc": "2.0",
+    "id": 2,
+    "result": {
+      "tools": []
+    }
+  },
+  "accepted": false,
+  "transport": "real-editor-http",
+  "calls": [
+    {
+      "arguments": {},
+      "response": {
+        "jsonrpc": "2.0",
+        "id": 2,
+        "result": {
+          "content": [
+            {
+              "type": "text",
+              "text": "{\"error\":\"E_PERMISSION: tool unavailable for current permissions/host capabilities\"}"
+            }
+          ],
+          "structuredContent": {
+            "error": "E_PERMISSION: tool unavailable for current permissions/host capabilities"
+          },
+          "isError": true
+        }
+      },
+      "tool": "tv2_context"
+    }
+  ],
+  "failure": "Tool failure calling tv2_context: E_PERMISSION: tool unavailable for current permissions/host capabilities",
+  "started_utc": "2026-09-30T14:09:53.2123859Z",
+  "stage": "Revoked",
+  "endpoint": "http://127.0.0.1:62302/mcp",
+  "finished_utc": "2026-09-30T14:09:53.4296354Z"
+}

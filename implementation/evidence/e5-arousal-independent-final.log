@@ -1,0 +1,16 @@
+test_01_lazy_import (__main__.Independent.test_01_lazy_import) ... ok
+test_02_regions_merge_pad_cap (__main__.Independent.test_02_regions_merge_pad_cap) ... ok
+test_03_global_hop_grid_and_empty (__main__.Independent.test_03_global_hop_grid_and_empty) ... ok
+test_04_baseline_population_std_and_zero (__main__.Independent.test_04_baseline_population_std_and_zero) ... ok
+test_05_overlap_half_open_identity_human_copy (__main__.Independent.test_05_overlap_half_open_identity_human_copy) ... ok
+test_06_pcm_pad_rms_finite (__main__.Independent.test_06_pcm_pad_rms_finite) ... ok
+test_07_checkpoint_hash_and_corruption (__main__.Independent.test_07_checkpoint_hash_and_corruption) ... ok
+test_08_paths_and_cancellation (__main__.Independent.test_08_paths_and_cancellation) ... ok
+test_09_invalid_track_times_ids (__main__.Independent.test_09_invalid_track_times_ids) ... ok
+test_10_closed_params_invalid_types (__main__.Independent.test_10_closed_params_invalid_types) ... ok
+test_11_cancellation_before_inputs_no_checkpoint (__main__.Independent.test_11_cancellation_before_inputs_no_checkpoint) ... ok
+
+----------------------------------------------------------------------
+Ran 11 tests in 0.066s
+
+OK

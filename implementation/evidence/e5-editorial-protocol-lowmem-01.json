@@ -1,0 +1,180 @@
+{
+  "accepted": true,
+  "tests_run": 7,
+  "failures": 0,
+  "errors": 0,
+  "no_ml_imports": true,
+  "worker_sha256": "f443cc10c23b72fa9b5c12a12fe50cfe2ef278d47e8d4172ae98911e3f096aff",
+  "worker_unchanged": true,
+  "script_sha256": "31ea6b721b730190b0bbceb9db185ed06f9d79225b0dc8fcb447b9115fd9eddd",
+  "duration_seconds": 6.10999999998603,
+  "processes": [
+    {
+      "case": "invalid-recovery",
+      "deadline_seconds": 30,
+      "job_memory_limit": 268435456,
+      "worker_sha256": "f443cc10c23b72fa9b5c12a12fe50cfe2ef278d47e8d4172ae98911e3f096aff",
+      "peak_job_memory": 19972096,
+      "pid": 444,
+      "accepted": true,
+      "error": null,
+      "exit_code": 0,
+      "duration_seconds": 0.5779999999795109,
+      "import_audit": {
+        "blocked_attempts": [],
+        "loaded_ml_modules": [],
+        "worker_sha256": "f443cc10c23b72fa9b5c12a12fe50cfe2ef278d47e8d4172ae98911e3f096aff"
+      },
+      "stderr_bytes": 0
+    },
+    {
+      "case": "fragmented",
+      "deadline_seconds": 30,
+      "job_memory_limit": 268435456,
+      "worker_sha256": "f443cc10c23b72fa9b5c12a12fe50cfe2ef278d47e8d4172ae98911e3f096aff",
+      "peak_job_memory": 20377600,
+      "pid": 28012,
+      "accepted": true,
+      "error": null,
+      "exit_code": 0,
+      "duration_seconds": 0.39100000000325963,
+      "import_audit": {
+        "blocked_attempts": [],
+        "loaded_ml_modules": [],
+        "worker_sha256": "f443cc10c23b72fa9b5c12a12fe50cfe2ef278d47e8d4172ae98911e3f096aff"
+      },
+      "stderr_bytes": 0
+    },
+    {
+      "case": "exact-limit",
+      "deadline_seconds": 30,
+      "job_memory_limit": 268435456,
+      "worker_sha256": "f443cc10c23b72fa9b5c12a12fe50cfe2ef278d47e8d4172ae98911e3f096aff",
+      "peak_job_memory": 24227840,
+      "pid": 14480,
+      "accepted": true,
+      "error": null,
+      "exit_code": 0,
+      "duration_seconds": 0.4220000000204891,
+      "import_audit": {
+        "blocked_attempts": [],
+        "loaded_ml_modules": [],
+        "worker_sha256": "f443cc10c23b72fa9b5c12a12fe50cfe2ef278d47e8d4172ae98911e3f096aff"
+      },
+      "stderr_bytes": 0
+    },
+    {
+      "case": "oversized",
+      "deadline_seconds": 30,
+      "job_memory_limit": 268435456,
+      "worker_sha256": "f443cc10c23b72fa9b5c12a12fe50cfe2ef278d47e8d4172ae98911e3f096aff",
+      "peak_job_memory": 23789568,
+      "pid": 29412,
+      "accepted": true,
+      "error": null,
+      "exit_code": 0,
+      "duration_seconds": 0.375,
+      "import_audit": {
+        "blocked_attempts": [],
+        "loaded_ml_modules": [],
+        "worker_sha256": "f443cc10c23b72fa9b5c12a12fe50cfe2ef278d47e8d4172ae98911e3f096aff"
+      },
+      "stderr_bytes": 0
+    },
+    {
+      "case": "incomplete-eof",
+      "deadline_seconds": 30,
+      "job_memory_limit": 268435456,
+      "worker_sha256": "f443cc10c23b72fa9b5c12a12fe50cfe2ef278d47e8d4172ae98911e3f096aff",
+      "peak_job_memory": 20267008,
+      "pid": 12960,
+      "accepted": true,
+      "error": null,
+      "exit_code": 0,
+      "duration_seconds": 0.3899999999557622,
+      "import_audit": {
+        "blocked_attempts": [],
+        "loaded_ml_modules": [],
+        "worker_sha256": "f443cc10c23b72fa9b5c12a12fe50cfe2ef278d47e8d4172ae98911e3f096aff"
+      },
+      "stderr_bytes": 0
+    },
+    {
+      "case": "idle-eof",
+      "deadline_seconds": 30,
+      "job_memory_limit": 268435456,
+      "worker_sha256": "f443cc10c23b72fa9b5c12a12fe50cfe2ef278d47e8d4172ae98911e3f096aff",
+      "peak_job_memory": 19881984,
+      "pid": 464,
+      "accepted": true,
+      "error": null,
+      "exit_code": 0,
+      "duration_seconds": 0.375,
+      "import_audit": {
+        "blocked_attempts": [],
+        "loaded_ml_modules": [],
+        "worker_sha256": "f443cc10c23b72fa9b5c12a12fe50cfe2ef278d47e8d4172ae98911e3f096aff"
+      },
+      "stderr_bytes": 0
+    },
+    {
+      "case": "hello-cancel-eof",
+      "deadline_seconds": 120,
+      "job_memory_limit": 268435456,
+      "worker_sha256": "f443cc10c23b72fa9b5c12a12fe50cfe2ef278d47e8d4172ae98911e3f096aff",
+      "peak_job_memory": 22777856,
+      "pid": 2996,
+      "hello_identity": {
+        "dependencies": {
+          "accelerate": "1.3.0",
+          "certifi": "2026.7.22",
+          "charset-normalizer": "3.5.2",
+          "colorama": "0.4.6",
+          "filelock": "3.32.3",
+          "fsspec": "2026.7.0",
+          "huggingface-hub": "0.34.4",
+          "idna": "3.20",
+          "jinja2": "3.1.6",
+          "markupsafe": "3.0.3",
+          "mpmath": "1.3.0",
+          "networkx": "3.6.1",
+          "numpy": "2.5.3",
+          "packaging": "26.3",
+          "psutil": "6.1.1",
+          "pyyaml": "6.0.3",
+          "regex": "2026.9.29",
+          "requests": "2.34.2",
+          "safetensors": "0.7.0",
+          "setuptools": "78.1.0",
+          "sympy": "1.14.0",
+          "tokenizers": "0.21.4",
+          "torch": "2.8.0+cpu",
+          "tqdm": "4.70.1",
+          "transformers": "4.48.3",
+          "typing-extensions": "4.16.0",
+          "urllib3": "2.8.0"
+        },
+        "lock_sha256": "f168f99ed58200cc1532217b00c6f27c8b0a68c98ba5899491875ee0538c99cb",
+        "model_digest": "f412a185d8af4ed396f1c078da54058e09e31af0aee851f4aeacf7014003be40",
+        "model_id": "Qwen/Qwen2.5-1.5B-Instruct",
+        "model_manifest_sha256": "066140930ba42fc71368e5770db47b2482d454826e926df3121ea2481e68366a",
+        "model_revision": "989aa7980e4cf806f80c7fef2b1adb7bc71aa306",
+        "python_sha256": "c40630e8d077aba7ac3850e9b69947c4c978e2dd40df9d7acdcee31f3b972da1",
+        "worker_sha256": "f443cc10c23b72fa9b5c12a12fe50cfe2ef278d47e8d4172ae98911e3f096aff"
+      },
+      "accepted": true,
+      "error": null,
+      "exit_code": 0,
+      "duration_seconds": 3.5790000000270084,
+      "import_audit": {
+        "blocked_attempts": [],
+        "loaded_ml_modules": [],
+        "worker_sha256": "f443cc10c23b72fa9b5c12a12fe50cfe2ef278d47e8d4172ae98911e3f096aff"
+      },
+      "stderr_bytes": 0
+    }
+  ],
+  "inference_executed": false,
+  "downloads": false,
+  "gui_exercised": false
+}

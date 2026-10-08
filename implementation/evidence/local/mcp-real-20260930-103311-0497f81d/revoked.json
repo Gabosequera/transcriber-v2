@@ -1,0 +1,47 @@
+{
+  "revision": 2,
+  "view": "Sequence",
+  "playhead_ms": 0,
+  "player": {
+    "position_ms": 0,
+    "playing": false,
+    "rate": 1.0,
+    "generation": 3,
+    "buffering": false,
+    "decode_ms": 94.17129516601562,
+    "audio_available": true
+  },
+  "last_frame": {
+    "position_ms": 0,
+    "w": 816,
+    "h": 460,
+    "generation": 3
+  },
+  "clips": [
+    {
+      "id": "clip-ecc99070a367",
+      "track": "V1",
+      "position_ms": 0,
+      "source_start_ms": 0,
+      "source_end_ms": 12000,
+      "enabled": true,
+      "link": "link-1b19e0d2af47"
+    },
+    {
+      "id": "clip-b34f481e9d95",
+      "track": "A1",
+      "position_ms": 0,
+      "source_start_ms": 0,
+      "source_end_ms": 12000,
+      "enabled": true,
+      "link": "link-1b19e0d2af47"
+    }
+  ],
+  "layers": [],
+  "toasts": [
+    "Importado fixture-a.mp4: video · 640×360 · 30.000 fps · h264 · 1 pista(s) de audio 48000 Hz 1 can. · 00:00:12.000",
+    "Insertado en 00:00:00.000",
+    "Revisión 2 guardada en C:\\Users\\gabri\\Todo\\transcriber-v2\\implementation\\evidence\\local\\mcp-real-20260930-103311-0497f81d\\fixture.transcriptor"
+  ],
+  "undo": "Insertar medio"
+}

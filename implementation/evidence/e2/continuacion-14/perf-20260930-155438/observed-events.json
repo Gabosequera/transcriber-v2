@@ -1,0 +1,2314 @@
+[
+  {
+    "seconds": 3.62582640000619,
+    "line": "paso 1: Log { text: \"PERF_OPEN_BEGIN\" }"
+  },
+  {
+    "seconds": 3.62582640000619,
+    "line": "PERF_OPEN_BEGIN"
+  },
+  {
+    "seconds": 3.727302899991628,
+    "line": "paso 2: Open { path: \"C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/large.transcriptor/project.json\" }"
+  },
+  {
+    "seconds": 3.930213499988895,
+    "line": "paso 3: Assert { markers: None, clips: Some(1000), layers: Some(2), items: Some(20000), revision: None, playing: None, rate: None, position: None, tracks: Some(2) }"
+  },
+  {
+    "seconds": 3.9810394999803975,
+    "line": "paso 4: Action { id: \"view.fit\" }"
+  },
+  {
+    "seconds": 4.083173100021668,
+    "line": "paso 5: Seek { t: 1.0 }"
+  },
+  {
+    "seconds": 4.1859432000201195,
+    "line": "paso 6: WaitFrame { ms: 15000 }"
+  },
+  {
+    "seconds": 4.388801000022795,
+    "line": "fotograma presentado: seq 1 (posici\u00f3n 00:00:01.000)"
+  },
+  {
+    "seconds": 4.388801000022795,
+    "line": "paso 7: Log { text: \"PERF_OPEN_FRAME_READY\" }"
+  },
+  {
+    "seconds": 4.388801000022795,
+    "line": "PERF_OPEN_FRAME_READY"
+  },
+  {
+    "seconds": 4.490944900026079,
+    "line": "paso 8: SetIn { t: 0.0 }"
+  },
+  {
+    "seconds": 4.541721499990672,
+    "line": "paso 9: SetOut { t: 4.0 }"
+  },
+  {
+    "seconds": 4.5925474999821745,
+    "line": "paso 10: Export { preset: \"h264-720p\", dest: \"C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/under-load.mp4\", range: true, selection: None }"
+  },
+  {
+    "seconds": 4.643120300024748,
+    "line": "paso 11: Log { text: \"PERF_EXPORT_ENQUEUED\" }"
+  },
+  {
+    "seconds": 4.643120300024748,
+    "line": "PERF_EXPORT_ENQUEUED"
+  },
+  {
+    "seconds": 4.7447213000268675,
+    "line": "paso 12: Seek { t: 4.0 }"
+  },
+  {
+    "seconds": 4.795461400004569,
+    "line": "paso 13: WaitFrame { ms: 15000 }"
+  },
+  {
+    "seconds": 4.9484213999821804,
+    "line": "fotograma presentado: seq 2 (posici\u00f3n 00:00:04.000)"
+  },
+  {
+    "seconds": 4.9484213999821804,
+    "line": "paso 14: Log { text: \"PERF_SEEK_EXPORT_READY\" }"
+  },
+  {
+    "seconds": 4.9484213999821804,
+    "line": "PERF_SEEK_EXPORT_READY"
+  },
+  {
+    "seconds": 5.0493820999981835,
+    "line": "paso 15: AdvanceFrames { frames: 1 }"
+  },
+  {
+    "seconds": 5.100260499981232,
+    "line": "paso 16: Log { text: \"PERF_STEP_BEGIN\" }"
+  },
+  {
+    "seconds": 5.100260499981232,
+    "line": "PERF_STEP_BEGIN"
+  },
+  {
+    "seconds": 5.202177400002256,
+    "line": "paso 17: Wait { ms: 50 }"
+  },
+  {
+    "seconds": 5.358519900008105,
+    "line": "paso 18: Dump { path: \"C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/step-00.json\" }"
+  },
+  {
+    "seconds": 5.7675750000053085,
+    "line": "paso 19: Wait { ms: 50 }"
+  },
+  {
+    "seconds": 6.078866800002288,
+    "line": "paso 20: Dump { path: \"C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/step-01.json\" }"
+  },
+  {
+    "seconds": 6.51669459999539,
+    "line": "paso 21: Wait { ms: 50 }"
+  },
+  {
+    "seconds": 6.618791399989277,
+    "line": "paso 22: Dump { path: \"C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/step-02.json\" }"
+  },
+  {
+    "seconds": 7.124878900009207,
+    "line": "paso 23: Wait { ms: 50 }"
+  },
+  {
+    "seconds": 7.175570900028106,
+    "line": "paso 24: Dump { path: \"C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/step-03.json\" }"
+  },
+  {
+    "seconds": 7.3705189999891445,
+    "line": "paso 25: Wait { ms: 50 }"
+  },
+  {
+    "seconds": 7.3705189999891445,
+    "line": "  toast: Info: Exportado C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/under-load.mp4 (00:00:04.000, 120 fotogramas, 2.5 s)"
+  },
+  {
+    "seconds": 7.421130599977914,
+    "line": "paso 26: Dump { path: \"C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/step-04.json\" }"
+  },
+  {
+    "seconds": 7.522850400011521,
+    "line": "  toast: Info: Exportado C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/under-load.mp4 (00:00:04.000, 120 fotogramas, 2.5 s)"
+  },
+  {
+    "seconds": 7.620181099977344,
+    "line": "paso 27: Wait { ms: 50 }"
+  },
+  {
+    "seconds": 7.620181099977344,
+    "line": "  toast: Info: Exportado C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/under-load.mp4 (00:00:04.000, 120 fotogramas, 2.5 s)"
+  },
+  {
+    "seconds": 7.670875900017563,
+    "line": "paso 28: Dump { path: \"C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/step-05.json\" }"
+  },
+  {
+    "seconds": 7.881458599993493,
+    "line": "  toast: Info: Exportado C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/under-load.mp4 (00:00:04.000, 120 fotogramas, 2.5 s)"
+  },
+  {
+    "seconds": 7.881458599993493,
+    "line": "paso 29: Wait { ms: 50 }"
+  },
+  {
+    "seconds": 7.881458599993493,
+    "line": "  toast: Info: Exportado C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/under-load.mp4 (00:00:04.000, 120 fotogramas, 2.5 s)"
+  },
+  {
+    "seconds": 7.9324371999828145,
+    "line": "paso 30: Dump { path: \"C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/step-06.json\" }"
+  },
+  {
+    "seconds": 8.03373989998363,
+    "line": "  toast: Info: Exportado C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/under-load.mp4 (00:00:04.000, 120 fotogramas, 2.5 s)"
+  },
+  {
+    "seconds": 8.12588050001068,
+    "line": "paso 31: Wait { ms: 50 }"
+  },
+  {
+    "seconds": 8.12588050001068,
+    "line": "  toast: Info: Exportado C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/under-load.mp4 (00:00:04.000, 120 fotogramas, 2.5 s)"
+  },
+  {
+    "seconds": 8.17686990002403,
+    "line": "paso 32: Dump { path: \"C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/step-07.json\" }"
+  },
+  {
+    "seconds": 8.278257500031032,
+    "line": "  toast: Info: Exportado C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/under-load.mp4 (00:00:04.000, 120 fotogramas, 2.5 s)"
+  },
+  {
+    "seconds": 8.370702799991705,
+    "line": "paso 33: Wait { ms: 50 }"
+  },
+  {
+    "seconds": 8.370702799991705,
+    "line": "  toast: Info: Exportado C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/under-load.mp4 (00:00:04.000, 120 fotogramas, 2.5 s)"
+  },
+  {
+    "seconds": 8.421135200012941,
+    "line": "paso 34: Dump { path: \"C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/step-08.json\" }"
+  },
+  {
+    "seconds": 8.522808199981228,
+    "line": "  toast: Info: Exportado C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/under-load.mp4 (00:00:04.000, 120 fotogramas, 2.5 s)"
+  },
+  {
+    "seconds": 8.68019230000209,
+    "line": "paso 35: Wait { ms: 50 }"
+  },
+  {
+    "seconds": 8.68019230000209,
+    "line": "  toast: Info: Exportado C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/under-load.mp4 (00:00:04.000, 120 fotogramas, 2.5 s)"
+  },
+  {
+    "seconds": 8.731220500019845,
+    "line": "paso 36: Dump { path: \"C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/step-09.json\" }"
+  },
+  {
+    "seconds": 8.88397820002865,
+    "line": "  toast: Info: Exportado C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/under-load.mp4 (00:00:04.000, 120 fotogramas, 2.5 s)"
+  },
+  {
+    "seconds": 8.984773400006816,
+    "line": "paso 37: Wait { ms: 50 }"
+  },
+  {
+    "seconds": 8.984773400006816,
+    "line": "  toast: Info: Exportado C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/under-load.mp4 (00:00:04.000, 120 fotogramas, 2.5 s)"
+  },
+  {
+    "seconds": 9.035793400020339,
+    "line": "paso 38: Dump { path: \"C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/step-10.json\" }"
+  },
+  {
+    "seconds": 9.13778510002885,
+    "line": "  toast: Info: Exportado C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/under-load.mp4 (00:00:04.000, 120 fotogramas, 2.5 s)"
+  },
+  {
+    "seconds": 9.237686400010716,
+    "line": "paso 39: Wait { ms: 50 }"
+  },
+  {
+    "seconds": 9.237686400010716,
+    "line": "  toast: Info: Exportado C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/under-load.mp4 (00:00:04.000, 120 fotogramas, 2.5 s)"
+  },
+  {
+    "seconds": 9.339130999986082,
+    "line": "paso 40: Dump { path: \"C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/step-11.json\" }"
+  },
+  {
+    "seconds": 9.492389200022444,
+    "line": "  toast: Info: Exportado C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/under-load.mp4 (00:00:04.000, 120 fotogramas, 2.5 s)"
+  },
+  {
+    "seconds": 9.691720300004818,
+    "line": "paso 41: Wait { ms: 50 }"
+  },
+  {
+    "seconds": 9.691720300004818,
+    "line": "  toast: Info: Exportado C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/under-load.mp4 (00:00:04.000, 120 fotogramas, 2.5 s)"
+  },
+  {
+    "seconds": 9.793644700024743,
+    "line": "paso 42: Dump { path: \"C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/step-12.json\" }"
+  },
+  {
+    "seconds": 9.89546580001479,
+    "line": "  toast: Info: Exportado C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/under-load.mp4 (00:00:04.000, 120 fotogramas, 2.5 s)"
+  },
+  {
+    "seconds": 9.992126400000416,
+    "line": "paso 43: Wait { ms: 50 }"
+  },
+  {
+    "seconds": 9.992126400000416,
+    "line": "  toast: Info: Exportado C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/under-load.mp4 (00:00:04.000, 120 fotogramas, 2.5 s)"
+  },
+  {
+    "seconds": 10.093204399978276,
+    "line": "paso 44: Dump { path: \"C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/step-13.json\" }"
+  },
+  {
+    "seconds": 10.236611100030132,
+    "line": "  toast: Info: Exportado C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/under-load.mp4 (00:00:04.000, 120 fotogramas, 2.5 s)"
+  },
+  {
+    "seconds": 10.287157999991905,
+    "line": "paso 45: Wait { ms: 50 }"
+  },
+  {
+    "seconds": 10.287157999991905,
+    "line": "  toast: Info: Exportado C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/under-load.mp4 (00:00:04.000, 120 fotogramas, 2.5 s)"
+  },
+  {
+    "seconds": 10.337968699983321,
+    "line": "paso 46: Dump { path: \"C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/step-14.json\" }"
+  },
+  {
+    "seconds": 10.43938190001063,
+    "line": "  toast: Info: Exportado C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/under-load.mp4 (00:00:04.000, 120 fotogramas, 2.5 s)"
+  },
+  {
+    "seconds": 10.546852200001013,
+    "line": "paso 47: Wait { ms: 50 }"
+  },
+  {
+    "seconds": 10.546852200001013,
+    "line": "  toast: Info: Exportado C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/under-load.mp4 (00:00:04.000, 120 fotogramas, 2.5 s)"
+  },
+  {
+    "seconds": 10.648948499991093,
+    "line": "paso 48: Dump { path: \"C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/step-15.json\" }"
+  },
+  {
+    "seconds": 10.791845600004308,
+    "line": "  toast: Info: Exportado C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/under-load.mp4 (00:00:04.000, 120 fotogramas, 2.5 s)"
+  },
+  {
+    "seconds": 10.791845600004308,
+    "line": "paso 49: Wait { ms: 50 }"
+  },
+  {
+    "seconds": 10.791845600004308,
+    "line": "  toast: Info: Exportado C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/under-load.mp4 (00:00:04.000, 120 fotogramas, 2.5 s)"
+  },
+  {
+    "seconds": 10.842413200007286,
+    "line": "paso 50: Dump { path: \"C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/step-16.json\" }"
+  },
+  {
+    "seconds": 10.944320200011134,
+    "line": "  toast: Info: Exportado C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/under-load.mp4 (00:00:04.000, 120 fotogramas, 2.5 s)"
+  },
+  {
+    "seconds": 11.034016899997368,
+    "line": "paso 51: Wait { ms: 50 }"
+  },
+  {
+    "seconds": 11.034016899997368,
+    "line": "  toast: Info: Exportado C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/under-load.mp4 (00:00:04.000, 120 fotogramas, 2.5 s)"
+  },
+  {
+    "seconds": 11.085086599981878,
+    "line": "paso 52: Dump { path: \"C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/step-17.json\" }"
+  },
+  {
+    "seconds": 11.186272000020836,
+    "line": "  toast: Info: Exportado C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/under-load.mp4 (00:00:04.000, 120 fotogramas, 2.5 s)"
+  },
+  {
+    "seconds": 11.29674130002968,
+    "line": "paso 53: Wait { ms: 50 }"
+  },
+  {
+    "seconds": 11.29674130002968,
+    "line": "  toast: Info: Exportado C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/under-load.mp4 (00:00:04.000, 120 fotogramas, 2.5 s)"
+  },
+  {
+    "seconds": 11.29674130002968,
+    "line": "paso 54: Dump { path: \"C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/step-18.json\" }"
+  },
+  {
+    "seconds": 11.398301600012928,
+    "line": "  toast: Info: Exportado C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/under-load.mp4 (00:00:04.000, 120 fotogramas, 2.5 s)"
+  },
+  {
+    "seconds": 11.492268199974205,
+    "line": "paso 55: Wait { ms: 50 }"
+  },
+  {
+    "seconds": 11.492268199974205,
+    "line": "  toast: Info: Exportado C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/under-load.mp4 (00:00:04.000, 120 fotogramas, 2.5 s)"
+  },
+  {
+    "seconds": 11.542971600021701,
+    "line": "paso 56: Dump { path: \"C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/step-19.json\" }"
+  },
+  {
+    "seconds": 11.644802200025879,
+    "line": "  toast: Info: Exportado C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/under-load.mp4 (00:00:04.000, 120 fotogramas, 2.5 s)"
+  },
+  {
+    "seconds": 11.735201000003144,
+    "line": "paso 57: Assert { markers: None, clips: None, layers: None, items: None, revision: None, playing: Some(false), rate: None, position: Some([4.0333, 4.0334]), tracks: None }"
+  },
+  {
+    "seconds": 11.735201000003144,
+    "line": "  toast: Info: Exportado C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/under-load.mp4 (00:00:04.000, 120 fotogramas, 2.5 s)"
+  },
+  {
+    "seconds": 11.735201000003144,
+    "line": "paso 58: WaitExport { ms: 120000 }"
+  },
+  {
+    "seconds": 11.735201000003144,
+    "line": "  toast: Info: Exportado C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/under-load.mp4 (00:00:04.000, 120 fotogramas, 2.5 s)"
+  },
+  {
+    "seconds": 11.836533599998802,
+    "line": "paso 59: SetOut { t: 12.0 }"
+  },
+  {
+    "seconds": 11.836533599998802,
+    "line": "  toast: Info: Exportado C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/under-load.mp4 (00:00:04.000, 120 fotogramas, 2.5 s)"
+  },
+  {
+    "seconds": 11.887224500009324,
+    "line": "paso 60: Export { preset: \"h264-720p\", dest: \"C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/playback-load.mp4\", range: true, selection: None }"
+  },
+  {
+    "seconds": 11.937784600013401,
+    "line": "paso 61: Log { text: \"PERF_PLAY_EXPORT_ENQUEUED\" }"
+  },
+  {
+    "seconds": 11.937784600013401,
+    "line": "PERF_PLAY_EXPORT_ENQUEUED"
+  },
+  {
+    "seconds": 11.9885894000181,
+    "line": "paso 62: Play"
+  },
+  {
+    "seconds": 12.09010249999119,
+    "line": "paso 63: Log { text: \"PERF_PLAY_BEGIN\" }"
+  },
+  {
+    "seconds": 12.09010249999119,
+    "line": "PERF_PLAY_BEGIN"
+  },
+  {
+    "seconds": 12.191416500019841,
+    "line": "paso 64: Wait { ms: 100 }"
+  },
+  {
+    "seconds": 12.343733999994583,
+    "line": "paso 65: Dump { path: \"C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/play-00.json\" }"
+  },
+  {
+    "seconds": 12.540801300026942,
+    "line": "paso 66: Wait { ms: 100 }"
+  },
+  {
+    "seconds": 12.74507399997674,
+    "line": "paso 67: Dump { path: \"C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/play-01.json\" }"
+  },
+  {
+    "seconds": 12.897918900009245,
+    "line": "paso 1: Log { text: \"PERF_OPEN_BEGIN\" }"
+  },
+  {
+    "seconds": 12.897918900009245,
+    "line": "PERF_OPEN_BEGIN"
+  },
+  {
+    "seconds": 12.897918900009245,
+    "line": "paso 2: Open { path: \"C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/large.transcriptor/project.json\" }"
+  },
+  {
+    "seconds": 12.897918900009245,
+    "line": "paso 3: Assert { markers: None, clips: Some(1000), layers: Some(2), items: Some(20000), revision: None, playing: None, rate: None, position: None, tracks: Some(2) }"
+  },
+  {
+    "seconds": 12.897918900009245,
+    "line": "paso 4: Action { id: \"view.fit\" }"
+  },
+  {
+    "seconds": 12.897918900009245,
+    "line": "paso 5: Seek { t: 1.0 }"
+  },
+  {
+    "seconds": 12.897918900009245,
+    "line": "paso 6: WaitFrame { ms: 15000 }"
+  },
+  {
+    "seconds": 12.897918900009245,
+    "line": "fotograma presentado: seq 1 (posici\u00f3n 00:00:01.000)"
+  },
+  {
+    "seconds": 12.897918900009245,
+    "line": "paso 7: Log { text: \"PERF_OPEN_FRAME_READY\" }"
+  },
+  {
+    "seconds": 12.897918900009245,
+    "line": "PERF_OPEN_FRAME_READY"
+  },
+  {
+    "seconds": 12.897918900009245,
+    "line": "paso 8: SetIn { t: 0.0 }"
+  },
+  {
+    "seconds": 12.897918900009245,
+    "line": "paso 9: SetOut { t: 4.0 }"
+  },
+  {
+    "seconds": 12.897918900009245,
+    "line": "paso 10: Export { preset: \"h264-720p\", dest: \"C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/under-load.mp4\", range: true, selection: None }"
+  },
+  {
+    "seconds": 12.897918900009245,
+    "line": "paso 11: Log { text: \"PERF_EXPORT_ENQUEUED\" }"
+  },
+  {
+    "seconds": 12.897918900009245,
+    "line": "PERF_EXPORT_ENQUEUED"
+  },
+  {
+    "seconds": 12.897918900009245,
+    "line": "paso 12: Seek { t: 4.0 }"
+  },
+  {
+    "seconds": 12.897918900009245,
+    "line": "paso 13: WaitFrame { ms: 15000 }"
+  },
+  {
+    "seconds": 12.897918900009245,
+    "line": "fotograma presentado: seq 2 (posici\u00f3n 00:00:04.000)"
+  },
+  {
+    "seconds": 12.897918900009245,
+    "line": "paso 14: Log { text: \"PERF_SEEK_EXPORT_READY\" }"
+  },
+  {
+    "seconds": 12.897918900009245,
+    "line": "PERF_SEEK_EXPORT_READY"
+  },
+  {
+    "seconds": 12.897918900009245,
+    "line": "paso 15: AdvanceFrames { frames: 1 }"
+  },
+  {
+    "seconds": 12.897918900009245,
+    "line": "paso 16: Log { text: \"PERF_STEP_BEGIN\" }"
+  },
+  {
+    "seconds": 12.897918900009245,
+    "line": "PERF_STEP_BEGIN"
+  },
+  {
+    "seconds": 12.897918900009245,
+    "line": "paso 17: Wait { ms: 50 }"
+  },
+  {
+    "seconds": 12.897918900009245,
+    "line": "paso 18: Dump { path: \"C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/step-00.json\" }"
+  },
+  {
+    "seconds": 12.897918900009245,
+    "line": "paso 19: Wait { ms: 50 }"
+  },
+  {
+    "seconds": 12.897918900009245,
+    "line": "paso 20: Dump { path: \"C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/step-01.json\" }"
+  },
+  {
+    "seconds": 12.897918900009245,
+    "line": "paso 21: Wait { ms: 50 }"
+  },
+  {
+    "seconds": 12.897918900009245,
+    "line": "paso 22: Dump { path: \"C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/step-02.json\" }"
+  },
+  {
+    "seconds": 12.897918900009245,
+    "line": "paso 23: Wait { ms: 50 }"
+  },
+  {
+    "seconds": 12.897918900009245,
+    "line": "paso 24: Dump { path: \"C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/step-03.json\" }"
+  },
+  {
+    "seconds": 12.897918900009245,
+    "line": "paso 25: Wait { ms: 50 }"
+  },
+  {
+    "seconds": 12.897918900009245,
+    "line": "  toast: Info: Exportado C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/under-load.mp4 (00:00:04.000, 120 fotogramas, 2.5 s)"
+  },
+  {
+    "seconds": 12.897918900009245,
+    "line": "paso 26: Dump { path: \"C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/step-04.json\" }"
+  },
+  {
+    "seconds": 12.897918900009245,
+    "line": "  toast: Info: Exportado C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/under-load.mp4 (00:00:04.000, 120 fotogramas, 2.5 s)"
+  },
+  {
+    "seconds": 12.897918900009245,
+    "line": "paso 27: Wait { ms: 50 }"
+  },
+  {
+    "seconds": 12.897918900009245,
+    "line": "  toast: Info: Exportado C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/under-load.mp4 (00:00:04.000, 120 fotogramas, 2.5 s)"
+  },
+  {
+    "seconds": 12.897918900009245,
+    "line": "paso 28: Dump { path: \"C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/step-05.json\" }"
+  },
+  {
+    "seconds": 12.897918900009245,
+    "line": "  toast: Info: Exportado C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/under-load.mp4 (00:00:04.000, 120 fotogramas, 2.5 s)"
+  },
+  {
+    "seconds": 12.897918900009245,
+    "line": "paso 29: Wait { ms: 50 }"
+  },
+  {
+    "seconds": 12.897918900009245,
+    "line": "  toast: Info: Exportado C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/under-load.mp4 (00:00:04.000, 120 fotogramas, 2.5 s)"
+  },
+  {
+    "seconds": 12.897918900009245,
+    "line": "paso 30: Dump { path: \"C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/step-06.json\" }"
+  },
+  {
+    "seconds": 12.897918900009245,
+    "line": "  toast: Info: Exportado C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/under-load.mp4 (00:00:04.000, 120 fotogramas, 2.5 s)"
+  },
+  {
+    "seconds": 12.897918900009245,
+    "line": "paso 31: Wait { ms: 50 }"
+  },
+  {
+    "seconds": 12.897918900009245,
+    "line": "  toast: Info: Exportado C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/under-load.mp4 (00:00:04.000, 120 fotogramas, 2.5 s)"
+  },
+  {
+    "seconds": 12.897918900009245,
+    "line": "paso 32: Dump { path: \"C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/step-07.json\" }"
+  },
+  {
+    "seconds": 12.897918900009245,
+    "line": "  toast: Info: Exportado C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/under-load.mp4 (00:00:04.000, 120 fotogramas, 2.5 s)"
+  },
+  {
+    "seconds": 12.897918900009245,
+    "line": "paso 33: Wait { ms: 50 }"
+  },
+  {
+    "seconds": 12.897918900009245,
+    "line": "  toast: Info: Exportado C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/under-load.mp4 (00:00:04.000, 120 fotogramas, 2.5 s)"
+  },
+  {
+    "seconds": 12.897918900009245,
+    "line": "paso 34: Dump { path: \"C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/step-08.json\" }"
+  },
+  {
+    "seconds": 12.897918900009245,
+    "line": "  toast: Info: Exportado C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/under-load.mp4 (00:00:04.000, 120 fotogramas, 2.5 s)"
+  },
+  {
+    "seconds": 12.897918900009245,
+    "line": "paso 35: Wait { ms: 50 }"
+  },
+  {
+    "seconds": 12.897918900009245,
+    "line": "  toast: Info: Exportado C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/under-load.mp4 (00:00:04.000, 120 fotogramas, 2.5 s)"
+  },
+  {
+    "seconds": 12.897918900009245,
+    "line": "paso 36: Dump { path: \"C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/step-09.json\" }"
+  },
+  {
+    "seconds": 12.897918900009245,
+    "line": "  toast: Info: Exportado C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/under-load.mp4 (00:00:04.000, 120 fotogramas, 2.5 s)"
+  },
+  {
+    "seconds": 12.897918900009245,
+    "line": "paso 37: Wait { ms: 50 }"
+  },
+  {
+    "seconds": 12.897918900009245,
+    "line": "  toast: Info: Exportado C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/under-load.mp4 (00:00:04.000, 120 fotogramas, 2.5 s)"
+  },
+  {
+    "seconds": 12.897918900009245,
+    "line": "paso 38: Dump { path: \"C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/step-10.json\" }"
+  },
+  {
+    "seconds": 12.897918900009245,
+    "line": "  toast: Info: Exportado C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/under-load.mp4 (00:00:04.000, 120 fotogramas, 2.5 s)"
+  },
+  {
+    "seconds": 12.897918900009245,
+    "line": "paso 39: Wait { ms: 50 }"
+  },
+  {
+    "seconds": 12.897918900009245,
+    "line": "  toast: Info: Exportado C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/under-load.mp4 (00:00:04.000, 120 fotogramas, 2.5 s)"
+  },
+  {
+    "seconds": 12.897918900009245,
+    "line": "paso 40: Dump { path: \"C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/step-11.json\" }"
+  },
+  {
+    "seconds": 12.897918900009245,
+    "line": "  toast: Info: Exportado C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/under-load.mp4 (00:00:04.000, 120 fotogramas, 2.5 s)"
+  },
+  {
+    "seconds": 12.897918900009245,
+    "line": "paso 41: Wait { ms: 50 }"
+  },
+  {
+    "seconds": 12.897918900009245,
+    "line": "  toast: Info: Exportado C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/under-load.mp4 (00:00:04.000, 120 fotogramas, 2.5 s)"
+  },
+  {
+    "seconds": 12.897918900009245,
+    "line": "paso 42: Dump { path: \"C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/step-12.json\" }"
+  },
+  {
+    "seconds": 12.897918900009245,
+    "line": "  toast: Info: Exportado C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/under-load.mp4 (00:00:04.000, 120 fotogramas, 2.5 s)"
+  },
+  {
+    "seconds": 12.897918900009245,
+    "line": "paso 43: Wait { ms: 50 }"
+  },
+  {
+    "seconds": 12.897918900009245,
+    "line": "  toast: Info: Exportado C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/under-load.mp4 (00:00:04.000, 120 fotogramas, 2.5 s)"
+  },
+  {
+    "seconds": 12.897918900009245,
+    "line": "paso 44: Dump { path: \"C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/step-13.json\" }"
+  },
+  {
+    "seconds": 12.897918900009245,
+    "line": "  toast: Info: Exportado C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/under-load.mp4 (00:00:04.000, 120 fotogramas, 2.5 s)"
+  },
+  {
+    "seconds": 12.897918900009245,
+    "line": "paso 45: Wait { ms: 50 }"
+  },
+  {
+    "seconds": 12.897918900009245,
+    "line": "  toast: Info: Exportado C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/under-load.mp4 (00:00:04.000, 120 fotogramas, 2.5 s)"
+  },
+  {
+    "seconds": 12.897918900009245,
+    "line": "paso 46: Dump { path: \"C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/step-14.json\" }"
+  },
+  {
+    "seconds": 12.897918900009245,
+    "line": "  toast: Info: Exportado C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/under-load.mp4 (00:00:04.000, 120 fotogramas, 2.5 s)"
+  },
+  {
+    "seconds": 12.897918900009245,
+    "line": "paso 47: Wait { ms: 50 }"
+  },
+  {
+    "seconds": 12.897918900009245,
+    "line": "  toast: Info: Exportado C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/under-load.mp4 (00:00:04.000, 120 fotogramas, 2.5 s)"
+  },
+  {
+    "seconds": 12.897918900009245,
+    "line": "paso 48: Dump { path: \"C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/step-15.json\" }"
+  },
+  {
+    "seconds": 12.897918900009245,
+    "line": "  toast: Info: Exportado C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/under-load.mp4 (00:00:04.000, 120 fotogramas, 2.5 s)"
+  },
+  {
+    "seconds": 12.897918900009245,
+    "line": "paso 49: Wait { ms: 50 }"
+  },
+  {
+    "seconds": 12.897918900009245,
+    "line": "  toast: Info: Exportado C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/under-load.mp4 (00:00:04.000, 120 fotogramas, 2.5 s)"
+  },
+  {
+    "seconds": 12.897918900009245,
+    "line": "paso 50: Dump { path: \"C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/step-16.json\" }"
+  },
+  {
+    "seconds": 12.897918900009245,
+    "line": "  toast: Info: Exportado C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/under-load.mp4 (00:00:04.000, 120 fotogramas, 2.5 s)"
+  },
+  {
+    "seconds": 12.897918900009245,
+    "line": "paso 51: Wait { ms: 50 }"
+  },
+  {
+    "seconds": 12.897918900009245,
+    "line": "  toast: Info: Exportado C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/under-load.mp4 (00:00:04.000, 120 fotogramas, 2.5 s)"
+  },
+  {
+    "seconds": 12.897918900009245,
+    "line": "paso 52: Dump { path: \"C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/step-17.json\" }"
+  },
+  {
+    "seconds": 12.897918900009245,
+    "line": "  toast: Info: Exportado C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/under-load.mp4 (00:00:04.000, 120 fotogramas, 2.5 s)"
+  },
+  {
+    "seconds": 12.897918900009245,
+    "line": "paso 53: Wait { ms: 50 }"
+  },
+  {
+    "seconds": 12.897918900009245,
+    "line": "  toast: Info: Exportado C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/under-load.mp4 (00:00:04.000, 120 fotogramas, 2.5 s)"
+  },
+  {
+    "seconds": 12.897918900009245,
+    "line": "paso 54: Dump { path: \"C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/step-18.json\" }"
+  },
+  {
+    "seconds": 12.897918900009245,
+    "line": "  toast: Info: Exportado C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/under-load.mp4 (00:00:04.000, 120 fotogramas, 2.5 s)"
+  },
+  {
+    "seconds": 12.897918900009245,
+    "line": "paso 55: Wait { ms: 50 }"
+  },
+  {
+    "seconds": 12.897918900009245,
+    "line": "  toast: Info: Exportado C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/under-load.mp4 (00:00:04.000, 120 fotogramas, 2.5 s)"
+  },
+  {
+    "seconds": 12.897918900009245,
+    "line": "paso 56: Dump { path: \"C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/step-19.json\" }"
+  },
+  {
+    "seconds": 12.897918900009245,
+    "line": "  toast: Info: Exportado C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/under-load.mp4 (00:00:04.000, 120 fotogramas, 2.5 s)"
+  },
+  {
+    "seconds": 12.897918900009245,
+    "line": "paso 57: Assert { markers: None, clips: None, layers: None, items: None, revision: None, playing: Some(false), rate: None, position: Some([4.0333, 4.0334]), tracks: None }"
+  },
+  {
+    "seconds": 12.897918900009245,
+    "line": "  toast: Info: Exportado C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/under-load.mp4 (00:00:04.000, 120 fotogramas, 2.5 s)"
+  },
+  {
+    "seconds": 12.897918900009245,
+    "line": "paso 58: WaitExport { ms: 120000 }"
+  },
+  {
+    "seconds": 12.897918900009245,
+    "line": "  toast: Info: Exportado C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/under-load.mp4 (00:00:04.000, 120 fotogramas, 2.5 s)"
+  },
+  {
+    "seconds": 12.897918900009245,
+    "line": "paso 59: SetOut { t: 12.0 }"
+  },
+  {
+    "seconds": 12.897918900009245,
+    "line": "  toast: Info: Exportado C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/under-load.mp4 (00:00:04.000, 120 fotogramas, 2.5 s)"
+  },
+  {
+    "seconds": 12.897918900009245,
+    "line": "paso 60: Export { preset: \"h264-720p\", dest: \"C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/playback-load.mp4\", range: true, selection: None }"
+  },
+  {
+    "seconds": 12.897918900009245,
+    "line": "paso 61: Log { text: \"PERF_PLAY_EXPORT_ENQUEUED\" }"
+  },
+  {
+    "seconds": 12.897918900009245,
+    "line": "PERF_PLAY_EXPORT_ENQUEUED"
+  },
+  {
+    "seconds": 12.897918900009245,
+    "line": "paso 62: Play"
+  },
+  {
+    "seconds": 12.897918900009245,
+    "line": "paso 63: Log { text: \"PERF_PLAY_BEGIN\" }"
+  },
+  {
+    "seconds": 12.897918900009245,
+    "line": "PERF_PLAY_BEGIN"
+  },
+  {
+    "seconds": 12.897918900009245,
+    "line": "paso 64: Wait { ms: 100 }"
+  },
+  {
+    "seconds": 12.897918900009245,
+    "line": "paso 65: Dump { path: \"C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/play-00.json\" }"
+  },
+  {
+    "seconds": 12.897918900009245,
+    "line": "paso 66: Wait { ms: 100 }"
+  },
+  {
+    "seconds": 12.897918900009245,
+    "line": "paso 67: Dump { path: \"C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/play-01.json\" }"
+  },
+  {
+    "seconds": 13.003532000002451,
+    "line": "paso 68: Wait { ms: 100 }"
+  },
+  {
+    "seconds": 13.207504799996968,
+    "line": "paso 69: Dump { path: \"C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/play-02.json\" }"
+  },
+  {
+    "seconds": 13.593686999985948,
+    "line": "paso 70: Wait { ms: 100 }"
+  },
+  {
+    "seconds": 13.748925600026269,
+    "line": "paso 71: Dump { path: \"C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/play-03.json\" }"
+  },
+  {
+    "seconds": 14.272342499985825,
+    "line": "paso 72: Wait { ms: 100 }"
+  },
+  {
+    "seconds": 14.48017210001126,
+    "line": "paso 73: Dump { path: \"C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/play-04.json\" }"
+  },
+  {
+    "seconds": 15.019760499999393,
+    "line": "paso 74: Wait { ms: 100 }"
+  },
+  {
+    "seconds": 15.242430999991484,
+    "line": "paso 75: Dump { path: \"C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/play-05.json\" }"
+  },
+  {
+    "seconds": 15.839079199999105,
+    "line": "paso 76: Wait { ms: 100 }"
+  },
+  {
+    "seconds": 15.99207189999288,
+    "line": "paso 77: Dump { path: \"C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/play-06.json\" }"
+  },
+  {
+    "seconds": 16.437189400021452,
+    "line": "paso 78: Wait { ms: 100 }"
+  },
+  {
+    "seconds": 16.703372600022703,
+    "line": "paso 79: Dump { path: \"C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/play-07.json\" }"
+  },
+  {
+    "seconds": 17.190483600017615,
+    "line": "paso 80: Wait { ms: 100 }"
+  },
+  {
+    "seconds": 17.398189799976535,
+    "line": "paso 81: Dump { path: \"C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/play-08.json\" }"
+  },
+  {
+    "seconds": 17.933552699978463,
+    "line": "paso 82: Wait { ms: 100 }"
+  },
+  {
+    "seconds": 18.193597199977376,
+    "line": "paso 83: Dump { path: \"C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/play-09.json\" }"
+  },
+  {
+    "seconds": 18.575179699982982,
+    "line": "paso 84: Wait { ms: 100 }"
+  },
+  {
+    "seconds": 18.78009740001289,
+    "line": "paso 85: Dump { path: \"C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/play-10.json\" }"
+  },
+  {
+    "seconds": 19.153635900001973,
+    "line": "paso 86: Wait { ms: 100 }"
+  },
+  {
+    "seconds": 19.307242700015195,
+    "line": "paso 87: Dump { path: \"C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/play-11.json\" }"
+  },
+  {
+    "seconds": 19.40912790002767,
+    "line": "  toast: Info: Exportado C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/playback-load.mp4 (00:00:12.000, 360 fotogramas, 7.1 s)"
+  },
+  {
+    "seconds": 19.507077799993567,
+    "line": "paso 88: Wait { ms: 100 }"
+  },
+  {
+    "seconds": 19.507077799993567,
+    "line": "  toast: Info: Exportado C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/playback-load.mp4 (00:00:12.000, 360 fotogramas, 7.1 s)"
+  },
+  {
+    "seconds": 19.65972180000972,
+    "line": "paso 89: Dump { path: \"C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/play-12.json\" }"
+  },
+  {
+    "seconds": 19.76186189998407,
+    "line": "  toast: Info: Exportado C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/playback-load.mp4 (00:00:12.000, 360 fotogramas, 7.1 s)"
+  },
+  {
+    "seconds": 19.857126599992625,
+    "line": "paso 90: Wait { ms: 100 }"
+  },
+  {
+    "seconds": 19.857126599992625,
+    "line": "  toast: Info: Exportado C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/playback-load.mp4 (00:00:12.000, 360 fotogramas, 7.1 s)"
+  },
+  {
+    "seconds": 20.059887400013395,
+    "line": "paso 91: Dump { path: \"C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/play-13.json\" }"
+  },
+  {
+    "seconds": 20.162454799981788,
+    "line": "  toast: Info: Exportado C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/playback-load.mp4 (00:00:12.000, 360 fotogramas, 7.1 s)"
+  },
+  {
+    "seconds": 20.258566799981054,
+    "line": "paso 92: Wait { ms: 100 }"
+  },
+  {
+    "seconds": 20.258566799981054,
+    "line": "  toast: Info: Exportado C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/playback-load.mp4 (00:00:12.000, 360 fotogramas, 7.1 s)"
+  },
+  {
+    "seconds": 20.411174300010316,
+    "line": "paso 93: Dump { path: \"C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/play-14.json\" }"
+  },
+  {
+    "seconds": 20.513177999993786,
+    "line": "  toast: Info: Exportado C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/playback-load.mp4 (00:00:12.000, 360 fotogramas, 7.1 s)"
+  },
+  {
+    "seconds": 20.609348200028762,
+    "line": "paso 94: Wait { ms: 100 }"
+  },
+  {
+    "seconds": 20.609348200028762,
+    "line": "  toast: Info: Exportado C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/playback-load.mp4 (00:00:12.000, 360 fotogramas, 7.1 s)"
+  },
+  {
+    "seconds": 20.761457699991297,
+    "line": "paso 95: Dump { path: \"C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/play-15.json\" }"
+  },
+  {
+    "seconds": 20.863091800012626,
+    "line": "  toast: Info: Exportado C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/playback-load.mp4 (00:00:12.000, 360 fotogramas, 7.1 s)"
+  },
+  {
+    "seconds": 20.955436800024472,
+    "line": "paso 96: Wait { ms: 100 }"
+  },
+  {
+    "seconds": 20.955436800024472,
+    "line": "  toast: Info: Exportado C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/playback-load.mp4 (00:00:12.000, 360 fotogramas, 7.1 s)"
+  },
+  {
+    "seconds": 21.108056500030216,
+    "line": "paso 97: Dump { path: \"C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/play-16.json\" }"
+  },
+  {
+    "seconds": 21.261411699990276,
+    "line": "  toast: Info: Exportado C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/playback-load.mp4 (00:00:12.000, 360 fotogramas, 7.1 s)"
+  },
+  {
+    "seconds": 21.3579268999747,
+    "line": "paso 98: Wait { ms: 100 }"
+  },
+  {
+    "seconds": 21.3579268999747,
+    "line": "  toast: Info: Exportado C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/playback-load.mp4 (00:00:12.000, 360 fotogramas, 7.1 s)"
+  },
+  {
+    "seconds": 21.560923099983484,
+    "line": "paso 99: Dump { path: \"C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/play-17.json\" }"
+  },
+  {
+    "seconds": 21.662524099985603,
+    "line": "  toast: Info: Exportado C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/playback-load.mp4 (00:00:12.000, 360 fotogramas, 7.1 s)"
+  },
+  {
+    "seconds": 21.757289599976502,
+    "line": "paso 100: Wait { ms: 100 }"
+  },
+  {
+    "seconds": 21.757289599976502,
+    "line": "  toast: Info: Exportado C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/playback-load.mp4 (00:00:12.000, 360 fotogramas, 7.1 s)"
+  },
+  {
+    "seconds": 21.91010420001112,
+    "line": "paso 101: Dump { path: \"C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/play-18.json\" }"
+  },
+  {
+    "seconds": 22.011584800027777,
+    "line": "  toast: Info: Exportado C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/playback-load.mp4 (00:00:12.000, 360 fotogramas, 7.1 s)"
+  },
+  {
+    "seconds": 22.105198599980213,
+    "line": "paso 102: Wait { ms: 100 }"
+  },
+  {
+    "seconds": 22.105198599980213,
+    "line": "  toast: Info: Exportado C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/playback-load.mp4 (00:00:12.000, 360 fotogramas, 7.1 s)"
+  },
+  {
+    "seconds": 22.207157400029246,
+    "line": "paso 103: Dump { path: \"C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/play-19.json\" }"
+  },
+  {
+    "seconds": 22.399039999989327,
+    "line": "  toast: Info: Exportado C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/playback-load.mp4 (00:00:12.000, 360 fotogramas, 7.1 s)"
+  },
+  {
+    "seconds": 22.399039999989327,
+    "line": "paso 104: Wait { ms: 100 }"
+  },
+  {
+    "seconds": 22.399039999989327,
+    "line": "  toast: Info: Exportado C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/playback-load.mp4 (00:00:12.000, 360 fotogramas, 7.1 s)"
+  },
+  {
+    "seconds": 22.551815500017256,
+    "line": "paso 105: Dump { path: \"C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/play-20.json\" }"
+  },
+  {
+    "seconds": 22.653516400023364,
+    "line": "  toast: Info: Exportado C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/playback-load.mp4 (00:00:12.000, 360 fotogramas, 7.1 s)"
+  },
+  {
+    "seconds": 22.7468856999767,
+    "line": "paso 106: Wait { ms: 100 }"
+  },
+  {
+    "seconds": 22.7468856999767,
+    "line": "  toast: Info: Exportado C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/playback-load.mp4 (00:00:12.000, 360 fotogramas, 7.1 s)"
+  },
+  {
+    "seconds": 22.848206700000446,
+    "line": "paso 107: Dump { path: \"C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/play-21.json\" }"
+  },
+  {
+    "seconds": 22.949955600022804,
+    "line": "  toast: Info: Exportado C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/playback-load.mp4 (00:00:12.000, 360 fotogramas, 7.1 s)"
+  },
+  {
+    "seconds": 23.05710109998472,
+    "line": "paso 108: Wait { ms: 100 }"
+  },
+  {
+    "seconds": 23.05710109998472,
+    "line": "  toast: Info: Exportado C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/playback-load.mp4 (00:00:12.000, 360 fotogramas, 7.1 s)"
+  },
+  {
+    "seconds": 23.15865080000367,
+    "line": "paso 109: Dump { path: \"C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/play-22.json\" }"
+  },
+  {
+    "seconds": 23.3548389999778,
+    "line": "  toast: Info: Exportado C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/playback-load.mp4 (00:00:12.000, 360 fotogramas, 7.1 s)"
+  },
+  {
+    "seconds": 23.3548389999778,
+    "line": "paso 110: Wait { ms: 100 }"
+  },
+  {
+    "seconds": 23.3548389999778,
+    "line": "  toast: Info: Exportado C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/playback-load.mp4 (00:00:12.000, 360 fotogramas, 7.1 s)"
+  },
+  {
+    "seconds": 23.50766649999423,
+    "line": "paso 111: Dump { path: \"C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/play-23.json\" }"
+  },
+  {
+    "seconds": 23.609217900026124,
+    "line": "  toast: Info: Exportado C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/playback-load.mp4 (00:00:12.000, 360 fotogramas, 7.1 s)"
+  },
+  {
+    "seconds": 23.70307759998832,
+    "line": "paso 112: Wait { ms: 100 }"
+  },
+  {
+    "seconds": 23.70307759998832,
+    "line": "  toast: Info: Exportado C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/playback-load.mp4 (00:00:12.000, 360 fotogramas, 7.1 s)"
+  },
+  {
+    "seconds": 23.80558079999173,
+    "line": "paso 113: Dump { path: \"C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/play-24.json\" }"
+  },
+  {
+    "seconds": 23.946573799999896,
+    "line": "  toast: Info: Exportado C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/playback-load.mp4 (00:00:12.000, 360 fotogramas, 7.1 s)"
+  },
+  {
+    "seconds": 23.946573799999896,
+    "line": "paso 114: Wait { ms: 100 }"
+  },
+  {
+    "seconds": 23.946573799999896,
+    "line": "  toast: Info: Exportado C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/playback-load.mp4 (00:00:12.000, 360 fotogramas, 7.1 s)"
+  },
+  {
+    "seconds": 24.048244500008877,
+    "line": "paso 115: Dump { path: \"C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/play-25.json\" }"
+  },
+  {
+    "seconds": 24.149342200020328,
+    "line": "  toast: Info: Exportado C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/playback-load.mp4 (00:00:12.000, 360 fotogramas, 7.1 s)"
+  },
+  {
+    "seconds": 24.23853680002503,
+    "line": "paso 116: Wait { ms: 100 }"
+  },
+  {
+    "seconds": 24.34010049997596,
+    "line": "paso 117: Dump { path: \"C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/play-26.json\" }"
+  },
+  {
+    "seconds": 24.53292440000223,
+    "line": "paso 118: Wait { ms: 100 }"
+  },
+  {
+    "seconds": 24.634579200006556,
+    "line": "paso 119: Dump { path: \"C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/play-27.json\" }"
+  },
+  {
+    "seconds": 24.82954950002022,
+    "line": "paso 120: Wait { ms: 100 }"
+  },
+  {
+    "seconds": 24.931441200023983,
+    "line": "paso 121: Dump { path: \"C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/play-28.json\" }"
+  },
+  {
+    "seconds": 25.072843400004786,
+    "line": "paso 122: Wait { ms: 100 }"
+  },
+  {
+    "seconds": 25.22574429999804,
+    "line": "paso 123: Dump { path: \"C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/play-29.json\" }"
+  },
+  {
+    "seconds": 25.42720500001451,
+    "line": "paso 124: Pause"
+  },
+  {
+    "seconds": 25.478258099989034,
+    "line": "paso 125: Wait { ms: 500 }"
+  },
+  {
+    "seconds": 25.98558999999659,
+    "line": "paso 126: Log { text: \"PERF_PLAY_END\" }"
+  },
+  {
+    "seconds": 25.98558999999659,
+    "line": "PERF_PLAY_END"
+  },
+  {
+    "seconds": 26.036231799982488,
+    "line": "paso 127: Dump { path: \"C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/final-state.json\" }"
+  },
+  {
+    "seconds": 26.230120700027328,
+    "line": "paso 128: WaitExport { ms: 120000 }"
+  },
+  {
+    "seconds": 26.281240699987393,
+    "line": "paso 129: SelectItem { layer: 0, index: 9999 }"
+  },
+  {
+    "seconds": 26.332234899979085,
+    "line": "paso 130: View { mode: \"source\" }"
+  },
+  {
+    "seconds": 26.332234899979085,
+    "line": "paso 131: Action { id: \"view.fit\" }"
+  },
+  {
+    "seconds": 26.332234899979085,
+    "line": "paso 132: Log { text: \"PERF_CACHE_BEGIN\" }"
+  },
+  {
+    "seconds": 26.332234899979085,
+    "line": "PERF_CACHE_BEGIN"
+  },
+  {
+    "seconds": 26.332234899979085,
+    "line": "paso 133: Seek { t: 1.0 }"
+  },
+  {
+    "seconds": 26.332234899979085,
+    "line": "paso 134: WaitFrame { ms: 15000 }"
+  },
+  {
+    "seconds": 26.592591100023128,
+    "line": "fotograma presentado: seq 321 (posici\u00f3n 00:00:01.000)"
+  },
+  {
+    "seconds": 26.592591100023128,
+    "line": "paso 135: Log { text: \"PERF_CACHE_SOURCE_FRAME_READY\" }"
+  },
+  {
+    "seconds": 26.592591100023128,
+    "line": "PERF_CACHE_SOURCE_FRAME_READY"
+  },
+  {
+    "seconds": 26.592591100023128,
+    "line": "paso 136: Play"
+  },
+  {
+    "seconds": 26.592591100023128,
+    "line": "paso 137: Wait { ms: 100 }"
+  },
+  {
+    "seconds": 26.745130600000266,
+    "line": "paso 138: Dump { path: \"C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/cache-00.json\" }"
+  },
+  {
+    "seconds": 26.846429600031115,
+    "line": "paso 139: Wait { ms: 100 }"
+  },
+  {
+    "seconds": 26.942987899994478,
+    "line": "paso 140: Dump { path: \"C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/cache-01.json\" }"
+  },
+  {
+    "seconds": 27.045167199976277,
+    "line": "paso 141: Wait { ms: 100 }"
+  },
+  {
+    "seconds": 27.146082199993543,
+    "line": "paso 142: Dump { path: \"C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/cache-02.json\" }"
+  },
+  {
+    "seconds": 27.358905200031586,
+    "line": "paso 143: Wait { ms: 100 }"
+  },
+  {
+    "seconds": 27.358905200031586,
+    "line": "paso 144: Dump { path: \"C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/cache-03.json\" }"
+  },
+  {
+    "seconds": 27.554713700024877,
+    "line": "paso 145: Wait { ms: 100 }"
+  },
+  {
+    "seconds": 27.60528429999249,
+    "line": "paso 146: Dump { path: \"C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/cache-04.json\" }"
+  },
+  {
+    "seconds": 27.706811300013214,
+    "line": "paso 1: Log { text: \"PERF_OPEN_BEGIN\" }"
+  },
+  {
+    "seconds": 27.706811300013214,
+    "line": "PERF_OPEN_BEGIN"
+  },
+  {
+    "seconds": 27.706811300013214,
+    "line": "paso 2: Open { path: \"C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/large.transcriptor/project.json\" }"
+  },
+  {
+    "seconds": 27.706811300013214,
+    "line": "paso 3: Assert { markers: None, clips: Some(1000), layers: Some(2), items: Some(20000), revision: None, playing: None, rate: None, position: None, tracks: Some(2) }"
+  },
+  {
+    "seconds": 27.706811300013214,
+    "line": "paso 4: Action { id: \"view.fit\" }"
+  },
+  {
+    "seconds": 27.706811300013214,
+    "line": "paso 5: Seek { t: 1.0 }"
+  },
+  {
+    "seconds": 27.706811300013214,
+    "line": "paso 6: WaitFrame { ms: 15000 }"
+  },
+  {
+    "seconds": 27.706811300013214,
+    "line": "fotograma presentado: seq 1 (posici\u00f3n 00:00:01.000)"
+  },
+  {
+    "seconds": 27.706811300013214,
+    "line": "paso 7: Log { text: \"PERF_OPEN_FRAME_READY\" }"
+  },
+  {
+    "seconds": 27.706811300013214,
+    "line": "PERF_OPEN_FRAME_READY"
+  },
+  {
+    "seconds": 27.706811300013214,
+    "line": "paso 8: SetIn { t: 0.0 }"
+  },
+  {
+    "seconds": 27.706811300013214,
+    "line": "paso 9: SetOut { t: 4.0 }"
+  },
+  {
+    "seconds": 27.706811300013214,
+    "line": "paso 10: Export { preset: \"h264-720p\", dest: \"C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/under-load.mp4\", range: true, selection: None }"
+  },
+  {
+    "seconds": 27.706811300013214,
+    "line": "paso 11: Log { text: \"PERF_EXPORT_ENQUEUED\" }"
+  },
+  {
+    "seconds": 27.706811300013214,
+    "line": "PERF_EXPORT_ENQUEUED"
+  },
+  {
+    "seconds": 27.706811300013214,
+    "line": "paso 12: Seek { t: 4.0 }"
+  },
+  {
+    "seconds": 27.706811300013214,
+    "line": "paso 13: WaitFrame { ms: 15000 }"
+  },
+  {
+    "seconds": 27.706811300013214,
+    "line": "fotograma presentado: seq 2 (posici\u00f3n 00:00:04.000)"
+  },
+  {
+    "seconds": 27.706811300013214,
+    "line": "paso 14: Log { text: \"PERF_SEEK_EXPORT_READY\" }"
+  },
+  {
+    "seconds": 27.706811300013214,
+    "line": "PERF_SEEK_EXPORT_READY"
+  },
+  {
+    "seconds": 27.706811300013214,
+    "line": "paso 15: AdvanceFrames { frames: 1 }"
+  },
+  {
+    "seconds": 27.706811300013214,
+    "line": "paso 16: Log { text: \"PERF_STEP_BEGIN\" }"
+  },
+  {
+    "seconds": 27.706811300013214,
+    "line": "PERF_STEP_BEGIN"
+  },
+  {
+    "seconds": 27.706811300013214,
+    "line": "paso 17: Wait { ms: 50 }"
+  },
+  {
+    "seconds": 27.706811300013214,
+    "line": "paso 18: Dump { path: \"C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/step-00.json\" }"
+  },
+  {
+    "seconds": 27.706811300013214,
+    "line": "paso 19: Wait { ms: 50 }"
+  },
+  {
+    "seconds": 27.706811300013214,
+    "line": "paso 20: Dump { path: \"C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/step-01.json\" }"
+  },
+  {
+    "seconds": 27.706811300013214,
+    "line": "paso 21: Wait { ms: 50 }"
+  },
+  {
+    "seconds": 27.706811300013214,
+    "line": "paso 22: Dump { path: \"C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/step-02.json\" }"
+  },
+  {
+    "seconds": 27.706811300013214,
+    "line": "paso 23: Wait { ms: 50 }"
+  },
+  {
+    "seconds": 27.706811300013214,
+    "line": "paso 24: Dump { path: \"C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/step-03.json\" }"
+  },
+  {
+    "seconds": 27.706811300013214,
+    "line": "paso 25: Wait { ms: 50 }"
+  },
+  {
+    "seconds": 27.706811300013214,
+    "line": "  toast: Info: Exportado C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/under-load.mp4 (00:00:04.000, 120 fotogramas, 2.5 s)"
+  },
+  {
+    "seconds": 27.706811300013214,
+    "line": "paso 26: Dump { path: \"C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/step-04.json\" }"
+  },
+  {
+    "seconds": 27.706811300013214,
+    "line": "  toast: Info: Exportado C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/under-load.mp4 (00:00:04.000, 120 fotogramas, 2.5 s)"
+  },
+  {
+    "seconds": 27.706811300013214,
+    "line": "paso 27: Wait { ms: 50 }"
+  },
+  {
+    "seconds": 27.706811300013214,
+    "line": "  toast: Info: Exportado C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/under-load.mp4 (00:00:04.000, 120 fotogramas, 2.5 s)"
+  },
+  {
+    "seconds": 27.706811300013214,
+    "line": "paso 28: Dump { path: \"C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/step-05.json\" }"
+  },
+  {
+    "seconds": 27.706811300013214,
+    "line": "  toast: Info: Exportado C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/under-load.mp4 (00:00:04.000, 120 fotogramas, 2.5 s)"
+  },
+  {
+    "seconds": 27.706811300013214,
+    "line": "paso 29: Wait { ms: 50 }"
+  },
+  {
+    "seconds": 27.706811300013214,
+    "line": "  toast: Info: Exportado C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/under-load.mp4 (00:00:04.000, 120 fotogramas, 2.5 s)"
+  },
+  {
+    "seconds": 27.706811300013214,
+    "line": "paso 30: Dump { path: \"C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/step-06.json\" }"
+  },
+  {
+    "seconds": 27.706811300013214,
+    "line": "  toast: Info: Exportado C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/under-load.mp4 (00:00:04.000, 120 fotogramas, 2.5 s)"
+  },
+  {
+    "seconds": 27.706811300013214,
+    "line": "paso 31: Wait { ms: 50 }"
+  },
+  {
+    "seconds": 27.706811300013214,
+    "line": "  toast: Info: Exportado C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/under-load.mp4 (00:00:04.000, 120 fotogramas, 2.5 s)"
+  },
+  {
+    "seconds": 27.706811300013214,
+    "line": "paso 32: Dump { path: \"C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/step-07.json\" }"
+  },
+  {
+    "seconds": 27.706811300013214,
+    "line": "  toast: Info: Exportado C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/under-load.mp4 (00:00:04.000, 120 fotogramas, 2.5 s)"
+  },
+  {
+    "seconds": 27.706811300013214,
+    "line": "paso 33: Wait { ms: 50 }"
+  },
+  {
+    "seconds": 27.706811300013214,
+    "line": "  toast: Info: Exportado C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/under-load.mp4 (00:00:04.000, 120 fotogramas, 2.5 s)"
+  },
+  {
+    "seconds": 27.706811300013214,
+    "line": "paso 34: Dump { path: \"C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/step-08.json\" }"
+  },
+  {
+    "seconds": 27.706811300013214,
+    "line": "  toast: Info: Exportado C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/under-load.mp4 (00:00:04.000, 120 fotogramas, 2.5 s)"
+  },
+  {
+    "seconds": 27.706811300013214,
+    "line": "paso 35: Wait { ms: 50 }"
+  },
+  {
+    "seconds": 27.706811300013214,
+    "line": "  toast: Info: Exportado C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/under-load.mp4 (00:00:04.000, 120 fotogramas, 2.5 s)"
+  },
+  {
+    "seconds": 27.706811300013214,
+    "line": "paso 36: Dump { path: \"C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/step-09.json\" }"
+  },
+  {
+    "seconds": 27.706811300013214,
+    "line": "  toast: Info: Exportado C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/under-load.mp4 (00:00:04.000, 120 fotogramas, 2.5 s)"
+  },
+  {
+    "seconds": 27.706811300013214,
+    "line": "paso 37: Wait { ms: 50 }"
+  },
+  {
+    "seconds": 27.706811300013214,
+    "line": "  toast: Info: Exportado C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/under-load.mp4 (00:00:04.000, 120 fotogramas, 2.5 s)"
+  },
+  {
+    "seconds": 27.706811300013214,
+    "line": "paso 38: Dump { path: \"C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/step-10.json\" }"
+  },
+  {
+    "seconds": 27.706811300013214,
+    "line": "  toast: Info: Exportado C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/under-load.mp4 (00:00:04.000, 120 fotogramas, 2.5 s)"
+  },
+  {
+    "seconds": 27.706811300013214,
+    "line": "paso 39: Wait { ms: 50 }"
+  },
+  {
+    "seconds": 27.706811300013214,
+    "line": "  toast: Info: Exportado C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/under-load.mp4 (00:00:04.000, 120 fotogramas, 2.5 s)"
+  },
+  {
+    "seconds": 27.706811300013214,
+    "line": "paso 40: Dump { path: \"C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/step-11.json\" }"
+  },
+  {
+    "seconds": 27.706811300013214,
+    "line": "  toast: Info: Exportado C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/under-load.mp4 (00:00:04.000, 120 fotogramas, 2.5 s)"
+  },
+  {
+    "seconds": 27.706811300013214,
+    "line": "paso 41: Wait { ms: 50 }"
+  },
+  {
+    "seconds": 27.706811300013214,
+    "line": "  toast: Info: Exportado C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/under-load.mp4 (00:00:04.000, 120 fotogramas, 2.5 s)"
+  },
+  {
+    "seconds": 27.706811300013214,
+    "line": "paso 42: Dump { path: \"C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/step-12.json\" }"
+  },
+  {
+    "seconds": 27.706811300013214,
+    "line": "  toast: Info: Exportado C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/under-load.mp4 (00:00:04.000, 120 fotogramas, 2.5 s)"
+  },
+  {
+    "seconds": 27.706811300013214,
+    "line": "paso 43: Wait { ms: 50 }"
+  },
+  {
+    "seconds": 27.706811300013214,
+    "line": "  toast: Info: Exportado C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/under-load.mp4 (00:00:04.000, 120 fotogramas, 2.5 s)"
+  },
+  {
+    "seconds": 27.706811300013214,
+    "line": "paso 44: Dump { path: \"C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/step-13.json\" }"
+  },
+  {
+    "seconds": 27.706811300013214,
+    "line": "  toast: Info: Exportado C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/under-load.mp4 (00:00:04.000, 120 fotogramas, 2.5 s)"
+  },
+  {
+    "seconds": 27.706811300013214,
+    "line": "paso 45: Wait { ms: 50 }"
+  },
+  {
+    "seconds": 27.706811300013214,
+    "line": "  toast: Info: Exportado C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/under-load.mp4 (00:00:04.000, 120 fotogramas, 2.5 s)"
+  },
+  {
+    "seconds": 27.706811300013214,
+    "line": "paso 46: Dump { path: \"C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/step-14.json\" }"
+  },
+  {
+    "seconds": 27.706811300013214,
+    "line": "  toast: Info: Exportado C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/under-load.mp4 (00:00:04.000, 120 fotogramas, 2.5 s)"
+  },
+  {
+    "seconds": 27.706811300013214,
+    "line": "paso 47: Wait { ms: 50 }"
+  },
+  {
+    "seconds": 27.706811300013214,
+    "line": "  toast: Info: Exportado C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/under-load.mp4 (00:00:04.000, 120 fotogramas, 2.5 s)"
+  },
+  {
+    "seconds": 27.706811300013214,
+    "line": "paso 48: Dump { path: \"C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/step-15.json\" }"
+  },
+  {
+    "seconds": 27.706811300013214,
+    "line": "  toast: Info: Exportado C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/under-load.mp4 (00:00:04.000, 120 fotogramas, 2.5 s)"
+  },
+  {
+    "seconds": 27.706811300013214,
+    "line": "paso 49: Wait { ms: 50 }"
+  },
+  {
+    "seconds": 27.706811300013214,
+    "line": "  toast: Info: Exportado C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/under-load.mp4 (00:00:04.000, 120 fotogramas, 2.5 s)"
+  },
+  {
+    "seconds": 27.706811300013214,
+    "line": "paso 50: Dump { path: \"C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/step-16.json\" }"
+  },
+  {
+    "seconds": 27.706811300013214,
+    "line": "  toast: Info: Exportado C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/under-load.mp4 (00:00:04.000, 120 fotogramas, 2.5 s)"
+  },
+  {
+    "seconds": 27.706811300013214,
+    "line": "paso 51: Wait { ms: 50 }"
+  },
+  {
+    "seconds": 27.706811300013214,
+    "line": "  toast: Info: Exportado C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/under-load.mp4 (00:00:04.000, 120 fotogramas, 2.5 s)"
+  },
+  {
+    "seconds": 27.706811300013214,
+    "line": "paso 52: Dump { path: \"C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/step-17.json\" }"
+  },
+  {
+    "seconds": 27.706811300013214,
+    "line": "  toast: Info: Exportado C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/under-load.mp4 (00:00:04.000, 120 fotogramas, 2.5 s)"
+  },
+  {
+    "seconds": 27.706811300013214,
+    "line": "paso 53: Wait { ms: 50 }"
+  },
+  {
+    "seconds": 27.706811300013214,
+    "line": "  toast: Info: Exportado C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/under-load.mp4 (00:00:04.000, 120 fotogramas, 2.5 s)"
+  },
+  {
+    "seconds": 27.706811300013214,
+    "line": "paso 54: Dump { path: \"C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/step-18.json\" }"
+  },
+  {
+    "seconds": 27.706811300013214,
+    "line": "  toast: Info: Exportado C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/under-load.mp4 (00:00:04.000, 120 fotogramas, 2.5 s)"
+  },
+  {
+    "seconds": 27.706811300013214,
+    "line": "paso 55: Wait { ms: 50 }"
+  },
+  {
+    "seconds": 27.706811300013214,
+    "line": "  toast: Info: Exportado C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/under-load.mp4 (00:00:04.000, 120 fotogramas, 2.5 s)"
+  },
+  {
+    "seconds": 27.706811300013214,
+    "line": "paso 56: Dump { path: \"C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/step-19.json\" }"
+  },
+  {
+    "seconds": 27.706811300013214,
+    "line": "  toast: Info: Exportado C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/under-load.mp4 (00:00:04.000, 120 fotogramas, 2.5 s)"
+  },
+  {
+    "seconds": 27.706811300013214,
+    "line": "paso 57: Assert { markers: None, clips: None, layers: None, items: None, revision: None, playing: Some(false), rate: None, position: Some([4.0333, 4.0334]), tracks: None }"
+  },
+  {
+    "seconds": 27.706811300013214,
+    "line": "  toast: Info: Exportado C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/under-load.mp4 (00:00:04.000, 120 fotogramas, 2.5 s)"
+  },
+  {
+    "seconds": 27.706811300013214,
+    "line": "paso 58: WaitExport { ms: 120000 }"
+  },
+  {
+    "seconds": 27.706811300013214,
+    "line": "  toast: Info: Exportado C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/under-load.mp4 (00:00:04.000, 120 fotogramas, 2.5 s)"
+  },
+  {
+    "seconds": 27.706811300013214,
+    "line": "paso 59: SetOut { t: 12.0 }"
+  },
+  {
+    "seconds": 27.706811300013214,
+    "line": "  toast: Info: Exportado C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/under-load.mp4 (00:00:04.000, 120 fotogramas, 2.5 s)"
+  },
+  {
+    "seconds": 27.706811300013214,
+    "line": "paso 60: Export { preset: \"h264-720p\", dest: \"C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/playback-load.mp4\", range: true, selection: None }"
+  },
+  {
+    "seconds": 27.706811300013214,
+    "line": "paso 61: Log { text: \"PERF_PLAY_EXPORT_ENQUEUED\" }"
+  },
+  {
+    "seconds": 27.706811300013214,
+    "line": "PERF_PLAY_EXPORT_ENQUEUED"
+  },
+  {
+    "seconds": 27.706811300013214,
+    "line": "paso 62: Play"
+  },
+  {
+    "seconds": 27.706811300013214,
+    "line": "paso 63: Log { text: \"PERF_PLAY_BEGIN\" }"
+  },
+  {
+    "seconds": 27.706811300013214,
+    "line": "PERF_PLAY_BEGIN"
+  },
+  {
+    "seconds": 27.706811300013214,
+    "line": "paso 64: Wait { ms: 100 }"
+  },
+  {
+    "seconds": 27.706811300013214,
+    "line": "paso 65: Dump { path: \"C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/play-00.json\" }"
+  },
+  {
+    "seconds": 27.706811300013214,
+    "line": "paso 66: Wait { ms: 100 }"
+  },
+  {
+    "seconds": 27.706811300013214,
+    "line": "paso 67: Dump { path: \"C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/play-01.json\" }"
+  },
+  {
+    "seconds": 27.706811300013214,
+    "line": "paso 68: Wait { ms: 100 }"
+  },
+  {
+    "seconds": 27.706811300013214,
+    "line": "paso 69: Dump { path: \"C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/play-02.json\" }"
+  },
+  {
+    "seconds": 27.706811300013214,
+    "line": "paso 70: Wait { ms: 100 }"
+  },
+  {
+    "seconds": 27.706811300013214,
+    "line": "paso 71: Dump { path: \"C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/play-03.json\" }"
+  },
+  {
+    "seconds": 27.706811300013214,
+    "line": "paso 72: Wait { ms: 100 }"
+  },
+  {
+    "seconds": 27.706811300013214,
+    "line": "paso 73: Dump { path: \"C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/play-04.json\" }"
+  },
+  {
+    "seconds": 27.706811300013214,
+    "line": "paso 74: Wait { ms: 100 }"
+  },
+  {
+    "seconds": 27.706811300013214,
+    "line": "paso 75: Dump { path: \"C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/play-05.json\" }"
+  },
+  {
+    "seconds": 27.706811300013214,
+    "line": "paso 76: Wait { ms: 100 }"
+  },
+  {
+    "seconds": 27.706811300013214,
+    "line": "paso 77: Dump { path: \"C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/play-06.json\" }"
+  },
+  {
+    "seconds": 27.706811300013214,
+    "line": "paso 78: Wait { ms: 100 }"
+  },
+  {
+    "seconds": 27.706811300013214,
+    "line": "paso 79: Dump { path: \"C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/play-07.json\" }"
+  },
+  {
+    "seconds": 27.706811300013214,
+    "line": "paso 80: Wait { ms: 100 }"
+  },
+  {
+    "seconds": 27.706811300013214,
+    "line": "paso 81: Dump { path: \"C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/play-08.json\" }"
+  },
+  {
+    "seconds": 27.706811300013214,
+    "line": "paso 82: Wait { ms: 100 }"
+  },
+  {
+    "seconds": 27.706811300013214,
+    "line": "paso 83: Dump { path: \"C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/play-09.json\" }"
+  },
+  {
+    "seconds": 27.706811300013214,
+    "line": "paso 84: Wait { ms: 100 }"
+  },
+  {
+    "seconds": 27.706811300013214,
+    "line": "paso 85: Dump { path: \"C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/play-10.json\" }"
+  },
+  {
+    "seconds": 27.706811300013214,
+    "line": "paso 86: Wait { ms: 100 }"
+  },
+  {
+    "seconds": 27.706811300013214,
+    "line": "paso 87: Dump { path: \"C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/play-11.json\" }"
+  },
+  {
+    "seconds": 27.706811300013214,
+    "line": "  toast: Info: Exportado C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/playback-load.mp4 (00:00:12.000, 360 fotogramas, 7.1 s)"
+  },
+  {
+    "seconds": 27.706811300013214,
+    "line": "paso 88: Wait { ms: 100 }"
+  },
+  {
+    "seconds": 27.706811300013214,
+    "line": "  toast: Info: Exportado C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/playback-load.mp4 (00:00:12.000, 360 fotogramas, 7.1 s)"
+  },
+  {
+    "seconds": 27.706811300013214,
+    "line": "paso 89: Dump { path: \"C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/play-12.json\" }"
+  },
+  {
+    "seconds": 27.706811300013214,
+    "line": "  toast: Info: Exportado C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/playback-load.mp4 (00:00:12.000, 360 fotogramas, 7.1 s)"
+  },
+  {
+    "seconds": 27.706811300013214,
+    "line": "paso 90: Wait { ms: 100 }"
+  },
+  {
+    "seconds": 27.706811300013214,
+    "line": "  toast: Info: Exportado C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/playback-load.mp4 (00:00:12.000, 360 fotogramas, 7.1 s)"
+  },
+  {
+    "seconds": 27.706811300013214,
+    "line": "paso 91: Dump { path: \"C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/play-13.json\" }"
+  },
+  {
+    "seconds": 27.706811300013214,
+    "line": "  toast: Info: Exportado C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/playback-load.mp4 (00:00:12.000, 360 fotogramas, 7.1 s)"
+  },
+  {
+    "seconds": 27.706811300013214,
+    "line": "paso 92: Wait { ms: 100 }"
+  },
+  {
+    "seconds": 27.706811300013214,
+    "line": "  toast: Info: Exportado C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/playback-load.mp4 (00:00:12.000, 360 fotogramas, 7.1 s)"
+  },
+  {
+    "seconds": 27.706811300013214,
+    "line": "paso 93: Dump { path: \"C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/play-14.json\" }"
+  },
+  {
+    "seconds": 27.706811300013214,
+    "line": "  toast: Info: Exportado C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/playback-load.mp4 (00:00:12.000, 360 fotogramas, 7.1 s)"
+  },
+  {
+    "seconds": 27.706811300013214,
+    "line": "paso 94: Wait { ms: 100 }"
+  },
+  {
+    "seconds": 27.706811300013214,
+    "line": "  toast: Info: Exportado C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/playback-load.mp4 (00:00:12.000, 360 fotogramas, 7.1 s)"
+  },
+  {
+    "seconds": 27.706811300013214,
+    "line": "paso 95: Dump { path: \"C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/play-15.json\" }"
+  },
+  {
+    "seconds": 27.706811300013214,
+    "line": "  toast: Info: Exportado C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/playback-load.mp4 (00:00:12.000, 360 fotogramas, 7.1 s)"
+  },
+  {
+    "seconds": 27.706811300013214,
+    "line": "paso 96: Wait { ms: 100 }"
+  },
+  {
+    "seconds": 27.706811300013214,
+    "line": "  toast: Info: Exportado C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/playback-load.mp4 (00:00:12.000, 360 fotogramas, 7.1 s)"
+  },
+  {
+    "seconds": 27.706811300013214,
+    "line": "paso 97: Dump { path: \"C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/play-16.json\" }"
+  },
+  {
+    "seconds": 27.706811300013214,
+    "line": "  toast: Info: Exportado C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/playback-load.mp4 (00:00:12.000, 360 fotogramas, 7.1 s)"
+  },
+  {
+    "seconds": 27.706811300013214,
+    "line": "paso 98: Wait { ms: 100 }"
+  },
+  {
+    "seconds": 27.706811300013214,
+    "line": "  toast: Info: Exportado C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/playback-load.mp4 (00:00:12.000, 360 fotogramas, 7.1 s)"
+  },
+  {
+    "seconds": 27.706811300013214,
+    "line": "paso 99: Dump { path: \"C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/play-17.json\" }"
+  },
+  {
+    "seconds": 27.706811300013214,
+    "line": "  toast: Info: Exportado C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/playback-load.mp4 (00:00:12.000, 360 fotogramas, 7.1 s)"
+  },
+  {
+    "seconds": 27.706811300013214,
+    "line": "paso 100: Wait { ms: 100 }"
+  },
+  {
+    "seconds": 27.706811300013214,
+    "line": "  toast: Info: Exportado C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/playback-load.mp4 (00:00:12.000, 360 fotogramas, 7.1 s)"
+  },
+  {
+    "seconds": 27.706811300013214,
+    "line": "paso 101: Dump { path: \"C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/play-18.json\" }"
+  },
+  {
+    "seconds": 27.706811300013214,
+    "line": "  toast: Info: Exportado C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/playback-load.mp4 (00:00:12.000, 360 fotogramas, 7.1 s)"
+  },
+  {
+    "seconds": 27.706811300013214,
+    "line": "paso 102: Wait { ms: 100 }"
+  },
+  {
+    "seconds": 27.706811300013214,
+    "line": "  toast: Info: Exportado C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/playback-load.mp4 (00:00:12.000, 360 fotogramas, 7.1 s)"
+  },
+  {
+    "seconds": 27.706811300013214,
+    "line": "paso 103: Dump { path: \"C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/play-19.json\" }"
+  },
+  {
+    "seconds": 27.706811300013214,
+    "line": "  toast: Info: Exportado C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/playback-load.mp4 (00:00:12.000, 360 fotogramas, 7.1 s)"
+  },
+  {
+    "seconds": 27.706811300013214,
+    "line": "paso 104: Wait { ms: 100 }"
+  },
+  {
+    "seconds": 27.706811300013214,
+    "line": "  toast: Info: Exportado C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/playback-load.mp4 (00:00:12.000, 360 fotogramas, 7.1 s)"
+  },
+  {
+    "seconds": 27.706811300013214,
+    "line": "paso 105: Dump { path: \"C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/play-20.json\" }"
+  },
+  {
+    "seconds": 27.706811300013214,
+    "line": "  toast: Info: Exportado C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/playback-load.mp4 (00:00:12.000, 360 fotogramas, 7.1 s)"
+  },
+  {
+    "seconds": 27.706811300013214,
+    "line": "paso 106: Wait { ms: 100 }"
+  },
+  {
+    "seconds": 27.706811300013214,
+    "line": "  toast: Info: Exportado C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/playback-load.mp4 (00:00:12.000, 360 fotogramas, 7.1 s)"
+  },
+  {
+    "seconds": 27.706811300013214,
+    "line": "paso 107: Dump { path: \"C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/play-21.json\" }"
+  },
+  {
+    "seconds": 27.706811300013214,
+    "line": "  toast: Info: Exportado C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/playback-load.mp4 (00:00:12.000, 360 fotogramas, 7.1 s)"
+  },
+  {
+    "seconds": 27.706811300013214,
+    "line": "paso 108: Wait { ms: 100 }"
+  },
+  {
+    "seconds": 27.706811300013214,
+    "line": "  toast: Info: Exportado C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/playback-load.mp4 (00:00:12.000, 360 fotogramas, 7.1 s)"
+  },
+  {
+    "seconds": 27.706811300013214,
+    "line": "paso 109: Dump { path: \"C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/play-22.json\" }"
+  },
+  {
+    "seconds": 27.706811300013214,
+    "line": "  toast: Info: Exportado C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/playback-load.mp4 (00:00:12.000, 360 fotogramas, 7.1 s)"
+  },
+  {
+    "seconds": 27.706811300013214,
+    "line": "paso 110: Wait { ms: 100 }"
+  },
+  {
+    "seconds": 27.706811300013214,
+    "line": "  toast: Info: Exportado C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/playback-load.mp4 (00:00:12.000, 360 fotogramas, 7.1 s)"
+  },
+  {
+    "seconds": 27.706811300013214,
+    "line": "paso 111: Dump { path: \"C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/play-23.json\" }"
+  },
+  {
+    "seconds": 27.706811300013214,
+    "line": "  toast: Info: Exportado C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/playback-load.mp4 (00:00:12.000, 360 fotogramas, 7.1 s)"
+  },
+  {
+    "seconds": 27.706811300013214,
+    "line": "paso 112: Wait { ms: 100 }"
+  },
+  {
+    "seconds": 27.706811300013214,
+    "line": "  toast: Info: Exportado C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/playback-load.mp4 (00:00:12.000, 360 fotogramas, 7.1 s)"
+  },
+  {
+    "seconds": 27.706811300013214,
+    "line": "paso 113: Dump { path: \"C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/play-24.json\" }"
+  },
+  {
+    "seconds": 27.706811300013214,
+    "line": "  toast: Info: Exportado C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/playback-load.mp4 (00:00:12.000, 360 fotogramas, 7.1 s)"
+  },
+  {
+    "seconds": 27.706811300013214,
+    "line": "paso 114: Wait { ms: 100 }"
+  },
+  {
+    "seconds": 27.706811300013214,
+    "line": "  toast: Info: Exportado C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/playback-load.mp4 (00:00:12.000, 360 fotogramas, 7.1 s)"
+  },
+  {
+    "seconds": 27.706811300013214,
+    "line": "paso 115: Dump { path: \"C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/play-25.json\" }"
+  },
+  {
+    "seconds": 27.706811300013214,
+    "line": "  toast: Info: Exportado C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/playback-load.mp4 (00:00:12.000, 360 fotogramas, 7.1 s)"
+  },
+  {
+    "seconds": 27.706811300013214,
+    "line": "paso 116: Wait { ms: 100 }"
+  },
+  {
+    "seconds": 27.706811300013214,
+    "line": "paso 117: Dump { path: \"C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/play-26.json\" }"
+  },
+  {
+    "seconds": 27.706811300013214,
+    "line": "paso 118: Wait { ms: 100 }"
+  },
+  {
+    "seconds": 27.706811300013214,
+    "line": "paso 119: Dump { path: \"C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/play-27.json\" }"
+  },
+  {
+    "seconds": 27.706811300013214,
+    "line": "paso 120: Wait { ms: 100 }"
+  },
+  {
+    "seconds": 27.706811300013214,
+    "line": "paso 121: Dump { path: \"C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/play-28.json\" }"
+  },
+  {
+    "seconds": 27.706811300013214,
+    "line": "paso 122: Wait { ms: 100 }"
+  },
+  {
+    "seconds": 27.706811300013214,
+    "line": "paso 123: Dump { path: \"C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/play-29.json\" }"
+  },
+  {
+    "seconds": 27.706811300013214,
+    "line": "paso 124: Pause"
+  },
+  {
+    "seconds": 27.706811300013214,
+    "line": "paso 125: Wait { ms: 500 }"
+  },
+  {
+    "seconds": 27.706811300013214,
+    "line": "paso 126: Log { text: \"PERF_PLAY_END\" }"
+  },
+  {
+    "seconds": 27.706811300013214,
+    "line": "PERF_PLAY_END"
+  },
+  {
+    "seconds": 27.706811300013214,
+    "line": "paso 127: Dump { path: \"C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/final-state.json\" }"
+  },
+  {
+    "seconds": 27.706811300013214,
+    "line": "paso 128: WaitExport { ms: 120000 }"
+  },
+  {
+    "seconds": 27.706811300013214,
+    "line": "paso 129: SelectItem { layer: 0, index: 9999 }"
+  },
+  {
+    "seconds": 27.706811300013214,
+    "line": "paso 130: View { mode: \"source\" }"
+  },
+  {
+    "seconds": 27.706811300013214,
+    "line": "paso 131: Action { id: \"view.fit\" }"
+  },
+  {
+    "seconds": 27.706811300013214,
+    "line": "paso 132: Log { text: \"PERF_CACHE_BEGIN\" }"
+  },
+  {
+    "seconds": 27.706811300013214,
+    "line": "PERF_CACHE_BEGIN"
+  },
+  {
+    "seconds": 27.706811300013214,
+    "line": "paso 133: Seek { t: 1.0 }"
+  },
+  {
+    "seconds": 27.706811300013214,
+    "line": "paso 134: WaitFrame { ms: 15000 }"
+  },
+  {
+    "seconds": 27.706811300013214,
+    "line": "fotograma presentado: seq 321 (posici\u00f3n 00:00:01.000)"
+  },
+  {
+    "seconds": 27.706811300013214,
+    "line": "paso 135: Log { text: \"PERF_CACHE_SOURCE_FRAME_READY\" }"
+  },
+  {
+    "seconds": 27.706811300013214,
+    "line": "PERF_CACHE_SOURCE_FRAME_READY"
+  },
+  {
+    "seconds": 27.706811300013214,
+    "line": "paso 136: Play"
+  },
+  {
+    "seconds": 27.706811300013214,
+    "line": "paso 137: Wait { ms: 100 }"
+  },
+  {
+    "seconds": 27.706811300013214,
+    "line": "paso 138: Dump { path: \"C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/cache-00.json\" }"
+  },
+  {
+    "seconds": 27.706811300013214,
+    "line": "paso 139: Wait { ms: 100 }"
+  },
+  {
+    "seconds": 27.706811300013214,
+    "line": "paso 140: Dump { path: \"C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/cache-01.json\" }"
+  },
+  {
+    "seconds": 27.706811300013214,
+    "line": "paso 141: Wait { ms: 100 }"
+  },
+  {
+    "seconds": 27.706811300013214,
+    "line": "paso 142: Dump { path: \"C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/cache-02.json\" }"
+  },
+  {
+    "seconds": 27.706811300013214,
+    "line": "paso 143: Wait { ms: 100 }"
+  },
+  {
+    "seconds": 27.706811300013214,
+    "line": "paso 144: Dump { path: \"C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/cache-03.json\" }"
+  },
+  {
+    "seconds": 27.706811300013214,
+    "line": "paso 145: Wait { ms: 100 }"
+  },
+  {
+    "seconds": 27.706811300013214,
+    "line": "paso 146: Dump { path: \"C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/cache-04.json\" }"
+  },
+  {
+    "seconds": 27.706811300013214,
+    "line": "paso 147: Wait { ms: 100 }"
+  },
+  {
+    "seconds": 27.800119600025937,
+    "line": "paso 148: Dump { path: \"C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/cache-05.json\" }"
+  },
+  {
+    "seconds": 27.901896300027147,
+    "line": "paso 149: Wait { ms: 100 }"
+  },
+  {
+    "seconds": 27.996885799977463,
+    "line": "paso 150: Dump { path: \"C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/cache-06.json\" }"
+  },
+  {
+    "seconds": 28.193353999988176,
+    "line": "paso 151: Wait { ms: 100 }"
+  },
+  {
+    "seconds": 28.244006799999624,
+    "line": "paso 152: Dump { path: \"C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/cache-07.json\" }"
+  },
+  {
+    "seconds": 28.345788199978415,
+    "line": "paso 153: Wait { ms: 100 }"
+  },
+  {
+    "seconds": 28.43807769997511,
+    "line": "paso 154: Dump { path: \"C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/cache-08.json\" }"
+  },
+  {
+    "seconds": 28.540299499989487,
+    "line": "paso 155: Wait { ms: 100 }"
+  },
+  {
+    "seconds": 28.63538539997535,
+    "line": "paso 156: Dump { path: \"C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/cache-09.json\" }"
+  },
+  {
+    "seconds": 28.73709130001953,
+    "line": "paso 157: Pause"
+  },
+  {
+    "seconds": 28.73709130001953,
+    "line": "paso 158: Wait { ms: 500 }"
+  },
+  {
+    "seconds": 29.240593300026376,
+    "line": "paso 159: AssertCaches { wave_columns_min: 1, thumb_tiles_min: 1 }"
+  },
+  {
+    "seconds": 29.240593300026376,
+    "line": "caches: wave_columns=766, thumb_tiles=20, OK=true"
+  },
+  {
+    "seconds": 29.240593300026376,
+    "line": "paso 160: Screenshot { path: \"C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/large-source.png\" }"
+  },
+  {
+    "seconds": 29.291530599992257,
+    "line": "paso 161: View { mode: \"sequence\" }"
+  },
+  {
+    "seconds": 29.291530599992257,
+    "line": "paso 162: Action { id: \"view.fit\" }"
+  },
+  {
+    "seconds": 29.39324669999769,
+    "line": "paso 163: Wait { ms: 500 }"
+  },
+  {
+    "seconds": 29.95226539997384,
+    "line": "paso 164: Assert { markers: None, clips: Some(1000), layers: None, items: Some(20000), revision: Some(0), playing: None, rate: None, position: None, tracks: None }"
+  },
+  {
+    "seconds": 30.00325750000775,
+    "line": "paso 165: Screenshot { path: \"C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/large-native.png\" }"
+  },
+  {
+    "seconds": 30.15631549997488,
+    "line": "paso 166: Quit"
+  }
+]

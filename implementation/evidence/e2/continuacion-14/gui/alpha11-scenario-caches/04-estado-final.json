@@ -1,0 +1,103 @@
+{
+  "revision": 15,
+  "view": "Sequence",
+  "playhead_ms": 0,
+  "player": {
+    "position_ms": 0,
+    "playing": false,
+    "rate": 1.0,
+    "generation": 21,
+    "buffering": false,
+    "decode_ms": 100.66929626464844,
+    "audio_available": true
+  },
+  "last_frame": {
+    "position_ms": 0,
+    "w": 790,
+    "h": 444,
+    "generation": 21
+  },
+  "clips": [
+    {
+      "id": "clip-8d00f4563818",
+      "track": "V1",
+      "position_ms": 0,
+      "source_start_ms": 0,
+      "source_end_ms": 12000,
+      "enabled": true,
+      "link": "link-df50f05c24e6"
+    },
+    {
+      "id": "clip-c0c90929b220",
+      "track": "A1",
+      "position_ms": 0,
+      "source_start_ms": 0,
+      "source_end_ms": 12000,
+      "enabled": true,
+      "link": "link-df50f05c24e6"
+    },
+    {
+      "id": "clip-651e249bfdb7",
+      "track": "V2",
+      "position_ms": 3000,
+      "source_start_ms": 0,
+      "source_end_ms": 2000,
+      "enabled": true,
+      "link": "link-88a7a5b3b667"
+    },
+    {
+      "id": "clip-9cf158e81fb0",
+      "track": "A2",
+      "position_ms": 3000,
+      "source_start_ms": 0,
+      "source_end_ms": 2000,
+      "enabled": true,
+      "link": "link-88a7a5b3b667"
+    },
+    {
+      "id": "clip-225224a4336a",
+      "track": "V3",
+      "position_ms": 1000,
+      "source_start_ms": 0,
+      "source_end_ms": 5000,
+      "enabled": true,
+      "link": null
+    },
+    {
+      "id": "clip-0e71718c9588",
+      "track": "A3",
+      "position_ms": 0,
+      "source_start_ms": 0,
+      "source_end_ms": 10000,
+      "enabled": true,
+      "link": null
+    },
+    {
+      "id": "clip-ce2d8b1f7288",
+      "track": "V2",
+      "position_ms": 5500,
+      "source_start_ms": 2500,
+      "source_end_ms": 8000,
+      "enabled": true,
+      "link": "link-88a7a5b3b667@3528000000@3880800000"
+    },
+    {
+      "id": "clip-36de0b223ad6",
+      "track": "A2",
+      "position_ms": 5500,
+      "source_start_ms": 2500,
+      "source_end_ms": 8000,
+      "enabled": true,
+      "link": "link-88a7a5b3b667@3528000000@3880800000"
+    }
+  ],
+  "layers": [],
+  "toasts": [
+    "Exportado C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/local/prepared-20260930-133827-995706/escenario1-vertical.mp4 (00:00:12.000, 360 fotogramas, 6.3 s)",
+    "Exportación añadida a la cola (revisión congelada)",
+    "Exportado C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/local/prepared-20260930-133827-995706/escenario1-audio.wav (00:00:12.000, 0 fotogramas, 0.5 s)",
+    "Exportación añadida a la cola (revisión congelada)",
+    "Exportado C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/local/prepared-20260930-133827-995706/escenario1-inout-720p.mp4 (00:00:02.000, 60 fotogramas, 1.6 s)"
+  ],
+  "undo": "Eliminar clip"
+}

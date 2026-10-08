@@ -1,0 +1,61 @@
+Diff in \\?\C:\Users\gabri\Todo\transcriber-v2\crates\pipeline\src\lib.rs:231:
+                     }
+                     if value.get("event").is_some() {
+                         if value.get("event").and_then(Value::as_str) != Some("progress")
+-                            || job.is_none() || value.get("job_id").and_then(Value::as_str) != job {
++                            || job.is_none()
++                            || value.get("job_id").and_then(Value::as_str) != job
++                        {
+                             return Err(DomainError::process("Evento Python no correlacionado con el job"));
+                         }
+                         progress(value);
+Diff in \\?\C:\Users\gabri\Todo\transcriber-v2\crates\pipeline\src\lib.rs:364:
+ }
+ 
+ /// Explicit local review can reconcile a result against a newer project base.
+-pub fn prepare_rebased_result(snapshot: Project, record: &JobRecord<AnalysisPayload>, result: &AnalysisResult, cancel: &AtomicBool) -> DomainResult<PreparedCommand> {
++pub fn prepare_rebased_result(
++    snapshot: Project,
++    record: &JobRecord<AnalysisPayload>,
++    result: &AnalysisResult,
++    cancel: &AtomicBool,
++) -> DomainResult<PreparedCommand> {
+     prepare_result_impl(snapshot, record, result, cancel, true)
+ }
+-fn prepare_result_impl(snapshot: Project, record: &JobRecord<AnalysisPayload>, result: &AnalysisResult, cancel: &AtomicBool, rebase: bool) -> DomainResult<PreparedCommand> {
++fn prepare_result_impl(
++    snapshot: Project,
++    record: &JobRecord<AnalysisPayload>,
++    result: &AnalysisResult,
++    cancel: &AtomicBool,
++    rebase: bool,
++) -> DomainResult<PreparedCommand> {
+     let session = ProjectSession::new(snapshot);
+     if session.project().project_id != record.project_id
+         || (!rebase && (session.revision() != record.revision || session.digest()? != record.payload.project_digest))
+Diff in \\?\C:\Users\gabri\Todo\transcriber-v2\crates\pipeline\src\lib.rs:399:
+         let source = checked_artifact(&root, name)?;
+         files.insert(name.clone(), tv2_domain::evidence::SourceFile { size: fs::metadata(&source)?.len(), source, sha256: sha256.clone() });
+     }
+-    evidence.source_bundle = Some(Arc::new(tv2_domain::evidence::SourceBundle::new(result.master_path.clone(), BTreeMap::new()).with_files(files).with_external_master_digest(evidence.document.full_digest().into())));
++    evidence.source_bundle = Some(Arc::new(
++        tv2_domain::evidence::SourceBundle::new(result.master_path.clone(), BTreeMap::new())
++            .with_files(files)
++            .with_external_master_digest(evidence.document.full_digest().into()),
++    ));
+     let mut commands = vec![tv2_domain::Command::AttachMaster { master: evidence }];
+     commands.extend(master.projections(&asset.id)?.into_iter().map(|layer| tv2_domain::Command::ReplaceLayer { layer }));
+-    let envelope = CommandEnvelope::human(tv2_domain::Command::Batch {
+-        label: "Incorporar análisis local".into(),
+-        commands,
+-    })
+-    .with_actor(Actor::External { source: "python-local-inference".into() })
+-    .with_base(session.revision())
+-    .with_idempotency(format!("analysis-{}", record.id));
++    let envelope = CommandEnvelope::human(tv2_domain::Command::Batch { label: "Incorporar análisis local".into(), commands })
++        .with_actor(Actor::External { source: "python-local-inference".into() })
++        .with_base(session.revision())
++        .with_idempotency(format!("analysis-{}", record.id));
+     session.prepare_command(envelope)
+ }
+ 

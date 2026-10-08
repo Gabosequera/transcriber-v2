@@ -1,0 +1,11 @@
+   Compiling tv2-media v2.0.0-alpha.10 (C:\Users\gabri\Todo\transcriber-v2\crates\media)
+    Finished `test` profile [optimized + debuginfo] target(s) in 6.61s
+     Running unittests src\lib.rs (target\debug\deps\tv2_media-670b66e91bf28d1a.exe)
+
+running 3 tests
+test export::tests::real_export_cancellation_during_verification_cleans_only_owned_temporaries ... ok
+test export::tests::real_export_preserves_concurrent_destination_and_legacy_temporaries ... ok
+test export::tests::concurrent_real_exports_to_one_destination_use_distinct_workspaces ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 33 filtered out; finished in 0.70s
+

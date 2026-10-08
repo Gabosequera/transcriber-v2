@@ -9,7 +9,7 @@ use std::path::PathBuf;
 use std::time::{Duration, Instant};
 use tv2_domain::ids::{ClipId, LayerId};
 use tv2_domain::time::Ticks;
-use tv2_domain::{Command, MovePolicy};
+use tv2_domain::{Command, DomainError, ErrorCode, MovePolicy, error::DomainResult};
 use tv2_media::player::PlayerCommand;
 
 #[derive(Clone, Debug, Deserialize)]
@@ -19,9 +19,27 @@ pub enum ExportSelection {
     Items,
 }
 
+#[derive(Clone, Copy, Debug, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub enum ScriptConflictChoice {
+    Local,
+    External,
+}
+
 #[derive(Clone, Debug, Deserialize)]
 #[serde(tag = "op", rename_all = "snake_case")]
 pub enum Step {
+    ControlSetup {
+        pipe_name: String,
+        permissions: tv2_control::Permissions,
+    },
+    ControlRevoke,
+    ControlStop,
+    AwaitSignal {
+        path: String,
+        #[serde(default = "d120000")]
+        ms: u64,
+    },
     Import {
         path: String,
     },
@@ -114,6 +132,33 @@ pub enum Step {
         #[serde(default = "d120000")]
         ms: u64,
     },
+    ExportV1Folder {
+        dest: String,
+        #[serde(default)]
+        include_montage: bool,
+        #[serde(default = "d120000")]
+        ms: u64,
+        #[serde(default)]
+        expect_error: Option<ErrorCode>,
+    },
+    WaitExternal {
+        #[serde(default = "d120000")]
+        ms: u64,
+        #[serde(default)]
+        fields: Option<usize>,
+        #[serde(default)]
+        conflicts: Option<usize>,
+    },
+    ApplyExternal {
+        #[serde(default)]
+        human_review: bool,
+        #[serde(default)]
+        choices: std::collections::BTreeMap<String, ScriptConflictChoice>,
+        #[serde(default = "d120000")]
+        ms: u64,
+        #[serde(default)]
+        expect_error: Option<ErrorCode>,
+    },
     Screenshot {
         path: String,
     },
@@ -195,12 +240,34 @@ fn d120000() -> u64 {
     120_000
 }
 
+fn receipt_valid<T>(result: &DomainResult<T>, received: bool, expected: Option<ErrorCode>, before: u64, after: u64, changes_project: bool) -> bool {
+    received
+        && match (result, expected) {
+            (Ok(_), None) => {
+                if changes_project {
+                    after > before
+                } else {
+                    after == before
+                }
+            }
+            (Err(error), Some(code)) => error.code == code && after == before,
+            _ => false,
+        }
+}
+
 pub struct ScriptRunner {
     steps: Vec<Step>,
     idx: usize,
     wait_until: Option<Instant>,
-    waiting_frame: Option<(u64, Instant, u64)>,
+    waiting_frame: Option<(Ticks, Instant, u64)>,
+    requested_frame: Option<Ticks>,
     waiting_export: Option<(Instant, u64)>,
+    waiting_document: Option<(Instant, u64, Option<ErrorCode>, u64)>,
+    document_result: Option<DomainResult<PathBuf>>,
+    waiting_external: Option<(Instant, u64, Option<usize>, Option<usize>)>,
+    waiting_external_apply: Option<(Instant, u64, Option<ErrorCode>, u64)>,
+    external_apply_result: Option<DomainResult<()>>,
+    waiting_signal: Option<(PathBuf, Instant, u64)>,
     pending_screenshot: Option<PathBuf>,
     pub log: Vec<String>,
     pub failed: bool,
@@ -217,7 +284,14 @@ impl ScriptRunner {
             idx: 0,
             wait_until: None,
             waiting_frame: None,
+            requested_frame: None,
             waiting_export: None,
+            waiting_document: None,
+            document_result: None,
+            waiting_external: None,
+            waiting_external_apply: None,
+            external_apply_result: None,
+            waiting_signal: None,
             pending_screenshot: None,
             log: Vec::new(),
             failed: false,
@@ -233,8 +307,34 @@ impl ScriptRunner {
 }
 
 impl TranscriptorApp {
+    pub(crate) fn script_document_export_result(&mut self, result: &DomainResult<PathBuf>) {
+        if let Some(runner) = &mut self.script
+            && runner.waiting_document.is_some()
+        {
+            runner.document_result = Some(result.clone());
+        }
+    }
+    pub(crate) fn script_external_apply_result(&mut self, result: &DomainResult<()>) {
+        if let Some(runner) = &mut self.script
+            && runner.waiting_external_apply.is_some()
+        {
+            runner.external_apply_result = Some(result.clone());
+        }
+    }
     pub fn script_tick(&mut self, ctx: &egui::Context) {
         let Some(mut runner) = self.script.take() else { return };
+        if let Some((path, started, ms)) = &runner.waiting_signal {
+            if !path.is_file() {
+                if started.elapsed() < Duration::from_millis(*ms) {
+                    ctx.request_repaint_after(Duration::from_millis(50));
+                    self.script = Some(runner);
+                    return;
+                }
+                runner.note(format!("ERROR: señal no recibida antes del timeout: {}", path.display()));
+                runner.failed = true;
+            }
+            runner.waiting_signal = None;
+        }
         // capturas entregadas por eframe
         if let Some(path) = runner.pending_screenshot.clone() {
             let shot: Option<std::sync::Arc<egui::ColorImage>> = ctx.input(|i| {
@@ -265,8 +365,7 @@ impl TranscriptorApp {
             }
             runner.wait_until = None;
         }
-        if let Some((_seen, started, ms)) = runner.waiting_frame {
-            let target = self.playhead.floor_to_frame(self.frame_rate());
+        if let Some((target, started, ms)) = runner.waiting_frame {
             let presented = self.last_frame.as_ref().map(|f| f.position);
             if presented != Some(target) && started.elapsed() < Duration::from_millis(ms.max(500)) {
                 ctx.request_repaint_after(Duration::from_millis(16));
@@ -275,10 +374,11 @@ impl TranscriptorApp {
             }
             if presented != Some(target) {
                 runner.note(format!(
-                    "AVISO: fotograma esperado {} no presentado (último {:?})",
+                    "ERROR: fotograma esperado {} no presentado (último {:?})",
                     target.timecode_ms(),
                     presented.map(|p| p.timecode_ms())
                 ));
+                runner.failed = true;
             }
             runner.note(format!(
                 "fotograma presentado: seq {} (posición {})",
@@ -312,7 +412,57 @@ impl TranscriptorApp {
             }
             runner.waiting_export = None;
         }
-        if self.imports.busy() || self.editorial_job.is_some() || self.persistence_job.is_some() {
+        if let Some((started, ms, expected, revision)) = runner.waiting_document {
+            if runner.document_result.is_none() && started.elapsed() < Duration::from_millis(ms) {
+                ctx.request_repaint_after(Duration::from_millis(50));
+                self.script = Some(runner);
+                return;
+            }
+            let received = runner.document_result.is_some();
+            let result = runner.document_result.take().unwrap_or_else(|| Err(DomainError::process("Timeout de export documental")));
+            let valid = receipt_valid(&result, received, expected, revision, self.session.revision(), false);
+            runner.note(format!("EXPORT_V1 resultado={result:?}, esperado={expected:?}, revisión={}", self.session.revision()));
+            runner.failed |= !valid;
+            runner.waiting_document = None;
+        }
+        if let Some((started, ms, fields, conflicts)) = runner.waiting_external {
+            let ready = self.external.change.as_ref().is_some_and(|change| {
+                fields.is_none_or(|expected| change.fields.len() == expected) && conflicts.is_none_or(|expected| change.conflicts.len() == expected)
+            });
+            if !ready && started.elapsed() < Duration::from_millis(ms) {
+                ctx.request_repaint_after(Duration::from_millis(50));
+                self.script = Some(runner);
+                return;
+            }
+            runner.note(format!(
+                "EXTERNAL ready={ready}, fields={:?}, conflicts={:?}, error={:?}",
+                self.external.change.as_ref().map(|c| c.fields.len()),
+                self.external.change.as_ref().map(|c| c.conflicts.len()),
+                self.external.error
+            ));
+            runner.failed |= !ready;
+            runner.waiting_external = None;
+        }
+        if let Some((started, ms, expected, revision)) = runner.waiting_external_apply {
+            if runner.external_apply_result.is_none() && started.elapsed() < Duration::from_millis(ms) {
+                ctx.request_repaint_after(Duration::from_millis(50));
+                self.script = Some(runner);
+                return;
+            }
+            let received = runner.external_apply_result.is_some();
+            let result = runner.external_apply_result.take().unwrap_or_else(|| Err(DomainError::process("Timeout de Apply externo")));
+            let valid = receipt_valid(&result, received, expected, revision, self.session.revision(), true);
+            runner.note(format!("APPLY_EXTERNAL resultado={result:?}, esperado={expected:?}, revisión={}", self.session.revision()));
+            runner.failed |= !valid;
+            runner.waiting_external_apply = None;
+        }
+        if self.imports.busy()
+            || self.editorial_job.is_some()
+            || self.persistence_job.is_some()
+            || self.autosave_job.is_some()
+            || self.v1_export_job.is_some()
+            || self.external_apply.is_some()
+        {
             ctx.request_repaint_after(Duration::from_millis(16));
             self.script = Some(runner);
             return;
@@ -326,6 +476,10 @@ impl TranscriptorApp {
         runner.idx += 1;
         runner.note(format!("paso {}: {:?}", runner.idx, step));
         match step {
+            Step::ControlSetup { pipe_name, permissions } => self.script_control_setup(pipe_name, permissions, ctx),
+            Step::ControlRevoke => self.script_control_revoke(),
+            Step::ControlStop => self.script_control_stop(),
+            Step::AwaitSignal { path, ms } => runner.waiting_signal = Some((PathBuf::from(path), Instant::now(), ms)),
             Step::AssertCaches { wave_columns_min, thumb_tiles_min } => {
                 let (wave, thumbs) = self.media_view.as_ref().map(|m| (m.wave_columns, m.thumb_tiles)).unwrap_or_default();
                 let ok = wave >= wave_columns_min && thumbs >= thumb_tiles_min;
@@ -349,13 +503,19 @@ impl TranscriptorApp {
                 }
                 self.insert_asset_at_playhead(a, None);
             }
-            Step::Seek { t } => self.seek(Ticks::from_seconds_f64(t)),
+            Step::Seek { t } => {
+                self.seek(Ticks::from_seconds_f64(t));
+                // A frame still queued from before the seek can update the UI
+                // playhead. Keep the requested target separate for verification.
+                runner.requested_frame = Some(self.playhead.floor_to_frame(self.frame_rate()));
+            }
             Step::Play => self.player_send(PlayerCommand::Play),
             Step::Pause => self.player_send(PlayerCommand::Pause),
             Step::Rate { value } => self.set_rate(value),
             Step::Wait { ms } => runner.wait_until = Some(Instant::now() + Duration::from_millis(ms)),
             Step::WaitFrame { ms } => {
-                runner.waiting_frame = Some((self.frame_seen, Instant::now(), ms));
+                let target = runner.requested_frame.take().unwrap_or_else(|| self.playhead.floor_to_frame(self.frame_rate()));
+                runner.waiting_frame = Some((target, Instant::now(), ms));
                 runner.wait_until = None;
             }
             Step::Split => self.split_at_playhead(),
@@ -428,8 +588,11 @@ impl TranscriptorApp {
                 }
             }
             Step::Save { path } => {
-                self.store = Some(tv2_application::ProjectStore::from_user_path(&PathBuf::from(path)));
-                let ok = self.save_project(false);
+                let target = tv2_application::ProjectStore::from_user_path(&PathBuf::from(path));
+                // Reuse the observed baseline for repeated saves; for Save As,
+                // keep the source store until the asynchronous copy succeeds.
+                let target = self.store.as_ref().filter(|store| store.root == target.root).cloned().unwrap_or(target);
+                let ok = self.save_project_to(target);
                 if !ok {
                     runner.failed = true;
                 }
@@ -457,6 +620,47 @@ impl TranscriptorApp {
                 }
             }
             Step::WaitExport { ms } => runner.waiting_export = Some((Instant::now(), ms)),
+            Step::ExportV1Folder { dest, include_montage, ms, expect_error } => {
+                runner.document_result = None;
+                runner.waiting_document = Some((Instant::now(), ms.clamp(1, 120_000), expect_error, self.session.revision()));
+                if let Err(error) = self.export_v1_folder_to(PathBuf::from(dest), include_montage) {
+                    runner.document_result = Some(Err(error));
+                }
+            }
+            Step::WaitExternal { ms, fields, conflicts } => runner.waiting_external = Some((Instant::now(), ms.clamp(1, 120_000), fields, conflicts)),
+            Step::ApplyExternal { human_review, choices, ms, expect_error } => {
+                runner.external_apply_result = None;
+                runner.waiting_external_apply = Some((Instant::now(), ms.clamp(1, 120_000), expect_error, self.session.revision()));
+                let result = (|| -> DomainResult<()> {
+                    let change = self.external.change.as_mut().ok_or_else(|| DomainError::precondition("No hay cambio externo revisable"))?;
+                    let paths: std::collections::BTreeSet<_> = change.conflicts.iter().map(|c| c.path.clone()).collect();
+                    if choices.keys().cloned().collect::<std::collections::BTreeSet<_>>() != paths {
+                        return Err(DomainError::invalid("Las elecciones deben nombrar exactamente los conflictos revisados"));
+                    }
+                    change.choices = choices
+                        .into_iter()
+                        .map(|(path, choice)| {
+                            (
+                                path,
+                                match choice {
+                                    ScriptConflictChoice::Local => tv2_application::reconcile::ConflictChoice::Local,
+                                    ScriptConflictChoice::External => tv2_application::reconcile::ConflictChoice::External,
+                                },
+                            )
+                        })
+                        .collect();
+                    change.human_review = human_review;
+                    Ok(())
+                })();
+                match result {
+                    Ok(()) => {
+                        if let Err(error) = self.start_external_apply() {
+                            runner.external_apply_result = Some(Err(error));
+                        }
+                    }
+                    Err(error) => runner.external_apply_result = Some(Err(error)),
+                }
+            }
             Step::Screenshot { path } => {
                 let p = PathBuf::from(path);
                 if let Some(parent) = p.parent() {
@@ -469,6 +673,8 @@ impl TranscriptorApp {
                 let snap = self.player_snapshot.clone();
                 let seq = self.sequence().cloned();
                 let value = serde_json::json!({
+                    "project_id": self.project().project_id,
+                    "name": self.project().name,
                     "revision": self.session.revision(),
                     "view": format!("{:?}", self.view),
                     "playhead_ms": self.playhead.as_millis_round(),
@@ -478,6 +684,13 @@ impl TranscriptorApp {
                     "layers": self.project().layers.iter().map(|l| serde_json::json!({"id": l.layer_id, "name": l.name, "items": l.items.iter().map(|i| serde_json::json!({"id": i.item_id, "label": i.label, "state": i.state.as_str(), "ranges": i.ranges.iter().map(|r| [r.start.as_seconds_ms(), r.end.as_seconds_ms()]).collect::<Vec<_>>()})).collect::<Vec<_>>()})).collect::<Vec<_>>(),
                     "toasts": self.toasts.iter().map(|t| t.text.clone()).collect::<Vec<_>>(),
                     "undo": self.session.undo_label(),
+                    "external": {"error": self.external.error, "watcher_error": self.external.watcher_error,
+                        "change": self.external.change.as_ref().map(|c| serde_json::json!({"base_revision": c.base_revision,
+                            "local_digest": c.local_digest, "external_digest": c.external_digest, "fields": c.fields,
+                            "conflicts": c.conflicts.iter().map(|conflict| serde_json::json!({"path": conflict.path,
+                                "base": conflict.base, "local": conflict.local, "external": conflict.external})).collect::<Vec<_>>(),
+                            "choices": c.choices.iter().map(|(path, choice)| (path.clone(), format!("{choice:?}"))).collect::<std::collections::BTreeMap<_, _>>(),
+                            "human_review": c.human_review}))},
                 });
                 let p = PathBuf::from(path);
                 if let Some(parent) = p.parent() {
@@ -648,3 +861,27 @@ impl TranscriptorApp {
 
 #[allow(dead_code)]
 fn _sev(_: Severity) {}
+
+#[cfg(test)]
+mod document_external_script_tests {
+    use super::*;
+
+    #[test]
+    fn timeout_cannot_satisfy_expected_worker_error_or_mask_a_revision_change() {
+        let failure: DomainResult<()> = Err(DomainError::process("worker failed"));
+        assert!(receipt_valid(&failure, true, Some(ErrorCode::Process), 3, 3, false));
+        assert!(!receipt_valid(&failure, false, Some(ErrorCode::Process), 3, 3, false));
+        assert!(!receipt_valid(&failure, true, Some(ErrorCode::Process), 3, 4, true));
+        assert!(!receipt_valid(&failure, true, Some(ErrorCode::Io), 3, 3, true));
+        assert!(!receipt_valid(&Ok(()), true, None, 3, 3, true));
+        assert!(receipt_valid(&Ok(()), true, None, 3, 4, true));
+        assert!(!receipt_valid(&Ok(()), true, None, 3, 4, false));
+    }
+
+    #[test]
+    fn external_apply_requires_explicit_human_review_and_typed_choices() {
+        let step: Step = serde_json::from_str(r#"{"op":"apply_external"}"#).unwrap();
+        assert!(matches!(step, Step::ApplyExternal { human_review: false, choices, .. } if choices.is_empty()));
+        assert!(serde_json::from_str::<Step>(r#"{"op":"apply_external","choices":{"/name":"automatic"}}"#).is_err());
+    }
+}

@@ -1,0 +1,145 @@
+[
+  {
+    "op": "viewport",
+    "width": 1400.0,
+    "height": 1000.0,
+    "zoom": 0.85
+  },
+  {
+    "op": "open",
+    "path": "C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/preview-prepared-20260930-161534/preview.transcriptor/project.json"
+  },
+  {
+    "op": "assert",
+    "clips": 1000,
+    "items": 20000,
+    "revision": 0
+  },
+  {
+    "op": "select_item",
+    "layer": 0,
+    "index": 0
+  },
+  {
+    "op": "view",
+    "mode": "source"
+  },
+  {
+    "op": "action",
+    "id": "view.fit"
+  },
+  {
+    "op": "seek",
+    "t": 3.0
+  },
+  {
+    "op": "wait_frame",
+    "ms": 15000
+  },
+  {
+    "op": "action",
+    "id": "tools.select_all"
+  },
+  {
+    "op": "dump",
+    "path": "C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/preview-prepared-20260930-161534/before.json"
+  },
+  {
+    "op": "screenshot",
+    "path": "C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/preview-prepared-20260930-161534/ready.png"
+  },
+  {
+    "op": "log",
+    "text": "PHASE1_READY: human drag layer0 middle right slightly; hold mouse until screenshot"
+  },
+  {
+    "op": "await_signal",
+    "path": "C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/preview-prepared-20260930-161534/capture-commit.signal",
+    "ms": 300000
+  },
+  {
+    "op": "screenshot",
+    "path": "C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/preview-prepared-20260930-161534/preview-commit.png"
+  },
+  {
+    "op": "await_signal",
+    "path": "C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/preview-prepared-20260930-161534/released.signal",
+    "ms": 300000
+  },
+  {
+    "op": "wait",
+    "ms": 1000
+  },
+  {
+    "op": "dump",
+    "path": "C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/preview-prepared-20260930-161534/after-commit.json"
+  },
+  {
+    "op": "assert",
+    "clips": 1000,
+    "items": 20000,
+    "revision": 1
+  },
+  {
+    "op": "undo"
+  },
+  {
+    "op": "assert",
+    "revision": 2,
+    "items": 20000
+  },
+  {
+    "op": "redo"
+  },
+  {
+    "op": "assert",
+    "revision": 3,
+    "items": 20000
+  },
+  {
+    "op": "dump",
+    "path": "C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/preview-prepared-20260930-161534/after-redo.json"
+  },
+  {
+    "op": "action",
+    "id": "tools.select_all"
+  },
+  {
+    "op": "log",
+    "text": "PHASE2_READY: human drag same layer; hold for screenshot; then Escape to cancel"
+  },
+  {
+    "op": "await_signal",
+    "path": "C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/preview-prepared-20260930-161534/capture-cancel.signal",
+    "ms": 300000
+  },
+  {
+    "op": "screenshot",
+    "path": "C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/preview-prepared-20260930-161534/preview-cancel.png"
+  },
+  {
+    "op": "await_signal",
+    "path": "C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/preview-prepared-20260930-161534/cancelled.signal",
+    "ms": 300000
+  },
+  {
+    "op": "wait",
+    "ms": 1000
+  },
+  {
+    "op": "dump",
+    "path": "C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/preview-prepared-20260930-161534/after-cancel.json"
+  },
+  {
+    "op": "assert",
+    "revision": 3,
+    "items": 20000
+  },
+  {
+    "op": "screenshot",
+    "path": "C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/preview-prepared-20260930-161534/after-cancel.png"
+  },
+  {
+    "op": "quit"
+  }
+]

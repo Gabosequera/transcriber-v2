@@ -1,0 +1,43 @@
+[
+  {
+    "op": "open",
+    "path": "C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/save-as-20260930-171900/copy.transcriptor/project.json"
+  },
+  {
+    "op": "assert",
+    "revision": 5,
+    "layers": 10,
+    "items": 18
+  },
+  {
+    "op": "undo"
+  },
+  {
+    "op": "assert",
+    "revision": 6,
+    "items": 17
+  },
+  {
+    "op": "redo"
+  },
+  {
+    "op": "assert",
+    "revision": 7,
+    "items": 18
+  },
+  {
+    "op": "dump",
+    "path": "C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/save-as-20260930-171900/copy-state.json"
+  },
+  {
+    "op": "save",
+    "path": "C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/save-as-20260930-171900/copy.transcriptor"
+  },
+  {
+    "op": "wait",
+    "ms": 500
+  },
+  {
+    "op": "quit"
+  }
+]

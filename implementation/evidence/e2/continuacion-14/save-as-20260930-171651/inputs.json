@@ -1,0 +1,33 @@
+{
+  "media_sha256": "ffb48c13e1b626ec2f73c3144147b689a153cf4a3d5017ce233fd5b3a4061f67",
+  "files": {
+    "demo-a.editorial.master.json": {
+      "bytes": 121284,
+      "sha256": "874757ef071f7271b8b8571f330c9c480c912a66f62414c0613c02ac1ff1335b"
+    },
+    "layers/layer-demo-notas.json": {
+      "bytes": 735,
+      "sha256": "812665796d2d543ff5ede810676b1cd395a89863a66efada02040d482f301485"
+    },
+    "layers/layer-demo-topics.json": {
+      "bytes": 820,
+      "sha256": "df37b3a9740af1f1238fa0d9afb9a9bf942db360d0a276b356146584725389b2"
+    },
+    "support/payload.bin": {
+      "bytes": 35651584,
+      "sha256": "72ca659fb4a3a467a780dacc32c5462d402822ef15c7fe7e16813aec7b32a9da"
+    },
+    "views/montaje.json": {
+      "bytes": 1547,
+      "sha256": "eb90607d211f1f15bbfe49e5af3d80a87b53f0dbd0b45cd6c1266409eb974cc0"
+    },
+    "views/trims.json": {
+      "bytes": 1218,
+      "sha256": "d34bf39b09c57270402ea6eae545ba4ec53946ef483e6826322b3b472656d5a7"
+    }
+  },
+  "directories": [
+    "empty",
+    "empty/nested"
+  ]
+}

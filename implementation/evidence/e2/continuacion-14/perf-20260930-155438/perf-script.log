@@ -1,0 +1,356 @@
+paso 1: Log { text: "PERF_OPEN_BEGIN" }
+PERF_OPEN_BEGIN
+paso 2: Open { path: "C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/large.transcriptor/project.json" }
+paso 3: Assert { markers: None, clips: Some(1000), layers: Some(2), items: Some(20000), revision: None, playing: None, rate: None, position: None, tracks: Some(2) }
+assert OK (clips 1000, capas 2, items 20000, rev 0, pos 0.000, rate 1, playing false)
+  toast: Info: Proyecto «Synthetic native performance» abierto (revisión 0)
+paso 4: Action { id: "view.fit" }
+  toast: Info: Proyecto «Synthetic native performance» abierto (revisión 0)
+paso 5: Seek { t: 1.0 }
+  toast: Info: Proyecto «Synthetic native performance» abierto (revisión 0)
+paso 6: WaitFrame { ms: 15000 }
+  toast: Info: Proyecto «Synthetic native performance» abierto (revisión 0)
+fotograma presentado: seq 1 (posición 00:00:01.000)
+paso 7: Log { text: "PERF_OPEN_FRAME_READY" }
+PERF_OPEN_FRAME_READY
+  toast: Info: Proyecto «Synthetic native performance» abierto (revisión 0)
+paso 8: SetIn { t: 0.0 }
+  toast: Info: Proyecto «Synthetic native performance» abierto (revisión 0)
+paso 9: SetOut { t: 4.0 }
+  toast: Info: Proyecto «Synthetic native performance» abierto (revisión 0)
+paso 10: Export { preset: "h264-720p", dest: "C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/under-load.mp4", range: true, selection: None }
+  toast: Info: Exportación añadida a la cola (revisión congelada)
+paso 11: Log { text: "PERF_EXPORT_ENQUEUED" }
+PERF_EXPORT_ENQUEUED
+  toast: Info: Exportación añadida a la cola (revisión congelada)
+paso 12: Seek { t: 4.0 }
+  toast: Info: Exportación añadida a la cola (revisión congelada)
+paso 13: WaitFrame { ms: 15000 }
+  toast: Info: Exportación añadida a la cola (revisión congelada)
+fotograma presentado: seq 2 (posición 00:00:04.000)
+paso 14: Log { text: "PERF_SEEK_EXPORT_READY" }
+PERF_SEEK_EXPORT_READY
+  toast: Info: Exportación añadida a la cola (revisión congelada)
+paso 15: AdvanceFrames { frames: 1 }
+  toast: Info: Exportación añadida a la cola (revisión congelada)
+paso 16: Log { text: "PERF_STEP_BEGIN" }
+PERF_STEP_BEGIN
+  toast: Info: Exportación añadida a la cola (revisión congelada)
+paso 17: Wait { ms: 50 }
+  toast: Info: Exportación añadida a la cola (revisión congelada)
+paso 18: Dump { path: "C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/step-00.json" }
+estado volcado en C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/step-00.json
+  toast: Info: Exportación añadida a la cola (revisión congelada)
+paso 19: Wait { ms: 50 }
+  toast: Info: Exportación añadida a la cola (revisión congelada)
+paso 20: Dump { path: "C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/step-01.json" }
+estado volcado en C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/step-01.json
+  toast: Info: Exportación añadida a la cola (revisión congelada)
+paso 21: Wait { ms: 50 }
+  toast: Info: Exportación añadida a la cola (revisión congelada)
+paso 22: Dump { path: "C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/step-02.json" }
+estado volcado en C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/step-02.json
+  toast: Info: Exportación añadida a la cola (revisión congelada)
+paso 23: Wait { ms: 50 }
+  toast: Info: Exportación añadida a la cola (revisión congelada)
+paso 24: Dump { path: "C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/step-03.json" }
+estado volcado en C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/step-03.json
+  toast: Info: Exportación añadida a la cola (revisión congelada)
+paso 25: Wait { ms: 50 }
+  toast: Info: Exportado C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/under-load.mp4 (00:00:04.000, 120 fotogramas, 2.5 s)
+paso 26: Dump { path: "C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/step-04.json" }
+estado volcado en C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/step-04.json
+  toast: Info: Exportado C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/under-load.mp4 (00:00:04.000, 120 fotogramas, 2.5 s)
+paso 27: Wait { ms: 50 }
+  toast: Info: Exportado C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/under-load.mp4 (00:00:04.000, 120 fotogramas, 2.5 s)
+paso 28: Dump { path: "C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/step-05.json" }
+estado volcado en C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/step-05.json
+  toast: Info: Exportado C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/under-load.mp4 (00:00:04.000, 120 fotogramas, 2.5 s)
+paso 29: Wait { ms: 50 }
+  toast: Info: Exportado C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/under-load.mp4 (00:00:04.000, 120 fotogramas, 2.5 s)
+paso 30: Dump { path: "C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/step-06.json" }
+estado volcado en C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/step-06.json
+  toast: Info: Exportado C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/under-load.mp4 (00:00:04.000, 120 fotogramas, 2.5 s)
+paso 31: Wait { ms: 50 }
+  toast: Info: Exportado C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/under-load.mp4 (00:00:04.000, 120 fotogramas, 2.5 s)
+paso 32: Dump { path: "C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/step-07.json" }
+estado volcado en C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/step-07.json
+  toast: Info: Exportado C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/under-load.mp4 (00:00:04.000, 120 fotogramas, 2.5 s)
+paso 33: Wait { ms: 50 }
+  toast: Info: Exportado C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/under-load.mp4 (00:00:04.000, 120 fotogramas, 2.5 s)
+paso 34: Dump { path: "C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/step-08.json" }
+estado volcado en C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/step-08.json
+  toast: Info: Exportado C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/under-load.mp4 (00:00:04.000, 120 fotogramas, 2.5 s)
+paso 35: Wait { ms: 50 }
+  toast: Info: Exportado C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/under-load.mp4 (00:00:04.000, 120 fotogramas, 2.5 s)
+paso 36: Dump { path: "C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/step-09.json" }
+estado volcado en C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/step-09.json
+  toast: Info: Exportado C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/under-load.mp4 (00:00:04.000, 120 fotogramas, 2.5 s)
+paso 37: Wait { ms: 50 }
+  toast: Info: Exportado C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/under-load.mp4 (00:00:04.000, 120 fotogramas, 2.5 s)
+paso 38: Dump { path: "C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/step-10.json" }
+estado volcado en C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/step-10.json
+  toast: Info: Exportado C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/under-load.mp4 (00:00:04.000, 120 fotogramas, 2.5 s)
+paso 39: Wait { ms: 50 }
+  toast: Info: Exportado C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/under-load.mp4 (00:00:04.000, 120 fotogramas, 2.5 s)
+paso 40: Dump { path: "C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/step-11.json" }
+estado volcado en C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/step-11.json
+  toast: Info: Exportado C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/under-load.mp4 (00:00:04.000, 120 fotogramas, 2.5 s)
+paso 41: Wait { ms: 50 }
+  toast: Info: Exportado C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/under-load.mp4 (00:00:04.000, 120 fotogramas, 2.5 s)
+paso 42: Dump { path: "C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/step-12.json" }
+estado volcado en C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/step-12.json
+  toast: Info: Exportado C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/under-load.mp4 (00:00:04.000, 120 fotogramas, 2.5 s)
+paso 43: Wait { ms: 50 }
+  toast: Info: Exportado C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/under-load.mp4 (00:00:04.000, 120 fotogramas, 2.5 s)
+paso 44: Dump { path: "C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/step-13.json" }
+estado volcado en C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/step-13.json
+  toast: Info: Exportado C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/under-load.mp4 (00:00:04.000, 120 fotogramas, 2.5 s)
+paso 45: Wait { ms: 50 }
+  toast: Info: Exportado C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/under-load.mp4 (00:00:04.000, 120 fotogramas, 2.5 s)
+paso 46: Dump { path: "C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/step-14.json" }
+estado volcado en C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/step-14.json
+  toast: Info: Exportado C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/under-load.mp4 (00:00:04.000, 120 fotogramas, 2.5 s)
+paso 47: Wait { ms: 50 }
+  toast: Info: Exportado C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/under-load.mp4 (00:00:04.000, 120 fotogramas, 2.5 s)
+paso 48: Dump { path: "C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/step-15.json" }
+estado volcado en C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/step-15.json
+  toast: Info: Exportado C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/under-load.mp4 (00:00:04.000, 120 fotogramas, 2.5 s)
+paso 49: Wait { ms: 50 }
+  toast: Info: Exportado C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/under-load.mp4 (00:00:04.000, 120 fotogramas, 2.5 s)
+paso 50: Dump { path: "C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/step-16.json" }
+estado volcado en C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/step-16.json
+  toast: Info: Exportado C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/under-load.mp4 (00:00:04.000, 120 fotogramas, 2.5 s)
+paso 51: Wait { ms: 50 }
+  toast: Info: Exportado C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/under-load.mp4 (00:00:04.000, 120 fotogramas, 2.5 s)
+paso 52: Dump { path: "C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/step-17.json" }
+estado volcado en C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/step-17.json
+  toast: Info: Exportado C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/under-load.mp4 (00:00:04.000, 120 fotogramas, 2.5 s)
+paso 53: Wait { ms: 50 }
+  toast: Info: Exportado C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/under-load.mp4 (00:00:04.000, 120 fotogramas, 2.5 s)
+paso 54: Dump { path: "C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/step-18.json" }
+estado volcado en C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/step-18.json
+  toast: Info: Exportado C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/under-load.mp4 (00:00:04.000, 120 fotogramas, 2.5 s)
+paso 55: Wait { ms: 50 }
+  toast: Info: Exportado C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/under-load.mp4 (00:00:04.000, 120 fotogramas, 2.5 s)
+paso 56: Dump { path: "C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/step-19.json" }
+estado volcado en C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/step-19.json
+  toast: Info: Exportado C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/under-load.mp4 (00:00:04.000, 120 fotogramas, 2.5 s)
+paso 57: Assert { markers: None, clips: None, layers: None, items: None, revision: None, playing: Some(false), rate: None, position: Some([4.0333, 4.0334]), tracks: None }
+assert OK (clips 1000, capas 2, items 20000, rev 0, pos 4.033, rate 1, playing false)
+  toast: Info: Exportado C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/under-load.mp4 (00:00:04.000, 120 fotogramas, 2.5 s)
+paso 58: WaitExport { ms: 120000 }
+  toast: Info: Exportado C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/under-load.mp4 (00:00:04.000, 120 fotogramas, 2.5 s)
+export OK: C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/under-load.mp4 · 00:00:04.000 · 120 frames · sha256 526fc481b7fbb6f2aa99b6150e2bfa4a613129f3df527b22624d32d3381d29a3
+paso 59: SetOut { t: 12.0 }
+  toast: Info: Exportado C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/under-load.mp4 (00:00:04.000, 120 fotogramas, 2.5 s)
+paso 60: Export { preset: "h264-720p", dest: "C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/playback-load.mp4", range: true, selection: None }
+  toast: Info: Exportación añadida a la cola (revisión congelada)
+paso 61: Log { text: "PERF_PLAY_EXPORT_ENQUEUED" }
+PERF_PLAY_EXPORT_ENQUEUED
+  toast: Info: Exportación añadida a la cola (revisión congelada)
+paso 62: Play
+  toast: Info: Exportación añadida a la cola (revisión congelada)
+paso 63: Log { text: "PERF_PLAY_BEGIN" }
+PERF_PLAY_BEGIN
+  toast: Info: Exportación añadida a la cola (revisión congelada)
+paso 64: Wait { ms: 100 }
+  toast: Info: Exportación añadida a la cola (revisión congelada)
+paso 65: Dump { path: "C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/play-00.json" }
+estado volcado en C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/play-00.json
+  toast: Info: Exportación añadida a la cola (revisión congelada)
+paso 66: Wait { ms: 100 }
+  toast: Info: Exportación añadida a la cola (revisión congelada)
+paso 67: Dump { path: "C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/play-01.json" }
+estado volcado en C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/play-01.json
+  toast: Info: Exportación añadida a la cola (revisión congelada)
+paso 68: Wait { ms: 100 }
+  toast: Info: Exportación añadida a la cola (revisión congelada)
+paso 69: Dump { path: "C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/play-02.json" }
+estado volcado en C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/play-02.json
+  toast: Info: Exportación añadida a la cola (revisión congelada)
+paso 70: Wait { ms: 100 }
+  toast: Info: Exportación añadida a la cola (revisión congelada)
+paso 71: Dump { path: "C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/play-03.json" }
+estado volcado en C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/play-03.json
+  toast: Info: Exportación añadida a la cola (revisión congelada)
+paso 72: Wait { ms: 100 }
+  toast: Info: Exportación añadida a la cola (revisión congelada)
+paso 73: Dump { path: "C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/play-04.json" }
+estado volcado en C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/play-04.json
+  toast: Info: Exportación añadida a la cola (revisión congelada)
+paso 74: Wait { ms: 100 }
+  toast: Info: Exportación añadida a la cola (revisión congelada)
+paso 75: Dump { path: "C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/play-05.json" }
+estado volcado en C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/play-05.json
+  toast: Info: Exportación añadida a la cola (revisión congelada)
+paso 76: Wait { ms: 100 }
+  toast: Info: Exportación añadida a la cola (revisión congelada)
+paso 77: Dump { path: "C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/play-06.json" }
+estado volcado en C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/play-06.json
+  toast: Info: Exportación añadida a la cola (revisión congelada)
+paso 78: Wait { ms: 100 }
+  toast: Info: Exportación añadida a la cola (revisión congelada)
+paso 79: Dump { path: "C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/play-07.json" }
+estado volcado en C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/play-07.json
+  toast: Info: Exportación añadida a la cola (revisión congelada)
+paso 80: Wait { ms: 100 }
+paso 81: Dump { path: "C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/play-08.json" }
+estado volcado en C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/play-08.json
+paso 82: Wait { ms: 100 }
+paso 83: Dump { path: "C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/play-09.json" }
+estado volcado en C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/play-09.json
+paso 84: Wait { ms: 100 }
+paso 85: Dump { path: "C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/play-10.json" }
+estado volcado en C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/play-10.json
+paso 86: Wait { ms: 100 }
+paso 87: Dump { path: "C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/play-11.json" }
+estado volcado en C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/play-11.json
+  toast: Info: Exportado C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/playback-load.mp4 (00:00:12.000, 360 fotogramas, 7.1 s)
+paso 88: Wait { ms: 100 }
+  toast: Info: Exportado C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/playback-load.mp4 (00:00:12.000, 360 fotogramas, 7.1 s)
+paso 89: Dump { path: "C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/play-12.json" }
+estado volcado en C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/play-12.json
+  toast: Info: Exportado C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/playback-load.mp4 (00:00:12.000, 360 fotogramas, 7.1 s)
+paso 90: Wait { ms: 100 }
+  toast: Info: Exportado C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/playback-load.mp4 (00:00:12.000, 360 fotogramas, 7.1 s)
+paso 91: Dump { path: "C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/play-13.json" }
+estado volcado en C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/play-13.json
+  toast: Info: Exportado C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/playback-load.mp4 (00:00:12.000, 360 fotogramas, 7.1 s)
+paso 92: Wait { ms: 100 }
+  toast: Info: Exportado C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/playback-load.mp4 (00:00:12.000, 360 fotogramas, 7.1 s)
+paso 93: Dump { path: "C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/play-14.json" }
+estado volcado en C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/play-14.json
+  toast: Info: Exportado C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/playback-load.mp4 (00:00:12.000, 360 fotogramas, 7.1 s)
+paso 94: Wait { ms: 100 }
+  toast: Info: Exportado C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/playback-load.mp4 (00:00:12.000, 360 fotogramas, 7.1 s)
+paso 95: Dump { path: "C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/play-15.json" }
+estado volcado en C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/play-15.json
+  toast: Info: Exportado C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/playback-load.mp4 (00:00:12.000, 360 fotogramas, 7.1 s)
+paso 96: Wait { ms: 100 }
+  toast: Info: Exportado C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/playback-load.mp4 (00:00:12.000, 360 fotogramas, 7.1 s)
+paso 97: Dump { path: "C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/play-16.json" }
+estado volcado en C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/play-16.json
+  toast: Info: Exportado C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/playback-load.mp4 (00:00:12.000, 360 fotogramas, 7.1 s)
+paso 98: Wait { ms: 100 }
+  toast: Info: Exportado C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/playback-load.mp4 (00:00:12.000, 360 fotogramas, 7.1 s)
+paso 99: Dump { path: "C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/play-17.json" }
+estado volcado en C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/play-17.json
+  toast: Info: Exportado C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/playback-load.mp4 (00:00:12.000, 360 fotogramas, 7.1 s)
+paso 100: Wait { ms: 100 }
+  toast: Info: Exportado C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/playback-load.mp4 (00:00:12.000, 360 fotogramas, 7.1 s)
+paso 101: Dump { path: "C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/play-18.json" }
+estado volcado en C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/play-18.json
+  toast: Info: Exportado C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/playback-load.mp4 (00:00:12.000, 360 fotogramas, 7.1 s)
+paso 102: Wait { ms: 100 }
+  toast: Info: Exportado C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/playback-load.mp4 (00:00:12.000, 360 fotogramas, 7.1 s)
+paso 103: Dump { path: "C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/play-19.json" }
+estado volcado en C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/play-19.json
+  toast: Info: Exportado C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/playback-load.mp4 (00:00:12.000, 360 fotogramas, 7.1 s)
+paso 104: Wait { ms: 100 }
+  toast: Info: Exportado C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/playback-load.mp4 (00:00:12.000, 360 fotogramas, 7.1 s)
+paso 105: Dump { path: "C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/play-20.json" }
+estado volcado en C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/play-20.json
+  toast: Info: Exportado C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/playback-load.mp4 (00:00:12.000, 360 fotogramas, 7.1 s)
+paso 106: Wait { ms: 100 }
+  toast: Info: Exportado C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/playback-load.mp4 (00:00:12.000, 360 fotogramas, 7.1 s)
+paso 107: Dump { path: "C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/play-21.json" }
+estado volcado en C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/play-21.json
+  toast: Info: Exportado C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/playback-load.mp4 (00:00:12.000, 360 fotogramas, 7.1 s)
+paso 108: Wait { ms: 100 }
+  toast: Info: Exportado C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/playback-load.mp4 (00:00:12.000, 360 fotogramas, 7.1 s)
+paso 109: Dump { path: "C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/play-22.json" }
+estado volcado en C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/play-22.json
+  toast: Info: Exportado C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/playback-load.mp4 (00:00:12.000, 360 fotogramas, 7.1 s)
+paso 110: Wait { ms: 100 }
+  toast: Info: Exportado C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/playback-load.mp4 (00:00:12.000, 360 fotogramas, 7.1 s)
+paso 111: Dump { path: "C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/play-23.json" }
+estado volcado en C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/play-23.json
+  toast: Info: Exportado C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/playback-load.mp4 (00:00:12.000, 360 fotogramas, 7.1 s)
+paso 112: Wait { ms: 100 }
+  toast: Info: Exportado C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/playback-load.mp4 (00:00:12.000, 360 fotogramas, 7.1 s)
+paso 113: Dump { path: "C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/play-24.json" }
+estado volcado en C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/play-24.json
+  toast: Info: Exportado C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/playback-load.mp4 (00:00:12.000, 360 fotogramas, 7.1 s)
+paso 114: Wait { ms: 100 }
+  toast: Info: Exportado C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/playback-load.mp4 (00:00:12.000, 360 fotogramas, 7.1 s)
+paso 115: Dump { path: "C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/play-25.json" }
+estado volcado en C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/play-25.json
+  toast: Info: Exportado C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/playback-load.mp4 (00:00:12.000, 360 fotogramas, 7.1 s)
+paso 116: Wait { ms: 100 }
+paso 117: Dump { path: "C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/play-26.json" }
+estado volcado en C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/play-26.json
+paso 118: Wait { ms: 100 }
+paso 119: Dump { path: "C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/play-27.json" }
+estado volcado en C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/play-27.json
+paso 120: Wait { ms: 100 }
+paso 121: Dump { path: "C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/play-28.json" }
+estado volcado en C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/play-28.json
+paso 122: Wait { ms: 100 }
+paso 123: Dump { path: "C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/play-29.json" }
+estado volcado en C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/play-29.json
+paso 124: Pause
+paso 125: Wait { ms: 500 }
+paso 126: Log { text: "PERF_PLAY_END" }
+PERF_PLAY_END
+paso 127: Dump { path: "C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/final-state.json" }
+estado volcado en C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/final-state.json
+paso 128: WaitExport { ms: 120000 }
+export OK: C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/playback-load.mp4 · 00:00:12.000 · 360 frames · sha256 4b49d6e97d76e6d102a2462374ad123fdee224238b641e20cac7cb66c053d9d1
+paso 129: SelectItem { layer: 0, index: 9999 }
+paso 130: View { mode: "source" }
+paso 131: Action { id: "view.fit" }
+paso 132: Log { text: "PERF_CACHE_BEGIN" }
+PERF_CACHE_BEGIN
+paso 133: Seek { t: 1.0 }
+paso 134: WaitFrame { ms: 15000 }
+fotograma presentado: seq 321 (posición 00:00:01.000)
+paso 135: Log { text: "PERF_CACHE_SOURCE_FRAME_READY" }
+PERF_CACHE_SOURCE_FRAME_READY
+paso 136: Play
+paso 137: Wait { ms: 100 }
+paso 138: Dump { path: "C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/cache-00.json" }
+estado volcado en C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/cache-00.json
+paso 139: Wait { ms: 100 }
+paso 140: Dump { path: "C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/cache-01.json" }
+estado volcado en C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/cache-01.json
+paso 141: Wait { ms: 100 }
+paso 142: Dump { path: "C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/cache-02.json" }
+estado volcado en C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/cache-02.json
+paso 143: Wait { ms: 100 }
+paso 144: Dump { path: "C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/cache-03.json" }
+estado volcado en C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/cache-03.json
+paso 145: Wait { ms: 100 }
+paso 146: Dump { path: "C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/cache-04.json" }
+estado volcado en C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/cache-04.json
+paso 147: Wait { ms: 100 }
+paso 148: Dump { path: "C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/cache-05.json" }
+estado volcado en C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/cache-05.json
+paso 149: Wait { ms: 100 }
+paso 150: Dump { path: "C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/cache-06.json" }
+estado volcado en C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/cache-06.json
+paso 151: Wait { ms: 100 }
+paso 152: Dump { path: "C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/cache-07.json" }
+estado volcado en C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/cache-07.json
+paso 153: Wait { ms: 100 }
+paso 154: Dump { path: "C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/cache-08.json" }
+estado volcado en C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/cache-08.json
+paso 155: Wait { ms: 100 }
+paso 156: Dump { path: "C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/cache-09.json" }
+estado volcado en C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/cache-09.json
+paso 157: Pause
+paso 158: Wait { ms: 500 }
+paso 159: AssertCaches { wave_columns_min: 1, thumb_tiles_min: 1 }
+caches: wave_columns=766, thumb_tiles=20, OK=true
+paso 160: Screenshot { path: "C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/large-source.png" }
+captura guardada en C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/large-source.png (1920×1080)
+paso 161: View { mode: "sequence" }
+paso 162: Action { id: "view.fit" }
+paso 163: Wait { ms: 500 }
+paso 164: Assert { markers: None, clips: Some(1000), layers: None, items: Some(20000), revision: Some(0), playing: None, rate: None, position: None, tracks: None }
+assert OK (clips 1000, capas 2, items 20000, rev 0, pos 3.067, rate 1, playing false)
+paso 165: Screenshot { path: "C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/large-native.png" }
+captura guardada en C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-155438/large-native.png (1920×1080)
+paso 166: Quit
+quit; fallos=false
+guion terminado; fallos=false

@@ -1,0 +1,22 @@
+{
+  "fixture_only": true,
+  "inference_accepted": false,
+  "gui_exercised": false,
+  "master_sha256": "aa31e59ece174c116bb37c7bda7d6e6ad6954f6dcd19f071aaf7f6e12cc49dc5",
+  "fingerprint_size": 32044,
+  "source_digest": "2bc78a4be318d40e79610c573f65aa45532a6a71bccbf9b8bdf0eb6e6a1c8138",
+  "v1_master_parse": "passed",
+  "missing_or_negative_size_rejected": true,
+  "projections": {
+    "layers": 2,
+    "word_evidence_preserved": true,
+    "locked": true,
+    "human_edits_fabricated": false
+  },
+  "master_evidence_validate": "passed",
+  "prepare_did_not_mutate": true,
+  "in_memory_commit_revision": 1,
+  "in_memory_undo_revision": 2,
+  "project_written": false,
+  "original_fixture_unchanged": true
+}

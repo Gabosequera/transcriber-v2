@@ -1,0 +1,54 @@
+{
+  "revision": 0,
+  "view": "Sequence",
+  "playhead_ms": 0,
+  "player": {
+    "position_ms": 0,
+    "playing": false,
+    "rate": 1.0,
+    "generation": 2,
+    "buffering": false,
+    "decode_ms": 0.39559999108314514,
+    "audio_available": true
+  },
+  "last_frame": {
+    "position_ms": 0,
+    "w": 846,
+    "h": 476,
+    "generation": 2
+  },
+  "clips": [
+    {
+      "id": "clip-rf64-0",
+      "track": "A1",
+      "position_ms": 0,
+      "source_start_ms": 0,
+      "source_end_ms": 500,
+      "enabled": true,
+      "link": null
+    },
+    {
+      "id": "clip-rf64-1",
+      "track": "A1",
+      "position_ms": 11200000,
+      "source_start_ms": 0,
+      "source_end_ms": 500,
+      "enabled": true,
+      "link": null
+    },
+    {
+      "id": "clip-rf64-2",
+      "track": "A1",
+      "position_ms": 22399500,
+      "source_start_ms": 0,
+      "source_end_ms": 500,
+      "enabled": true,
+      "link": null
+    }
+  ],
+  "layers": [],
+  "toasts": [
+    "Exportado C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/rf64-20260930-165217/physical-rf64.wav (06:13:20.000, 0 fotogramas, 144.7 s)"
+  ],
+  "undo": null
+}

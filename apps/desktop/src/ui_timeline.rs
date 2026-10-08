@@ -366,7 +366,7 @@ pub fn draw(app: &mut TranscriptorApp, ui: &mut egui::Ui) {
                 e.extend_from_slice(app.timeline_view.index.marker_edges(window));
             }
             if let Some(asset) = &layer_asset {
-                e.extend_from_slice(app.timeline_view.semantic_index.edges(asset, window));
+                e.extend(app.timeline_view.semantic_index.edges(asset, window));
             }
         }
         e.push(app.playhead);
@@ -973,36 +973,74 @@ pub fn draw(app: &mut TranscriptorApp, ui: &mut egui::Ui) {
                     let margin = Ticks::from_seconds_f64((8.0 / app.timeline_view.px_per_s) as f64);
                     let visible =
                         TimeRange::new(app.timeline_view.scroll_t - margin, app.timeline_view.scroll_t + app.timeline_view.visible_span() + margin);
-                    for occurrence in app.timeline_view.semantic_index.query(layer_id, visible) {
-                        let Some(it) = layer.items.get(occurrence.item) else { continue };
-                        let selected = app.selection.items.iter().any(|(l, i)| l == layer_id && i == &it.item_id);
-                        let (a, b) = (occurrence.range.start, occurrence.range.end);
-                        let x1 = app.timeline_view.t_to_x(a, x0);
-                        let x2 = app.timeline_view.t_to_x(b, x0).max(x1 + 6.0);
-                        if x2 < x0 || x1 > rect.right() {
-                            continue;
+                    let columns = (rect.right() - x0).ceil().max(1.0) as usize;
+                    let selected_items: std::collections::HashSet<_> =
+                        app.selection.items.iter().filter(|(id, _)| id == layer_id).map(|(_, item)| item).collect();
+                    let paint = app.timeline_view.semantic_index.paint_query(layer_id, visible, columns, |occurrence| {
+                        let item = layer.items.get(occurrence.item)?;
+                        Some(item_paint_kind(item.state, selected_items.contains(&item.item_id)))
+                    });
+                    match paint {
+                        crate::timeline_index::SemanticPaint::Exact(occurrences) => {
+                            for occurrence in occurrences {
+                                let Some(it) = layer.items.get(occurrence.item) else { continue };
+                                let selected = app.selection.items.iter().any(|(l, i)| l == layer_id && i == &it.item_id);
+                                let (a, b) = (occurrence.range.start, occurrence.range.end);
+                                let x1 = app.timeline_view.t_to_x(a, x0);
+                                let x2 = app.timeline_view.t_to_x(b, x0).max(x1 + 6.0);
+                                if x2 < x0 || x1 > rect.right() {
+                                    continue;
+                                }
+                                let rr = Rect::from_min_max(Pos2::new(x1, lane.y + 4.0), Pos2::new(x2, lane.y + lane.h - 4.0));
+                                draw_item(&clip_painter, rr, it, color, selected, app.timeline_view.px_per_s);
+                            }
                         }
-                        let rr = Rect::from_min_max(Pos2::new(x1, lane.y + 4.0), Pos2::new(x2, lane.y + lane.h - 4.0));
-                        draw_item(&clip_painter, rr, it, color, selected, app.timeline_view.px_per_s);
+                        crate::timeline_index::SemanticPaint::Dense(coverage) => {
+                            for span in coverage {
+                                let rr = Rect::from_min_max(
+                                    Pos2::new(app.timeline_view.t_to_x(span.range.start, x0), lane.y + 4.0),
+                                    Pos2::new(app.timeline_view.t_to_x(span.range.end, x0), lane.y + lane.h - 4.0),
+                                )
+                                .intersect(clip_painter.clip_rect());
+                                draw_dense_items(&clip_painter, rr, color, span.kind);
+                            }
+                        }
                     }
                 }
             }
         }
         // cabecera
-        for geometry in app.gesture_preview.geometry() {
-            if !matches!(&lane.kind,LaneKind::Layer(id) if id==&geometry.layer) {
-                continue;
-            }
-            let Some(layer) = app.project().layer(&geometry.layer) else { continue };
-            for range in &geometry.ranges {
-                for (a, b) in item_range_in_view(app, range, &layer.asset_id) {
-                    let ghost = Rect::from_min_max(
-                        Pos2::new(app.timeline_view.t_to_x(a, x0), lane.y + 3.0),
-                        Pos2::new(app.timeline_view.t_to_x(b, x0).max(app.timeline_view.t_to_x(a, x0) + 6.0), lane.y + lane.h - 3.0),
-                    );
-                    let color = if geometry.removed { Color32::LIGHT_RED } else { colors::ACCENT };
-                    clip_painter.rect_filled(ghost, 2.0, color.gamma_multiply(0.22));
-                    clip_painter.rect_stroke(ghost, 2.0, Stroke::new(2.0, color), egui::StrokeKind::Inside);
+        if !app.gesture_preview.geometry().is_empty()
+            && let LaneKind::Layer(layer_id) = &lane.kind
+            && let Some(layer) = app.project().layer(layer_id)
+        {
+            let margin = Ticks::from_seconds_f64((6.0 / app.timeline_view.px_per_s) as f64);
+            let visible = TimeRange::new(app.timeline_view.scroll_t - margin, app.timeline_view.scroll_t + app.timeline_view.visible_span() + margin);
+            let ranges = app
+                .gesture_preview
+                .geometry()
+                .iter()
+                .filter(|geometry| &geometry.layer == layer_id)
+                .flat_map(|geometry| geometry.ranges.iter().map(move |range| (*range, geometry.removed)));
+            let paint =
+                app.timeline_view.semantic_index.paint_preview(&layer.asset_id, ranges, visible, (rect.right() - x0).ceil().max(1.0) as usize);
+            let spans: Vec<_> = match paint {
+                crate::timeline_index::SemanticPaint::Exact(occurrences) => {
+                    occurrences.into_iter().map(|o| (o.range, o.range_index != 0, true)).collect()
+                }
+                crate::timeline_index::SemanticPaint::Dense(coverage) => {
+                    coverage.into_iter().map(|span| (span.range, span.kind != 0, false)).collect()
+                }
+            };
+            for (range, removed, exact) in spans {
+                let left = app.timeline_view.t_to_x(range.start, x0);
+                let right = app.timeline_view.t_to_x(range.end, x0).max(left + if exact { 6.0 } else { 1.0 });
+                let ghost =
+                    Rect::from_min_max(Pos2::new(left, lane.y + 3.0), Pos2::new(right, lane.y + lane.h - 3.0)).intersect(clip_painter.clip_rect());
+                let color = if removed { Color32::LIGHT_RED } else { colors::ACCENT };
+                if ghost.is_positive() {
+                    clip_painter.rect_filled(ghost, if exact { 2.0 } else { 0.0 }, color.gamma_multiply(0.22));
+                    clip_painter.rect_stroke(ghost, if exact { 2.0 } else { 0.0 }, Stroke::new(2.0, color), egui::StrokeKind::Inside);
                 }
             }
         }
@@ -1178,20 +1216,6 @@ fn hit_test(app: &TranscriptorApp, lanes: &[Lane], p: Pos2, x0: f32) -> Hit {
     }
 }
 
-/// Rango fuente → rangos de vista (uno por clip que lo contenga en Secuencia).
-pub(crate) fn item_range_in_view(app: &TranscriptorApp, r: &TimeRange, asset: &tv2_domain::ids::AssetId) -> Vec<(Ticks, Ticks)> {
-    match app.view {
-        ViewMode::Source => {
-            if app.source_asset.as_ref() == Some(asset) {
-                vec![(r.start, r.end)]
-            } else {
-                vec![]
-            }
-        }
-        ViewMode::Sequence => app.timeline_view.semantic_index.project_range(asset, *r),
-    }
-}
-
 fn semantic_overlay_for_clip(app: &TranscriptorApp, c: &tv2_domain::timeline::Clip) -> Vec<(Ticks, Ticks, Color32)> {
     let mut out = Vec::new();
     let view = TimeRange::new(app.timeline_view.scroll_t, app.timeline_view.scroll_t + app.timeline_view.visible_span());
@@ -1200,16 +1224,29 @@ fn semantic_overlay_for_clip(app: &TranscriptorApp, c: &tv2_domain::timeline::Cl
     for (layer_id, color) in app.timeline_view.semantic_index.visible_layers(&c.asset_id) {
         let Some(layer) = app.project().layer(layer_id) else { continue };
         let color = parse_color(color);
-        for occurrence in app.timeline_view.semantic_index.query_source(layer_id, source) {
-            let Some(it) = layer.items.get(occurrence.item).filter(|item| item.state != ItemState::Disabled) else { continue };
-            if let Some(r) = it.ranges.get(occurrence.range_index)
-                && let Some(i) = c.source.intersection(r)
-            {
+        let columns = (visible.duration().as_seconds_f64() * app.timeline_view.px_per_s as f64).ceil().max(1.0) as usize;
+        let paint = app.timeline_view.semantic_index.paint_source(layer_id, source, columns, |occurrence| {
+            layer.items.get(occurrence.item).filter(|item| item.state != ItemState::Disabled).map(|_| 0)
+        });
+        let ranges = match paint {
+            crate::timeline_index::SemanticPaint::Exact(occurrences) => occurrences.into_iter().map(|o| o.range).collect(),
+            crate::timeline_index::SemanticPaint::Dense(coverage) => coverage.into_iter().map(|span| span.range).collect::<Vec<_>>(),
+        };
+        for range in ranges {
+            if let Some(i) = visible_overlay_range(range, source, Ticks::from_seconds_f64(1.0 / app.timeline_view.px_per_s as f64)) {
                 out.push((c.position + (i.start - c.source.start), c.position + (i.end - c.source.start), color));
             }
         }
     }
     out
+}
+
+fn visible_overlay_range(range: TimeRange, visible: TimeRange, point_width: Ticks) -> Option<TimeRange> {
+    if range.is_point() {
+        visible.contains(range.start).then(|| TimeRange::new(range.start, (range.start + point_width.max(Ticks(1))).min(visible.end)))
+    } else {
+        visible.intersection(&range)
+    }
 }
 
 fn gesture_source_pair(
@@ -1329,6 +1366,29 @@ fn draw_clip(
             FontId::proportional(12.0),
             colors::TEXT,
         );
+    }
+}
+
+fn item_paint_kind(state: ItemState, selected: bool) -> usize {
+    (match state {
+        ItemState::Accepted => 0,
+        ItemState::Proposed => 1,
+        ItemState::Disabled => 2,
+    }) + if selected { 3 } else { 0 }
+}
+
+fn draw_dense_items(painter: &egui::Painter, r: Rect, color: Color32, kind: usize) {
+    if !r.is_positive() {
+        return;
+    }
+    let fill = match kind % 3 {
+        0 => color,
+        1 => color.gamma_multiply(0.6),
+        _ => colors::DISABLED,
+    };
+    painter.rect_filled(r, 0.0, fill);
+    if kind >= 3 {
+        painter.rect_stroke(r, 0.0, Stroke::new(2.0, colors::ACCENT), egui::StrokeKind::Inside);
     }
 }
 
@@ -1706,5 +1766,27 @@ pub fn parse_color(hex: &str) -> Color32 {
         Color32::from_rgb(r, g, b)
     } else {
         colors::ACCENT
+    }
+}
+
+#[cfg(test)]
+mod performance_paint_tests {
+    use super::*;
+    #[test]
+    fn point_overlay_has_one_pixel_and_respects_half_open_source_boundary() {
+        let range = |a, b| TimeRange::new(Ticks::from_seconds(a), Ticks::from_seconds(b));
+        let pixel = Ticks::from_seconds_f64(0.01);
+        assert_eq!(
+            visible_overlay_range(range(5, 5), range(0, 10), pixel),
+            Some(TimeRange::new(Ticks::from_seconds(5), Ticks::from_seconds(5) + pixel))
+        );
+        assert_eq!(visible_overlay_range(range(0, 0), range(0, 10), pixel), Some(TimeRange::new(Ticks::ZERO, pixel)));
+        assert!(visible_overlay_range(range(10, 10), range(0, 10), pixel).is_none());
+        assert!(visible_overlay_range(range(11, 11), range(0, 10), pixel).is_none());
+        assert_eq!(visible_overlay_range(range(2, 12), range(0, 10), pixel), Some(range(2, 10)));
+        assert_eq!(
+            visible_overlay_range(range(5, 5), range(0, 10), Ticks::ZERO),
+            Some(TimeRange::new(Ticks::from_seconds(5), Ticks::from_seconds(5) + Ticks(1)))
+        );
     }
 }

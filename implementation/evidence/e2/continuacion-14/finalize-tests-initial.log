@@ -1,0 +1,33 @@
+test_alignment_recalculates_intensity_pauses_and_conversation (__main__.FinalizationTests.test_alignment_recalculates_intensity_pauses_and_conversation) ... ok
+test_base_only_does_not_claim_optional_inference_and_preserves_chunks (__main__.FinalizationTests.test_base_only_does_not_claim_optional_inference_and_preserves_chunks) ... ok
+test_cancel_before_and_during_assembly_preserves_base (__main__.FinalizationTests.test_cancel_before_and_during_assembly_preserves_base) ... ok
+test_fallback_alignment_does_not_claim_mms (__main__.FinalizationTests.test_fallback_alignment_does_not_claim_mms) ... ok
+test_full_assembly_is_immutable_and_preserves_asr_extensions (__main__.FinalizationTests.test_full_assembly_is_immutable_and_preserves_asr_extensions) ... ok
+test_import_is_stdlib_only (__main__.FinalizationTests.test_import_is_stdlib_only) ... ok
+test_rejects_duplicate_ids_across_tracks (__main__.FinalizationTests.test_rejects_duplicate_ids_across_tracks) ... ok
+test_rejects_invalid_closed_structure_ranges_and_nonfinite (__main__.FinalizationTests.test_rejects_invalid_closed_structure_ranges_and_nonfinite) ... ok
+test_rejects_mutated_stage_identity_text_probability_and_original_times (__main__.FinalizationTests.test_rejects_mutated_stage_identity_text_probability_and_original_times) ... ok
+test_rejects_pcm_changed_during_derivation (__main__.FinalizationTests.test_rejects_pcm_changed_during_derivation) ... ok
+test_rejects_preexisting_chunks_with_alignment (__main__.FinalizationTests.test_rejects_preexisting_chunks_with_alignment) ... ok
+test_rejects_stale_stage_lineage_times_audio_and_source (__main__.FinalizationTests.test_rejects_stale_stage_lineage_times_audio_and_source) ... 
+  test_rejects_stale_stage_lineage_times_audio_and_source (__main__.FinalizationTests.test_rejects_stale_stage_lineage_times_audio_and_source) (mutation=<function FinalizationTests.test_rejects_stale_stage_lineage_times_audio_and_source.<locals>.<lambda> at 0x0000028B1DE60A90>) ... FAIL
+
+======================================================================
+FAIL: test_rejects_stale_stage_lineage_times_audio_and_source (__main__.FinalizationTests.test_rejects_stale_stage_lineage_times_audio_and_source) (mutation=<function FinalizationTests.test_rejects_stale_stage_lineage_times_audio_and_source.<locals>.<lambda> at 0x0000028B1DE60A90>)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\gabri\Todo\transcriber-v2\tests\scripts\test_e5_finalize.py", line 159, in test_rejects_stale_stage_lineage_times_audio_and_source
+    self.assert_rejected(inputs=inputs, code="E_PRECONDITION")
+    ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\gabri\Todo\transcriber-v2\tests\scripts\test_e5_finalize.py", line 79, in assert_rejected
+    self.assertEqual(caught.exception.code, code)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 'E_ARGUMENT' != 'E_PRECONDITION'
+- E_ARGUMENT
++ E_PRECONDITION
+
+
+----------------------------------------------------------------------
+Ran 12 tests in 0.227s
+
+FAILED (failures=1)

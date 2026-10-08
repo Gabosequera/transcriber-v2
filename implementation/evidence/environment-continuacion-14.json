@@ -1,0 +1,53 @@
+{
+  "media": "36 tests executed PASS",
+  "gui_alpha10": "launched (PID14268 human; E2 scripted transport PASS)",
+  "policy_files": [
+    {
+      "Name": "{0283AC0F-FFF1-49AE-ADA1-8A933130CAD6}.cip",
+      "Length": 7079,
+      "LastWriteTime": "2024-04-01T03:22:16.9972758-04:00"
+    },
+    {
+      "Name": "{0939ED82-BFD5-4D32-B58E-D31D3C49715A}.cip",
+      "Length": 4893,
+      "LastWriteTime": "2024-04-01T03:22:35.0755361-04:00"
+    },
+    {
+      "Name": "{1283AC0F-FFF1-49AE-ADA1-8A933130CAD6}.cip",
+      "Length": 79907,
+      "LastWriteTime": "2024-04-01T03:22:42.4662029-04:00"
+    },
+    {
+      "Name": "{1678656C-05EF-481F-BC5B-EBD8C991502D}.cip",
+      "Length": 4655,
+      "LastWriteTime": "2026-03-06T18:49:13.161196-05:00"
+    },
+    {
+      "Name": "{1939ED82-BFD5-4D32-B58E-D31D3C49715A}.cip",
+      "Length": 4913,
+      "LastWriteTime": "2024-04-01T03:22:43.6849705-04:00"
+    },
+    {
+      "Name": "{2678656C-05EF-481F-BC5B-EBD8C991502D}.cip",
+      "Length": 4660,
+      "LastWriteTime": "2026-03-06T18:49:13.161196-05:00"
+    },
+    {
+      "Name": "{60FD87F8-4593-44A0-91B0-2E0DA022F248}.cip",
+      "Length": 10836,
+      "LastWriteTime": "2026-09-08T18:43:57.85702-04:00"
+    },
+    {
+      "Name": "{784C4414-79F4-4C32-A6A5-F0FB42A51D0D}.cip",
+      "Length": 196506,
+      "LastWriteTime": "2026-07-17T15:31:15.5439055-04:00"
+    }
+  ],
+  "specific_retained_events": [],
+  "kernel_ci": 2,
+  "observed_at": "2026-09-30T09:37:32.8257888-04:00",
+  "old_app_tests": "Not retried; no evidence of changed cause",
+  "smart_app_control": "On",
+  "umci": 2,
+  "ci_tool_result": "CiTool -lp -json: access denied -2147024891"
+}

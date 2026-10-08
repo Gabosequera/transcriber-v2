@@ -1,0 +1,15 @@
+{
+  "accepted": true,
+  "cap_bytes": 1073741824,
+  "deadline_seconds": 60,
+  "worker_sha256": "781041f532749a15e9199ffe9b6d7c92e19d2aafdddad6e6d5efec349f19502e",
+  "script_sha256": "4b62e0065dc2e9e14d58f781aac9ecbf60c4df7ef9887e7c2fe8ac9c5a20feea",
+  "real_model_weights_loaded": false,
+  "editorial_quality_accepted": false,
+  "pid": 28048,
+  "supervisor_handshake": true,
+  "exit_code": 0,
+  "peak_job_memory": 330293248,
+  "duration_seconds": 5.452999999979511,
+  "own_process_signaled": true
+}

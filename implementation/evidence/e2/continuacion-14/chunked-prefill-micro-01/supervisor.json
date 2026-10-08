@@ -1,0 +1,14 @@
+{
+  "accepted": true,
+  "cap_bytes": 1073741824,
+  "deadline_seconds": 60,
+  "script_sha256": "c0b29991a07a956fa89ea078b453bb092cc2c559ca1f58e3b6a4caa90c799cc3",
+  "real_model_weights_loaded": false,
+  "editorial_quality_accepted": false,
+  "pid": 13408,
+  "supervisor_handshake": true,
+  "exit_code": 0,
+  "peak_job_memory": 329236480,
+  "duration_seconds": 5.045999999972992,
+  "own_process_signaled": true
+}

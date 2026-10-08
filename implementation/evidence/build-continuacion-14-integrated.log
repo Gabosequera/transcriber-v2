@@ -1,0 +1,5 @@
+   Compiling tv2-media v2.0.0-alpha.11 (C:\Users\gabri\Todo\transcriber-v2\crates\media)
+   Compiling tv2-control v2.0.0-alpha.11 (C:\Users\gabri\Todo\transcriber-v2\crates\control)
+   Compiling tv2-pipeline v2.0.0-alpha.11 (C:\Users\gabri\Todo\transcriber-v2\crates\pipeline)
+   Compiling transcriptor v2.0.0-alpha.11 (C:\Users\gabri\Todo\transcriber-v2\apps\desktop)
+    Finished `release` profile [optimized + debuginfo] target(s) in 2m 30s

@@ -1,0 +1,18 @@
+{
+  "case": "incomplete-eof",
+  "deadline_seconds": 30,
+  "job_memory_limit": 268435456,
+  "worker_sha256": "9bcae1d0f89bbef99e8b776bc8fc58fdd7511c9fe5f77895adb4f3da08ac2c1f",
+  "peak_job_memory": 20193280,
+  "pid": 29724,
+  "accepted": true,
+  "error": null,
+  "exit_code": 0,
+  "duration_seconds": 0.3279999999795109,
+  "import_audit": {
+    "blocked_attempts": [],
+    "loaded_ml_modules": [],
+    "worker_sha256": "9bcae1d0f89bbef99e8b776bc8fc58fdd7511c9fe5f77895adb4f3da08ac2c1f"
+  },
+  "stderr_bytes": 0
+}

@@ -1,0 +1,6 @@
+    Checking tv2-pipeline v2.0.0-alpha.11 (C:\Users\gabri\Todo\transcriber-v2\crates\pipeline)
+    Checking tv2-v1compat v2.0.0-alpha.11 (C:\Users\gabri\Todo\transcriber-v2\crates\v1compat)
+    Checking tv2-application v2.0.0-alpha.11 (C:\Users\gabri\Todo\transcriber-v2\crates\application)
+    Checking tv2-control v2.0.0-alpha.11 (C:\Users\gabri\Todo\transcriber-v2\crates\control)
+    Checking tv2-media v2.0.0-alpha.11 (C:\Users\gabri\Todo\transcriber-v2\crates\media)
+    Finished `dev` profile [optimized + debuginfo] target(s) in 4.11s

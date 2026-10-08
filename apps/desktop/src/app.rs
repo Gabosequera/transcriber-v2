@@ -170,6 +170,7 @@ pub struct TranscriptorApp {
     pub imports: crate::import_jobs::ImportJobs,
     pub relink_job: Option<crate::import_jobs::RelinkJob>,
     pub editorial_job: Option<crate::editorial_jobs::EditorialJob>,
+    pub analysis: crate::pipeline_ui::AnalysisUi,
     pub editorial_review: crate::editorial_review::EditorialReview,
     pub conversation: crate::conversation_ui::ConversationUi,
     pub semantic_job: Option<crate::semantic_jobs::SemanticJob>,
@@ -300,6 +301,7 @@ impl TranscriptorApp {
             imports: Default::default(),
             relink_job: None,
             editorial_job: None,
+            analysis: Default::default(),
             editorial_review: Default::default(),
             conversation: Default::default(),
             semantic_job: None,
@@ -620,6 +622,10 @@ impl TranscriptorApp {
         } else {
             self.store.clone().unwrap()
         };
+        self.save_project_to(store)
+    }
+
+    pub fn save_project_to(&mut self, store: ProjectStore) -> bool {
         if self.persistence_job.is_some() || self.autosave_job.is_some() {
             self.toast(Severity::Warn, "Espera a que termine la operación de archivos");
             return false;
@@ -648,20 +654,26 @@ impl TranscriptorApp {
         }
     }
     pub fn accept_external(&mut self) {
+        if let Err(error) = self.start_external_apply() {
+            self.script_external_apply_result(&Err(error.clone()));
+            self.report(error);
+        }
+    }
+    pub(crate) fn start_external_apply(&mut self) -> tv2_domain::error::DomainResult<()> {
         if self.external_apply.is_some() {
-            return;
+            return Err(DomainError::precondition("Hay un Apply externo en curso"));
         }
-        if let (Some(store), Some(change)) = (self.store.clone(), self.external.change.take()) {
-            let project = self.project().clone();
-            let worker = store.clone();
-            let (tx, result) = crossbeam_channel::bounded(1);
-            match std::thread::Builder::new().name("external-apply-prepare".into()).spawn(move || {
-                let _ = tx.send(worker.prepare_external(&project, change));
-            }) {
-                Ok(_) => self.external_apply = Some(crate::external::ExternalApply { store, result }),
-                Err(e) => self.report(e.into()),
-            }
-        }
+        let store = self.store.clone().ok_or_else(|| DomainError::precondition("No hay proyecto guardado para Apply externo"))?;
+        let change = self.external.change.clone().ok_or_else(|| DomainError::precondition("No hay cambio externo revisable"))?;
+        let project = self.project().clone();
+        let worker = store.clone();
+        let (tx, result) = crossbeam_channel::bounded(1);
+        std::thread::Builder::new().name("external-apply-prepare".into()).spawn(move || {
+            let _ = tx.send(worker.prepare_external(&project, change));
+        })?;
+        self.external.change = None;
+        self.external_apply = Some(crate::external::ExternalApply { store, result });
+        Ok(())
     }
 
     fn poll_external_apply(&mut self) {
@@ -675,9 +687,12 @@ impl TranscriptorApp {
         };
         let job = self.external_apply.take().unwrap();
         if self.store.as_ref().is_none_or(|s| s.root != job.store.root) {
+            self.script_external_apply_result(&Err(DomainError::precondition("El proyecto cambió durante Apply externo")));
             return;
         }
-        match result.and_then(|prepared| job.store.commit_external(&mut self.session, prepared)) {
+        let result = result.and_then(|prepared| job.store.commit_external(&mut self.session, prepared));
+        self.script_external_apply_result(&result);
+        match result {
             Ok(()) => {
                 self.external = Default::default();
                 self.after_change();
@@ -950,6 +965,7 @@ impl TranscriptorApp {
             Err(crossbeam_channel::TryRecvError::Disconnected) => Err(DomainError::process("Worker de exportación V1 terminó sin resultado")),
         };
         self.v1_export_job = None;
+        self.script_document_export_result(&result);
         match result {
             Ok(path) => self.toast(Severity::Info, format!("Documento V1 exportado en {}", path.display())),
             Err(e) => self.report(e),
@@ -981,6 +997,16 @@ impl TranscriptorApp {
     }
 
     pub fn player_send(&self, c: PlayerCommand) {
+        match &c {
+            PlayerCommand::Seek(at) | PlayerCommand::Scrub(at) => self.resolver.requested_position.set(Some(*at)),
+            PlayerCommand::StepFrames(frames) => {
+                if let Some(at) = self.resolver.requested_position.get() {
+                    self.resolver.requested_position.set(Some(crate::resolve_jobs::step_target(at, *frames, self.frame_rate(), self.duration())));
+                }
+            }
+            PlayerCommand::Play | PlayerCommand::Pause | PlayerCommand::TogglePlay => self.resolver.requested_position.set(None),
+            _ => {}
+        }
         if self.composition_pending() {
             match &c {
                 PlayerCommand::Seek(at) | PlayerCommand::Scrub(at) => {
@@ -2390,6 +2416,7 @@ impl eframe::App for TranscriptorApp {
         self.poll_import();
         self.poll_editorial_import();
         self.poll_relink();
+        self.poll_analysis(ctx);
         self.poll_v1_export();
         self.poll_persistence();
         self.poll_semantic();
@@ -2420,7 +2447,7 @@ impl eframe::App for TranscriptorApp {
                 Some(t) => t.set(img, egui::TextureOptions::LINEAR),
                 None => self.texture = Some(ctx.load_texture("visor", img, egui::TextureOptions::LINEAR)),
             }
-            if !self.player_snapshot.playing && !self.composition_pending() {
+            if !self.player_snapshot.playing && !self.composition_pending() && self.resolver.accept_paused_position(pf.position, self.frame_rate()) {
                 self.playhead = pf.position;
             }
             self.last_frame = Some(pf);
@@ -2458,6 +2485,7 @@ impl eframe::App for TranscriptorApp {
             || self.gesture_preview.active()
             || self.persistence_job.is_some()
             || self.editorial_job.is_some()
+            || self.analysis.busy()
             || self.semantic_job.is_some()
             || self.author_scan.is_some()
             || self.export_jobs_scan.is_some()
@@ -2484,6 +2512,8 @@ impl eframe::App for TranscriptorApp {
 
 impl TranscriptorApp {
     pub fn shutdown_workers(&mut self) {
+        self.analysis.cancel();
+        self.editorial_review.cancel();
         self.imports.cancel();
         if let Some(job) = &self.editorial_job {
             job.cancel.store(true, std::sync::atomic::Ordering::Release);

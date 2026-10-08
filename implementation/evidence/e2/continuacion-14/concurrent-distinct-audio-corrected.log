@@ -1,0 +1,45 @@
+   Compiling tv2-media v2.0.0-alpha.11 (C:\Users\gabri\Todo\transcriber-v2\crates\media)
+error[E0373]: closure may outlive the current function, but it borrows `run`, which is owned by the current function
+   --> crates\media\src\export.rs:901:37
+    |
+893 |         let results = std::thread::scope(|scope| {
+    |                                           ----- has type `&'1 Scope<'1, '_>`
+...
+901 |             let first = scope.spawn(|| run(&request));
+    |                                     ^^ --- `run` is borrowed here
+    |                                     |
+    |                                     may outlive borrowed value `run`
+    |
+note: function requires argument type to outlive `'1`
+   --> crates\media\src\export.rs:901:25
+    |
+901 |             let first = scope.spawn(|| run(&request));
+    |                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+help: to force the closure to take ownership of `run` (and any other referenced variables), use the `move` keyword
+    |
+901 |             let first = scope.spawn(move || run(&request));
+    |                                     ++++
+
+error[E0373]: closure may outlive the current function, but it borrows `run`, which is owned by the current function
+   --> crates\media\src\export.rs:902:38
+    |
+893 |         let results = std::thread::scope(|scope| {
+    |                                           ----- has type `&'1 Scope<'1, '_>`
+...
+902 |             let second = scope.spawn(|| run(&other_request));
+    |                                      ^^ --- `run` is borrowed here
+    |                                      |
+    |                                      may outlive borrowed value `run`
+    |
+note: function requires argument type to outlive `'1`
+   --> crates\media\src\export.rs:902:26
+    |
+902 |             let second = scope.spawn(|| run(&other_request));
+    |                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+help: to force the closure to take ownership of `run` (and any other referenced variables), use the `move` keyword
+    |
+902 |             let second = scope.spawn(move || run(&other_request));
+    |                                      ++++
+
+For more information about this error, try `rustc --explain E0373`.
+error: could not compile `tv2-media` (lib test) due to 2 previous errors

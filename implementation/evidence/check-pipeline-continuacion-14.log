@@ -1,0 +1,17 @@
+    Checking windows-sys v0.61.2
+    Checking tv2-domain v2.0.0-alpha.10 (C:\Users\gabri\Todo\transcriber-v2\crates\domain)
+    Checking tempfile v3.27.0
+    Checking tv2-media v2.0.0-alpha.10 (C:\Users\gabri\Todo\transcriber-v2\crates\media)
+    Checking tv2-v1compat v2.0.0-alpha.10 (C:\Users\gabri\Todo\transcriber-v2\crates\v1compat)
+    Checking tv2-application v2.0.0-alpha.10 (C:\Users\gabri\Todo\transcriber-v2\crates\application)
+    Checking tv2-pipeline v2.0.0-alpha.10 (C:\Users\gabri\Todo\transcriber-v2\crates\pipeline)
+error[E0425]: cannot find function `digest_json_result` in module `tv2_domain::digest`
+  --> crates\pipeline\src\lib.rs:93:25
+   |
+93 |     tv2_domain::digest::digest_json_result(&json!(files))
+   |                         ^^^^^^^^^^^^^^^^^^ not found in `tv2_domain::digest`
+
+For more information about this error, try `rustc --explain E0425`.
+error: could not compile `tv2-pipeline` (lib test) due to 1 previous error
+warning: build failed, waiting for other jobs to finish...
+error: could not compile `tv2-pipeline` (lib) due to 1 previous error

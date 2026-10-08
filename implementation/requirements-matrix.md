@@ -1,4 +1,26 @@
-# Matriz vigente — continuación 13, alpha.10
+# Matriz vigente — continuación 14, alpha.11
+
+La autorización vigente permite ejecución GUI/multimedia/crash/PERF y E5; sustituye aplazamientos históricos de las tablas inferiores. [Registro14](evidence/continuacion-14.md) distingue implementación, ejecución y aceptación.
+
+| Requisitos | Incremento / ejecución | Pendiente |
+|---|---|---|
+| MED-01..05, EXP-01..03 | 36 tests media ejecutados; guiones nativos de composición/cachés/transporte; exports medidos; RF64 físico4.300.800.114bytes,6:13:20 y muestras exactas después de4GiB | Audio/sincronía humanos y compatibilidad NLE; test concurrente reforzado compilado y bloqueado4551 |
+| DAT-02..04 | i128 mtime real corregido;83unitarios+3integraciones;10muertes propias con recovery; humano confirma revisión9; SaveAs/traslado/copia nativos con origen retirado, bundles/IDs/ticks/history exactos y export verificado | Recuperación autosave humana separada; watcher Apply/derivación/export documental; no corte eléctrico ni todos publicadores |
+| UI-03/04, LAY-01/02 | Usuario observó Ctrl+N y añadió tramo en alpha.10 | Foco/IME/DPI/gestos y aceptación alpha.11 |
+| AI-01..04, OPS-01 | Cliente HTTP→editor nativo PASS: preview/apply/verify/replay/stale/undo/redo/revocación/reinicio; carrera Winsock demostrada y corregida | Revisión visual humana; control suite4551 no reintentada; autorización del guion no es revisión humana |
+| ML-01 | Pipeline offline;15 contratos Rust; intensidad/heurísticas; MMS/arousal/risas por hosts Rust; generación compuesta Save/reopen/undo/redo y rechazo de5falsificaciones con SHA recalculado | ASR real bloqueado PyAV; parent de pruebas inventado; generación editorial LLM, risa positiva técnica PASS; anotación humana y calidad en español pendientes |
+| ML-02/03 | Supervisor/JobObject real; generación19+17Python; workflow12contratos y cancel/resume/reuse real; editorial24Rust+26Python+7protocolo real; GUI integrada/Clippy correcto; Qwen1.5B verificado, perfil FP32/SDPA con OMP/MKL2; fallos conservados | DAG ML completo/GUI sin aceptación; host08/09 dentro de8GiB pero rechazados por formato/IDs fuente; decodificación restringida en investigación; calidad pendiente |
+| PERF-01 | Caso1000clips/20000tramos PASS30.63s,WS516.38MiB, export/reproducción simultáneos7.319s tras corregir panicwgpu; evidencia conserva fallo previo | FPS/gestos físicos y nuevas previews sin build nativo pendiente |
+
+Suites domain/desktop/V1compat/control anteriores compiladas, sin reintento4551; no aceptación por compilación. V1/datos personales solo lectura; sin inferencia remota ni secretos. E2/E3/E4/E5 permanecen abiertas.
+
+Actualización PERF-01: después del panic por buffer wgpu de378MB, el mismo escenario1000clips/20000tramos pasó en349df:30.63s/exit0, picoWS516.38MiB y reproducción/export simultáneos7.319s. Índice sin producto cartesiano y dibujo denso por cobertura de píxeles. No acepta FPS/gestos físicos. Incremento posterior de previews/puntos compilado, pendiente de build/observación. El build separado falló4551 en dependencia y se conserva sin elusión. GUI humana349df abierta; [guardado manual confirmado](evidence/human-alpha11-save.json).
+
+Actualización ML-01/03: [MMS host real](evidence/continuacion-14-e5-mms.md) PASS con parent inventado explícito,23palabras y recibos durables/controles semánticos; sin ASR ni incorporación. Supervisor suspendido y backpressure stdin ejecutados. Arousal real03 pasó5ventanas/23palabras con cache/cancel; lector PeekNamedPipe corrige bloqueo stdin/NumPy demostrado con versiones idénticas. Detector de risas ejecutó silencio/voz sin eventos; positiva de risa pendiente. Hosts de señales, DAG completo e incorporación de generación editorial continúan en implementación.
+
+---
+
+# Histórico — continuación 13, alpha.10
 
 La implementación de alpha.9 se conserva. [Backlog 13](evidence/continuacion-13.md) identifica requisito, símbolo, defecto, comportamiento y dependencia; separa código corregido, ejecución permitida, bloqueo automático y aceptación aplazada.
 

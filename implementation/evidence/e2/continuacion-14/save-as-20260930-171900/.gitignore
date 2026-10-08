@@ -1,0 +1,4 @@
+**/payload.bin
+**/source-bundles/*
+**/objects/*
+**/.write.lock

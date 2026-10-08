@@ -1,0 +1,25 @@
+   Compiling tv2-application v2.0.0-alpha.10 (C:\Users\gabri\Todo\transcriber-v2\crates\application)
+    Finished `test` profile [optimized + debuginfo] target(s) in 19.05s
+     Running unittests src\lib.rs (target\debug\deps\tv2_application-761e5409f1147582.exe)
+
+running 1 test
+PASS process kill/reopen/lock/receipt/undo/redo boundary=0 storage=false
+PASS process kill/reopen/lock/receipt/undo/redo boundary=1 storage=false
+PASS process kill/reopen/lock/receipt/undo/redo boundary=2 storage=false
+PASS process kill/reopen/lock/receipt/undo/redo boundary=3 storage=false
+PASS process kill/reopen/lock/receipt/undo/redo boundary=4 storage=false
+PASS process kill/reopen/lock/receipt/undo/redo boundary=0 storage=true
+PASS process kill/reopen/lock/receipt/undo/redo boundary=1 storage=true
+PASS process kill/reopen/lock/receipt/undo/redo boundary=2 storage=true
+PASS process kill/reopen/lock/receipt/undo/redo boundary=3 storage=true
+PASS process kill/reopen/lock/receipt/undo/redo boundary=4 storage=true
+test store::tests::process_crash_recovers_commit_boundaries_and_releases_os_lock ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 81 filtered out; finished in 0.71s
+
+     Running tests\block_review.rs (target\debug\deps\block_review-c2f76ead066a16b9.exe)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 3 filtered out; finished in 0.00s
+

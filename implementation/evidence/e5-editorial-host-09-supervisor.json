@@ -1,0 +1,19 @@
+{
+  "job_memory_limit": 8589934592,
+  "fixture_asr_invented": true,
+  "gui_exercised": false,
+  "supervisor_handshake": true,
+  "kind": "topics",
+  "host_sha256": "4b9f767cc46ccb6a22b47ee1794d281edea2b8e46cb287af94b51bb4572fb292",
+  "worker_sha256": "b58e715b55cc428666f99f0f48be644f60c8bf37387f32cf2d6a261d1376fe11",
+  "supervisor_sha256": "6c96f2b05beecec9a638aa0cb7d2a3e74fbcfd944103e700d43dc2aadbc73215",
+  "pid": 16908,
+  "exit_code": 1,
+  "peak_job_memory": 7864418304,
+  "accepted": false,
+  "error": "Editorial host failed; preserve stdout/stderr and job evidence",
+  "own_process_signaled": true,
+  "worker_sha256_after": "b58e715b55cc428666f99f0f48be644f60c8bf37387f32cf2d6a261d1376fe11",
+  "host_sha256_after": "4b9f767cc46ccb6a22b47ee1794d281edea2b8e46cb287af94b51bb4572fb292",
+  "duration_seconds": 109.84400000004098
+}

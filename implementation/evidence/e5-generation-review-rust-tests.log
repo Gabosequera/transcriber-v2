@@ -1,0 +1,11 @@
+   Compiling tv2-pipeline v2.0.0-alpha.11 (C:\Users\gabri\Todo\transcriber-v2\crates\pipeline)
+    Finished `test` profile [optimized + debuginfo] target(s) in 5.76s
+     Running unittests src\lib.rs (target\debug\deps\tv2_pipeline-36941c32715fd558.exe)
+
+running 3 tests
+test generation::tests::generation_rejects_forged_utterance_time_signal_and_original ... ok
+test generation::tests::generation_preserves_word_identity_probability_and_extensions ... ok
+test generation::tests::generation_rejects_changed_or_missing_human_extensions_in_derived_objects ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 13 filtered out; finished in 0.01s
+

@@ -1,0 +1,76 @@
+{
+  "schema": "editorial-trims/1",
+  "media": {
+    "size": 2245856,
+    "hash_muestreado": "5af6e20946b99936f1b56449a3d5d28f9f6f490a840cf09b5ad59abba5050604",
+    "inventario_sha256": "77aae5a1df8f009ed8f55643e2949f7ff3340026398608631ea992eae8a58d70"
+  },
+  "duration": 12.0,
+  "revision": 1,
+  "next_id": 4,
+  "updated_at": "2026-09-08T00:17:13+00:00",
+  "silence": null,
+  "ai": null,
+  "lanes": [
+    {
+      "lane_id": "main",
+      "name": "Recortes",
+      "color": "#728bd0"
+    },
+    {
+      "lane_id": "ai",
+      "name": "Cortes sugeridos (AI)",
+      "color": "#9471bd"
+    }
+  ],
+  "cuts": [
+    {
+      "cut_id": "cut-000001",
+      "t_ini": 2.0,
+      "t_fin": 2.5,
+      "origin": "user",
+      "lane": "main",
+      "enabled": true,
+      "accepted": true,
+      "edited": false,
+      "reason": "muletilla",
+      "confidence": null,
+      "chunk_id": null,
+      "evidence": {},
+      "warnings": [],
+      "created_at": "2026-09-08T00:17:13+00:00"
+    },
+    {
+      "cut_id": "cut-000002",
+      "t_ini": 4.0,
+      "t_fin": 4.8,
+      "origin": "ai",
+      "lane": "ai",
+      "enabled": true,
+      "accepted": false,
+      "edited": false,
+      "reason": "tangente",
+      "confidence": null,
+      "chunk_id": null,
+      "evidence": {},
+      "warnings": [],
+      "created_at": "2026-09-08T00:17:13+00:00"
+    },
+    {
+      "cut_id": "cut-000003",
+      "t_ini": 8.5,
+      "t_fin": 9.0,
+      "origin": "silence",
+      "lane": "main",
+      "enabled": false,
+      "accepted": false,
+      "edited": false,
+      "reason": "silencio",
+      "confidence": null,
+      "chunk_id": null,
+      "evidence": {},
+      "warnings": [],
+      "created_at": "2026-09-08T00:17:13+00:00"
+    }
+  ]
+}

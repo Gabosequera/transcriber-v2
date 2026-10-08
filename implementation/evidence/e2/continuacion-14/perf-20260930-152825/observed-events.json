@@ -1,0 +1,94 @@
+[
+  {
+    "seconds": 1.2240154999890365,
+    "line": "paso 1: Log { text: \"PERF_OPEN_BEGIN\" }"
+  },
+  {
+    "seconds": 1.2240154999890365,
+    "line": "PERF_OPEN_BEGIN"
+  },
+  {
+    "seconds": 1.3254642999963835,
+    "line": "paso 2: Open { path: \"C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-152825/large.transcriptor/project.json\" }"
+  },
+  {
+    "seconds": 1.5289340000017546,
+    "line": "paso 3: Assert { markers: None, clips: Some(1000), layers: Some(2), items: Some(20000), revision: None, playing: None, rate: None, position: None, tracks: Some(2) }"
+  },
+  {
+    "seconds": 1.5289340000017546,
+    "line": "paso 4: Action { id: \"view.fit\" }"
+  },
+  {
+    "seconds": 1.5797780999564566,
+    "line": "paso 5: Seek { t: 1.0 }"
+  },
+  {
+    "seconds": 1.5797780999564566,
+    "line": "paso 6: WaitFrame { ms: 15000 }"
+  },
+  {
+    "seconds": 1.7372738999547437,
+    "line": "fotograma presentado: seq 1 (posici\u00f3n 00:00:01.000)"
+  },
+  {
+    "seconds": 1.7372738999547437,
+    "line": "paso 7: Log { text: \"PERF_OPEN_FRAME_READY\" }"
+  },
+  {
+    "seconds": 1.7372738999547437,
+    "line": "PERF_OPEN_FRAME_READY"
+  },
+  {
+    "seconds": 1.7372738999547437,
+    "line": "paso 8: SetIn { t: 0.0 }"
+  },
+  {
+    "seconds": 1.7372738999547437,
+    "line": "paso 9: SetOut { t: 4.0 }"
+  },
+  {
+    "seconds": 1.7372738999547437,
+    "line": "paso 10: Export { preset: \"h264-720p\", dest: \"C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-152825/under-load.mp4\", range: true, selection: None }"
+  },
+  {
+    "seconds": 1.7372738999547437,
+    "line": "paso 11: Log { text: \"PERF_EXPORT_ENQUEUED\" }"
+  },
+  {
+    "seconds": 1.7372738999547437,
+    "line": "PERF_EXPORT_ENQUEUED"
+  },
+  {
+    "seconds": 1.7372738999547437,
+    "line": "paso 12: Seek { t: 4.0 }"
+  },
+  {
+    "seconds": 1.7372738999547437,
+    "line": "paso 13: WaitFrame { ms: 15000 }"
+  },
+  {
+    "seconds": 3.4368794999900274,
+    "line": "fotograma presentado: seq 2 (posici\u00f3n 00:00:04.000)"
+  },
+  {
+    "seconds": 3.4368794999900274,
+    "line": "paso 14: Log { text: \"PERF_SEEK_EXPORT_READY\" }"
+  },
+  {
+    "seconds": 3.4368794999900274,
+    "line": "PERF_SEEK_EXPORT_READY"
+  },
+  {
+    "seconds": 4.950282799953129,
+    "line": "paso 15: AdvanceFrames { frames: 1 }"
+  },
+  {
+    "seconds": 5.6636040000012144,
+    "line": "paso 16: Log { text: \"PERF_STEP_BEGIN\" }"
+  },
+  {
+    "seconds": 5.6636040000012144,
+    "line": "PERF_STEP_BEGIN"
+  }
+]

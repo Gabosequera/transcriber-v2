@@ -1,0 +1,39 @@
+paso 1: Import { path: "C:\\Users\\gabri\\Todo\\transcriber-v2\\tests\\fixtures\\media\\fixture-a.mp4" }
+paso 2: Insert { asset: 0, at: Some(0.0) }
+  toast: Info: Insertado en 00:00:00.000
+paso 3: Save { path: "C:\\Users\\gabri\\Todo\\transcriber-v2\\implementation\\evidence\\local\\mcp-real-20260930-100945-d0661db4\\fixture.transcriptor" }
+  toast: Info: Insertado en 00:00:00.000
+paso 4: Wait { ms: 800 }
+  toast: Info: Revisión 2 guardada en C:\Users\gabri\Todo\transcriber-v2\implementation\evidence\local\mcp-real-20260930-100945-d0661db4\fixture.transcriptor
+paso 5: ControlSetup { pipe_name: "tv2-acceptance-2feb71a06f1b4ea08fd5bcca82c7c60c", permissions: Permissions { read: true, propose: true, apply: true, selection: true, transport: true, jobs: false, automatic_commands: {"redo", "rename_project", "undo"} } }
+  toast: Info: Revisión 2 guardada en C:\Users\gabri\Todo\transcriber-v2\implementation\evidence\local\mcp-real-20260930-100945-d0661db4\fixture.transcriptor
+paso 6: AwaitSignal { path: "C:\\Users\\gabri\\Todo\\transcriber-v2\\implementation\\evidence\\local\\mcp-real-20260930-100945-d0661db4\\phase1.done", ms: 180000 }
+  toast: Info: Revisión 2 guardada en C:\Users\gabri\Todo\transcriber-v2\implementation\evidence\local\mcp-real-20260930-100945-d0661db4\fixture.transcriptor
+paso 7: ControlRevoke
+paso 8: Dump { path: "C:\\Users\\gabri\\Todo\\transcriber-v2\\implementation\\evidence\\local\\mcp-real-20260930-100945-d0661db4\\revoked.json" }
+estado volcado en C:\Users\gabri\Todo\transcriber-v2\implementation\evidence\local\mcp-real-20260930-100945-d0661db4\revoked.json
+paso 9: AwaitSignal { path: "C:\\Users\\gabri\\Todo\\transcriber-v2\\implementation\\evidence\\local\\mcp-real-20260930-100945-d0661db4\\phase2.done", ms: 60000 }
+paso 10: Save { path: "C:\\Users\\gabri\\Todo\\transcriber-v2\\implementation\\evidence\\local\\mcp-real-20260930-100945-d0661db4\\fixture.transcriptor" }
+paso 11: Wait { ms: 800 }
+  toast: Error: el proyecto en disco cambió desde su apertura · abre la versión externa o guarda tus cambios en otra carpeta
+paso 12: ControlStop
+  toast: Error: el proyecto en disco cambió desde su apertura · abre la versión externa o guarda tus cambios en otra carpeta
+paso 13: Wait { ms: 500 }
+  toast: Error: el proyecto en disco cambió desde su apertura · abre la versión externa o guarda tus cambios en otra carpeta
+paso 14: Open { path: "C:\\Users\\gabri\\Todo\\transcriber-v2\\implementation\\evidence\\local\\mcp-real-20260930-100945-d0661db4\\fixture.transcriptor\\project.json" }
+  toast: Error: el proyecto en disco cambió desde su apertura · abre la versión externa o guarda tus cambios en otra carpeta
+paso 15: Wait { ms: 800 }
+  toast: Info: Proyecto «Sin título» abierto (revisión 2)
+paso 16: ControlSetup { pipe_name: "tv2-acceptance-53a14b79e39a4b6ba630cc1c79c1073c", permissions: Permissions { read: true, propose: false, apply: false, selection: false, transport: false, jobs: false, automatic_commands: {} } }
+  toast: Info: Proyecto «Sin título» abierto (revisión 2)
+paso 17: AwaitSignal { path: "C:\\Users\\gabri\\Todo\\transcriber-v2\\implementation\\evidence\\local\\mcp-real-20260930-100945-d0661db4\\phase3.done", ms: 60000 }
+  toast: Info: Proyecto «Sin título» abierto (revisión 2)
+paso 18: ControlStop
+  toast: Info: Proyecto «Sin título» abierto (revisión 2)
+paso 19: Dump { path: "C:\\Users\\gabri\\Todo\\transcriber-v2\\implementation\\evidence\\local\\mcp-real-20260930-100945-d0661db4\\final.json" }
+estado volcado en C:\Users\gabri\Todo\transcriber-v2\implementation\evidence\local\mcp-real-20260930-100945-d0661db4\final.json
+  toast: Info: Proyecto «Sin título» abierto (revisión 2)
+paso 20: Quit
+quit; fallos=true
+  toast: Info: Proyecto «Sin título» abierto (revisión 2)
+guion terminado; fallos=true

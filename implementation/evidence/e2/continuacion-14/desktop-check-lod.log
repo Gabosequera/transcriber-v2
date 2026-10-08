@@ -1,0 +1,38 @@
+    Checking windows-sys v0.61.2
+    Checking tempfile v3.27.0
+    Checking nu-ansi-term v0.50.3
+    Checking eframe v0.36.1
+    Checking rfd v0.17.2
+    Checking tv2-application v2.0.0-alpha.11 (C:\Users\gabri\Todo\transcriber-v2\crates\application)
+    Checking tv2-media v2.0.0-alpha.11 (C:\Users\gabri\Todo\transcriber-v2\crates\media)
+    Checking tracing-subscriber v0.3.23
+    Checking egui_kittest v0.36.1
+    Checking tv2-control v2.0.0-alpha.11 (C:\Users\gabri\Todo\transcriber-v2\crates\control)
+    Checking tv2-pipeline v2.0.0-alpha.11 (C:\Users\gabri\Todo\transcriber-v2\crates\pipeline)
+    Checking transcriptor v2.0.0-alpha.11 (C:\Users\gabri\Todo\transcriber-v2\apps\desktop)
+error: expected expression, found `+`
+    --> apps\desktop\src\ui_timeline.rs:1356:98
+     |
+1356 |     match state { ItemState::Accepted => 0, ItemState::Proposed => 1, ItemState::Disabled => 2 } + if selected { 3 } else { 0 }
+     |                                                                                                  ^ expected expression
+     |
+help: parentheses are required to parse this as an expression
+     |
+1356 |     (match state { ItemState::Accepted => 0, ItemState::Proposed => 1, ItemState::Disabled => 2 }) + if selected { 3 } else { 0 }
+     |     +                                                                                            +
+
+error[E0308]: mismatched types
+    --> apps\desktop\src\ui_timeline.rs:1356:5
+     |
+1356 |     match state { ItemState::Accepted => 0, ItemState::Proposed => 1, ItemState::Disabled => 2 } + if selected { 3 } else { 0 }
+     |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ expected `()`, found integer
+     |
+help: parentheses are required to parse this as an expression
+     |
+1356 |     (match state { ItemState::Accepted => 0, ItemState::Proposed => 1, ItemState::Disabled => 2 }) + if selected { 3 } else { 0 }
+     |     +                                                                                            +
+
+For more information about this error, try `rustc --explain E0308`.
+error: could not compile `transcriptor` (bin "Transcriptor") due to 2 previous errors
+warning: build failed, waiting for other jobs to finish...
+error: could not compile `transcriptor` (bin "Transcriptor" test) due to 2 previous errors

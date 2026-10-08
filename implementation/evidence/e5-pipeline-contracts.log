@@ -1,0 +1,35 @@
+   Compiling windows-sys v0.61.2
+   Compiling tinyvec_macros v0.1.1
+   Compiling tinyvec v1.13.2
+   Compiling unicode-normalization v0.1.25
+   Compiling tv2-v1compat v2.0.0-alpha.10 (C:\Users\gabri\Todo\transcriber-v2\crates\v1compat)
+   Compiling tempfile v3.27.0
+   Compiling tv2-application v2.0.0-alpha.10 (C:\Users\gabri\Todo\transcriber-v2\crates\application)
+   Compiling tv2-media v2.0.0-alpha.10 (C:\Users\gabri\Todo\transcriber-v2\crates\media)
+   Compiling tv2-pipeline v2.0.0-alpha.10 (C:\Users\gabri\Todo\transcriber-v2\crates\pipeline)
+    Finished `test` profile [optimized + debuginfo] target(s) in 1m 01s
+     Running unittests src\lib.rs (target\debug\deps\tv2_pipeline-138b37532c0a5721.exe)
+
+running 9 tests
+test tests::artifact_paths_cannot_escape_the_owned_job_even_with_matching_bytes ... ok
+test tests::cancellation_prevents_result_validation_and_preparation ... ok
+test tests::result_linkage_rejects_each_changed_identity_and_missing_receipt_entry ... ok
+test tests::prepared_analysis_cannot_commit_after_local_human_edit ... ok
+test tests::stale_project_revision_identity_digest_and_asset_are_rejected ... ok
+test tests::undeclared_editorial_sibling_never_becomes_part_of_inference_proposal ... ok
+test tests::incorporation_preserves_human_decisions_preview_and_idempotent_receipts ... ok
+test tests::tampered_or_missing_artifact_is_rejected_before_preparing_any_change ... ok
+
+thread 'tests::analysis_evidence_history_receipt_and_save_as_survive_job_folder_move' (26860) panicked at crates\pipeline\src\tests.rs:203:72:
+called `Result::unwrap()` on an `Err` value: DomainError { code: Io, message: "El sistema no puede encontrar la ruta especificada. (os error 3)", context: [], action: None }
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+test tests::analysis_evidence_history_receipt_and_save_as_survive_job_folder_move ... FAILED
+
+failures:
+
+failures:
+    tests::analysis_evidence_history_receipt_and_save_as_survive_job_folder_move
+
+test result: FAILED. 8 passed; 1 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.06s
+
+error: test failed, to rerun pass `-p tv2-pipeline --lib`

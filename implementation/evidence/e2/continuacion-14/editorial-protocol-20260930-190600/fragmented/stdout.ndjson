@@ -1,0 +1,2 @@
+{"error":{"code":"E_METHOD","message":"Unknown editorial method"},"id":"fragment","protocol":"tv2-editorial/1"}
+{"id":"shutdown","protocol":"tv2-editorial/1","result":{"shutdown":true}}

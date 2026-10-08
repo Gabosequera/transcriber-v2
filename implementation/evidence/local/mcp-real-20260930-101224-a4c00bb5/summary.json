@@ -1,0 +1,17 @@
+{
+  "error": "An error occurred while sending the request.",
+  "schema": "tv2-real-mcp-acceptance/1",
+  "accepted": false,
+  "cleanup_owned_pid": 6932,
+  "fixture": {
+    "sha256": "FFB48C13E1B626EC2F73C3144147B689A153CF4A3D5017CE233FD5B3A4061F67",
+    "path": "C:\\Users\\gabri\\Todo\\transcriber-v2\\tests\\fixtures\\media\\fixture-a.mp4"
+  },
+  "authorization": "trusted local --script grants scoped automatic commands; no remote permission escalation",
+  "started_at": "2026-09-30T10:12:24.5397115-04:00",
+  "build": {
+    "sha256": "5C43F3675B9A8536E84452AF40CEAC09CCD7BF5F05DDFA5B769C4310BD01AC54",
+    "path": "C:\\Users\\gabri\\Todo\\transcriber-v2\\target\\release\\Transcriptor.exe"
+  },
+  "finished_at": "2026-09-30T10:12:31.1312840-04:00"
+}

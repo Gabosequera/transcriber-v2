@@ -20,10 +20,27 @@ pub enum AssetKind {
 #[derive(Clone, PartialEq, Eq, Debug, Default, Serialize, Deserialize)]
 pub struct Fingerprint {
     pub size: u64,
-    #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[serde(default, skip_serializing_if = "Option::is_none", deserialize_with = "deserialize_mtime_ns")]
     pub mtime_ns: Option<i128>,
     pub hash_muestreado: String,
     pub inventario_sha256: String,
+}
+
+// Internally tagged commands deserialize nested values through Serde's content
+// buffer, whose deserialize_i128 is unsupported. Read the JSON integer through
+// its signed/unsigned 64-bit representation and widen without losing nanoseconds.
+// The persisted JSON and the in-memory/V1-compatible fingerprint stay unchanged.
+fn deserialize_mtime_ns<'de, D: serde::Deserializer<'de>>(deserializer: D) -> Result<Option<i128>, D::Error> {
+    let value = Option::<serde_json::Number>::deserialize(deserializer)?;
+    value
+        .map(|number| {
+            number
+                .as_i64()
+                .map(i128::from)
+                .or_else(|| number.as_u64().map(i128::from))
+                .ok_or_else(|| serde::de::Error::custom("mtime_ns debe ser un entero JSON de 64 bits"))
+        })
+        .transpose()
 }
 
 impl Fingerprint {

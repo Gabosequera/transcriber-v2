@@ -1,0 +1,9 @@
+
+Algorithm : SHA256
+Hash      : AE3227680D61F8ACC63A3D5247E44ED9ECBB75F2114CF63E8FDED2DB6A01906A
+Path      : C:\Users\gabri\Todo\transcriber-v2\crates\pipeline\src\editorial.rs
+
+Algorithm : SHA256
+Hash      : FDFA5C6C42D139D97E65CB45C083BA3A244FA7D89573799560166C6DC2BDE784
+Path      : C:\Users\gabri\Todo\transcriber-v2\crates\pipeline\src\editorial\tests.rs
+

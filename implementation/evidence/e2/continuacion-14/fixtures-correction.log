@@ -1,0 +1,12 @@
+fixture-a.mp4: ya existe
+fixture-b.mp4: generando
+  ffmpeg -f lavfi -i testsrc2=size=640x360:rate=30:duration=8 -f lavfi -i sine=frequency=440:sample_rate=48000:duration=8 -vf "drawtext=fontfile='C\\:/WINDOWS/Fonts/arial.ttf':text='B %{n}':x=20:y=20:fontsize=48:fontcolor=white:box=1:boxcolor=black@0.7" -c:v libx264 -preset fast -crf 18 -g 60 -pix_fmt yuv420p -c:a aac -b:a 192k -shortest C:\Users\gabri\Todo\transcriber-v2\tests\fixtures\media\fixture-b.mp4
+fixture-hd.mp4: ya existe
+tone-220.wav: generando
+  ffmpeg -f lavfi -i sine=frequency=220:sample_rate=48000:duration=10 -ac 2 -c:a pcm_s16le C:\Users\gabri\Todo\transcriber-v2\tests\fixtures\media\tone-220.wav
+fixture-sync.mp4: ya existe
+fixture-rot90.mp4: ya existe
+fixture-vfr.mp4: ya existe
+fixture-start5.ts: ya existe
+fixture-audio-delay.mp4: ya existe
+C:\Users\gabri\Todo\transcriber-v2\tests\fixtures\media\fixture-espacios\ñ medios prueba\fixture-ñ.mp4: ya existe

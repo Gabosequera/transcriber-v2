@@ -43,24 +43,33 @@ impl TranscriptorApp {
             self.toast(Severity::Warn, "Hay una exportación en curso");
             return;
         }
-        let Some(asset) = self.current_layer_asset() else {
+        if self.current_layer_asset().is_none() {
             self.toast(Severity::Warn, "Selecciona el medio cuya carpeta V1 quieres exportar");
             return;
-        };
+        }
         let Some(directory) = rfd::FileDialog::new().set_title("Destino para una nueva carpeta documental V1").pick_folder() else {
             return;
         };
+        let root = directory.join(format!("v1-folder-r{}-{}", self.project().revision, tv2_domain::ids::random_hex12()));
+        if let Err(error) = self.export_v1_folder_to(root, include_montage) {
+            self.report(error);
+        }
+    }
+    /// Export only into a new owned directory; GUI and trusted script share publication.
+    pub fn export_v1_folder_to(&mut self, root: std::path::PathBuf, include_montage: bool) -> DomainResult<()> {
+        if self.v1_export_job.is_some() {
+            return Err(DomainError::precondition("Hay una exportación en curso"));
+        }
+        let asset = self.current_layer_asset().ok_or_else(|| DomainError::precondition("Selecciona el medio cuya carpeta V1 quieres exportar"))?;
         let project = self.project().clone();
         let sequence = if include_montage { self.sequence().map(|s| s.id.clone()) } else { None };
         if include_montage && sequence.is_none() {
-            self.toast(Severity::Warn, "Selecciona un montaje");
-            return;
+            return Err(DomainError::precondition("Selecciona un montaje"));
         }
         let (tx, rx) = crossbeam_channel::bounded(1);
         match std::thread::Builder::new().name("v1-folder-export".into()).spawn(move || {
             let work = || -> DomainResult<std::path::PathBuf> {
                 let docs = tv2_v1compat::folder::export(&project, &asset, sequence.as_ref())?;
-                let root = directory.join(format!("v1-folder-r{}-{}", project.revision, tv2_domain::ids::random_hex12()));
                 tv2_application::documents::create(&root)?;
                 tv2_application::documents::publish_with_directories(&root, &docs.documents, &docs.files, &docs.directories)?;
                 Ok(root)
@@ -68,8 +77,9 @@ impl TranscriptorApp {
             let _ = tx.send(work());
         }) {
             Ok(_) => self.v1_export_job = Some(rx),
-            Err(e) => self.report(e.into()),
+            Err(e) => return Err(e.into()),
         }
+        Ok(())
     }
     pub fn import_author_dialog(&mut self) {
         self.scan_author(true);

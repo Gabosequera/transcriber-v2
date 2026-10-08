@@ -28,14 +28,82 @@ pub struct ItemOccurrence {
     pub range: TimeRange,
 }
 
+pub enum SemanticPaint {
+    Exact(Vec<ItemOccurrence>),
+    /// Dense geometry is represented by covered pixel intervals, separately
+    /// for three states and selected/unselected. The model and hit tests stay exact.
+    Dense(Vec<PaintCoverage>),
+}
+pub struct PaintCoverage {
+    pub range: TimeRange,
+    pub kind: usize,
+}
+
+struct PaintAccumulator {
+    range: TimeRange,
+    columns: usize,
+    exact: Vec<ItemOccurrence>,
+    count: usize,
+    coverage: [Vec<i64>; 6],
+}
+impl PaintAccumulator {
+    fn new(range: TimeRange, columns: usize) -> Self {
+        let columns = columns.clamp(1, 16384);
+        Self { range, columns, exact: Vec::new(), count: 0, coverage: std::array::from_fn(|_| vec![0; columns + 1]) }
+    }
+    fn add(&mut self, occurrence: ItemOccurrence, kind: usize) {
+        let Some(coverage) = self.coverage.get_mut(kind) else { return };
+        let duration = self.range.duration().0.max(1) as i128;
+        let column = |tick: Ticks, round_up: bool| {
+            let numerator = (tick.0 as i128 - self.range.start.0 as i128).clamp(0, duration) * self.columns as i128;
+            ((numerator + if round_up { duration - 1 } else { 0 }) / duration) as usize
+        };
+        let start = column(occurrence.range.start, false).min(self.columns - 1);
+        let end = column(occurrence.range.end, true).max(start + 1).min(self.columns);
+        coverage[start] += 1;
+        coverage[end] -= 1;
+        self.count += 1;
+        if self.count <= self.columns * 4 {
+            self.exact.push(occurrence);
+        } else {
+            self.exact.clear();
+        }
+    }
+    fn finish(mut self) -> SemanticPaint {
+        if self.count <= self.columns * 4 {
+            self.exact.sort_by_key(|o| (o.range.start, o.item, o.range_index));
+            self.exact.dedup_by_key(|o| (o.item, o.range_index, o.range));
+            return SemanticPaint::Exact(self.exact);
+        }
+        let tick =
+            |column: usize| Ticks((self.range.start.0 as i128 + self.range.duration().0 as i128 * column as i128 / self.columns as i128) as i64);
+        let mut out = Vec::new();
+        for (kind, coverage) in self.coverage.iter().enumerate() {
+            let (mut active, mut start) = (0, None);
+            for (column, difference) in coverage.iter().enumerate() {
+                active += difference;
+                match (start, active > 0) {
+                    (None, true) => start = Some(column),
+                    (Some(first), false) => {
+                        out.push(PaintCoverage { range: TimeRange::new(tick(first), tick(column)), kind });
+                        start = None;
+                    }
+                    _ => {}
+                }
+            }
+        }
+        SemanticPaint::Dense(out)
+    }
+}
+
 #[derive(Default)]
 pub struct SemanticIndex {
     stamp: Option<(String, u64, crate::app::ViewMode, Option<tv2_domain::ids::AssetId>)>,
-    layers: HashMap<tv2_domain::ids::LayerId, (Vec<ItemOccurrence>, TrackIndex)>,
+    layers: HashMap<LayerId, AssetId>,
     source_layers: HashMap<LayerId, (Vec<ItemOccurrence>, TrackIndex)>,
     visible_layers: HashMap<AssetId, Vec<(LayerId, String)>>,
     projections: HashMap<AssetId, (Vec<(TimeRange, Ticks)>, TrackIndex)>,
-    view_edges: HashMap<AssetId, Vec<Ticks>>,
+    source_view: bool,
     pending: Option<crossbeam_channel::Receiver<SemanticIndex>>,
     failed: Option<(SemanticStamp, String)>,
 }
@@ -74,7 +142,6 @@ impl SemanticIndex {
             self.source_layers.clear();
             self.visible_layers.clear();
             self.projections.clear();
-            self.view_edges.clear();
         }
         if let Some(rx) = &self.pending {
             match rx.try_recv() {
@@ -131,7 +198,7 @@ impl SemanticIndex {
         }
     }
     fn build(input: SemanticInput) -> Self {
-        let mut result = Self { visible_layers: input.visible, ..Default::default() };
+        let mut result = Self { visible_layers: input.visible, source_view: input.stamp.2 == crate::app::ViewMode::Source, ..Default::default() };
         for (asset, spans) in input.clips {
             result.projections.insert(asset, (spans, TrackIndex::default()));
         }
@@ -142,75 +209,149 @@ impl SemanticIndex {
             index.root = index.build(&entries);
         }
         for layer in input.layers {
-            let mut occurrences = Vec::new();
             let mut sources = layer.ranges;
-            for occurrence in &sources {
-                let source = occurrence.range;
-                let ranges = if input.stamp.2 == crate::app::ViewMode::Source {
-                    if input.stamp.3.as_ref() == Some(&layer.asset) { vec![(source.start, source.end)] } else { vec![] }
-                } else {
-                    result.project_range(&layer.asset, source)
-                };
-                for (start, end) in ranges {
-                    occurrences.push(ItemOccurrence {
-                        item: occurrence.item,
-                        range_index: occurrence.range_index,
-                        range: TimeRange::new(start, end),
-                    });
-                }
+            if !result.source_view || input.stamp.3.as_ref() == Some(&layer.asset) {
+                result.layers.insert(layer.id.clone(), layer.asset);
             }
-            occurrences.sort_by_key(|o| (o.range.start, o.item, o.range_index));
-            occurrences.dedup_by_key(|o| (o.item, o.range_index, o.range));
-            result.view_edges.entry(layer.asset).or_default().extend(occurrences.iter().flat_map(|o| [o.range.start, o.range.end]));
-            let index = occurrence_index(&occurrences);
-            result.layers.insert(layer.id.clone(), (occurrences, index));
             sources.sort_by_key(|o| (o.range.start, o.item, o.range_index));
             let index = occurrence_index(&sources);
             result.source_layers.insert(layer.id, (sources, index));
-        }
-        for edges in result.view_edges.values_mut() {
-            edges.sort_unstable();
-            edges.dedup();
         }
         result.stamp = Some(input.stamp);
         result
     }
 
     pub fn query(&self, layer: &tv2_domain::ids::LayerId, range: TimeRange) -> Vec<ItemOccurrence> {
-        let Some((occurrences, index)) = self.layers.get(layer) else { return vec![] };
-        let mut found = Vec::new();
-        index.query(index.root, range, &mut found, &mut 0);
-        found.into_iter().map(|i| occurrences[i]).collect()
+        let mut out = Vec::new();
+        self.visit(layer, range, |occurrence| out.push(occurrence));
+        out.sort_by_key(|o| (o.range.start, o.item, o.range_index));
+        out.dedup_by_key(|o| (o.item, o.range_index, o.range));
+        out
+    }
+
+    // Project only clips intersecting the query. Repeated media must never
+    // materialize the item × clip Cartesian product in the resident index.
+    fn visit(&self, layer: &LayerId, range: TimeRange, mut visitor: impl FnMut(ItemOccurrence)) {
+        let Some(asset) = self.layers.get(layer) else { return };
+        if self.source_view {
+            for occurrence in self.query_source(layer, range) {
+                visitor(occurrence);
+            }
+            return;
+        }
+        let Some((clips, _)) = self.projections.get(asset) else { return };
+        for (source, position) in clips {
+            let timeline = TimeRange::new(*position, *position + source.duration());
+            let Some(visible) = timeline.intersection(&range) else { continue };
+            let query = TimeRange::new(source.start + (visible.start - *position), source.start + (visible.end - *position));
+            for occurrence in self.query_source(layer, query) {
+                let overlap = if occurrence.range.is_point() {
+                    source.contains(occurrence.range.start).then_some(occurrence.range)
+                } else {
+                    source.intersection(&occurrence.range)
+                };
+                if let Some(overlap) = overlap {
+                    visitor(ItemOccurrence {
+                        range: TimeRange::new(*position + (overlap.start - source.start), *position + (overlap.end - source.start)),
+                        ..occurrence
+                    });
+                }
+            }
+        }
+    }
+
+    pub fn paint_query(
+        &self,
+        layer: &LayerId,
+        range: TimeRange,
+        columns: usize,
+        classify: impl Fn(ItemOccurrence) -> Option<usize>,
+    ) -> SemanticPaint {
+        let mut paint = PaintAccumulator::new(range, columns);
+        self.visit(layer, range, |occurrence| {
+            if let Some(kind) = classify(occurrence) {
+                paint.add(occurrence, kind);
+            }
+        });
+        paint.finish()
+    }
+
+    pub fn paint_source(
+        &self,
+        layer: &LayerId,
+        range: TimeRange,
+        columns: usize,
+        classify: impl Fn(ItemOccurrence) -> Option<usize>,
+    ) -> SemanticPaint {
+        let mut paint = PaintAccumulator::new(range, columns);
+        for occurrence in self.query_source(layer, range) {
+            if let Some(kind) = classify(occurrence) {
+                paint.add(occurrence, kind);
+            }
+        }
+        paint.finish()
+    }
+
+    /// Presentation-only preview. Iterate visible clip mappings before source
+    /// ranges, never allocate a range × repetition product or change a command.
+    pub fn paint_preview(
+        &self,
+        asset: &AssetId,
+        ranges: impl IntoIterator<Item = (TimeRange, bool)>,
+        visible: TimeRange,
+        columns: usize,
+    ) -> SemanticPaint {
+        let ranges: Vec<_> = ranges.into_iter().collect();
+        let mut paint = PaintAccumulator::new(visible, columns);
+        let mut add = |item, range: TimeRange, removed| {
+            if (range.is_point() && visible.contains(range.start)) || range.overlaps(&visible) {
+                paint.add(ItemOccurrence { item, range_index: usize::from(removed), range }, usize::from(removed));
+            }
+        };
+        if self.source_view {
+            if self.stamp.as_ref().and_then(|stamp| stamp.3.as_ref()) == Some(asset) {
+                for (item, (range, removed)) in ranges.iter().enumerate() {
+                    add(item, *range, *removed);
+                }
+            }
+        } else if let Some((clips, _)) = self.projections.get(asset) {
+            for (source, position) in clips {
+                if !TimeRange::new(*position, *position + source.duration()).overlaps(&visible) {
+                    continue;
+                }
+                for (item, (range, removed)) in ranges.iter().enumerate() {
+                    let overlap = if range.is_point() { source.contains(range.start).then_some(*range) } else { source.intersection(range) };
+                    if let Some(overlap) = overlap {
+                        add(item, TimeRange::new(*position + (overlap.start - source.start), *position + (overlap.end - source.start)), *removed);
+                    }
+                }
+            }
+        }
+        paint.finish()
     }
 
     pub fn visible_layers(&self, asset: &AssetId) -> &[(LayerId, String)] {
         self.visible_layers.get(asset).map(Vec::as_slice).unwrap_or_default()
     }
-    pub fn edges(&self, asset: &AssetId, range: TimeRange) -> &[Ticks] {
-        self.view_edges.get(asset).map(|edges| edge_window(edges, range)).unwrap_or_default()
+    pub fn edges(&self, asset: &AssetId, range: TimeRange) -> Vec<Ticks> {
+        let mut edges = Vec::new();
+        for (layer, layer_asset) in &self.layers {
+            if layer_asset == asset {
+                self.visit(layer, TimeRange::new(Ticks(range.start.0.saturating_sub(1)), Ticks(range.end.0.saturating_add(1))), |occurrence| {
+                    edges
+                        .extend([occurrence.range.start, occurrence.range.end].into_iter().filter(|edge| *edge >= range.start && *edge <= range.end));
+                });
+            }
+        }
+        edges.sort_unstable();
+        edges.dedup();
+        edges
     }
     pub fn query_source(&self, layer: &LayerId, range: TimeRange) -> Vec<ItemOccurrence> {
         let Some((occurrences, index)) = self.source_layers.get(layer) else { return vec![] };
         let mut found = Vec::new();
         index.query(index.root, range, &mut found, &mut 0);
         found.into_iter().map(|i| occurrences[i]).collect()
-    }
-    pub fn project_range(&self, asset: &AssetId, range: TimeRange) -> Vec<(Ticks, Ticks)> {
-        let Some((clips, index)) = self.projections.get(asset) else { return vec![] };
-        let query = TimeRange::new(range.start, Ticks(range.end.0.max(range.start.0.saturating_add(1))));
-        let mut found = Vec::new();
-        index.query(index.root, query, &mut found, &mut 0);
-        let mut mapped = Vec::new();
-        for i in found {
-            let (source, position) = clips[i];
-            let intersection = if range.is_point() { source.contains(range.start).then_some(range) } else { source.intersection(&range) };
-            if let Some(overlap) = intersection {
-                mapped.push((position + (overlap.start - source.start), position + (overlap.end - source.start)));
-            }
-        }
-        mapped.sort_unstable();
-        mapped.dedup();
-        mapped
     }
     pub fn gesture_source_pair(&self, asset: &AssetId, range: TimeRange, origin: Ticks, target: Ticks, tolerance: Ticks) -> Option<(Ticks, Ticks)> {
         let (clips, index) = self.projections.get(asset)?;
@@ -453,6 +594,90 @@ fn edge_window(edges: &[Ticks], range: TimeRange) -> &[Ticks] {
 mod tests {
     use super::*;
     use tv2_domain::{ids::AssetId, timeline::TrackKind};
+    #[test]
+    fn repeated_semantics_remain_lazy_and_exact_at_visible_clip_boundaries() {
+        let range = |a, b| TimeRange::new(Ticks::from_seconds(a), Ticks::from_seconds(b));
+        let asset = AssetId::new("synthetic");
+        let layer = LayerId::new("dense");
+        let sources: Vec<_> = (0..20_000).map(|item| ItemOccurrence { item, range_index: 0, range: range(0, 1) }).collect();
+        let input = SemanticInput {
+            stamp: ("p".into(), 1, crate::app::ViewMode::Sequence, None),
+            layers: vec![LayerInput { id: layer.clone(), asset: asset.clone(), ranges: sources }],
+            visible: HashMap::new(),
+            // Linked A/V duplicates are deduplicated; distant repetitions stay distinct.
+            clips: HashMap::from([(asset.clone(), (0..500).flat_map(|i| [(range(0, 1), Ticks::from_seconds(i)); 2]).collect())]),
+        };
+        let index = SemanticIndex::build(input);
+        assert_eq!(index.source_layers[&layer].0.len(), 20_000);
+        assert_eq!(index.projections[&asset].0.len(), 500);
+        // No resident ten-million-occurrence product. Exact queries and snap
+        // boundaries still expose every original item in only the visible repeat.
+        let got = index.query(&layer, range(250, 251));
+        assert_eq!(got.len(), 20_000);
+        assert!(got.iter().all(|o| o.range == range(250, 251)));
+        assert_eq!(index.edges(&asset, range(250, 251)), vec![Ticks::from_seconds(250), Ticks::from_seconds(251)]);
+        let paint = index.paint_query(&layer, range(250, 251), 100, |o| Some(if o.item == 19_999 { 4 } else { 1 }));
+        let SemanticPaint::Dense(coverage) = paint else { panic!("dense query must have bounded geometry") };
+        assert_eq!(coverage.len(), 2);
+        assert!(coverage.iter().all(|span| span.range == range(250, 251)));
+        assert!(coverage.iter().any(|span| span.kind == 4));
+        assert_eq!(index.query(&layer, range(250, 251)).len(), 20_000, "LOD never changes editing geometry");
+    }
+    #[test]
+    fn pixel_coverage_keeps_gaps_points_states_and_selected_items() {
+        let range = |a, b| TimeRange::new(Ticks::from_seconds(a), Ticks::from_seconds(b));
+        let mut paint = PaintAccumulator::new(range(0, 10), 10);
+        for item in 0..100_000 {
+            paint.add(ItemOccurrence { item, range_index: 0, range: range(0, 2) }, 1);
+        }
+        paint.add(ItemOccurrence { item: 100_001, range_index: 0, range: range(5, 5) }, 4);
+        paint.add(ItemOccurrence { item: 100_002, range_index: 0, range: range(8, 10) }, 2);
+        let SemanticPaint::Dense(coverage) = paint.finish() else { panic!("density must aggregate") };
+        assert_eq!(coverage.len(), 3);
+        assert!(coverage.iter().any(|span| span.kind == 1 && span.range == range(0, 2)));
+        assert!(coverage.iter().any(|span| span.kind == 4 && span.range == range(5, 6)));
+        assert!(coverage.iter().any(|span| span.kind == 2 && span.range == range(8, 10)));
+        // Sparse/zoomed-in presentation retains exact labels and ranges.
+        let mut sparse = PaintAccumulator::new(range(0, 10), 10);
+        sparse.add(ItemOccurrence { item: 3, range_index: 1, range: range(5, 5) }, 4);
+        let SemanticPaint::Exact(items) = sparse.finish() else { panic!("sparse geometry must stay exact") };
+        assert_eq!(items[0].item, 3);
+        assert_eq!(items[0].range, range(5, 5));
+    }
+    #[test]
+    fn massive_preview_culls_repetitions_and_bounds_geometry_without_mutating_ranges() {
+        let range = |a, b| TimeRange::new(Ticks::from_seconds(a), Ticks::from_seconds(b));
+        let asset = AssetId::new("preview");
+        let input = SemanticInput {
+            stamp: ("p".into(), 1, crate::app::ViewMode::Sequence, None),
+            layers: vec![],
+            visible: HashMap::new(),
+            clips: HashMap::from([(asset.clone(), (0..500).map(|i| (range(0, 1), Ticks::from_seconds(i))).collect())]),
+        };
+        let index = SemanticIndex::build(input);
+        let original: Vec<_> = (0..20_000).map(|i| (range(0, 1), i % 2 == 0)).collect();
+        let SemanticPaint::Dense(coverage) = index.paint_preview(&asset, original.iter().copied(), range(250, 251), 100) else {
+            panic!("preview must aggregate")
+        };
+        assert_eq!(coverage.len(), 2);
+        assert!(coverage.iter().all(|span| span.range == range(250, 251)));
+        assert!(coverage.iter().any(|span| span.kind == 0));
+        assert!(coverage.iter().any(|span| span.kind == 1));
+        let SemanticPaint::Dense(all) = index.paint_preview(&asset, original.iter().copied(), range(0, 500), 1000) else {
+            panic!("ten million ghosts must aggregate")
+        };
+        assert_eq!(all.len(), 2, "mesh must depend on pixels, not repetitions × items");
+        assert!(all.iter().all(|span| span.range == range(0, 500)));
+        let SemanticPaint::Exact(empty) = index.paint_preview(&asset, original.iter().copied(), range(501, 502), 100) else {
+            panic!("offscreen ghosts must be absent")
+        };
+        assert!(empty.is_empty());
+        assert!(
+            original.iter().enumerate().all(|(i, (r, removed))| *r == range(0, 1) && *removed == (i % 2 == 0)),
+            "preview must not mutate command ranges"
+        );
+        assert_eq!(index.projections[&asset].0.len(), 500);
+    }
     #[test]
     fn semantic_gesture_stays_on_one_source_mapping_across_repetitions() {
         let range = |a, b| TimeRange::new(Ticks::from_seconds(a), Ticks::from_seconds(b));

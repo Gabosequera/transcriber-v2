@@ -1,0 +1,44 @@
+    Checking tv2-pipeline v2.0.0-alpha.11 (C:\Users\gabri\Todo\transcriber-v2\crates\pipeline)
+    Checking transcriptor v2.0.0-alpha.11 (C:\Users\gabri\Todo\transcriber-v2\apps\desktop)
+error: the borrowed expression implements the required traits
+   --> apps\desktop\src\pipeline_ui.rs:315:101
+    |
+315 |                         tv2_pipeline::run(&record, record.state != JobState::Queued, token.clone(), &progress)?;
+    |                                                                                                     ^^^^^^^^^ help: change this to: `progress`
+    |
+    = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.98.0/index.html#needless_borrows_for_generic_args
+    = note: `-D clippy::needless-borrows-for-generic-args` implied by `-D warnings`
+    = help: to override `-D warnings` add `#[allow(clippy::needless_borrows_for_generic_args)]`
+
+error: the borrowed expression implements the required traits
+   --> apps\desktop\src\pipeline_ui.rs:324:97
+    |
+324 |                         workflow::run(&record, record.state != JobState::Queued, token.clone(), &progress)?;
+    |                                                                                                 ^^^^^^^^^ help: change this to: `progress`
+    |
+    = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.98.0/index.html#needless_borrows_for_generic_args
+
+error: try not to call a closure in the expression where it is declared
+   --> apps\desktop\src\pipeline_ui.rs:389:25
+    |
+389 |               let value = (|| {
+    |  _________________________^
+390 | |                 let prepared = record.prepare(snapshot, &token, true);
+391 | |                 Ok((record, prepared))
+392 | |             })();
+    | |________________^
+    |
+    = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.98.0/index.html#redundant_closure_call
+    = note: `-D clippy::redundant-closure-call` implied by `-D warnings`
+    = help: to override `-D warnings` add `#[allow(clippy::redundant_closure_call)]`
+help: try doing something like
+    |
+389 ~             let value = {
+390 +                 let prepared = record.prepare(snapshot, &token, true);
+391 +                 Ok((record, prepared))
+392 ~             };
+    |
+
+error: could not compile `transcriptor` (bin "Transcriptor") due to 3 previous errors
+warning: build failed, waiting for other jobs to finish...
+error: could not compile `transcriptor` (bin "Transcriptor" test) due to 3 previous errors

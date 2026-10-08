@@ -1,0 +1,19 @@
+    Finished `test` profile [optimized + debuginfo] target(s) in 0.43s
+     Running unittests src\lib.rs (target\debug\deps\tv2_pipeline-36941c32715fd558.exe)
+
+running 12 tests
+test workflow::tests::plan_payload_unknown_fields_and_changed_digest_rejected ... ok
+test workflow::tests::checkpoint_header_and_parent_tampering_rejected ... ok
+test workflow::tests::plan_rejects_equal_roots_duplicate_tracks_and_arousal_without_alignment ... ok
+test workflow::tests::checkpoint_rejects_work_file_before_writing ... ok
+test workflow::tests::resource_change_rejected_before_workflow_claim ... ok
+test workflow::tests::checkpoint_reads_do_not_create_missing_directories ... ok
+test workflow::tests::validation_missing_checkpoint_is_readonly ... ok
+test workflow::tests::cancellation_keeps_checkpointed_child_queued_before_execute ... ok
+test workflow::tests::missing_checkpointed_child_is_never_recreated ... ok
+test workflow::tests::succeeded_child_is_verified_and_reused_without_execute ... ok
+test workflow::tests::checkpoint_junction_is_rejected_without_touching_destination ... ok
+test workflow::tests::failed_cancelled_interrupted_children_require_explicit_resume ... ok
+
+test result: ok. 12 passed; 0 failed; 0 ignored; 0 measured; 28 filtered out; finished in 0.28s
+

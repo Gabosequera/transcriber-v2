@@ -5,13 +5,14 @@ members = [
     "crates/application",
     "crates/control",
     "crates/media",
+    "crates/pipeline",
     "crates/v1compat",
     "apps/desktop",
 ]
 default-members = ["apps/desktop"]
 
 [workspace.package]
-version = "2.0.0-alpha.10"
+version = "2.0.0-alpha.11"
 edition = "2024"
 rust-version = "1.98"
 license-file = "LICENSE.md"

@@ -1,0 +1,47 @@
+{
+  "revision": 2,
+  "view": "Sequence",
+  "playhead_ms": 0,
+  "player": {
+    "position_ms": 0,
+    "playing": false,
+    "rate": 1.0,
+    "generation": 8,
+    "buffering": false,
+    "decode_ms": 118.12820434570312,
+    "audio_available": true
+  },
+  "last_frame": {
+    "position_ms": 0,
+    "w": 790,
+    "h": 444,
+    "generation": 8
+  },
+  "clips": [
+    {
+      "id": "clip-4a660eed4a18",
+      "track": "V1",
+      "position_ms": 0,
+      "source_start_ms": 0,
+      "source_end_ms": 12000,
+      "enabled": true,
+      "link": "link-e394c9a8cff2"
+    },
+    {
+      "id": "clip-5c18c704ed33",
+      "track": "A1",
+      "position_ms": 0,
+      "source_start_ms": 0,
+      "source_end_ms": 12000,
+      "enabled": true,
+      "link": "link-e394c9a8cff2"
+    }
+  ],
+  "layers": [],
+  "toasts": [
+    "Espera a que termine la escritura antes de cerrar",
+    "el proyecto en disco cambió desde su apertura · abre la versión externa o guarda tus cambios en otra carpeta",
+    "Proyecto «Sin título» abierto (revisión 2)"
+  ],
+  "undo": "Insertar medio"
+}

@@ -1,0 +1,17 @@
+{
+  "result": "PASS",
+  "project_id": "proj-47e245bfbf07",
+  "revisions": [
+    3,
+    5,
+    7
+  ],
+  "layers_sequences_masters_exactly_unchanged": true,
+  "durable_submillisecond_ticks": {
+    "start": 4233600706,
+    "end": 6350401411
+  },
+  "new_item_id": "item-bdb4889267ad",
+  "undo_removes_only_new_item": true,
+  "redo_and_copy_identity_sets_equal": true
+}

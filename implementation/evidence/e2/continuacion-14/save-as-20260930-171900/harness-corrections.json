@@ -1,0 +1,10 @@
+{
+  "save_as_native_repeated": false,
+  "original_native_phases_pass": true,
+  "postcheck_failures_preserved": [
+    "bundle.files lookup for inline document: KeyError layers/layer-demo-notas.json",
+    "inline byte equality using default Windows cp1252: mismatch; fixed explicit UTF8, original bytes preserved",
+    "tick expectation assumed source-view IN2/OUT4 but script used sequence-view mapping source6/source9; corrected independent montage mapping expectation"
+  ],
+  "interpretation": "No production change; corrected harness interpretation of documented storage/source clocks."
+}

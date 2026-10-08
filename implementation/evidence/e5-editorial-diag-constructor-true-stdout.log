@@ -1,0 +1,6 @@
+{"peak_pagefile": 327340032, "phase": "before_true_constructor", "private": 327331840, "rss": 284098560, "vms": 327331840}
+{"peak_pagefile": 331001856, "phase": "after_true_constructor_before_gc", "private": 331001856, "rss": 288104448, "vms": 331001856}
+{"peak_pagefile": 331001856, "phase": "after_true_constructor_after_gc", "private": 331001856, "rss": 288104448, "vms": 331001856}
+{"all_parameters_meta": true, "config_sha256": "98d2ff8cc47488d08a2b0b3acf4eb99ef210779b42bd48605f6b8e36acdbf670", "cpu_buffer": "model.rotary_emb.inv_freq", "cpu_buffer_bytes": 256, "cpu_parameter_bytes": 0, "forward_count": 0, "generated_tokens": 0, "original_inv_freq_alias": true, "phase": "validated_true_constructor", "seconds": 0.23399999999674037, "weights_loaded": false}
+{"peak_pagefile": 331038720, "phase": "after_cpu_buffer_reconstruction", "private": 331038720, "rss": 288411648, "vms": 331038720}
+{"peak_pagefile": 331038720, "phase": "after_model_delete", "private": 331038720, "rss": 288411648, "vms": 331038720}

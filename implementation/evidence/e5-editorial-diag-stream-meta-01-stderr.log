@@ -1,0 +1,11 @@
+Traceback (most recent call last):
+  File "C:\Users\gabri\Todo\transcriber-v2\tests\scripts\probe_editorial_qwen_stream_fp32_meta.py", line 233, in <module>
+    child()
+  File "C:\Users\gabri\Todo\transcriber-v2\tests\scripts\probe_editorial_qwen_stream_fp32_meta.py", line 187, in child
+    previous = [json.loads(line) for line in PREVIOUS.read_text(encoding="utf-8").splitlines()]
+                                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\gabri\AppData\Roaming\uv\python\cpython-3.12-windows-x86_64-none\Lib\pathlib.py", line 1028, in read_text
+    return f.read()
+           ^^^^^^^^
+  File "<frozen codecs>", line 322, in decode
+UnicodeDecodeError: 'utf-8' codec can't decode byte 0xbf in position 2636: invalid start byte

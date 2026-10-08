@@ -32,6 +32,88 @@ struct BackgroundResult {
     request: Option<tv2_control::PendingRequest>,
 }
 impl TranscriptorApp {
+    /// Local acceptance automation has the same authority as the GUI controls.
+    /// This is invoked only by a user-supplied --script, never by MCP tools.
+    pub fn script_control_setup(&mut self, pipe_name: String, permissions: Permissions, ctx: &egui::Context) {
+        if !pipe_name.starts_with("tv2-acceptance-") || !pipe_name.bytes().all(|c| c.is_ascii_alphanumeric() || c == b'-') || pipe_name.len() > 128 {
+            self.report(tv2_domain::DomainError::invalid("Pipe de aceptación inválida"));
+            if let Some(script) = &mut self.script {
+                script.failed = true;
+            }
+            return;
+        }
+        self.script_control_stop();
+        let wake = ctx.clone();
+        let service = match ControlService::start_with_wake(move || wake.request_repaint()) {
+            Ok(service) => service,
+            Err(error) => {
+                self.report(error.into());
+                if let Some(script) = &mut self.script {
+                    script.failed = true;
+                }
+                return;
+            }
+        };
+        self.control.project = self.project().project_id.clone();
+        let project = self.control.project.clone();
+        let path = crate::paths::config_dir().join("control").join(format!("{}.json", tv2_domain::digest::digest_json(&json!(project))));
+        let endpoint = service.endpoint();
+        let token = service.token().to_string();
+        let (tx, rx) = crossbeam_channel::bounded(1);
+        let wake = ctx.clone();
+        match std::thread::Builder::new().name("mcp-acceptance-setup".into()).spawn(move || {
+            let result = ControlEngine::restore(project, permissions, path);
+            let ready = result.is_ok();
+            let _ = tx.send(result);
+            wake.request_repaint();
+            if ready {
+                #[cfg(windows)]
+                {
+                    use std::io::Write;
+                    // The test harness creates a CurrentUserOnly pipe. The token
+                    // stays in process memory and never enters logs/evidence.
+                    let result = (|| -> std::io::Result<()> {
+                        let mut pipe = std::fs::OpenOptions::new().write(true).open(format!("\\\\.\\pipe\\{pipe_name}"))?;
+                        serde_json::to_writer(&mut pipe, &json!({"endpoint":endpoint,"token":token}))?;
+                        pipe.write_all(b"\n")?;
+                        pipe.flush()
+                    })();
+                    if let Err(error) = result {
+                        tracing::error!("No se conectó el pipe de aceptación: {error}");
+                    }
+                }
+                #[cfg(not(windows))]
+                {
+                    let _ = (endpoint, token, pipe_name);
+                }
+            }
+        }) {
+            Ok(_) => {
+                self.control.restore = Some(rx);
+                self.control.service = Some(service);
+                self.control.open = true;
+            }
+            Err(error) => {
+                self.report(error.into());
+                if let Some(script) = &mut self.script {
+                    script.failed = true;
+                }
+            }
+        }
+    }
+    pub fn script_control_revoke(&mut self) {
+        if let Some(engine) = &mut self.control.engine {
+            engine.revoke();
+        }
+    }
+    pub fn script_control_stop(&mut self) {
+        self.control.service = None;
+        self.control.engine = None;
+        self.control.background = None;
+        self.control.restore = None;
+        self.control.pending_json = None;
+        self.control.pending_local_reprepare = None;
+    }
     fn control_host_state(&self) -> HostState {
         let project = &self.project().project_id;
         let mut jobs: Vec<Value> = self

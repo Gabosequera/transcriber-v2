@@ -1,0 +1,26 @@
+paso 1: ImportV1 { path: "C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/save-as-20260930-171651/synthetic-editorial", media: Some("C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/save-as-20260930-171651/media/fixture-a.mp4") }
+paso 2: Wait { ms: 1500 }
+  toast: Info: V1 importado: 2 capas, 2 carriles de recortes, 5 tramos de montaje (12 comandos)
+paso 3: Assert { markers: None, clips: None, layers: Some(4), items: Some(7), revision: Some(1), playing: None, rate: None, position: None, tracks: None }
+ASSERT layers: esperado 4, real 9
+ASSERT items: esperado 7, real 17
+  toast: Info: V1 importado: 2 capas, 2 carriles de recortes, 5 tramos de montaje (12 comandos)
+paso 4: Dump { path: "C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/save-as-20260930-171651/imported-state.json" }
+estado volcado en C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/save-as-20260930-171651/imported-state.json
+  toast: Info: V1 importado: 2 capas, 2 carriles de recortes, 5 tramos de montaje (12 comandos)
+paso 5: NewLayer { name: "Human portability edit" }
+  toast: Info: V1 importado: 2 capas, 2 carriles de recortes, 5 tramos de montaje (12 comandos)
+paso 6: SetIn { t: 2.000001 }
+  toast: Info: V1 importado: 2 capas, 2 carriles de recortes, 5 tramos de montaje (12 comandos)
+paso 7: SetOut { t: 4.000002 }
+  toast: Info: V1 importado: 2 capas, 2 carriles de recortes, 5 tramos de montaje (12 comandos)
+paso 8: AddRange
+  toast: Info: V1 importado: 2 capas, 2 carriles de recortes, 5 tramos de montaje (12 comandos)
+paso 9: Assert { markers: None, clips: None, layers: Some(5), items: Some(8), revision: Some(3), playing: None, rate: None, position: None, tracks: None }
+ASSERT layers: esperado 5, real 10
+ASSERT items: esperado 8, real 18
+  toast: Info: V1 importado: 2 capas, 2 carriles de recortes, 5 tramos de montaje (12 comandos)
+paso 10: Save { path: "C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/save-as-20260930-171651/origin.transcriptor" }
+  toast: Info: V1 importado: 2 capas, 2 carriles de recortes, 5 tramos de montaje (12 comandos)
+paso 11: AwaitSignal { path: "C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/save-as-20260930-171651/saved-a.signal", ms: 30000 }
+  toast: Info: Revisión 3 guardada en C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/save-as-20260930-171651/origin.transcriptor

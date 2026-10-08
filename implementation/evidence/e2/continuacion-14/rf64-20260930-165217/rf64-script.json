@@ -1,0 +1,51 @@
+[
+  {
+    "op": "open",
+    "path": "C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/rf64-20260930-165217/synthetic.transcriptor/project.json"
+  },
+  {
+    "op": "assert",
+    "clips": 3,
+    "tracks": 1,
+    "revision": 0
+  },
+  {
+    "op": "set_in",
+    "t": 0
+  },
+  {
+    "op": "set_out",
+    "t": 22400
+  },
+  {
+    "op": "log",
+    "text": "RF64_EXPORT_BEGIN"
+  },
+  {
+    "op": "export",
+    "preset": "wav-pcm",
+    "dest": "C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/rf64-20260930-165217/physical-rf64.wav",
+    "range": true
+  },
+  {
+    "op": "wait_export",
+    "ms": 1200000
+  },
+  {
+    "op": "dump",
+    "path": "C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/rf64-20260930-165217/final-state.json"
+  },
+  {
+    "op": "assert",
+    "clips": 3,
+    "tracks": 1,
+    "revision": 0
+  },
+  {
+    "op": "screenshot",
+    "path": "C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/rf64-20260930-165217/rf64-native.png"
+  },
+  {
+    "op": "quit"
+  }
+]

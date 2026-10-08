@@ -1,0 +1,13 @@
+{
+  "utc": "2026-09-30T15:49:40.2329039Z",
+  "result": "BLOCKED_BEFORE_EXECUTION",
+  "cargo_exit": 101,
+  "native_error": 4551,
+  "blocked_path": "C:\\Users\\gabri\\Todo\\transcriber-v2\\target\\perf-lod\\release\\build\\windows_x86_64_msvc-fc5d89a3113d6f0b\\build-script-build.exe",
+  "blocked_sha256": "9A76306357D512CDA32B1695352FF5B5E714073735228401D4ADAEFD97F1CE20",
+  "original_exe_sha256": "8BA5193593D6D7EAF406169BF88158AF3ECDBF98A6D4FC5F25CC9AC9C4AABD26",
+  "human_pid": 26948,
+  "human_running": false,
+  "retry": "none",
+  "policy_changes": "none"
+}

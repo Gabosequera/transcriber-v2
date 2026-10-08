@@ -1,0 +1,27 @@
+    Checking tv2-application v2.0.0-alpha.11 (C:\Users\gabri\Todo\transcriber-v2\crates\application)
+    Checking tv2-media v2.0.0-alpha.11 (C:\Users\gabri\Todo\transcriber-v2\crates\media)
+    Checking tv2-pipeline v2.0.0-alpha.11 (C:\Users\gabri\Todo\transcriber-v2\crates\pipeline)
+error: this `if` statement can be collapsed
+  --> crates\pipeline\src\process_tree.rs:55:21
+   |
+55 | /                     if entry.th32OwnerProcessID == child.id() {
+56 | |                         if thread_id.replace(entry.th32ThreadID).is_some() {
+57 | |                             return Err(std::io::Error::other("Worker suspendido con varios hilos inesperados"));
+58 | |                         }
+59 | |                     }
+   | |_____________________^
+   |
+   = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.98.0/index.html#collapsible_if
+   = note: `-D clippy::collapsible-if` implied by `-D warnings`
+   = help: to override `-D warnings` add `#[allow(clippy::collapsible_if)]`
+help: collapse nested if block
+   |
+55 ~                     if entry.th32OwnerProcessID == child.id()
+56 ~                         && thread_id.replace(entry.th32ThreadID).is_some() {
+57 |                             return Err(std::io::Error::other("Worker suspendido con varios hilos inesperados"));
+58 ~                         }
+   |
+
+error: could not compile `tv2-pipeline` (lib) due to 1 previous error
+warning: build failed, waiting for other jobs to finish...
+error: could not compile `tv2-pipeline` (lib test) due to 1 previous error

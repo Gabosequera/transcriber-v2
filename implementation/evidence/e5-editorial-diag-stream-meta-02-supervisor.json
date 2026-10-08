@@ -1,0 +1,15 @@
+{
+  "cap_bytes": 8589934592,
+  "deadline_seconds": 180,
+  "accepted": false,
+  "editorial_accepted": false,
+  "generation_executed": false,
+  "script_sha256": "4c522ea044df3dce646b657436fc8ba7845cd8cd4e3226782dbcb2b964ecb63b",
+  "supervisor_layout_sha256": "2eb9d9df43fb10edeed5a055ec85c6afc4933f99d6f36aa4bc662bc10a614934",
+  "pid": 30156,
+  "exit_code": 3221225477,
+  "error": "RuntimeError: Forward diagnostic failed; preserve phase evidence",
+  "peak_job_memory": 8683937792,
+  "duration_seconds": 41.28100000001723,
+  "own_process_signaled": true
+}

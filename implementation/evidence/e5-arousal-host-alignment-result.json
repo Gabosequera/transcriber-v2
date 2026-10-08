@@ -1,0 +1,17 @@
+{
+  "job_id": "job-0be1e8a200a1",
+  "project_id": "proj-5789225831cf",
+  "revision": 1,
+  "project_digest": "fd3aa86252b56c5d2ea37ab05ee0e747d267fdfdc39976e108a58fb0079439e8",
+  "asset_id": "asset-76f1df4dc491",
+  "normalized_audio_sha256": "90f6dfc24eca1116f879c5269e0dbec6cc5e0687e7bcd89ccea11344f641397a",
+  "transcript_sha256": "df53df34972ee9875c41caa248b9c15578793ccb07f0df9c7525b6f4efa6bf06",
+  "model_sha256": "20ef12963ab4924bef49ac4fc7f58ad5da2ee43b2c11bc8c853c9b90ecdbc680",
+  "source_sha256": "90f6dfc24eca1116f879c5269e0dbec6cc5e0687e7bcd89ccea11344f641397a",
+  "source_duration_ticks": 6725073600,
+  "timebase": "flicks/705600000",
+  "alignment_path": "alignment/aligned-words.json",
+  "artifacts": {
+    "alignment/aligned-words.json": "a93c30c93a7c8d5aae569a2e2d796beb5d8c0e0bfa3dab0bc02f748d9e9d9456"
+  }
+}

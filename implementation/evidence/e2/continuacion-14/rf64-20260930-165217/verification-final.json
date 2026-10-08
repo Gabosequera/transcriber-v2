@@ -1,0 +1,118 @@
+{
+  "result": "PASS",
+  "native_export_rerun": false,
+  "native_gui_log_pass": true,
+  "verification": {
+    "size": 4300800114,
+    "ds64_riff_size": 4300800106,
+    "ds64_data_size": 4300800000,
+    "ds64_sample_count": 1075200000,
+    "fmt": [
+      1,
+      2,
+      48000,
+      192000,
+      4,
+      16
+    ],
+    "data_offset": 114,
+    "duration_seconds": 22400,
+    "readings": [
+      {
+        "timeline_seconds": 0.1,
+        "absolute_byte_offset": 19314,
+        "max_pcm16_error": 0,
+        "rms": 2047.5074700718433
+      },
+      {
+        "timeline_seconds": 11200.1,
+        "absolute_byte_offset": 2150419314,
+        "max_pcm16_error": 0,
+        "rms": 2047.5074700718433
+      },
+      {
+        "timeline_seconds": 22399.6,
+        "absolute_byte_offset": 4300723314,
+        "max_pcm16_error": 0,
+        "rms": 2047.5074700718433
+      },
+      {
+        "silence_seconds": 100,
+        "maximum_absolute_pcm16": 0
+      },
+      {
+        "silence_seconds": 11201.0,
+        "maximum_absolute_pcm16": 0
+      },
+      {
+        "silence_seconds": 22398,
+        "maximum_absolute_pcm16": 0
+      }
+    ],
+    "ffprobe": {
+      "streams": [
+        {
+          "index": 0,
+          "codec_name": "pcm_s16le",
+          "codec_long_name": "PCM signed 16-bit little-endian",
+          "codec_type": "audio",
+          "codec_tag_string": "[1][0][0][0]",
+          "codec_tag": "0x0001",
+          "sample_fmt": "s16",
+          "sample_rate": "48000",
+          "channels": 2,
+          "bits_per_sample": 16,
+          "initial_padding": 0,
+          "r_frame_rate": "0/0",
+          "avg_frame_rate": "0/0",
+          "time_base": "1/48000",
+          "duration_ts": 1075200000,
+          "duration": "22400.000000",
+          "bit_rate": "1536000",
+          "disposition": {
+            "default": 0,
+            "dub": 0,
+            "original": 0,
+            "comment": 0,
+            "lyrics": 0,
+            "karaoke": 0,
+            "forced": 0,
+            "hearing_impaired": 0,
+            "visual_impaired": 0,
+            "clean_effects": 0,
+            "attached_pic": 0,
+            "timed_thumbnails": 0,
+            "non_diegetic": 0,
+            "captions": 0,
+            "descriptions": 0,
+            "metadata": 0,
+            "dependent": 0,
+            "still_image": 0,
+            "multilayer": 0
+          }
+        }
+      ],
+      "format": {
+        "filename": "implementation\\evidence\\e2\\continuacion-14\\rf64-20260930-165217\\physical-rf64.wav",
+        "nb_streams": 1,
+        "nb_programs": 0,
+        "nb_stream_groups": 0,
+        "format_name": "wav",
+        "format_long_name": "WAV / WAVE (Waveform Audio)",
+        "duration": "22400.000000",
+        "size": "4300800114",
+        "bit_rate": "1536000",
+        "probe_score": 100,
+        "tags": {
+          "encoder": "Lavf62.12.102"
+        }
+      }
+    },
+    "sha256": "b38e8564e43e3ee29be62c8d75a2e3bb3895f0a6ddffbe28530735e5b32885ed"
+  },
+  "harness_corrections": [
+    "round float silence read position to integer byte offset",
+    "resolve ffprobe through tests.support.media_tool"
+  ],
+  "original_measurements_preserved": "measurements.json"
+}

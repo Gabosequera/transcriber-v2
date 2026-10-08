@@ -1,0 +1,71 @@
+    Checking tv2-domain v2.0.0-alpha.10 (C:\Users\gabri\Todo\transcriber-v2\crates\domain)
+    Checking tv2-application v2.0.0-alpha.10 (C:\Users\gabri\Todo\transcriber-v2\crates\application)
+    Checking tv2-v1compat v2.0.0-alpha.10 (C:\Users\gabri\Todo\transcriber-v2\crates\v1compat)
+    Checking tv2-media v2.0.0-alpha.10 (C:\Users\gabri\Todo\transcriber-v2\crates\media)
+    Checking tv2-pipeline v2.0.0-alpha.10 (C:\Users\gabri\Todo\transcriber-v2\crates\pipeline)
+    Checking tv2-control v2.0.0-alpha.10 (C:\Users\gabri\Todo\transcriber-v2\crates\control)
+    Checking transcriptor v2.0.0-alpha.10 (C:\Users\gabri\Todo\transcriber-v2\apps\desktop)
+error: this `if` statement can be collapsed
+   --> apps\desktop\src\pipeline_ui.rs:250:21
+    |
+250 | / ...   if ui.button("Elegir…").clicked() {
+251 | | ...       if let Some(path) = if folder { rfd::FileDialog::new().pick_folder() } else { rfd::FileDialog::new().pick_file() } {
+252 | | ...           *value = path;
+253 | | ...       }
+254 | | ...   }
+    | |_______^
+    |
+    = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.98.0/index.html#collapsible_if
+    = note: `-D clippy::collapsible-if` implied by `-D warnings`
+    = help: to override `-D warnings` add `#[allow(clippy::collapsible_if)]`
+help: collapse nested if block
+    |
+250 ~                     if ui.button("Elegir…").clicked()
+251 ~                         && let Some(path) = if folder { rfd::FileDialog::new().pick_folder() } else { rfd::FileDialog::new().pick_file() } {
+252 |                             *value = path;
+253 ~                         }
+    |
+
+error: this `if` statement can be collapsed
+   --> apps\desktop\src\pipeline_ui.rs:303:5
+    |
+303 | /     if apply {
+304 | |         if let Err(error) = app.apply_analysis() {
+305 | |             app.analysis.error = Some(error.to_string());
+306 | |             app.report(error);
+307 | |         }
+308 | |     }
+    | |_____^
+    |
+    = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.98.0/index.html#collapsible_if
+help: collapse nested if block
+    |
+303 ~     if apply
+304 ~         && let Err(error) = app.apply_analysis() {
+305 |             app.analysis.error = Some(error.to_string());
+306 |             app.report(error);
+307 ~         }
+    |
+
+error: this `if` statement can be collapsed
+   --> apps\desktop\src\pipeline_ui.rs:309:5
+    |
+309 | /     if start {
+310 | |         if let Some(asset) = app.analysis.asset.clone().or_else(|| app.source_asset.clone()) {
+311 | |             app.start_analysis(asset, None, ctx);
+312 | |         }
+313 | |     }
+    | |_____^
+    |
+    = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.98.0/index.html#collapsible_if
+help: collapse nested if block
+    |
+309 ~     if start
+310 ~         && let Some(asset) = app.analysis.asset.clone().or_else(|| app.source_asset.clone()) {
+311 |             app.start_analysis(asset, None, ctx);
+312 ~         }
+    |
+
+error: could not compile `transcriptor` (bin "Transcriptor") due to 3 previous errors
+warning: build failed, waiting for other jobs to finish...
+error: could not compile `transcriptor` (bin "Transcriptor" test) due to 3 previous errors

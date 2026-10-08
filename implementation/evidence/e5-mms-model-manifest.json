@@ -1,0 +1,13 @@
+{
+  "digest_origin": "measured after public HTTPS download; not an upstream signed digest",
+  "elapsed_seconds": 33.343,
+  "etag": "\"97a1af3bb69ad1fcade02350fe0453d0-151\"",
+  "last_modified": "Tue, 16 May 2023 14:53:47 GMT",
+  "license": "CC-BY-NC-4.0",
+  "license_source": "https://github.com/facebookresearch/fairseq/tree/100cd91db19bb27277a06a25eb4154c805b10189/examples/mms#license",
+  "model": "torchaudio.pipelines.MMS_FA",
+  "sha256": "20ef12963ab4924bef49ac4fc7f58ad5da2ee43b2c11bc8c853c9b90ecdbc680",
+  "size": 1262047414,
+  "source_url": "https://dl.fbaipublicfiles.com/mms/torchaudio/ctc_alignment_mling_uroman/model.pt",
+  "torchaudio_version": "2.8.0+cpu"
+}

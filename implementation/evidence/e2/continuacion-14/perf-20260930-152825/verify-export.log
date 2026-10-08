@@ -1,0 +1,7 @@
+export: duración 4.000 s (esperada 4.0), streams ['video', 'audio']
+  video h264 1280x720 30/1 nb_frames=120
+  audio pico -20.513278 dBFS
+  t=0.5s → fuente 0.5s: PSNR 43.9 dB (control 6.5s: 20.0 dB) OK
+  t=2.5s → fuente 2.5s: PSNR 43.7 dB (control 8.5s: 19.7 dB) OK
+  t=3.5s → fuente 3.5s: PSNR 43.2 dB (control 9.5s: 17.8 dB) OK
+RESULTADO: OK

@@ -1,0 +1,34 @@
+Microsoft (R) COFF/PE Dumper Version 14.51.36248.0
+Copyright (C) Microsoft Corporation.  All rights reserved.
+
+
+Dump of file .local\e5-arousal-venv\Lib\site-packages\numpy\_core\_multiarray_umath.cp312-win_amd64.pyd
+
+File Type: DLL
+
+  Image has the following dependencies:
+
+    libscipy_openblas64_-ed4f167a5330424524f45258e7ca2c8d.dll
+    python312.dll
+    msvcp140-a4c2229bdc2a2a630acdc095b4d86008.dll
+    VCRUNTIME140.dll
+    VCRUNTIME140_1.dll
+    api-ms-win-crt-stdio-l1-1-0.dll
+    api-ms-win-crt-runtime-l1-1-0.dll
+    api-ms-win-crt-math-l1-1-0.dll
+    api-ms-win-crt-utility-l1-1-0.dll
+    api-ms-win-crt-string-l1-1-0.dll
+    api-ms-win-crt-heap-l1-1-0.dll
+    api-ms-win-crt-convert-l1-1-0.dll
+    api-ms-win-crt-time-l1-1-0.dll
+    api-ms-win-crt-environment-l1-1-0.dll
+    api-ms-win-crt-locale-l1-1-0.dll
+    KERNEL32.dll
+
+  Summary
+
+       3A000 .data
+       22000 .pdata
+       96000 .rdata
+        3000 .reloc
+      2D3000 .text

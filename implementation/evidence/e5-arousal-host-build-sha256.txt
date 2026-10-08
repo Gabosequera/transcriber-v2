@@ -1,0 +1,10 @@
+
+Hash : 0178936D8FC98F0D051A90081D83CAB91B0B9C4ECCF4FA1EED27FDA1407C15E6
+Path : C:\Users\gabri\Todo\transcriber-v2\crates\pipeline\src\arousal.rs
+
+Hash : 172ADD1BDCD3201193BFDD7C1D6B08138677BC55C3DD5F64367CD79950ABE080
+Path : C:\Users\gabri\Todo\transcriber-v2\crates\pipeline\examples\arousal_host.rs
+
+Hash : 85C7D6A619720ED08E7AA60973697162652A21D49DEBFDB3D36B453A12494A15
+Path : C:\Users\gabri\Todo\transcriber-v2\target\debug\examples\arousal_host.exe
+

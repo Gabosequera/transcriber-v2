@@ -1,0 +1,1279 @@
+{
+  "schema": "transcriptor-project-storage/1",
+  "project": {
+    "schema": "transcriptor-project/2",
+    "project_id": "proj-7a285cf041de",
+    "name": "Sin título",
+    "revision": 3,
+    "created_at": "2026-09-30T17:16:52+00:00",
+    "updated_at": "2026-09-30T17:16:54+00:00",
+    "assets": [
+      {
+        "id": "asset-8bea68219302",
+        "kind": "video",
+        "name": "fixture-a.mp4",
+        "path": "media/fixture-a.mp4",
+        "probe": {
+          "container": "mov",
+          "duration": 8467200000,
+          "start_time": 0,
+          "video": {
+            "stream_index": 0,
+            "codec": "h264",
+            "width": 640,
+            "height": 360,
+            "rotation": 0,
+            "frame_rate": {
+              "num": 30,
+              "den": 1
+            },
+            "avg_frame_rate": {
+              "num": 30,
+              "den": 1
+            },
+            "time_base": {
+              "num": 1,
+              "den": 15360
+            },
+            "start_time": 0,
+            "pix_fmt": "yuv420p",
+            "nb_frames": 360,
+            "duration": 8467200000,
+            "variable_frame_rate": false
+          },
+          "audio": [
+            {
+              "stream_index": 1,
+              "audio_index": 0,
+              "codec": "aac",
+              "channels": 1,
+              "channel_layout": "mono",
+              "sample_rate": 48000,
+              "start_time": 0,
+              "duration": 8467200000,
+              "title": ""
+            }
+          ],
+          "size": 2129706
+        },
+        "fingerprint": {
+          "size": 2129706,
+          "mtime_ns": 1790774357811100300,
+          "hash_muestreado": "326bad7e9be71813ec86c3ea4c09e9575fccba40590be89f4c4012ce20ff82f7",
+          "inventario_sha256": "77aae5a1df8f009ed8f55643e2949f7ff3340026398608631ea992eae8a58d70"
+        },
+        "missing": false
+      }
+    ],
+    "sequences": [
+      {
+        "id": "seq-ca5ae5de2c0a",
+        "name": "Secuencia 1",
+        "frame_rate": {
+          "num": 30,
+          "den": 1
+        },
+        "width": 1920,
+        "height": 1080,
+        "sample_rate": 48000,
+        "tracks": [],
+        "clips": [],
+        "markers": []
+      },
+      {
+        "id": "seq-3ede197de14f",
+        "name": "Montaje V1",
+        "frame_rate": {
+          "num": 30,
+          "den": 1
+        },
+        "width": 640,
+        "height": 360,
+        "sample_rate": 48000,
+        "tracks": [
+          {
+            "id": "track-89311422f392",
+            "kind": "video",
+            "name": "V1",
+            "muted": false,
+            "solo": false,
+            "locked": false,
+            "visible": true,
+            "gain_db": 0.0
+          },
+          {
+            "id": "track-90b36cefbedd",
+            "kind": "audio",
+            "name": "A1",
+            "muted": false,
+            "solo": false,
+            "locked": false,
+            "visible": true,
+            "gain_db": 0.0
+          }
+        ],
+        "clips": [
+          {
+            "id": "clip-000001-0",
+            "track_id": "track-89311422f392",
+            "asset_id": "asset-8bea68219302",
+            "source": {
+              "start": 705600000,
+              "end": 2116800000
+            },
+            "position": 0,
+            "enabled": true,
+            "name": "Saludo",
+            "link_group": "link-v1-clip-000001-0",
+            "transform": {
+              "x": 0.0,
+              "y": 0.0,
+              "scale": 1.0,
+              "opacity": 1.0,
+              "fit": "fit"
+            },
+            "gain_db": 0.0,
+            "provenance": {
+              "origin": "import-v1",
+              "v1_clip_id": "clip-000001",
+              "created_at": "2026-09-30T17:16:52+00:00"
+            },
+            "extra": {
+              "v1": {
+                "state": "proposed",
+                "reason": "",
+                "origin": "user",
+                "topic_ids": [],
+                "edited": false,
+                "track_id": "V1",
+                "seq_ini_placed": 0.0
+              }
+            }
+          },
+          {
+            "id": "clip-000001-0-a0",
+            "track_id": "track-90b36cefbedd",
+            "asset_id": "asset-8bea68219302",
+            "source": {
+              "start": 705600000,
+              "end": 2116800000
+            },
+            "position": 0,
+            "enabled": true,
+            "name": "Saludo",
+            "link_group": "link-v1-clip-000001-0",
+            "transform": {
+              "x": 0.0,
+              "y": 0.0,
+              "scale": 1.0,
+              "opacity": 1.0,
+              "fit": "fit"
+            },
+            "gain_db": 0.0,
+            "audio_stream": 0,
+            "provenance": {
+              "origin": "import-v1",
+              "v1_clip_id": "clip-000001",
+              "created_at": "2026-09-30T17:16:52+00:00"
+            },
+            "extra": {
+              "v1": {
+                "state": "proposed",
+                "reason": "",
+                "origin": "user",
+                "topic_ids": [],
+                "edited": false,
+                "track_id": "V1",
+                "seq_ini_placed": 0.0
+              }
+            }
+          },
+          {
+            "id": "clip-000003-1",
+            "track_id": "track-89311422f392",
+            "asset_id": "asset-8bea68219302",
+            "source": {
+              "start": 4233600000,
+              "end": 4939200000
+            },
+            "position": 1411200000,
+            "enabled": true,
+            "name": "Risa encima",
+            "link_group": "link-v1-clip-000003-1",
+            "transform": {
+              "x": 0.0,
+              "y": 0.0,
+              "scale": 1.0,
+              "opacity": 1.0,
+              "fit": "fit"
+            },
+            "gain_db": 0.0,
+            "provenance": {
+              "origin": "import-v1",
+              "v1_clip_id": "clip-000003",
+              "created_at": "2026-09-30T17:16:52+00:00"
+            },
+            "extra": {
+              "v1": {
+                "state": "proposed",
+                "reason": "",
+                "origin": "user",
+                "topic_ids": [],
+                "edited": false,
+                "track_id": "V2",
+                "seq_ini_placed": 2.0
+              }
+            }
+          },
+          {
+            "id": "clip-000003-1-a0",
+            "track_id": "track-90b36cefbedd",
+            "asset_id": "asset-8bea68219302",
+            "source": {
+              "start": 4233600000,
+              "end": 4939200000
+            },
+            "position": 1411200000,
+            "enabled": true,
+            "name": "Risa encima",
+            "link_group": "link-v1-clip-000003-1",
+            "transform": {
+              "x": 0.0,
+              "y": 0.0,
+              "scale": 1.0,
+              "opacity": 1.0,
+              "fit": "fit"
+            },
+            "gain_db": 0.0,
+            "audio_stream": 0,
+            "provenance": {
+              "origin": "import-v1",
+              "v1_clip_id": "clip-000003",
+              "created_at": "2026-09-30T17:16:52+00:00"
+            },
+            "extra": {
+              "v1": {
+                "state": "proposed",
+                "reason": "",
+                "origin": "user",
+                "topic_ids": [],
+                "edited": false,
+                "track_id": "V2",
+                "seq_ini_placed": 2.0
+              }
+            }
+          },
+          {
+            "id": "clip-000001-2",
+            "track_id": "track-89311422f392",
+            "asset_id": "asset-8bea68219302",
+            "source": {
+              "start": 2822400000,
+              "end": 3528000000
+            },
+            "position": 2116800000,
+            "enabled": true,
+            "name": "Saludo",
+            "link_group": "link-v1-clip-000001-2",
+            "transform": {
+              "x": 0.0,
+              "y": 0.0,
+              "scale": 1.0,
+              "opacity": 1.0,
+              "fit": "fit"
+            },
+            "gain_db": 0.0,
+            "provenance": {
+              "origin": "import-v1",
+              "v1_clip_id": "clip-000001",
+              "created_at": "2026-09-30T17:16:52+00:00"
+            },
+            "extra": {
+              "v1": {
+                "state": "proposed",
+                "reason": "",
+                "origin": "user",
+                "topic_ids": [],
+                "edited": false,
+                "track_id": "V1",
+                "seq_ini_placed": 0.0
+              }
+            }
+          },
+          {
+            "id": "clip-000001-2-a0",
+            "track_id": "track-90b36cefbedd",
+            "asset_id": "asset-8bea68219302",
+            "source": {
+              "start": 2822400000,
+              "end": 3528000000
+            },
+            "position": 2116800000,
+            "enabled": true,
+            "name": "Saludo",
+            "link_group": "link-v1-clip-000001-2",
+            "transform": {
+              "x": 0.0,
+              "y": 0.0,
+              "scale": 1.0,
+              "opacity": 1.0,
+              "fit": "fit"
+            },
+            "gain_db": 0.0,
+            "audio_stream": 0,
+            "provenance": {
+              "origin": "import-v1",
+              "v1_clip_id": "clip-000001",
+              "created_at": "2026-09-30T17:16:52+00:00"
+            },
+            "extra": {
+              "v1": {
+                "state": "proposed",
+                "reason": "",
+                "origin": "user",
+                "topic_ids": [],
+                "edited": false,
+                "track_id": "V1",
+                "seq_ini_placed": 0.0
+              }
+            }
+          },
+          {
+            "id": "clip-000002-3",
+            "track_id": "track-89311422f392",
+            "asset_id": "asset-8bea68219302",
+            "source": {
+              "start": 6350400000,
+              "end": 7761600000
+            },
+            "position": 2822400000,
+            "enabled": true,
+            "name": "Cierre",
+            "link_group": "link-v1-clip-000002-3",
+            "transform": {
+              "x": 0.0,
+              "y": 0.0,
+              "scale": 1.0,
+              "opacity": 1.0,
+              "fit": "fit"
+            },
+            "gain_db": 0.0,
+            "provenance": {
+              "origin": "import-v1",
+              "v1_clip_id": "clip-000002",
+              "created_at": "2026-09-30T17:16:52+00:00"
+            },
+            "extra": {
+              "v1": {
+                "state": "accepted",
+                "reason": "",
+                "origin": "user",
+                "topic_ids": [],
+                "edited": true,
+                "track_id": "V1",
+                "seq_ini_placed": 4.0
+              }
+            }
+          },
+          {
+            "id": "clip-000002-3-a0",
+            "track_id": "track-90b36cefbedd",
+            "asset_id": "asset-8bea68219302",
+            "source": {
+              "start": 6350400000,
+              "end": 7761600000
+            },
+            "position": 2822400000,
+            "enabled": true,
+            "name": "Cierre",
+            "link_group": "link-v1-clip-000002-3",
+            "transform": {
+              "x": 0.0,
+              "y": 0.0,
+              "scale": 1.0,
+              "opacity": 1.0,
+              "fit": "fit"
+            },
+            "gain_db": 0.0,
+            "audio_stream": 0,
+            "provenance": {
+              "origin": "import-v1",
+              "v1_clip_id": "clip-000002",
+              "created_at": "2026-09-30T17:16:52+00:00"
+            },
+            "extra": {
+              "v1": {
+                "state": "accepted",
+                "reason": "",
+                "origin": "user",
+                "topic_ids": [],
+                "edited": true,
+                "track_id": "V1",
+                "seq_ini_placed": 4.0
+              }
+            }
+          },
+          {
+            "id": "clip-000004-4",
+            "track_id": "track-89311422f392",
+            "asset_id": "asset-8bea68219302",
+            "source": {
+              "start": 705600000,
+              "end": 1411200000
+            },
+            "position": 4233600000,
+            "enabled": true,
+            "name": "Repetido",
+            "link_group": "link-v1-clip-000004-4",
+            "transform": {
+              "x": 0.0,
+              "y": 0.0,
+              "scale": 1.0,
+              "opacity": 1.0,
+              "fit": "fit"
+            },
+            "gain_db": 0.0,
+            "provenance": {
+              "origin": "import-v1",
+              "v1_clip_id": "clip-000004",
+              "created_at": "2026-09-30T17:16:52+00:00"
+            },
+            "extra": {
+              "v1": {
+                "state": "proposed",
+                "reason": "",
+                "origin": "user",
+                "topic_ids": [],
+                "edited": false,
+                "track_id": "V1",
+                "seq_ini_placed": 6.0
+              }
+            }
+          },
+          {
+            "id": "clip-000004-4-a0",
+            "track_id": "track-90b36cefbedd",
+            "asset_id": "asset-8bea68219302",
+            "source": {
+              "start": 705600000,
+              "end": 1411200000
+            },
+            "position": 4233600000,
+            "enabled": true,
+            "name": "Repetido",
+            "link_group": "link-v1-clip-000004-4",
+            "transform": {
+              "x": 0.0,
+              "y": 0.0,
+              "scale": 1.0,
+              "opacity": 1.0,
+              "fit": "fit"
+            },
+            "gain_db": 0.0,
+            "audio_stream": 0,
+            "provenance": {
+              "origin": "import-v1",
+              "v1_clip_id": "clip-000004",
+              "created_at": "2026-09-30T17:16:52+00:00"
+            },
+            "extra": {
+              "v1": {
+                "state": "proposed",
+                "reason": "",
+                "origin": "user",
+                "topic_ids": [],
+                "edited": false,
+                "track_id": "V1",
+                "seq_ini_placed": 6.0
+              }
+            }
+          }
+        ],
+        "markers": [],
+        "extra": {
+          "v1_montage_profile": {
+            "schema": "editorial-montaje/1",
+            "revision": 1,
+            "flattened": true,
+            "top_track_replaces_audio": true,
+            "gaps_compacted": true
+          },
+          "v1_original_montage": {
+            "analysis": {
+              "pass": 0,
+              "request_id": null
+            },
+            "clips": [
+              {
+                "clip_id": "clip-000001",
+                "confidence": null,
+                "created_at": "2026-09-08T00:17:13+00:00",
+                "edited": false,
+                "junction_note": "",
+                "label": "Saludo",
+                "origin": "user",
+                "reason": "",
+                "seq_ini": 0.0,
+                "source_fin": 5.0,
+                "source_ini": 1.0,
+                "state": "proposed",
+                "topic_ids": [],
+                "track_id": "V1"
+              },
+              {
+                "clip_id": "clip-000002",
+                "confidence": null,
+                "created_at": "2026-09-08T00:17:13+00:00",
+                "edited": true,
+                "junction_note": "",
+                "label": "Cierre",
+                "origin": "user",
+                "reason": "",
+                "seq_ini": 4.0,
+                "source_fin": 11.0,
+                "source_ini": 9.0,
+                "state": "accepted",
+                "topic_ids": [],
+                "track_id": "V1"
+              },
+              {
+                "clip_id": "clip-000004",
+                "confidence": null,
+                "created_at": "2026-09-08T00:17:13+00:00",
+                "edited": false,
+                "junction_note": "",
+                "label": "Repetido",
+                "origin": "user",
+                "reason": "",
+                "seq_ini": 6.0,
+                "source_fin": 2.0,
+                "source_ini": 1.0,
+                "state": "proposed",
+                "topic_ids": [],
+                "track_id": "V1"
+              },
+              {
+                "clip_id": "clip-000003",
+                "confidence": null,
+                "created_at": "2026-09-08T00:17:13+00:00",
+                "edited": false,
+                "junction_note": "",
+                "label": "Risa encima",
+                "origin": "user",
+                "reason": "",
+                "seq_ini": 2.0,
+                "source_fin": 7.0,
+                "source_ini": 6.0,
+                "state": "proposed",
+                "topic_ids": [],
+                "track_id": "V2"
+              }
+            ],
+            "duration_source": 12.0,
+            "media": {
+              "hash_muestreado": "326bad7e9be71813ec86c3ea4c09e9575fccba40590be89f4c4012ce20ff82f7",
+              "inventario_sha256": "77aae5a1df8f009ed8f55643e2949f7ff3340026398608631ea992eae8a58d70",
+              "size": 2129706
+            },
+            "next_id": 5,
+            "revision": 1,
+            "schema": "editorial-montaje/1",
+            "target_seconds": 900.0,
+            "tracks": [
+              {
+                "name": "V1",
+                "track_id": "V1"
+              },
+              {
+                "name": "V2",
+                "track_id": "V2"
+              },
+              {
+                "name": "V3",
+                "track_id": "V3"
+              }
+            ],
+            "updated_at": "2026-09-08T00:17:13+00:00"
+          },
+          "v1_projection_digest": "6a7080dffc0efc2a3dec7e7b2001ca0b4016e087fd272c271e74c963ad5fd262"
+        }
+      }
+    ],
+    "active_sequence": "seq-3ede197de14f",
+    "layers": [
+      {
+        "layer_id": "layer-demo-notas",
+        "kind": "user",
+        "name": "Notas manuales",
+        "color": "#d09947",
+        "asset_id": "asset-8bea68219302",
+        "items": [
+          {
+            "item_id": "item-breve",
+            "label": "Breve",
+            "comment": "tramo corto",
+            "state": "proposed",
+            "edited": true,
+            "ranges": [
+              {
+                "start": 5115600000,
+                "end": 5292000000
+              }
+            ]
+          },
+          {
+            "item_id": "item-off",
+            "label": "Descartado",
+            "comment": "",
+            "state": "disabled",
+            "edited": true,
+            "ranges": [
+              {
+                "start": 5644800000,
+                "end": 6350400000
+              }
+            ]
+          }
+        ],
+        "revision": 1,
+        "deleted": false,
+        "visible": true,
+        "locked": false,
+        "source_master_digest": "b6718b34d63dcd5954e9cdd1657f55611db20af02f6c45e255680d3a06e02df6",
+        "extra": {
+          "v1_media_fingerprint": {
+            "size": 2129706,
+            "hash_muestreado": "326bad7e9be71813ec86c3ea4c09e9575fccba40590be89f4c4012ce20ff82f7",
+            "inventario_sha256": "77aae5a1df8f009ed8f55643e2949f7ff3340026398608631ea992eae8a58d70"
+          },
+          "tv2_v1_source_path": "layers/layer-demo-notas.json"
+        }
+      },
+      {
+        "layer_id": "layer-demo-topics",
+        "kind": "topics",
+        "name": "Temas",
+        "color": "#d09947",
+        "asset_id": "asset-8bea68219302",
+        "items": [
+          {
+            "item_id": "item-tema-1",
+            "label": "Saludo",
+            "comment": "Apertura del episodio",
+            "state": "accepted",
+            "edited": true,
+            "ranges": [
+              {
+                "start": 352800000,
+                "end": 2822400000
+              },
+              {
+                "start": 6350400000,
+                "end": 7761600000
+              }
+            ]
+          },
+          {
+            "item_id": "item-sub-1",
+            "label": "PresentaciÃ³n",
+            "comment": "",
+            "state": "proposed",
+            "edited": false,
+            "parent_id": "item-tema-1",
+            "ranges": [
+              {
+                "start": 705600000,
+                "end": 1411200000
+              }
+            ]
+          }
+        ],
+        "deleted_item_ids": [
+          "item-borrado"
+        ],
+        "revision": 1,
+        "deleted": false,
+        "visible": true,
+        "locked": false,
+        "source_master_digest": "b6718b34d63dcd5954e9cdd1657f55611db20af02f6c45e255680d3a06e02df6",
+        "extra": {
+          "v1_media_fingerprint": {
+            "size": 2129706,
+            "hash_muestreado": "326bad7e9be71813ec86c3ea4c09e9575fccba40590be89f4c4012ce20ff82f7",
+            "inventario_sha256": "77aae5a1df8f009ed8f55643e2949f7ff3340026398608631ea992eae8a58d70"
+          },
+          "tv2_v1_source_path": "layers/layer-demo-topics.json"
+        }
+      },
+      {
+        "layer_id": "trims-main",
+        "kind": "trims",
+        "name": "Recortes",
+        "color": "#728bd0",
+        "asset_id": "asset-8bea68219302",
+        "items": [
+          {
+            "item_id": "cut-000001",
+            "label": "cut-000001",
+            "comment": "muletilla",
+            "state": "accepted",
+            "edited": false,
+            "ranges": [
+              {
+                "start": 1411200000,
+                "end": 1764000000
+              }
+            ],
+            "origin": "user",
+            "extra": {
+              "chunk_id": null,
+              "confidence": null,
+              "created_at": "2026-09-08T00:17:13+00:00",
+              "evidence": {},
+              "warnings": [],
+              "enabled": true,
+              "accepted": true
+            }
+          },
+          {
+            "item_id": "cut-000003",
+            "label": "cut-000003",
+            "comment": "silencio",
+            "state": "disabled",
+            "edited": false,
+            "ranges": [
+              {
+                "start": 5997600000,
+                "end": 6350400000
+              }
+            ],
+            "origin": "silence",
+            "extra": {
+              "chunk_id": null,
+              "confidence": null,
+              "created_at": "2026-09-08T00:17:13+00:00",
+              "evidence": {},
+              "warnings": [],
+              "enabled": false,
+              "accepted": false
+            }
+          }
+        ],
+        "revision": 1,
+        "deleted": false,
+        "visible": true,
+        "locked": false,
+        "lane": "main",
+        "extra": {
+          "v1_import_layer_revision": 1,
+          "v1_media_fingerprint": {
+            "hash_muestreado": "326bad7e9be71813ec86c3ea4c09e9575fccba40590be89f4c4012ce20ff82f7",
+            "inventario_sha256": "77aae5a1df8f009ed8f55643e2949f7ff3340026398608631ea992eae8a58d70",
+            "size": 2129706
+          },
+          "v1_lane_metadata": {
+            "color": "#728bd0",
+            "lane_id": "main",
+            "name": "Recortes"
+          },
+          "v1_trims_header": {
+            "ai": null,
+            "duration": 12.0,
+            "media": {
+              "hash_muestreado": "326bad7e9be71813ec86c3ea4c09e9575fccba40590be89f4c4012ce20ff82f7",
+              "inventario_sha256": "77aae5a1df8f009ed8f55643e2949f7ff3340026398608631ea992eae8a58d70",
+              "size": 2129706
+            },
+            "next_id": 4,
+            "revision": 1,
+            "schema": "editorial-trims/1",
+            "silence": null,
+            "updated_at": "2026-09-08T00:17:13+00:00"
+          }
+        }
+      },
+      {
+        "layer_id": "trims-ai",
+        "kind": "trims",
+        "name": "Cortes sugeridos (AI)",
+        "color": "#9471bd",
+        "asset_id": "asset-8bea68219302",
+        "items": [
+          {
+            "item_id": "cut-000002",
+            "label": "cut-000002",
+            "comment": "tangente",
+            "state": "proposed",
+            "edited": false,
+            "ranges": [
+              {
+                "start": 2822400000,
+                "end": 3386880000
+              }
+            ],
+            "origin": "ai",
+            "extra": {
+              "chunk_id": null,
+              "confidence": null,
+              "created_at": "2026-09-08T00:17:13+00:00",
+              "evidence": {},
+              "warnings": [],
+              "enabled": true,
+              "accepted": false
+            }
+          }
+        ],
+        "revision": 1,
+        "deleted": false,
+        "visible": true,
+        "locked": false,
+        "lane": "ai",
+        "extra": {
+          "v1_import_layer_revision": 1,
+          "v1_media_fingerprint": {
+            "hash_muestreado": "326bad7e9be71813ec86c3ea4c09e9575fccba40590be89f4c4012ce20ff82f7",
+            "inventario_sha256": "77aae5a1df8f009ed8f55643e2949f7ff3340026398608631ea992eae8a58d70",
+            "size": 2129706
+          },
+          "v1_lane_metadata": {
+            "color": "#9471bd",
+            "lane_id": "ai",
+            "name": "Cortes sugeridos (AI)"
+          }
+        }
+      },
+      {
+        "layer_id": "master-557e897564e152f95147951e",
+        "kind": "transcript",
+        "name": "Palabras · A",
+        "color": "#d09947",
+        "asset_id": "asset-8bea68219302",
+        "items": [
+          {
+            "item_id": "A-w-000100",
+            "label": "hola",
+            "comment": "",
+            "state": "proposed",
+            "edited": false,
+            "ranges": [
+              {
+                "start": 705600000,
+                "end": 987840000
+              }
+            ],
+            "origin": "master-v1",
+            "extra": {
+              "evidence": {
+                "t_fin": 1.4,
+                "t_ini": 1.0,
+                "text": "hola",
+                "track_id": "A",
+                "word_id": "A-w-000100"
+              }
+            }
+          },
+          {
+            "item_id": "A-w-000150",
+            "label": "mundo",
+            "comment": "",
+            "state": "proposed",
+            "edited": false,
+            "ranges": [
+              {
+                "start": 1058400000,
+                "end": 1340640000
+              }
+            ],
+            "origin": "master-v1",
+            "extra": {
+              "evidence": {
+                "t_fin": 1.9,
+                "t_ini": 1.5,
+                "text": "mundo",
+                "track_id": "A",
+                "word_id": "A-w-000150"
+              }
+            }
+          },
+          {
+            "item_id": "A-w-000500",
+            "label": "bien",
+            "comment": "",
+            "state": "proposed",
+            "edited": false,
+            "ranges": [
+              {
+                "start": 3528000000,
+                "end": 3810240000
+              }
+            ],
+            "origin": "master-v1",
+            "extra": {
+              "evidence": {
+                "t_fin": 5.4,
+                "t_ini": 5.0,
+                "text": "bien",
+                "track_id": "A",
+                "word_id": "A-w-000500"
+              }
+            }
+          },
+          {
+            "item_id": "A-w-001000",
+            "label": "fin",
+            "comment": "",
+            "state": "proposed",
+            "edited": false,
+            "ranges": [
+              {
+                "start": 7056000000,
+                "end": 7408800000
+              }
+            ],
+            "origin": "master-v1",
+            "extra": {
+              "evidence": {
+                "t_fin": 10.5,
+                "t_ini": 10.0,
+                "text": "fin",
+                "track_id": "A",
+                "word_id": "A-w-001000"
+              }
+            }
+          }
+        ],
+        "revision": 0,
+        "deleted": false,
+        "visible": true,
+        "locked": true,
+        "source_master_digest": "b6718b34d63dcd5954e9cdd1657f55611db20af02f6c45e255680d3a06e02df6",
+        "extra": {
+          "master_projection": {
+            "track_id": "A",
+            "collection": "words"
+          }
+        }
+      },
+      {
+        "layer_id": "master-2548261cd75cc5d5c3c4d833",
+        "kind": "speakers",
+        "name": "Intervenciones · A",
+        "color": "#d09947",
+        "asset_id": "asset-8bea68219302",
+        "items": [
+          {
+            "item_id": "A-u-000001",
+            "label": "hola mundo",
+            "comment": "",
+            "state": "proposed",
+            "edited": false,
+            "ranges": [
+              {
+                "start": 705600000,
+                "end": 1340640000
+              }
+            ],
+            "origin": "master-v1",
+            "extra": {
+              "evidence": {
+                "signals": {},
+                "t_fin": 1.9,
+                "t_ini": 1.0,
+                "text": "hola mundo",
+                "track_id": "A",
+                "utterance_id": "A-u-000001",
+                "word_ids": [
+                  "A-w-000100",
+                  "A-w-000150"
+                ]
+              }
+            }
+          },
+          {
+            "item_id": "A-u-000002",
+            "label": "bien",
+            "comment": "",
+            "state": "proposed",
+            "edited": false,
+            "ranges": [
+              {
+                "start": 3528000000,
+                "end": 3810240000
+              }
+            ],
+            "origin": "master-v1",
+            "extra": {
+              "evidence": {
+                "signals": {},
+                "t_fin": 5.4,
+                "t_ini": 5.0,
+                "text": "bien",
+                "track_id": "A",
+                "utterance_id": "A-u-000002",
+                "word_ids": [
+                  "A-w-000500"
+                ]
+              }
+            }
+          },
+          {
+            "item_id": "A-u-000003",
+            "label": "fin",
+            "comment": "",
+            "state": "proposed",
+            "edited": false,
+            "ranges": [
+              {
+                "start": 7056000000,
+                "end": 7408800000
+              }
+            ],
+            "origin": "master-v1",
+            "extra": {
+              "evidence": {
+                "signals": {},
+                "t_fin": 10.5,
+                "t_ini": 10.0,
+                "text": "fin",
+                "track_id": "A",
+                "utterance_id": "A-u-000003",
+                "word_ids": [
+                  "A-w-001000"
+                ]
+              }
+            }
+          }
+        ],
+        "revision": 0,
+        "deleted": false,
+        "visible": true,
+        "locked": true,
+        "source_master_digest": "b6718b34d63dcd5954e9cdd1657f55611db20af02f6c45e255680d3a06e02df6",
+        "extra": {
+          "master_projection": {
+            "track_id": "A",
+            "collection": "utterances"
+          }
+        }
+      },
+      {
+        "layer_id": "master-1c293ee066e823beee9a697e",
+        "kind": "transcript",
+        "name": "Palabras · B",
+        "color": "#d09947",
+        "asset_id": "asset-8bea68219302",
+        "items": [
+          {
+            "item_id": "B-w-000300",
+            "label": "sÃ­",
+            "comment": "",
+            "state": "proposed",
+            "edited": false,
+            "ranges": [
+              {
+                "start": 2116800000,
+                "end": 2328480000
+              }
+            ],
+            "origin": "master-v1",
+            "extra": {
+              "evidence": {
+                "t_fin": 3.3,
+                "t_ini": 3.0,
+                "text": "sÃ­",
+                "track_id": "B",
+                "word_id": "B-w-000300"
+              }
+            }
+          }
+        ],
+        "revision": 0,
+        "deleted": false,
+        "visible": true,
+        "locked": true,
+        "source_master_digest": "b6718b34d63dcd5954e9cdd1657f55611db20af02f6c45e255680d3a06e02df6",
+        "extra": {
+          "master_projection": {
+            "track_id": "B",
+            "collection": "words"
+          }
+        }
+      },
+      {
+        "layer_id": "master-745e2863f314b8bc83d8ca90",
+        "kind": "speakers",
+        "name": "Intervenciones · B",
+        "color": "#d09947",
+        "asset_id": "asset-8bea68219302",
+        "items": [
+          {
+            "item_id": "B-u-000001",
+            "label": "sÃ­",
+            "comment": "",
+            "state": "proposed",
+            "edited": false,
+            "ranges": [
+              {
+                "start": 2116800000,
+                "end": 2328480000
+              }
+            ],
+            "origin": "master-v1",
+            "extra": {
+              "evidence": {
+                "signals": {},
+                "t_fin": 3.3,
+                "t_ini": 3.0,
+                "text": "sÃ­",
+                "track_id": "B",
+                "utterance_id": "B-u-000001",
+                "word_ids": [
+                  "B-w-000300"
+                ]
+              }
+            }
+          }
+        ],
+        "revision": 0,
+        "deleted": false,
+        "visible": true,
+        "locked": true,
+        "source_master_digest": "b6718b34d63dcd5954e9cdd1657f55611db20af02f6c45e255680d3a06e02df6",
+        "extra": {
+          "master_projection": {
+            "track_id": "B",
+            "collection": "utterances"
+          }
+        }
+      },
+      {
+        "layer_id": "master-ccdccb993066ca3868ef245c",
+        "kind": "laughter",
+        "name": "Risas · B",
+        "color": "#d09947",
+        "asset_id": "asset-8bea68219302",
+        "items": [
+          {
+            "item_id": "B-laugh-00001",
+            "label": "B-laugh-00001",
+            "comment": "",
+            "state": "proposed",
+            "edited": false,
+            "ranges": [
+              {
+                "start": 4233600000,
+                "end": 4939200000
+              }
+            ],
+            "origin": "master-v1",
+            "extra": {
+              "evidence": {
+                "conf": 0.9,
+                "event_id": "B-laugh-00001",
+                "max_conf": 0.9,
+                "t_fin": 7.0,
+                "t_ini": 6.0,
+                "track_id": "B"
+              }
+            }
+          }
+        ],
+        "revision": 0,
+        "deleted": false,
+        "visible": true,
+        "locked": true,
+        "source_master_digest": "b6718b34d63dcd5954e9cdd1657f55611db20af02f6c45e255680d3a06e02df6",
+        "extra": {
+          "master_projection": {
+            "track_id": "B",
+            "collection": "laughter"
+          }
+        }
+      },
+      {
+        "layer_id": "layer-4cc83ae9bb6f",
+        "kind": "user",
+        "name": "Human portability edit",
+        "color": "#d09947",
+        "asset_id": "asset-8bea68219302",
+        "items": [
+          {
+            "item_id": "item-0db4c799fd18",
+            "label": "Tramo 1",
+            "comment": "",
+            "state": "proposed",
+            "edited": true,
+            "ranges": [
+              {
+                "start": 4233600706,
+                "end": 6350401411
+              }
+            ],
+            "origin": "user"
+          }
+        ],
+        "revision": 1,
+        "deleted": false,
+        "visible": true,
+        "locked": false
+      }
+    ],
+    "masters": [
+      {
+        "asset_id": "asset-8bea68219302",
+        "source_digest": "b6718b34d63dcd5954e9cdd1657f55611db20af02f6c45e255680d3a06e02df6",
+        "document": {
+          "schema": "transcriptor-evidence-ref/1",
+          "sha256": "874757ef071f7271b8b8571f330c9c480c912a66f62414c0613c02ac1ff1335b",
+          "bytes": 121284,
+          "canonical_digest": "874757ef071f7271b8b8571f330c9c480c912a66f62414c0613c02ac1ff1335b"
+        },
+        "source_bundle": {
+          "master_path": "demo-a.editorial.master.json",
+          "documents": {
+            "layers/layer-demo-notas.json": "{\"color\":\"#d09947\",\"items\":[{\"comment\":\"tramo corto\",\"edited\":true,\"item_id\":\"item-breve\",\"label\":\"Breve\",\"parent_id\":null,\"ranges\":[{\"t_fin\":7.5,\"t_ini\":7.25}],\"state\":\"proposed\"},{\"comment\":\"\",\"edited\":true,\"item_id\":\"item-off\",\"label\":\"Descartado\",\"parent_id\":null,\"ranges\":[{\"t_fin\":9.0,\"t_ini\":8.0}],\"state\":\"disabled\"}],\"kind\":\"user\",\"layer_id\":\"layer-demo-notas\",\"media_fingerprint\":{\"hash_muestreado\":\"326bad7e9be71813ec86c3ea4c09e9575fccba40590be89f4c4012ce20ff82f7\",\"inventario_sha256\":\"77aae5a1df8f009ed8f55643e2949f7ff3340026398608631ea992eae8a58d70\",\"size\":2129706},\"name\":\"Notas manuales\",\"revision\":1,\"schema\":\"editorial-layer/1\",\"source_master_digest\":\"b6718b34d63dcd5954e9cdd1657f55611db20af02f6c45e255680d3a06e02df6\"}",
+            "layers/layer-demo-topics.json": "{\"color\":\"#d09947\",\"deleted_item_ids\":[\"item-borrado\"],\"items\":[{\"comment\":\"Apertura del episodio\",\"edited\":true,\"item_id\":\"item-tema-1\",\"label\":\"Saludo\",\"parent_id\":null,\"ranges\":[{\"t_fin\":4.0,\"t_ini\":0.5},{\"t_fin\":11.0,\"t_ini\":9.0}],\"state\":\"accepted\"},{\"comment\":\"\",\"edited\":false,\"item_id\":\"item-sub-1\",\"label\":\"PresentaciÃ³n\",\"parent_id\":\"item-tema-1\",\"ranges\":[{\"t_fin\":2.0,\"t_ini\":1.0}],\"state\":\"proposed\"}],\"kind\":\"topics\",\"layer_id\":\"layer-demo-topics\",\"media_fingerprint\":{\"hash_muestreado\":\"326bad7e9be71813ec86c3ea4c09e9575fccba40590be89f4c4012ce20ff82f7\",\"inventario_sha256\":\"77aae5a1df8f009ed8f55643e2949f7ff3340026398608631ea992eae8a58d70\",\"size\":2129706},\"name\":\"Temas\",\"revision\":1,\"schema\":\"editorial-layer/1\",\"source_master_digest\":\"b6718b34d63dcd5954e9cdd1657f55611db20af02f6c45e255680d3a06e02df6\"}",
+            "views/montaje.json": "{\"analysis\":{\"pass\":0,\"request_id\":null},\"clips\":[{\"clip_id\":\"clip-000001\",\"confidence\":null,\"created_at\":\"2026-09-08T00:17:13+00:00\",\"edited\":false,\"junction_note\":\"\",\"label\":\"Saludo\",\"origin\":\"user\",\"reason\":\"\",\"seq_ini\":0.0,\"source_fin\":5.0,\"source_ini\":1.0,\"state\":\"proposed\",\"topic_ids\":[],\"track_id\":\"V1\"},{\"clip_id\":\"clip-000002\",\"confidence\":null,\"created_at\":\"2026-09-08T00:17:13+00:00\",\"edited\":true,\"junction_note\":\"\",\"label\":\"Cierre\",\"origin\":\"user\",\"reason\":\"\",\"seq_ini\":4.0,\"source_fin\":11.0,\"source_ini\":9.0,\"state\":\"accepted\",\"topic_ids\":[],\"track_id\":\"V1\"},{\"clip_id\":\"clip-000004\",\"confidence\":null,\"created_at\":\"2026-09-08T00:17:13+00:00\",\"edited\":false,\"junction_note\":\"\",\"label\":\"Repetido\",\"origin\":\"user\",\"reason\":\"\",\"seq_ini\":6.0,\"source_fin\":2.0,\"source_ini\":1.0,\"state\":\"proposed\",\"topic_ids\":[],\"track_id\":\"V1\"},{\"clip_id\":\"clip-000003\",\"confidence\":null,\"created_at\":\"2026-09-08T00:17:13+00:00\",\"edited\":false,\"junction_note\":\"\",\"label\":\"Risa encima\",\"origin\":\"user\",\"reason\":\"\",\"seq_ini\":2.0,\"source_fin\":7.0,\"source_ini\":6.0,\"state\":\"proposed\",\"topic_ids\":[],\"track_id\":\"V2\"}],\"duration_source\":12.0,\"media\":{\"hash_muestreado\":\"326bad7e9be71813ec86c3ea4c09e9575fccba40590be89f4c4012ce20ff82f7\",\"inventario_sha256\":\"77aae5a1df8f009ed8f55643e2949f7ff3340026398608631ea992eae8a58d70\",\"size\":2129706},\"next_id\":5,\"revision\":1,\"schema\":\"editorial-montaje/1\",\"target_seconds\":900.0,\"tracks\":[{\"name\":\"V1\",\"track_id\":\"V1\"},{\"name\":\"V2\",\"track_id\":\"V2\"},{\"name\":\"V3\",\"track_id\":\"V3\"}],\"updated_at\":\"2026-09-08T00:17:13+00:00\"}",
+            "views/trims.json": "{\"ai\":null,\"cuts\":[{\"accepted\":true,\"chunk_id\":null,\"confidence\":null,\"created_at\":\"2026-09-08T00:17:13+00:00\",\"cut_id\":\"cut-000001\",\"edited\":false,\"enabled\":true,\"evidence\":{},\"lane\":\"main\",\"origin\":\"user\",\"reason\":\"muletilla\",\"t_fin\":2.5,\"t_ini\":2.0,\"warnings\":[]},{\"accepted\":false,\"chunk_id\":null,\"confidence\":null,\"created_at\":\"2026-09-08T00:17:13+00:00\",\"cut_id\":\"cut-000002\",\"edited\":false,\"enabled\":true,\"evidence\":{},\"lane\":\"ai\",\"origin\":\"ai\",\"reason\":\"tangente\",\"t_fin\":4.8,\"t_ini\":4.0,\"warnings\":[]},{\"accepted\":false,\"chunk_id\":null,\"confidence\":null,\"created_at\":\"2026-09-08T00:17:13+00:00\",\"cut_id\":\"cut-000003\",\"edited\":false,\"enabled\":false,\"evidence\":{},\"lane\":\"main\",\"origin\":\"silence\",\"reason\":\"silencio\",\"t_fin\":9.0,\"t_ini\":8.5,\"warnings\":[]}],\"duration\":12.0,\"lanes\":[{\"color\":\"#728bd0\",\"lane_id\":\"main\",\"name\":\"Recortes\"},{\"color\":\"#9471bd\",\"lane_id\":\"ai\",\"name\":\"Cortes sugeridos (AI)\"}],\"media\":{\"hash_muestreado\":\"326bad7e9be71813ec86c3ea4c09e9575fccba40590be89f4c4012ce20ff82f7\",\"inventario_sha256\":\"77aae5a1df8f009ed8f55643e2949f7ff3340026398608631ea992eae8a58d70\",\"size\":2129706},\"next_id\":4,\"revision\":1,\"schema\":\"editorial-trims/1\",\"silence\":null,\"updated_at\":\"2026-09-08T00:17:13+00:00\"}"
+          },
+          "files": {
+            "demo-a.editorial.master.json": {
+              "source": "@project/source-bundles/874757ef071f7271b8b8571f330c9c480c912a66f62414c0613c02ac1ff1335b",
+              "size": 121284,
+              "sha256": "874757ef071f7271b8b8571f330c9c480c912a66f62414c0613c02ac1ff1335b"
+            },
+            "support/payload.bin": {
+              "source": "@project/source-bundles/72ca659fb4a3a467a780dacc32c5462d402822ef15c7fe7e16813aec7b32a9da",
+              "size": 35651584,
+              "sha256": "72ca659fb4a3a467a780dacc32c5462d402822ef15c7fe7e16813aec7b32a9da"
+            }
+          },
+          "directories": [
+            "empty",
+            "empty/nested",
+            "layers",
+            "support",
+            "views"
+          ],
+          "external_master_digest": "874757ef071f7271b8b8571f330c9c480c912a66f62414c0613c02ac1ff1335b"
+        }
+      }
+    ],
+    "layer_order": [
+      "layer-demo-notas",
+      "layer-demo-topics",
+      "trims-main",
+      "trims-ai",
+      "master-557e897564e152f95147951e",
+      "master-2548261cd75cc5d5c3c4d833",
+      "master-1c293ee066e823beee9a697e",
+      "master-745e2863f314b8bc83d8ca90",
+      "master-ccdccb993066ca3868ef245c",
+      "layer-4cc83ae9bb6f"
+    ],
+    "settings": {
+      "snapping": true,
+      "skip_trims_on_play": false
+    }
+  }
+}

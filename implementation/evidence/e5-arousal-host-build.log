@@ -1,0 +1,28 @@
+   Compiling tv2-pipeline v2.0.0-alpha.11 (C:\Users\gabri\Todo\transcriber-v2\crates\pipeline)
+error[E0433]: cannot find `V1Master` in `tv2_v1compat`
+  --> crates\pipeline\examples\arousal_host.rs:92:19
+   |
+92 |     tv2_v1compat::V1Master::parse(master.clone())?.projections(&asset)?;
+   |                   ^^^^^^^^ could not find `V1Master` in `tv2_v1compat`
+
+error[E0277]: the trait bound `T: serde::Serialize` is not satisfied
+   --> crates\pipeline\examples\arousal_host.rs:29:25
+    |
+ 29 |     Ok(jobs::discover::<T>(root)?.into_iter().find(|record| record.id == id).ok_or("completed receipt missing")?)
+    |                         ^ the trait `Serialize` is not implemented for `T`
+    |
+    = note: for local types consider adding `#[derive(serde::Serialize)]` to your `T` type
+    = note: for types from other crates check whether the crate offers a `serde` feature flag
+note: required by a bound in `tv2_application::jobs::discover`
+   --> crates\application\src\jobs.rs:120:20
+    |
+120 | pub fn discover<T: Serialize + DeserializeOwned>(root: &Path) -> DomainResult<Vec<JobRecord<T>>> {
+    |                    ^^^^^^^^^ required by this bound in `discover`
+help: consider further restricting type parameter `T` with trait `Serialize`
+    |
+ 28 | fn completed<T: serde::de::DeserializeOwned + serde::Serialize>(root: &std::path::Path, id: &str) -> Result<JobRecord<T>, Box<dyn std::error::Error>> {
+    |                                             ++++++++++++++++++
+
+Some errors have detailed explanations: E0277, E0433.
+For more information about an error, try `rustc --explain E0277`.
+error: could not compile `tv2-pipeline` (example "arousal_host") due to 2 previous errors

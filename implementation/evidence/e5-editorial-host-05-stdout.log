@@ -1,0 +1,13 @@
+{"event":"progress","fraction":0.1,"job_id":"job-a869c65e437f","protocol":"tv2-editorial/1","stage":"load_editorial_model"}
+{"event":"progress","fraction":0.10044378698224853,"job_id":"job-a869c65e437f","protocol":"tv2-editorial/1","stage":"load_editorial_model"}
+{"event":"progress","fraction":0.11775147928994084,"job_id":"job-a869c65e437f","protocol":"tv2-editorial/1","stage":"load_editorial_model"}
+{"event":"progress","fraction":0.13550295857988165,"job_id":"job-a869c65e437f","protocol":"tv2-editorial/1","stage":"load_editorial_model"}
+{"event":"progress","fraction":0.15325443786982249,"job_id":"job-a869c65e437f","protocol":"tv2-editorial/1","stage":"load_editorial_model"}
+{"event":"progress","fraction":0.17100591715976332,"job_id":"job-a869c65e437f","protocol":"tv2-editorial/1","stage":"load_editorial_model"}
+{"event":"progress","fraction":0.18875739644970413,"job_id":"job-a869c65e437f","protocol":"tv2-editorial/1","stage":"load_editorial_model"}
+{"event":"progress","fraction":0.20650887573964496,"job_id":"job-a869c65e437f","protocol":"tv2-editorial/1","stage":"load_editorial_model"}
+{"event":"progress","fraction":0.2242603550295858,"job_id":"job-a869c65e437f","protocol":"tv2-editorial/1","stage":"load_editorial_model"}
+{"event":"progress","fraction":0.2420118343195266,"job_id":"job-a869c65e437f","protocol":"tv2-editorial/1","stage":"load_editorial_model"}
+{"event":"progress","fraction":0.25,"job_id":"job-a869c65e437f","protocol":"tv2-editorial/1","stage":"load_editorial_model"}
+{"event":"progress","fraction":0.25,"job_id":"job-a869c65e437f","protocol":"tv2-editorial/1","stage":"loaded_editorial_model"}
+{"event":"progress","fraction":0.3,"job_id":"job-a869c65e437f","protocol":"tv2-editorial/1","stage":"editorial_inference"}

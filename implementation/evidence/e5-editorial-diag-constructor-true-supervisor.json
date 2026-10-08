@@ -1,0 +1,11 @@
+{
+  "cap_bytes": 1073741824,
+  "deadline_seconds": 60,
+  "accepted": true,
+  "pretrained_model_executed": false,
+  "pid": 1248,
+  "exit_code": 0,
+  "peak_job_memory": 333275136,
+  "duration_seconds": 5.25,
+  "own_process_signaled": true
+}

@@ -1,0 +1,5 @@
+{"download": "config.json", "size": 2344, "sha256": "c0962c3d1f065972bbebbba0bbffb8016ef4e9aae4a9b07e5fec22f770d2cddb"}
+{"download": "preprocessor_config.json", "size": 214, "sha256": "60ca5a31e13f69ee2fbf147504c8676db5f6398fd7a6b12294341dff838edfcf"}
+{"download": "model.safetensors", "size": 661375508, "sha256": "efa5ac1a13b2d2f42182738e44794b1eb4c0cdd221a8b4ae11304c3a5f5fae95"}
+{"download": "README.md", "size": 3913, "sha256": "5fe5eb9afb24ab938fb3facf0eebe64a0f8a8628eb93fd772ba5c7120a45365d"}
+{"manifest": "C:\\Users\\gabri\\Todo\\transcriber-v2\\.local\\models\\arousal-audeering\\model-manifest.json", "sha256": "93c9c89093955b3a515b80825457b9c49049707edb737e896b2bd1eb111c4de4", "files": {"config.json": {"size": 2344, "sha256": "c0962c3d1f065972bbebbba0bbffb8016ef4e9aae4a9b07e5fec22f770d2cddb"}, "preprocessor_config.json": {"size": 214, "sha256": "60ca5a31e13f69ee2fbf147504c8676db5f6398fd7a6b12294341dff838edfcf"}, "model.safetensors": {"size": 661375508, "sha256": "efa5ac1a13b2d2f42182738e44794b1eb4c0cdd221a8b4ae11304c3a5f5fae95"}}}

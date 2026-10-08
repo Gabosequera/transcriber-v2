@@ -1,0 +1,12 @@
+{
+  "job_memory_limit": 8589934592,
+  "fixture_asr_invented": true,
+  "gui_exercised": false,
+  "supervisor_handshake": true,
+  "pid": 10940,
+  "exit_code": 1,
+  "peak_job_memory": 26894336,
+  "accepted": false,
+  "error": "Editorial host failed; preserve stdout/stderr and job evidence",
+  "duration_seconds": 13.98499999998603
+}

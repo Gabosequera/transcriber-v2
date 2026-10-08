@@ -1,0 +1,44 @@
+{
+  "result": "OK",
+  "checks": [
+    {
+      "file": "escenario1-vertical.mp4",
+      "duration": 12.0,
+      "audio_peak_dbfs": -15.117808,
+      "video_size": [
+        1080,
+        1920
+      ],
+      "frames": 360
+    },
+    {
+      "file": "escenario1-audio.wav",
+      "duration": 12.0,
+      "audio_peak_dbfs": -15.12747,
+      "video_size": null,
+      "frames": null
+    },
+    {
+      "file": "escenario1-inout-720p.mp4",
+      "duration": 2.0,
+      "audio_peak_dbfs": -15.023524,
+      "video_size": [
+        1280,
+        720
+      ],
+      "frames": 60
+    },
+    {
+      "inout_time": 0.5,
+      "sequence_time": 2.5,
+      "psnr_db": 54.36845682417243,
+      "wrong_time_psnr_db": 14.337750634883372
+    },
+    {
+      "inout_time": 1.5,
+      "sequence_time": 3.5,
+      "psnr_db": 53.39162756675938,
+      "wrong_time_psnr_db": 14.596029570147033
+    }
+  ]
+}

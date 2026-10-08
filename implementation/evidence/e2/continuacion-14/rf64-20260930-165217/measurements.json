@@ -1,0 +1,17 @@
+{
+  "result": "FAIL",
+  "run": "C:\\Users\\gabri\\Todo\\transcriber-v2\\implementation\\evidence\\e2\\continuacion-14\\rf64-20260930-165217",
+  "exe_sha256": "349df668c006a1565613ad6770edd918fb514243b5e2b32888469335f2837c36",
+  "pid": 28300,
+  "protected_human_pid": 6868,
+  "free_before": 130847612928,
+  "budget_bytes": 15032385536,
+  "expected_peak_bytes": 12919177216,
+  "peak_run_bytes": 12902410627,
+  "elapsed_seconds": 146.8701548000099,
+  "exit_code": 0,
+  "failure": "TypeError(\"'float' object cannot be interpreted as an integer\")",
+  "source_sha256": "2696830c783f5a5b945f3fc4493d67322f2f1e526582c00049f420fd039d1a19",
+  "source_unchanged": true,
+  "duration_seconds": 22400
+}

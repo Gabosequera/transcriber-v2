@@ -1,0 +1,5 @@
+rate 1: 12 ráfagas, desvío máximo 0.1 ms
+rate 2: 12 ráfagas, desvío máximo 14.5 ms
+rate 3: 12 ráfagas, desvío máximo 25.9 ms
+rate 4: 12 ráfagas, desvío máximo 19.8 ms
+rate 2 desde 2,5 s: primera ráfaga a 0.244 s (esperado 0,250), desvío 5.9 ms

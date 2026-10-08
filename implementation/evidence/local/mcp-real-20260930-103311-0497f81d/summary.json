@@ -1,0 +1,17 @@
+{
+  "build": {
+    "sha256": "262B209C73636AE162AD91221E0F610C114FC57EC706DD627ABEAE14BED3EA6B",
+    "path": "C:\\Users\\gabri\\Todo\\transcriber-v2\\target\\release\\Transcriptor.exe"
+  },
+  "schema": "tv2-real-mcp-acceptance/1",
+  "finished_at": "2026-09-30T10:33:17.0649796-04:00",
+  "cleanup_owned_pid": 24788,
+  "fixture": {
+    "sha256": "FFB48C13E1B626EC2F73C3144147B689A153CF4A3D5017CE233FD5B3A4061F67",
+    "path": "C:\\Users\\gabri\\Todo\\transcriber-v2\\tests\\fixtures\\media\\fixture-a.mp4"
+  },
+  "accepted": false,
+  "started_at": "2026-09-30T10:33:11.1518683-04:00",
+  "error": "An error occurred while sending the request.",
+  "authorization": "trusted local --script grants scoped automatic commands; no remote permission escalation"
+}

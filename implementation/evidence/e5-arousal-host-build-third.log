@@ -1,0 +1,15 @@
+   Compiling tv2-pipeline v2.0.0-alpha.11 (C:\Users\gabri\Todo\transcriber-v2\crates\pipeline)
+error[E0599]: no variant, associated function, or constant named `PreconditionFailed` found for enum `ErrorCode` in the current scope
+   --> crates\pipeline\examples\arousal_host.rs:154:107
+    |
+154 |     assert_eq!(arousal::run(&altered_record, false, cancel.clone(), |_| {}).unwrap_err().code, ErrorCode::PreconditionFailed);
+    |                                                                                                           ^^^^^^^^^^^^^^^^^^ variant, associated function, or constant not found in `ErrorCode`
+    |
+help: there is a variant with a similar name
+    |
+154 -     assert_eq!(arousal::run(&altered_record, false, cancel.clone(), |_| {}).unwrap_err().code, ErrorCode::PreconditionFailed);
+154 +     assert_eq!(arousal::run(&altered_record, false, cancel.clone(), |_| {}).unwrap_err().code, ErrorCode::Precondition);
+    |
+
+For more information about this error, try `rustc --explain E0599`.
+error: could not compile `tv2-pipeline` (example "arousal_host") due to 1 previous error

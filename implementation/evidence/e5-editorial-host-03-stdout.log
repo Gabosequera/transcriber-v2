@@ -1,0 +1,3 @@
+{"event":"progress","fraction":0.1,"job_id":"job-51f7c56d137b","protocol":"tv2-editorial/1","stage":"load_editorial_model"}
+{"event":"progress","fraction":0.15,"job_id":"job-51f7c56d137b","protocol":"tv2-editorial/1","stage":"loaded_editorial_model"}
+{"event":"progress","fraction":0.2,"job_id":"job-51f7c56d137b","protocol":"tv2-editorial/1","stage":"quantize_editorial_linears"}

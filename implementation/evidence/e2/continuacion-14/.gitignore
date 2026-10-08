@@ -1,0 +1,6 @@
+# Raw native dumps remain local; compact observations and synthetic inputs are retained.
+perf-*/step-*.json
+perf-*/play-*.json
+perf-*/cache-*.json
+perf-*/final-state.json
+perf-*/*/.write.lock

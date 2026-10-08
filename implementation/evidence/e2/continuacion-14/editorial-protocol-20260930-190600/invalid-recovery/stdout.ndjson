@@ -1,0 +1,10 @@
+{"error":{"code":"E_EDITORIAL","message":"Expecting property name enclosed in double quotes: line 1 column 2 (char 1)"},"id":null,"protocol":"tv2-editorial/1"}
+{"error":{"code":"E_PROTOCOL","message":"Invalid envelope"},"id":null,"protocol":"tv2-editorial/1"}
+{"error":{"code":"E_METHOD","message":"Unknown editorial method"},"id":"unknown","protocol":"tv2-editorial/1"}
+{"error":{"code":"E_ARGUMENT","message":"Shutdown requires empty params"},"id":"invalid-shutdown","protocol":"tv2-editorial/1"}
+{"error":{"code":"E_ARGUMENT","message":"Cancel must name active job"},"id":"no-job","protocol":"tv2-editorial/1"}
+{"error":{"code":"E_PROTOCOL","message":"One initialized job per worker"},"id":"uninitialized","protocol":"tv2-editorial/1"}
+{"error":{"code":"E_JSON","message":"Duplicate JSON member"},"id":null,"protocol":"tv2-editorial/1"}
+{"error":{"code":"E_EDITORIAL","message":"Non-finite JSON"},"id":null,"protocol":"tv2-editorial/1"}
+{"error":{"code":"E_PROTOCOL","message":"Invalid protocol/ID"},"id":"bad-protocol","protocol":"tv2-editorial/1"}
+{"id":"shutdown","protocol":"tv2-editorial/1","result":{"shutdown":true}}

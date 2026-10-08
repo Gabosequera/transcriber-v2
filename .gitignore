@@ -29,6 +29,7 @@
 /implementation/evidence/**/*.rgba
 /implementation/evidence/**/*.pcm
 /workers/**/models/
+/~/.cache/
 
 # Synthetic demo project is required by the package builder.
 !/implementation/evidence/e2/cache-markers-demo.transcriptor/

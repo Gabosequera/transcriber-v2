@@ -1,0 +1,17 @@
+
+Algorithm : SHA256
+Hash      : 7BCD11BAD1E60B5D57E84AF64D3854FF7F4D15B3EAE2C5BF44911A78556B29F0
+Path      : C:\Users\gabri\Todo\transcriber-v2\target\debug\examples\generation_host.exe
+
+Algorithm : SHA256
+Hash      : 6582FCC513A724CFA1B203F4C989C663FC9CD3728CFC899CBBB423D14BDC5584
+Path      : C:\Users\gabri\Todo\transcriber-v2\workers\python\finalize.py
+
+Algorithm : SHA256
+Hash      : C2DAFF13C196FBBB96B91A647FE40EAB9D0BF8FBA546045678DFA02731CE5323
+Path      : C:\Users\gabri\Todo\transcriber-v2\workers\python\finalize_worker.py
+
+Algorithm : SHA256
+Hash      : 3AEB54BCD49A0DC68968D5A5BD477D39AAC7B75F70939E726B276601A42A412A
+Path      : C:\Users\gabri\Todo\transcriber-v2\.local\e5-generation-host-02\run\result.json
+

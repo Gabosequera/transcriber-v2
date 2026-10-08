@@ -1,0 +1,18 @@
+   Compiling tv2-domain v2.0.0-alpha.11 (C:\Users\gabri\Todo\transcriber-v2\crates\domain)
+   Compiling tv2-media v2.0.0-alpha.11 (C:\Users\gabri\Todo\transcriber-v2\crates\media)
+error[E0618]: expected function, found `std::sync::Arc<tv2_domain::ResolvedTimeline>`
+   --> crates\media\src\export.rs:890:46
+    |
+880 |         let (timeline, assets) = timeline(&tools, "fixture-a.mp4");
+    |              -------- `timeline` has type `std::sync::Arc<tv2_domain::ResolvedTimeline>`
+...
+890 |         let (other_timeline, other_assets) = timeline(&tools, "fixture-b.mp4");
+    |                                              ^^^^^^^^-------------------------
+    |                                              |
+    |                                              call expression requires function
+...
+927 |     fn timeline(tools: &FfmpegTools, name: &str) -> (Arc<ResolvedTimeline>, Arc<HashMap<AssetId, AssetSource>>) {
+    |     ----------------------------------------------------------------------------------------------------------- this function of the same name is available here, but it's shadowed by the local binding
+
+For more information about this error, try `rustc --explain E0618`.
+error: could not compile `tv2-media` (lib test) due to 1 previous error

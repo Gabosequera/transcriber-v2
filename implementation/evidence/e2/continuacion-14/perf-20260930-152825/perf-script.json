@@ -1,0 +1,512 @@
+[
+  {
+    "op": "log",
+    "text": "PERF_OPEN_BEGIN"
+  },
+  {
+    "op": "open",
+    "path": "C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-152825/large.transcriptor/project.json"
+  },
+  {
+    "op": "assert",
+    "clips": 1000,
+    "tracks": 2,
+    "layers": 2,
+    "items": 20000
+  },
+  {
+    "op": "action",
+    "id": "view.fit"
+  },
+  {
+    "op": "seek",
+    "t": 1.0
+  },
+  {
+    "op": "wait_frame",
+    "ms": 15000
+  },
+  {
+    "op": "log",
+    "text": "PERF_OPEN_FRAME_READY"
+  },
+  {
+    "op": "set_in",
+    "t": 0.0
+  },
+  {
+    "op": "set_out",
+    "t": 4.0
+  },
+  {
+    "op": "export",
+    "preset": "h264-720p",
+    "dest": "C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-152825/under-load.mp4",
+    "range": true
+  },
+  {
+    "op": "log",
+    "text": "PERF_EXPORT_ENQUEUED"
+  },
+  {
+    "op": "seek",
+    "t": 4.0
+  },
+  {
+    "op": "wait_frame",
+    "ms": 15000
+  },
+  {
+    "op": "log",
+    "text": "PERF_SEEK_EXPORT_READY"
+  },
+  {
+    "op": "step_frames",
+    "frames": 1
+  },
+  {
+    "op": "log",
+    "text": "PERF_STEP_BEGIN"
+  },
+  {
+    "op": "wait",
+    "ms": 50
+  },
+  {
+    "op": "dump",
+    "path": "C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-152825/step-00.json"
+  },
+  {
+    "op": "wait",
+    "ms": 50
+  },
+  {
+    "op": "dump",
+    "path": "C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-152825/step-01.json"
+  },
+  {
+    "op": "wait",
+    "ms": 50
+  },
+  {
+    "op": "dump",
+    "path": "C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-152825/step-02.json"
+  },
+  {
+    "op": "wait",
+    "ms": 50
+  },
+  {
+    "op": "dump",
+    "path": "C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-152825/step-03.json"
+  },
+  {
+    "op": "wait",
+    "ms": 50
+  },
+  {
+    "op": "dump",
+    "path": "C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-152825/step-04.json"
+  },
+  {
+    "op": "wait",
+    "ms": 50
+  },
+  {
+    "op": "dump",
+    "path": "C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-152825/step-05.json"
+  },
+  {
+    "op": "wait",
+    "ms": 50
+  },
+  {
+    "op": "dump",
+    "path": "C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-152825/step-06.json"
+  },
+  {
+    "op": "wait",
+    "ms": 50
+  },
+  {
+    "op": "dump",
+    "path": "C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-152825/step-07.json"
+  },
+  {
+    "op": "wait",
+    "ms": 50
+  },
+  {
+    "op": "dump",
+    "path": "C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-152825/step-08.json"
+  },
+  {
+    "op": "wait",
+    "ms": 50
+  },
+  {
+    "op": "dump",
+    "path": "C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-152825/step-09.json"
+  },
+  {
+    "op": "wait",
+    "ms": 50
+  },
+  {
+    "op": "dump",
+    "path": "C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-152825/step-10.json"
+  },
+  {
+    "op": "wait",
+    "ms": 50
+  },
+  {
+    "op": "dump",
+    "path": "C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-152825/step-11.json"
+  },
+  {
+    "op": "wait",
+    "ms": 50
+  },
+  {
+    "op": "dump",
+    "path": "C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-152825/step-12.json"
+  },
+  {
+    "op": "wait",
+    "ms": 50
+  },
+  {
+    "op": "dump",
+    "path": "C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-152825/step-13.json"
+  },
+  {
+    "op": "wait",
+    "ms": 50
+  },
+  {
+    "op": "dump",
+    "path": "C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-152825/step-14.json"
+  },
+  {
+    "op": "wait",
+    "ms": 50
+  },
+  {
+    "op": "dump",
+    "path": "C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-152825/step-15.json"
+  },
+  {
+    "op": "wait",
+    "ms": 50
+  },
+  {
+    "op": "dump",
+    "path": "C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-152825/step-16.json"
+  },
+  {
+    "op": "wait",
+    "ms": 50
+  },
+  {
+    "op": "dump",
+    "path": "C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-152825/step-17.json"
+  },
+  {
+    "op": "wait",
+    "ms": 50
+  },
+  {
+    "op": "dump",
+    "path": "C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-152825/step-18.json"
+  },
+  {
+    "op": "wait",
+    "ms": 50
+  },
+  {
+    "op": "dump",
+    "path": "C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-152825/step-19.json"
+  },
+  {
+    "op": "assert",
+    "position": [
+      4.0333,
+      4.0334
+    ],
+    "playing": false
+  },
+  {
+    "op": "play"
+  },
+  {
+    "op": "log",
+    "text": "PERF_PLAY_BEGIN"
+  },
+  {
+    "op": "wait",
+    "ms": 100
+  },
+  {
+    "op": "dump",
+    "path": "C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-152825/play-00.json"
+  },
+  {
+    "op": "wait",
+    "ms": 100
+  },
+  {
+    "op": "dump",
+    "path": "C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-152825/play-01.json"
+  },
+  {
+    "op": "wait",
+    "ms": 100
+  },
+  {
+    "op": "dump",
+    "path": "C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-152825/play-02.json"
+  },
+  {
+    "op": "wait",
+    "ms": 100
+  },
+  {
+    "op": "dump",
+    "path": "C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-152825/play-03.json"
+  },
+  {
+    "op": "wait",
+    "ms": 100
+  },
+  {
+    "op": "dump",
+    "path": "C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-152825/play-04.json"
+  },
+  {
+    "op": "wait",
+    "ms": 100
+  },
+  {
+    "op": "dump",
+    "path": "C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-152825/play-05.json"
+  },
+  {
+    "op": "wait",
+    "ms": 100
+  },
+  {
+    "op": "dump",
+    "path": "C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-152825/play-06.json"
+  },
+  {
+    "op": "wait",
+    "ms": 100
+  },
+  {
+    "op": "dump",
+    "path": "C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-152825/play-07.json"
+  },
+  {
+    "op": "wait",
+    "ms": 100
+  },
+  {
+    "op": "dump",
+    "path": "C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-152825/play-08.json"
+  },
+  {
+    "op": "wait",
+    "ms": 100
+  },
+  {
+    "op": "dump",
+    "path": "C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-152825/play-09.json"
+  },
+  {
+    "op": "wait",
+    "ms": 100
+  },
+  {
+    "op": "dump",
+    "path": "C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-152825/play-10.json"
+  },
+  {
+    "op": "wait",
+    "ms": 100
+  },
+  {
+    "op": "dump",
+    "path": "C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-152825/play-11.json"
+  },
+  {
+    "op": "wait",
+    "ms": 100
+  },
+  {
+    "op": "dump",
+    "path": "C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-152825/play-12.json"
+  },
+  {
+    "op": "wait",
+    "ms": 100
+  },
+  {
+    "op": "dump",
+    "path": "C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-152825/play-13.json"
+  },
+  {
+    "op": "wait",
+    "ms": 100
+  },
+  {
+    "op": "dump",
+    "path": "C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-152825/play-14.json"
+  },
+  {
+    "op": "wait",
+    "ms": 100
+  },
+  {
+    "op": "dump",
+    "path": "C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-152825/play-15.json"
+  },
+  {
+    "op": "wait",
+    "ms": 100
+  },
+  {
+    "op": "dump",
+    "path": "C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-152825/play-16.json"
+  },
+  {
+    "op": "wait",
+    "ms": 100
+  },
+  {
+    "op": "dump",
+    "path": "C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-152825/play-17.json"
+  },
+  {
+    "op": "wait",
+    "ms": 100
+  },
+  {
+    "op": "dump",
+    "path": "C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-152825/play-18.json"
+  },
+  {
+    "op": "wait",
+    "ms": 100
+  },
+  {
+    "op": "dump",
+    "path": "C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-152825/play-19.json"
+  },
+  {
+    "op": "wait",
+    "ms": 100
+  },
+  {
+    "op": "dump",
+    "path": "C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-152825/play-20.json"
+  },
+  {
+    "op": "wait",
+    "ms": 100
+  },
+  {
+    "op": "dump",
+    "path": "C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-152825/play-21.json"
+  },
+  {
+    "op": "wait",
+    "ms": 100
+  },
+  {
+    "op": "dump",
+    "path": "C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-152825/play-22.json"
+  },
+  {
+    "op": "wait",
+    "ms": 100
+  },
+  {
+    "op": "dump",
+    "path": "C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-152825/play-23.json"
+  },
+  {
+    "op": "wait",
+    "ms": 100
+  },
+  {
+    "op": "dump",
+    "path": "C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-152825/play-24.json"
+  },
+  {
+    "op": "wait",
+    "ms": 100
+  },
+  {
+    "op": "dump",
+    "path": "C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-152825/play-25.json"
+  },
+  {
+    "op": "wait",
+    "ms": 100
+  },
+  {
+    "op": "dump",
+    "path": "C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-152825/play-26.json"
+  },
+  {
+    "op": "wait",
+    "ms": 100
+  },
+  {
+    "op": "dump",
+    "path": "C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-152825/play-27.json"
+  },
+  {
+    "op": "wait",
+    "ms": 100
+  },
+  {
+    "op": "dump",
+    "path": "C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-152825/play-28.json"
+  },
+  {
+    "op": "wait",
+    "ms": 100
+  },
+  {
+    "op": "dump",
+    "path": "C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-152825/play-29.json"
+  },
+  {
+    "op": "pause"
+  },
+  {
+    "op": "wait",
+    "ms": 500
+  },
+  {
+    "op": "log",
+    "text": "PERF_PLAY_END"
+  },
+  {
+    "op": "dump",
+    "path": "C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-152825/final-state.json"
+  },
+  {
+    "op": "wait_export",
+    "ms": 120000
+  },
+  {
+    "op": "screenshot",
+    "path": "C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-152825/large-native.png"
+  },
+  {
+    "op": "quit"
+  }
+]

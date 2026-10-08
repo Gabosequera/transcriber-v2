@@ -1,0 +1,1 @@
+{"accepted": true, "converted_linears": 15, "engine": "x86", "generated_random_token_ids": [1, 9, 14, 31, 27, 27, 27, 27, 27], "generated_token_count": 4, "logits_dtype": "torch.float32", "max_abs_logit_error": 0.014538213610649109, "pretrained_model_executed": false, "random_miniature_architecture": "Qwen2ForCausalLM", "threads": 2, "torch": "2.8.0+cpu"}

@@ -1,0 +1,255 @@
+{
+  "schema": "transcriptor-job/1",
+  "id": "job-af113a7927a3",
+  "project_id": "proj-5789225831cf",
+  "revision": 1,
+  "state": "cancelled",
+  "payload_digest": "87d643863c0ec44e20a57d107d3dff57e9ebfa1e7c05a262f50e4d36eab3f6d2",
+  "payload": {
+    "parent": {
+      "schema": "transcriptor-job/1",
+      "id": "job-0be1e8a200a1",
+      "project_id": "proj-5789225831cf",
+      "revision": 1,
+      "state": "succeeded",
+      "payload_digest": "3ec4e2fa34fe694ec0a3011d5796c880c25ee6d7957158627c9906e572c267c3",
+      "payload": {
+        "parent": {
+          "schema": "transcriptor-job/1",
+          "id": "job-57fe5b97cf1c",
+          "project_id": "proj-5789225831cf",
+          "revision": 1,
+          "state": "succeeded",
+          "payload_digest": "81a04dd0e9a92ecdb09bc77400f4c4acc62375acf8fc4fad5b9b5b9224b85307",
+          "payload": {
+            "project_digest": "fd3aa86252b56c5d2ea37ab05ee0e747d267fdfdc39976e108a58fb0079439e8",
+            "asset": {
+              "id": "asset-76f1df4dc491",
+              "kind": "audio",
+              "name": "speech-a.wav",
+              "path": "C:/Users/gabri/Todo/transcriber-v2\\.local/e5-python-tests-20260930/fixtures/speech-a.wav",
+              "probe": {
+                "container": "wav",
+                "duration": 6725073600,
+                "start_time": 0,
+                "audio": [
+                  {
+                    "stream_index": 0,
+                    "audio_index": 0,
+                    "codec": "pcm_s16le",
+                    "channels": 1,
+                    "channel_layout": "",
+                    "sample_rate": 16000,
+                    "start_time": 0,
+                    "duration": 6725073600,
+                    "title": ""
+                  }
+                ],
+                "size": 305038
+              },
+              "fingerprint": {
+                "size": 305038,
+                "mtime_ns": 1790775615716566400,
+                "hash_muestreado": "af08d4ecaee4e6e3a814a1e974736f9773ba017501a6d815ca5a3b7363b2c766",
+                "inventario_sha256": "c95d12f734a815b9367434bf8198600b41b94ce556267b628954ac43dce1bec7"
+              },
+              "missing": false
+            },
+            "source_path": "C:/Users/gabri/Todo/transcriber-v2\\.local/e5-python-tests-20260930/fixtures/speech-a.wav",
+            "source_sha256": "90f6dfc24eca1116f879c5269e0dbec6cc5e0687e7bcd89ccea11344f641397a",
+            "model_digest": "3dff5642c8dd933e5ea720bb911c774406ad9b5800b16d319b59ed3bb7ff5643",
+            "worker_sha256": "b3bd11a54b519155d6745e9a73a030d74bb5a32ea18b5542b4b675747d2c7d09",
+            "runtime": {
+              "python": "C:/Users/gabri/Todo/transcriber-v2\\.local/e5-venv/Scripts/python.exe",
+              "worker": "C:/Users/gabri/Todo/transcriber-v2\\workers/python/worker.py",
+              "model": "C:/Users/gabri/Todo/transcriber-v2\\.local/models/whisper-tiny",
+              "work_root": "C:/Users/gabri/Todo/transcriber-v2/.local/e5-arousal-host-01\\invented-asr-parent"
+            },
+            "parameters": {
+              "language": "en",
+              "device": "cpu",
+              "threads": 2,
+              "beam_size": 5,
+              "steps": [
+                "extract",
+                "transcribe"
+              ]
+            },
+            "ffmpeg_path": "ffmpeg.exe"
+          },
+          "updated_at": "2026-09-30T16:34:54+00:00",
+          "result": {
+            "job_id": "job-57fe5b97cf1c",
+            "project_id": "proj-5789225831cf",
+            "revision": 1,
+            "project_digest": "fd3aa86252b56c5d2ea37ab05ee0e747d267fdfdc39976e108a58fb0079439e8",
+            "source_sha256": "90f6dfc24eca1116f879c5269e0dbec6cc5e0687e7bcd89ccea11344f641397a",
+            "model_digest": "3dff5642c8dd933e5ea720bb911c774406ad9b5800b16d319b59ed3bb7ff5643",
+            "master_path": "editorial/analysis.editorial.master.json",
+            "artifacts": {
+              ".work/audio/a0.wav": "90f6dfc24eca1116f879c5269e0dbec6cc5e0687e7bcd89ccea11344f641397a",
+              ".work/transcripts/a0.json": "df53df34972ee9875c41caa248b9c15578793ccb07f0df9c7525b6f4efa6bf06",
+              "editorial/analysis.editorial.master.json": "d55cbccbaa2bf3ff9689d9b7af8c34e60f7bab8f88738bbd99428181b0daeaaa"
+            }
+          },
+          "error": "FIXTURE ONLY: known invented words; no ASR inference",
+          "attempts": [
+            {
+              "started_at": "2026-09-30T16:34:54+00:00",
+              "ended_at": "2026-09-30T16:34:54+00:00",
+              "state": "succeeded",
+              "result": {
+                "job_id": "job-57fe5b97cf1c",
+                "project_id": "proj-5789225831cf",
+                "revision": 1,
+                "project_digest": "fd3aa86252b56c5d2ea37ab05ee0e747d267fdfdc39976e108a58fb0079439e8",
+                "source_sha256": "90f6dfc24eca1116f879c5269e0dbec6cc5e0687e7bcd89ccea11344f641397a",
+                "model_digest": "3dff5642c8dd933e5ea720bb911c774406ad9b5800b16d319b59ed3bb7ff5643",
+                "master_path": "editorial/analysis.editorial.master.json",
+                "artifacts": {
+                  ".work/audio/a0.wav": "90f6dfc24eca1116f879c5269e0dbec6cc5e0687e7bcd89ccea11344f641397a",
+                  ".work/transcripts/a0.json": "df53df34972ee9875c41caa248b9c15578793ccb07f0df9c7525b6f4efa6bf06",
+                  "editorial/analysis.editorial.master.json": "d55cbccbaa2bf3ff9689d9b7af8c34e60f7bab8f88738bbd99428181b0daeaaa"
+                }
+              },
+              "error": "FIXTURE ONLY: known invented words; no ASR inference"
+            }
+          ]
+        },
+        "parent_result": {
+          "job_id": "job-57fe5b97cf1c",
+          "project_id": "proj-5789225831cf",
+          "revision": 1,
+          "project_digest": "fd3aa86252b56c5d2ea37ab05ee0e747d267fdfdc39976e108a58fb0079439e8",
+          "source_sha256": "90f6dfc24eca1116f879c5269e0dbec6cc5e0687e7bcd89ccea11344f641397a",
+          "model_digest": "3dff5642c8dd933e5ea720bb911c774406ad9b5800b16d319b59ed3bb7ff5643",
+          "master_path": "editorial/analysis.editorial.master.json",
+          "artifacts": {
+            ".work/audio/a0.wav": "90f6dfc24eca1116f879c5269e0dbec6cc5e0687e7bcd89ccea11344f641397a",
+            ".work/transcripts/a0.json": "df53df34972ee9875c41caa248b9c15578793ccb07f0df9c7525b6f4efa6bf06",
+            "editorial/analysis.editorial.master.json": "d55cbccbaa2bf3ff9689d9b7af8c34e60f7bab8f88738bbd99428181b0daeaaa"
+          }
+        },
+        "audio_index": 0,
+        "normalized_audio_sha256": "90f6dfc24eca1116f879c5269e0dbec6cc5e0687e7bcd89ccea11344f641397a",
+        "transcript_sha256": "df53df34972ee9875c41caa248b9c15578793ccb07f0df9c7525b6f4efa6bf06",
+        "model_sha256": "20ef12963ab4924bef49ac4fc7f58ad5da2ee43b2c11bc8c853c9b90ecdbc680",
+        "model_manifest_sha256": "d75ef8c1dc3cf98b5470533b615746b98c578d505199a22e2764acc90b7a0e2a",
+        "worker_sha256": "7c59aa50d81727e3390f9bbfa4d3796f0464f68d15333406ea7e0c554a32c1ce",
+        "lock_sha256": "29d21883e56c3fbf5db7ca6b2af1dca514e832855bb9f52d8b75fe84e174eab8",
+        "runtime": {
+          "python": "C:/Users/gabri/Todo/transcriber-v2\\.local/e5-alignment-venv/Scripts/python.exe",
+          "worker": "C:/Users/gabri/Todo/transcriber-v2\\workers/python/alignment_worker.py",
+          "model": "C:/Users/gabri/Todo/transcriber-v2\\.local/models/mms-fa/model.pt",
+          "model_manifest": "C:/Users/gabri/Todo/transcriber-v2\\.local/models/mms-fa/model-manifest.json",
+          "lock": "C:/Users/gabri/Todo/transcriber-v2\\workers/python/requirements-alignment.lock",
+          "work_root": "C:/Users/gabri/Todo/transcriber-v2/.local/e5-arousal-host-01\\alignment"
+        },
+        "parameters": {
+          "device": "cpu",
+          "threads": 2,
+          "batch_words": 120,
+          "margin": 0.5,
+          "max_batch_seconds": 30.0
+        }
+      },
+      "updated_at": "2026-09-30T16:35:08+00:00",
+      "result": {
+        "job_id": "job-0be1e8a200a1",
+        "project_id": "proj-5789225831cf",
+        "revision": 1,
+        "project_digest": "fd3aa86252b56c5d2ea37ab05ee0e747d267fdfdc39976e108a58fb0079439e8",
+        "asset_id": "asset-76f1df4dc491",
+        "normalized_audio_sha256": "90f6dfc24eca1116f879c5269e0dbec6cc5e0687e7bcd89ccea11344f641397a",
+        "transcript_sha256": "df53df34972ee9875c41caa248b9c15578793ccb07f0df9c7525b6f4efa6bf06",
+        "model_sha256": "20ef12963ab4924bef49ac4fc7f58ad5da2ee43b2c11bc8c853c9b90ecdbc680",
+        "source_sha256": "90f6dfc24eca1116f879c5269e0dbec6cc5e0687e7bcd89ccea11344f641397a",
+        "source_duration_ticks": 6725073600,
+        "timebase": "flicks/705600000",
+        "alignment_path": "alignment/aligned-words.json",
+        "artifacts": {
+          "alignment/aligned-words.json": "a93c30c93a7c8d5aae569a2e2d796beb5d8c0e0bfa3dab0bc02f748d9e9d9456"
+        }
+      },
+      "error": null,
+      "attempts": [
+        {
+          "started_at": "2026-09-30T16:34:56+00:00",
+          "ended_at": "2026-09-30T16:35:08+00:00",
+          "state": "succeeded",
+          "result": {
+            "job_id": "job-0be1e8a200a1",
+            "project_id": "proj-5789225831cf",
+            "revision": 1,
+            "project_digest": "fd3aa86252b56c5d2ea37ab05ee0e747d267fdfdc39976e108a58fb0079439e8",
+            "asset_id": "asset-76f1df4dc491",
+            "normalized_audio_sha256": "90f6dfc24eca1116f879c5269e0dbec6cc5e0687e7bcd89ccea11344f641397a",
+            "transcript_sha256": "df53df34972ee9875c41caa248b9c15578793ccb07f0df9c7525b6f4efa6bf06",
+            "model_sha256": "20ef12963ab4924bef49ac4fc7f58ad5da2ee43b2c11bc8c853c9b90ecdbc680",
+            "source_sha256": "90f6dfc24eca1116f879c5269e0dbec6cc5e0687e7bcd89ccea11344f641397a",
+            "source_duration_ticks": 6725073600,
+            "timebase": "flicks/705600000",
+            "alignment_path": "alignment/aligned-words.json",
+            "artifacts": {
+              "alignment/aligned-words.json": "a93c30c93a7c8d5aae569a2e2d796beb5d8c0e0bfa3dab0bc02f748d9e9d9456"
+            }
+          },
+          "error": null
+        }
+      ]
+    },
+    "parent_result": {
+      "job_id": "job-0be1e8a200a1",
+      "project_id": "proj-5789225831cf",
+      "revision": 1,
+      "project_digest": "fd3aa86252b56c5d2ea37ab05ee0e747d267fdfdc39976e108a58fb0079439e8",
+      "asset_id": "asset-76f1df4dc491",
+      "normalized_audio_sha256": "90f6dfc24eca1116f879c5269e0dbec6cc5e0687e7bcd89ccea11344f641397a",
+      "transcript_sha256": "df53df34972ee9875c41caa248b9c15578793ccb07f0df9c7525b6f4efa6bf06",
+      "model_sha256": "20ef12963ab4924bef49ac4fc7f58ad5da2ee43b2c11bc8c853c9b90ecdbc680",
+      "source_sha256": "90f6dfc24eca1116f879c5269e0dbec6cc5e0687e7bcd89ccea11344f641397a",
+      "source_duration_ticks": 6725073600,
+      "timebase": "flicks/705600000",
+      "alignment_path": "alignment/aligned-words.json",
+      "artifacts": {
+        "alignment/aligned-words.json": "a93c30c93a7c8d5aae569a2e2d796beb5d8c0e0bfa3dab0bc02f748d9e9d9456"
+      }
+    },
+    "normalized_audio_sha256": "90f6dfc24eca1116f879c5269e0dbec6cc5e0687e7bcd89ccea11344f641397a",
+    "transcript_sha256": "a93c30c93a7c8d5aae569a2e2d796beb5d8c0e0bfa3dab0bc02f748d9e9d9456",
+    "model_digest": "18f38ce13568ec98a0173603e4bf653097e802ac8fb3c7fa34df751c97a3a36e",
+    "model_manifest_sha256": "93c9c89093955b3a515b80825457b9c49049707edb737e896b2bd1eb111c4de4",
+    "worker_sha256": "ad3e56279b79e579153db2a9b2874cc923379f5311f6d0952d28b2166fb6a29b",
+    "lock_sha256": "52853cb13a0bbf5d36a38aad9f34b1b300774043a57bc0aa48655b6e357c3aa1",
+    "runtime": {
+      "python": "C:/Users/gabri/Todo/transcriber-v2\\.local/e5-arousal-venv/Scripts/python.exe",
+      "worker": "C:/Users/gabri/Todo/transcriber-v2\\workers/python/arousal_worker.py",
+      "model": "C:/Users/gabri/Todo/transcriber-v2\\.local/models/arousal-audeering",
+      "model_manifest": "C:/Users/gabri/Todo/transcriber-v2\\.local/models/arousal-audeering/model-manifest.json",
+      "lock": "C:/Users/gabri/Todo/transcriber-v2\\workers/python/requirements-arousal.lock",
+      "work_root": "C:/Users/gabri/Todo/transcriber-v2/.local/e5-arousal-host-01\\arousal"
+    },
+    "parameters": {
+      "device": "cpu",
+      "threads": 2,
+      "window_seconds": 4.0,
+      "hop_seconds": 2.0,
+      "batch_size": 1,
+      "gap_seconds": 1.0,
+      "padding_seconds": 0.5,
+      "scope": "speech-regions"
+    }
+  },
+  "updated_at": "2026-09-30T16:35:44+00:00",
+  "result": null,
+  "error": "[Cancelled] Análisis cancelado",
+  "attempts": [
+    {
+      "started_at": "2026-09-30T16:35:42+00:00",
+      "ended_at": "2026-09-30T16:35:44+00:00",
+      "state": "cancelled",
+      "result": null,
+      "error": "[Cancelled] Análisis cancelado"
+    }
+  ]
+}

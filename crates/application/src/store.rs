@@ -699,6 +699,209 @@ mod tests {
     use super::*;
 
     #[test]
+    fn file_mtime_roundtrips_through_import_audit_checkpoint_history_and_autosave() {
+        let temp = tempfile::tempdir().unwrap();
+        let source = temp.path().join("synthetic-source.bin");
+        fs::write(&source, b"synthetic source metadata").unwrap();
+        let mtime = fs::metadata(&source).unwrap().modified().unwrap().duration_since(std::time::UNIX_EPOCH).unwrap().as_nanos() as i128;
+        let mut asset = tv2_domain::commands::tests_support::fake_video("a", 30);
+        asset.path = source.to_string_lossy().replace('\\', "/");
+        asset.fingerprint.mtime_ns = Some(mtime);
+        let request = crate::CommandEnvelope::human(tv2_domain::Command::ImportAsset { asset }).with_idempotency("mtime-import");
+        let bytes = serde_json::to_vec(&request).unwrap();
+        let decoded: crate::CommandEnvelope = serde_json::from_slice(&bytes).expect("tagged ImportAsset with real nanosecond mtime must decode");
+        assert_eq!(decoded, request);
+        let mut live = crate::ProjectSession::new(Project::new("file mtime"));
+        live.execute(request.clone()).unwrap();
+        let store = ProjectStore::at(temp.path().join("project.transcriptor"));
+        store.save_checkpoint(live.project(), live.pending_journal(), Some(&live.history_snapshot())).unwrap();
+        let mut reopened = ProjectStore::at(&store.root).load_session().unwrap();
+        assert_eq!(reopened.project().assets[0].fingerprint.mtime_ns, Some(mtime));
+        assert!(reopened.execute(request.clone()).unwrap().replayed);
+        reopened.undo(crate::Actor::Human).unwrap();
+        assert!(reopened.project().assets.is_empty());
+        reopened.redo(crate::Actor::Human).unwrap();
+        assert_eq!(reopened.project().assets[0].fingerprint.mtime_ns, Some(mtime));
+        let loaded = ProjectStore::at(&store.root);
+        let saved = loaded.load_session().unwrap();
+        loaded.save_autosave_checkpoint(reopened.project(), reopened.pending_journal(), Some(&reopened.history_snapshot())).unwrap();
+        let candidate = loaded.recovery_checkpoint(saved.project()).unwrap().unwrap();
+        let mut recovered = saved;
+        recovered.recover_checkpoint(candidate.project, candidate.events, candidate.history).unwrap();
+        assert_eq!(recovered.project().assets[0].fingerprint.mtime_ns, Some(mtime));
+        assert!(recovered.command_receipt("mtime-import").unwrap().is_some());
+        loaded.save_checkpoint(recovered.project(), recovered.pending_journal(), Some(&recovered.history_snapshot())).unwrap();
+        let destination = ProjectStore::at(temp.path().join("save-as.transcriptor"));
+        destination.copy_audit_from(&loaded, &recovered.project().project_id, recovered.revision()).unwrap();
+        let mut project = recovered.project().clone();
+        let mut history = recovered.history_snapshot();
+        destination.materialize_source_bundles(&mut project, &mut history).unwrap();
+        destination.save_checkpoint(&project, &[], Some(&history)).unwrap();
+        let copied = ProjectStore::at(&destination.root).load_session().unwrap();
+        assert_eq!(copied.project().assets[0].fingerprint.mtime_ns, Some(mtime));
+        assert!(copied.command_receipt("mtime-import").unwrap().is_some());
+    }
+
+    #[test]
+    fn mtime_integer_contract_preserves_signed_unsigned_null_and_missing_values() {
+        for mtime in [None, Some(-1), Some(0), Some(i128::from(i64::MAX)), Some(i128::from(i64::MAX) + 1), Some(i128::from(u64::MAX))] {
+            let mut asset = tv2_domain::commands::tests_support::fake_video("mtime", 30);
+            asset.fingerprint.mtime_ns = mtime;
+            let command = tv2_domain::Command::ImportAsset { asset };
+            let raw = serde_json::to_value(&command).unwrap();
+            assert_eq!(serde_json::from_value::<tv2_domain::Command>(raw.clone()).unwrap(), command);
+            assert_eq!(serde_json::from_slice::<tv2_domain::Command>(&serde_json::to_vec(&command).unwrap()).unwrap(), command);
+            if let Some(mtime) = mtime {
+                assert_eq!(raw["asset"]["fingerprint"]["mtime_ns"].to_string(), mtime.to_string());
+            } else {
+                assert!(raw["asset"]["fingerprint"].get("mtime_ns").is_none());
+                let mut null = raw;
+                null["asset"]["fingerprint"]["mtime_ns"] = serde_json::Value::Null;
+                assert_eq!(serde_json::from_value::<tv2_domain::Command>(null).unwrap(), command);
+            }
+        }
+        let mut raw =
+            serde_json::to_value(tv2_domain::Command::ImportAsset { asset: tv2_domain::commands::tests_support::fake_video("mtime", 30) }).unwrap();
+        for invalid in [serde_json::json!(0.5), serde_json::json!("1760000000000000000"), serde_json::json!(true)] {
+            raw["asset"]["fingerprint"]["mtime_ns"] = invalid;
+            assert!(serde_json::from_value::<tv2_domain::Command>(raw.clone()).is_err());
+        }
+    }
+
+    // This helper runs only in a child of the test below. The parent kills its
+    // own child after the checkpoint handshake, while the real OS lock is held.
+    #[test]
+    #[ignore = "controlled subprocess helper; invoked by process_crash_recovers_commit_boundaries"]
+    fn crash_boundary_child() {
+        let root = std::path::PathBuf::from(std::env::var_os("TV2_E3_CRASH_ROOT").expect("parent-owned fixture"));
+        assert_eq!(fs::read(root.join("e3-process-fixture")).unwrap(), b"owned synthetic fixture");
+        let boundary: usize = std::env::var("TV2_E3_CRASH_BOUNDARY").unwrap().parse().unwrap();
+        assert!(boundary <= 4);
+        let storage = std::env::var("TV2_E3_CRASH_STORAGE").unwrap() == "true";
+        let store = ProjectStore::at(&root);
+        let mut session = store.load_session().unwrap();
+        let before = session.project().clone();
+        let mut commands = vec![tv2_domain::Command::RenameProject { name: "after process crash".into() }];
+        if storage {
+            let asset = before.assets[0].clone();
+            let document: tv2_domain::evidence::EvidenceDocument = serde_json::json!({
+                "schema":"editorial-master/1", "media":{"fingerprint":asset.fingerprint,"duration":30.0},
+                "tracks":{}, "synthetic_analysis":"x".repeat(100*1024)
+            })
+            .into();
+            commands.push(tv2_domain::Command::AttachMaster {
+                master: tv2_domain::evidence::MasterEvidence {
+                    asset_id: asset.id,
+                    source_digest: document.source_digest().into(),
+                    document,
+                    source_bundle: None,
+                },
+            });
+        }
+        session
+            .execute(
+                crate::CommandEnvelope::human(tv2_domain::Command::Batch { label: "controlled process checkpoint".into(), commands })
+                    .with_idempotency("process-once"),
+            )
+            .unwrap();
+        let _lock = store.read_lock().unwrap();
+        let audit = crate::audit::prepare(&root, session.pending_journal()).unwrap();
+        let mut writer = crate::storage_codec::Writer::new(&root);
+        let project = writer.project(session.project()).unwrap();
+        let history = writer.history(&session.history_snapshot()).unwrap();
+        assert_eq!(writer.used, storage);
+        let intent = CommitIntent {
+            schema: if storage { "transcriptor-commit/2" } else { "transcriptor-commit/1" }.into(),
+            before_digest: Some(ProjectStore::digest(&before).unwrap()),
+            project,
+            events: vec![],
+            history: Some(history),
+            audit: Some(audit),
+        };
+        atomic_write(&root.join(PENDING_FILE), &serde_json::to_vec(&intent).unwrap()).unwrap();
+        if boundary >= 1 {
+            let project = if storage {
+                serde_json::json!({"schema":crate::storage_codec::PROJECT_STORAGE,"project":intent.project})
+            } else {
+                serde_json::to_value(&intent.project).unwrap()
+            };
+            atomic_write(&store.project_path(), &serde_json::to_vec(&project).unwrap()).unwrap();
+        }
+        if boundary >= 2 {
+            crate::audit::commit(&root, intent.audit.as_ref().unwrap()).unwrap();
+        }
+        if boundary >= 3 {
+            let history = crate::history_codec::encode(intent.history.as_ref().unwrap()).unwrap();
+            let history = if storage { serde_json::json!({"schema":crate::storage_codec::HISTORY_STORAGE,"history":history}) } else { history };
+            atomic_write(&root.join("history.json"), &serde_json::to_vec(&history).unwrap()).unwrap();
+        }
+        if boundary >= 4 {
+            fs::remove_file(root.join(PENDING_FILE)).unwrap();
+        }
+        atomic_write(&root.join("crash-boundary-ready"), b"ready while lock is held").unwrap();
+        loop {
+            std::thread::sleep(std::time::Duration::from_millis(100));
+        }
+    }
+
+    struct OwnedChild(std::process::Child);
+    impl Drop for OwnedChild {
+        fn drop(&mut self) {
+            let _ = self.0.kill();
+            let _ = self.0.wait();
+        }
+    }
+
+    #[test]
+    fn process_crash_recovers_commit_boundaries_and_releases_os_lock() {
+        for storage in [false, true] {
+            for boundary in 0..=4 {
+                let temp = tempfile::tempdir().unwrap();
+                let root = temp.path();
+                fs::write(root.join("e3-process-fixture"), b"owned synthetic fixture").unwrap();
+                let mut before = Project::new("before process crash");
+                before.assets.push(tv2_domain::commands::tests_support::fake_video("a", 30));
+                ProjectStore::at(root).save(&before).unwrap();
+                let mut child = OwnedChild(
+                    std::process::Command::new(std::env::current_exe().unwrap())
+                        .args(["--exact", "store::tests::crash_boundary_child", "--ignored", "--nocapture"])
+                        .env("TV2_E3_CRASH_ROOT", root)
+                        .env("TV2_E3_CRASH_BOUNDARY", boundary.to_string())
+                        .env("TV2_E3_CRASH_STORAGE", storage.to_string())
+                        .stdout(std::process::Stdio::null())
+                        .stderr(std::process::Stdio::inherit())
+                        .spawn()
+                        .unwrap(),
+                );
+                let deadline = std::time::Instant::now() + std::time::Duration::from_secs(15);
+                while !root.join("crash-boundary-ready").exists() {
+                    assert!(child.0.try_wait().unwrap().is_none(), "owned child exited before boundary {boundary}, storage={storage}");
+                    assert!(std::time::Instant::now() < deadline, "owned child did not reach boundary {boundary}, storage={storage}");
+                    std::thread::sleep(std::time::Duration::from_millis(10));
+                }
+                let store = ProjectStore::at(root);
+                assert_eq!(store.load().unwrap_err().code, tv2_domain::ErrorCode::ExternalConflict);
+                child.0.kill().unwrap();
+                assert!(!child.0.wait().unwrap().success());
+                let mut recovered = store.load_session().unwrap();
+                assert_eq!(recovered.project().name, "after process crash");
+                assert_eq!(recovered.project().revision, 1);
+                assert_eq!(recovered.project().masters.len(), usize::from(storage));
+                assert!(recovered.command_receipt("process-once").unwrap().is_some());
+                assert_eq!(store.read_journal().unwrap().len(), 1);
+                assert!(!root.join(PENDING_FILE).exists());
+                assert_eq!(ProjectStore::at(root).load_session().unwrap().project(), recovered.project());
+                recovered.undo(crate::Actor::Human).unwrap();
+                assert_eq!(recovered.project().name, before.name);
+                assert!(recovered.project().masters.is_empty());
+                recovered.redo(crate::Actor::Human).unwrap();
+                assert_eq!(recovered.project().name, "after process crash");
+                println!("PASS process kill/reopen/lock/receipt/undo/redo boundary={boundary} storage={storage}");
+            }
+        }
+    }
+
+    #[test]
     fn staged_audit_commit_recovers_project_index_and_history_boundaries() {
         for boundary in 0..=3 {
             let temp = tempfile::tempdir().unwrap();

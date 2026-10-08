@@ -1,0 +1,65 @@
+{
+  "schema": "transcriptor-project/2",
+  "project_id": "proj-5789225831cf",
+  "name": "Invented ASR parent; real MMS and audEERING",
+  "revision": 1,
+  "created_at": "2026-09-30T16:34:54+00:00",
+  "updated_at": "2026-09-30T16:34:54+00:00",
+  "assets": [
+    {
+      "id": "asset-76f1df4dc491",
+      "kind": "audio",
+      "name": "speech-a.wav",
+      "path": "C:/Users/gabri/Todo/transcriber-v2\\.local/e5-python-tests-20260930/fixtures/speech-a.wav",
+      "probe": {
+        "container": "wav",
+        "duration": 6725073600,
+        "start_time": 0,
+        "audio": [
+          {
+            "stream_index": 0,
+            "audio_index": 0,
+            "codec": "pcm_s16le",
+            "channels": 1,
+            "channel_layout": "",
+            "sample_rate": 16000,
+            "start_time": 0,
+            "duration": 6725073600,
+            "title": ""
+          }
+        ],
+        "size": 305038
+      },
+      "fingerprint": {
+        "size": 305038,
+        "mtime_ns": 1790775615716566400,
+        "hash_muestreado": "af08d4ecaee4e6e3a814a1e974736f9773ba017501a6d815ca5a3b7363b2c766",
+        "inventario_sha256": "c95d12f734a815b9367434bf8198600b41b94ce556267b628954ac43dce1bec7"
+      },
+      "missing": false
+    }
+  ],
+  "sequences": [
+    {
+      "id": "seq-f6011b007dbf",
+      "name": "Secuencia 1",
+      "frame_rate": {
+        "num": 30,
+        "den": 1
+      },
+      "width": 1920,
+      "height": 1080,
+      "sample_rate": 48000,
+      "tracks": [],
+      "clips": [],
+      "markers": []
+    }
+  ],
+  "active_sequence": "seq-f6011b007dbf",
+  "layers": [],
+  "layer_order": [],
+  "settings": {
+    "snapping": true,
+    "skip_trims_on_play": false
+  }
+}

@@ -1,0 +1,22 @@
+    Checking transcriptor v2.0.0-alpha.11 (C:\Users\gabri\Todo\transcriber-v2\apps\desktop)
+error: method `project_range` is never used
+   --> apps\desktop\src\timeline_index.rs:356:12
+    |
+123 | impl SemanticIndex {
+    | ------------------ method in this implementation
+...
+356 |     pub fn project_range(&self, asset: &AssetId, range: TimeRange) -> Vec<(Ticks, Ticks)> {
+    |            ^^^^^^^^^^^^^
+    |
+    = note: `-D dead-code` implied by `-D warnings`
+    = help: to override `-D warnings` add `#[expect(dead_code)]` or `#[allow(dead_code)]`
+
+error: function `item_range_in_view` is never used
+    --> apps\desktop\src\ui_timeline.rs:1220:15
+     |
+1220 | pub(crate) fn item_range_in_view(app: &TranscriptorApp, r: &TimeRange, asset: &tv2_domain::ids::AssetId) -> Vec<(Ticks, Ticks)> {
+     |               ^^^^^^^^^^^^^^^^^^
+
+error: could not compile `transcriptor` (bin "Transcriptor") due to 2 previous errors
+warning: build failed, waiting for other jobs to finish...
+error: could not compile `transcriptor` (bin "Transcriptor" test) due to 2 previous errors

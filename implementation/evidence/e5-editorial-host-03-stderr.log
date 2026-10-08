@@ -1,0 +1,1 @@
+Error: DomainError { code: Process, message: "Worker Python: {\"code\":\"E_OOM\",\"message\":\"bad allocation\"}", context: [], action: None }

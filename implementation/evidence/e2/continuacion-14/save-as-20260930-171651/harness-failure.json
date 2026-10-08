@@ -1,0 +1,7 @@
+{
+  "result": "FAIL",
+  "reason": "Harness assumed project.json flat root; actual transcriptor-project-storage/1 wraps project. KeyError revision closed only own JobObject process. Existing prepared e2-import-v1 expectation4layers/7items omits5masterprojections10items; actual9/17 matches master fixture collections and importer source.",
+  "source_rust_changed": false,
+  "native_log_preserved": "save-as.log",
+  "project_saved_revision": 3
+}

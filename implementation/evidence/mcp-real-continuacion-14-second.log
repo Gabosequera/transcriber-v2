@@ -1,0 +1,10 @@
+PASS: real-editor stage Read. GUI visibility and physical behavior require separate observations.
+Review proposal proposal-6e1a98bc41a6 and stale proposal proposal-cd6de693edcd in the local GUI, then run Apply with the same evidence path.
+PASS: real-editor stage Prepare. GUI visibility and physical behavior require separate observations.
+PASS: real-editor stage Apply. GUI visibility and physical behavior require separate observations.
+Review proposal proposal-2d0f87ac3bed and stale proposal proposal-1d5f43918b03 in the local GUI, then run Apply with the same evidence path.
+PASS: real-editor stage Prepare. GUI visibility and physical behavior require separate observations.
+PASS: real-editor stage Apply. GUI visibility and physical behavior require separate observations.
+Review proposal proposal-79e185bdbcaf and stale proposal proposal-1505e805baa6 in the local GUI, then run Apply with the same evidence path.
+PASS: real-editor stage Prepare. GUI visibility and physical behavior require separate observations.
+PASS: real-editor stage Apply. GUI visibility and physical behavior require separate observations.

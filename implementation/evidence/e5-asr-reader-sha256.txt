@@ -1,0 +1,7 @@
+
+Hash : B3BD11A54B519155D6745E9A73A030D74BB5A32EA18B5542B4B675747D2C7D09
+Path : C:\Users\gabri\Todo\transcriber-v2\workers\python\worker.py
+
+Hash : 77670F3BDC1702447407393979001E35F0FAA9063DBFF70307BDCBD3C958FEEF
+Path : C:\Users\gabri\Todo\transcriber-v2\implementation\evidence\e5-asr-reader-independent-result.json
+

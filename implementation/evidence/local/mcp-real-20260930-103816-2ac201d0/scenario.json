@@ -1,0 +1,104 @@
+[
+  {
+    "op": "import",
+    "path": "C:\\Users\\gabri\\Todo\\transcriber-v2\\tests\\fixtures\\media\\fixture-a.mp4"
+  },
+  {
+    "at": 0.0,
+    "op": "insert",
+    "asset": 0
+  },
+  {
+    "op": "save",
+    "path": "C:\\Users\\gabri\\Todo\\transcriber-v2\\implementation\\evidence\\local\\mcp-real-20260930-103816-2ac201d0\\fixture.transcriptor"
+  },
+  {
+    "op": "wait",
+    "ms": 800
+  },
+  {
+    "pipe_name": "tv2-acceptance-a3e09f47608c42b09a016228690a7f09",
+    "permissions": {
+      "automatic_commands": [
+        "rename_project",
+        "undo",
+        "redo"
+      ],
+      "jobs": false,
+      "propose": true,
+      "transport": true,
+      "selection": true,
+      "read": true,
+      "apply": true
+    },
+    "op": "control_setup"
+  },
+  {
+    "path": "C:\\Users\\gabri\\Todo\\transcriber-v2\\implementation\\evidence\\local\\mcp-real-20260930-103816-2ac201d0\\phase1.done",
+    "ms": 180000,
+    "op": "await_signal"
+  },
+  {
+    "op": "control_revoke"
+  },
+  {
+    "op": "dump",
+    "path": "C:\\Users\\gabri\\Todo\\transcriber-v2\\implementation\\evidence\\local\\mcp-real-20260930-103816-2ac201d0\\revoked.json"
+  },
+  {
+    "path": "C:\\Users\\gabri\\Todo\\transcriber-v2\\implementation\\evidence\\local\\mcp-real-20260930-103816-2ac201d0\\phase2.done",
+    "ms": 60000,
+    "op": "await_signal"
+  },
+  {
+    "op": "save",
+    "path": "C:\\Users\\gabri\\Todo\\transcriber-v2\\implementation\\evidence\\local\\mcp-real-20260930-103816-2ac201d0\\fixture.transcriptor"
+  },
+  {
+    "op": "wait",
+    "ms": 800
+  },
+  {
+    "op": "control_stop"
+  },
+  {
+    "op": "wait",
+    "ms": 500
+  },
+  {
+    "op": "open",
+    "path": "C:\\Users\\gabri\\Todo\\transcriber-v2\\implementation\\evidence\\local\\mcp-real-20260930-103816-2ac201d0\\fixture.transcriptor\\project.json"
+  },
+  {
+    "op": "wait",
+    "ms": 800
+  },
+  {
+    "pipe_name": "tv2-acceptance-373c577ed0dc48d3ae2a3710c0a1e72a",
+    "permissions": {
+      "automatic_commands": [],
+      "jobs": false,
+      "propose": false,
+      "transport": false,
+      "selection": false,
+      "read": true,
+      "apply": false
+    },
+    "op": "control_setup"
+  },
+  {
+    "path": "C:\\Users\\gabri\\Todo\\transcriber-v2\\implementation\\evidence\\local\\mcp-real-20260930-103816-2ac201d0\\phase3.done",
+    "ms": 60000,
+    "op": "await_signal"
+  },
+  {
+    "op": "control_stop"
+  },
+  {
+    "op": "dump",
+    "path": "C:\\Users\\gabri\\Todo\\transcriber-v2\\implementation\\evidence\\local\\mcp-real-20260930-103816-2ac201d0\\final.json"
+  },
+  {
+    "op": "quit"
+  }
+]

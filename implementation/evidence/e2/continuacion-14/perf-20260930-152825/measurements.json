@@ -1,0 +1,42 @@
+{
+  "result": "FAIL",
+  "exe": "C:\\Users\\gabri\\Todo\\transcriber-v2\\target\\release\\Transcriptor.exe",
+  "exe_sha256": "8ba5193593d6d7eaf406169bf88158af3ecdbf98a6d4fc5f25cc9ac9c4aabd26",
+  "pid": 4060,
+  "protected_human_pid": 26948,
+  "os": "Windows-11-10.0.26200-SP0",
+  "cpu_count": 16,
+  "external_process_context": "Human GUI Transcriptor PID 26948 open (~338 MiB working set); FFmpeg PID 18724 open (~69 MiB); Codex and other desktop apps remain open. Root and E4 paused new supervisor/MMS work during this window; no inference active at start.",
+  "fixture": {
+    "clips": 1000,
+    "items": 20000,
+    "layers": 2,
+    "tracks": 2,
+    "sequence_seconds": 500,
+    "source_seconds": 12,
+    "source_bytes": 2129706,
+    "source_sha256": "ffb48c13e1b626ec2f73c3144147b689a153cf4a3d5017ce233fd5b3a4061f67",
+    "source": "C:/Users/gabri/Todo/transcriber-v2/tests/fixtures/media/fixture-a.mp4",
+    "project_bytes": 4910128,
+    "project_sha256": "4cb6b616938fed83aed3d49f9db72b036e1141481c8bd15bfe0c6df64dd1ed90",
+    "schema": "transcriptor-project/1",
+    "history": "none (synthetic input)"
+  },
+  "elapsed_seconds": 6.486081299954094,
+  "exit_code": 101,
+  "peak_working_set_bytes": 1078497280,
+  "peak_private_bytes": 2459930624,
+  "open_to_requested_frame_ms": 513.2583999657072,
+  "seek_during_export_to_frame_ms": 1699.6056000352837,
+  "step_to_first_observed_position_ms": null,
+  "playback_samples": [],
+  "run_bytes": 6347206,
+  "source_unchanged": true,
+  "measurement_limits": [
+    "50 ms external sampling; includes GUI scheduling and script I/O",
+    "No isolated OS/DPI/IME/input-latency claim",
+    "Dump serializes 20000 items per sample; no claim of pure frame time",
+    "Peak working set is only own desktop process, excludes FFmpeg child working sets",
+    "Synthetic V2 /1 input excludes durable history, master and model memory"
+  ]
+}

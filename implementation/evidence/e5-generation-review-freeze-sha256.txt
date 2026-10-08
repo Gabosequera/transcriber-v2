@@ -1,0 +1,21 @@
+
+Algorithm : SHA256
+Hash      : 5D98071022BC458061EEE615FDFB78D3D2463B63BFAB56CC608BC66337FD7812
+Path      : C:\Users\gabri\Todo\transcriber-v2\crates\pipeline\src\generation.rs
+
+Algorithm : SHA256
+Hash      : 6582FCC513A724CFA1B203F4C989C663FC9CD3728CFC899CBBB423D14BDC5584
+Path      : C:\Users\gabri\Todo\transcriber-v2\workers\python\finalize.py
+
+Algorithm : SHA256
+Hash      : C2DAFF13C196FBBB96B91A647FE40EAB9D0BF8FBA546045678DFA02731CE5323
+Path      : C:\Users\gabri\Todo\transcriber-v2\workers\python\finalize_worker.py
+
+Algorithm : SHA256
+Hash      : 9CDBABF113BCBABF760B0175E98445865212C91652577991ED5FA00CDC3929C9
+Path      : C:\Users\gabri\Todo\transcriber-v2\tests\scripts\test_e5_finalize.py
+
+Algorithm : SHA256
+Hash      : A90A0639838BFE03DD146C5A3664616B6AC77129F5B2B57EA15FEF40E05EC196
+Path      : C:\Users\gabri\Todo\transcriber-v2\tests\scripts\test_e5_finalize_protocol.py
+

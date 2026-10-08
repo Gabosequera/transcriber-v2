@@ -1,0 +1,25 @@
+
+Hash : AD3E56279B79E579153DB2A9B2874CC923379F5311F6D0952D28B2166FB6A29B
+Path : C:\Users\gabri\Todo\transcriber-v2\workers\python\arousal_worker.py
+
+Hash : 52853CB13A0BBF5D36A38AAD9F34B1B300774043A57BC0AA48655B6E357C3AA1
+Path : C:\Users\gabri\Todo\transcriber-v2\workers\python\requirements-arousal.lock
+
+Hash : 0A75EF0D2B07D5430CA97067C0E00AAE799DBB23A1FBD83FD6E7037AEC271CDD
+Path : C:\Users\gabri\Todo\transcriber-v2\tests\scripts\test_e5_arousal.py
+
+Hash : A942BB2DD4EA50A51710045CF6557739C40E9148F64D9D962284E0ACB67EFE1A
+Path : C:\Users\gabri\Todo\transcriber-v2\tests\scripts\probe_arousal_numpy.py
+
+Hash : BB981513E60B791CBF838AF8EFF5006747EAEB480FAA919E35E1687101670A11
+Path : C:\Users\gabri\Todo\transcriber-v2\scripts\download_arousal_model.py
+
+Hash : B97F8165074D539ACCD25DAE2C349CAF482221AB8F827D98563DE27E58E9DA34
+Path : C:\Users\gabri\Todo\transcriber-v2\implementation\evidence\e5-arousal-real-03-result.json
+
+Hash : 8C29E0C28780345362D123730B19BC14971B573F84968D92319DFA7AB01DE1DB
+Path : C:\Users\gabri\Todo\transcriber-v2\implementation\evidence\e5-arousal-real-03-words.json
+
+Hash : 46210F8678D126522481C5B305A7400CB7581B23B79D1B24AAD92D9BBE4ACE55
+Path : C:\Users\gabri\Todo\transcriber-v2\implementation\evidence\e5-arousal-real-03-checkpoint.json
+

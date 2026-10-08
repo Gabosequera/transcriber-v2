@@ -1,0 +1,1 @@
+PASS: blocked stdin cancellation, owned worker/child shutdown and oversized request rejection; no inference.

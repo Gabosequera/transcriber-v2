@@ -1,0 +1,29 @@
+paso 1: Open { path: "C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/rf64-20260930-165217/synthetic.transcriptor/project.json" }
+paso 2: Assert { markers: None, clips: Some(3), layers: None, items: None, revision: Some(0), playing: None, rate: None, position: None, tracks: Some(1) }
+assert OK (clips 3, capas 0, items 0, rev 0, pos 0.000, rate 1, playing false)
+  toast: Info: Proyecto «RF64 physical synthetic acceptance» abierto (revisión 0)
+paso 3: SetIn { t: 0.0 }
+  toast: Info: Proyecto «RF64 physical synthetic acceptance» abierto (revisión 0)
+paso 4: SetOut { t: 22400.0 }
+  toast: Info: Proyecto «RF64 physical synthetic acceptance» abierto (revisión 0)
+paso 5: Log { text: "RF64_EXPORT_BEGIN" }
+RF64_EXPORT_BEGIN
+  toast: Info: Proyecto «RF64 physical synthetic acceptance» abierto (revisión 0)
+paso 6: Export { preset: "wav-pcm", dest: "C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/rf64-20260930-165217/physical-rf64.wav", range: true, selection: None }
+  toast: Info: Exportación añadida a la cola (revisión congelada)
+paso 7: WaitExport { ms: 1200000 }
+  toast: Info: Exportación añadida a la cola (revisión congelada)
+export OK: C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/rf64-20260930-165217/physical-rf64.wav · 06:13:20.000 · 0 frames · sha256 b38e8564e43e3ee29be62c8d75a2e3bb3895f0a6ddffbe28530735e5b32885ed
+paso 8: Dump { path: "C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/rf64-20260930-165217/final-state.json" }
+estado volcado en C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/rf64-20260930-165217/final-state.json
+  toast: Info: Exportado C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/rf64-20260930-165217/physical-rf64.wav (06:13:20.000, 0 fotogramas, 144.7 s)
+paso 9: Assert { markers: None, clips: Some(3), layers: None, items: None, revision: Some(0), playing: None, rate: None, position: None, tracks: Some(1) }
+assert OK (clips 3, capas 0, items 0, rev 0, pos 0.000, rate 1, playing false)
+  toast: Info: Exportado C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/rf64-20260930-165217/physical-rf64.wav (06:13:20.000, 0 fotogramas, 144.7 s)
+paso 10: Screenshot { path: "C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/rf64-20260930-165217/rf64-native.png" }
+  toast: Info: Exportado C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/rf64-20260930-165217/physical-rf64.wav (06:13:20.000, 0 fotogramas, 144.7 s)
+captura guardada en C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/rf64-20260930-165217/rf64-native.png (1920×1080)
+paso 11: Quit
+quit; fallos=false
+  toast: Info: Exportado C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/rf64-20260930-165217/physical-rf64.wav (06:13:20.000, 0 fotogramas, 144.7 s)
+guion terminado; fallos=false

@@ -1,0 +1,21 @@
+
+Algorithm : SHA256
+Hash      : 0A407239EAFD9B6ACA8B95F68B19AE009018C2C44F9C076E1277D482BBF9040F
+Path      : C:\Users\gabri\Todo\transcriber-v2\crates\pipeline\src\lib.rs
+
+Algorithm : SHA256
+Hash      : 5FAEFB12B1B03ED8619E48180E4276ADCB8810D7048DBADFC5E6CFCA9264898E
+Path      : C:\Users\gabri\Todo\transcriber-v2\crates\pipeline\examples\blocked_stdin.rs
+
+Algorithm : SHA256
+Hash      : 89E042BC3B3E1460B976EC3D9E64A7853A069D7E26657E8200EC2E265B034761
+Path      : C:\Users\gabri\Todo\transcriber-v2\tests\scripts\blocked_stdin_worker_fixture.py
+
+Algorithm : SHA256
+Hash      : 5B788D547D2BDE1D5DFA2DDDEB5302DED7A514995AD133F6611817F0C92C23C6
+Path      : C:\Users\gabri\Todo\transcriber-v2\target\debug\examples\blocked_stdin.exe
+
+Algorithm : SHA256
+Hash      : CC372FEE6527C98401EBF74DBD08E707D8EE385109E86D45D7F1AE002F8C5027
+Path      : C:\Users\gabri\Todo\transcriber-v2\implementation\evidence\e5-blocked-stdin-result.json
+

@@ -1,0 +1,43 @@
+{
+  "revision": 0,
+  "view": "Sequence",
+  "playhead_ms": 0,
+  "player": {
+    "position_ms": 5200,
+    "playing": false,
+    "rate": 1.0,
+    "generation": 18,
+    "buffering": false,
+    "decode_ms": 124.99959564208984,
+    "audio_available": true
+  },
+  "last_frame": {
+    "position_ms": 5200,
+    "w": 790,
+    "h": 444,
+    "generation": 18
+  },
+  "clips": [],
+  "layers": [],
+  "toasts": [
+    "Importado fixture-a.mp4: video · 640×360 · 30.000 fps · h264 · 1 pista(s) de audio 48000 Hz 1 can. · 00:00:12.000",
+    "Importado fixture-b.mp4: video · 640×360 · 30.000 fps · h264 · 1 pista(s) de audio 48000 Hz 1 can. · 00:00:08.000",
+    "Importado overlay-alpha.png: imagen · 320×180 · png",
+    "Importado tone-220.wav: audio · 1 pista(s) de audio 48000 Hz 2 can. · 00:00:10.000",
+    "Insertado en 00:00:00.000",
+    "Insertado en 00:00:03.000",
+    "Insertado en 00:00:01.000",
+    "Insertado en 00:00:00.000",
+    "Deshacer Eliminar clip",
+    "Rehacer Eliminar clip",
+    "JSON inválido: i128 is not supported",
+    "Proyecto nuevo",
+    "El sistema no puede encontrar la ruta especificada. (os error 3)",
+    "La secuencia está vacía",
+    "La secuencia está vacía",
+    "La secuencia está vacía",
+    "La secuencia está vacía",
+    "La secuencia está vacía"
+  ],
+  "undo": null
+}

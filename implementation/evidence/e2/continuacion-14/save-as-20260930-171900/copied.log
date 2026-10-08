@@ -1,0 +1,25 @@
+paso 1: Open { path: "C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/save-as-20260930-171900/copy.transcriptor/project.json" }
+paso 2: Assert { markers: None, clips: None, layers: Some(10), items: Some(18), revision: Some(5), playing: None, rate: None, position: None, tracks: None }
+assert OK (clips 10, capas 10, items 18, rev 5, pos 0.000, rate 1, playing false)
+  toast: Info: Proyecto «Sin título» abierto (revisión 5)
+paso 3: Undo
+  toast: Info: Deshacer Añadir tramo
+paso 4: Assert { markers: None, clips: None, layers: None, items: Some(17), revision: Some(6), playing: None, rate: None, position: None, tracks: None }
+assert OK (clips 10, capas 10, items 17, rev 6, pos 0.000, rate 1, playing false)
+  toast: Info: Deshacer Añadir tramo
+paso 5: Redo
+  toast: Info: Rehacer Añadir tramo
+paso 6: Assert { markers: None, clips: None, layers: None, items: Some(18), revision: Some(7), playing: None, rate: None, position: None, tracks: None }
+assert OK (clips 10, capas 10, items 18, rev 7, pos 0.000, rate 1, playing false)
+  toast: Info: Rehacer Añadir tramo
+paso 7: Dump { path: "C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/save-as-20260930-171900/copy-state.json" }
+estado volcado en C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/save-as-20260930-171900/copy-state.json
+  toast: Info: Rehacer Añadir tramo
+paso 8: Save { path: "C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/save-as-20260930-171900/copy.transcriptor" }
+  toast: Info: Rehacer Añadir tramo
+paso 9: Wait { ms: 500 }
+  toast: Info: Revisión 7 guardada en C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/save-as-20260930-171900/copy.transcriptor
+paso 10: Quit
+quit; fallos=false
+  toast: Info: Revisión 7 guardada en C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/save-as-20260930-171900/copy.transcriptor
+guion terminado; fallos=false

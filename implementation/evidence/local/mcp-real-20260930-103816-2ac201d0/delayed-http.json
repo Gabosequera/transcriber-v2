@@ -1,0 +1,11 @@
+{
+  "accepted": true,
+  "delayed_headers_and_body": true,
+  "response": {
+    "jsonrpc": "2.0",
+    "id": 8801,
+    "result": {}
+  },
+  "elapsed_ms": 470,
+  "status": "HTTP/1.1 200 OK"
+}

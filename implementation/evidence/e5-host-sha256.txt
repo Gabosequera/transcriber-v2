@@ -1,0 +1,21 @@
+
+Algorithm : SHA256
+Hash      : 91DC0CC8DC18F90F1BFCA3480ED28CF2FA5B888F76F7DD64D3E433792494F069
+Path      : C:\Users\gabri\Todo\transcriber-v2\target\debug\examples\runtime_smoke.exe
+
+Algorithm : SHA256
+Hash      : BF6AF05B3C7380F51C1D70658001EF181470809148C205B7115128845B434268
+Path      : C:\Users\gabri\Todo\transcriber-v2\workers\python\worker.py
+
+Algorithm : SHA256
+Hash      : 391B80A23A699D08AC9FAA3E446463E54A8BA844272E447136AF8AEBAC387322
+Path      : C:\Users\gabri\Todo\transcriber-v2\.local\e5-host-smoke-20260930-02\transport-only-owned-child.py
+
+Algorithm : SHA256
+Hash      : 1562864A6004E595FABC30F18A08B0C129C0CE83800FDD3BED88B2CEC09BD5A1
+Path      : C:\Users\gabri\Todo\transcriber-v2\.local\e5-python-tests-20260930\fixtures\multistream.mkv
+
+Algorithm : SHA256
+Hash      : 45A74EF47E7EFDD266D888516513F834A17F04A5592E3DA991BC26AED19F391D
+Path      : C:\Users\gabri\Todo\transcriber-v2\.local\e5-host-smoke-20260930-02\result.json
+

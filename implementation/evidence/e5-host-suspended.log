@@ -1,0 +1,4 @@
+   Compiling tv2-pipeline v2.0.0-alpha.11 (C:\Users\gabri\Todo\transcriber-v2\crates\pipeline)
+    Finished `dev` profile [optimized + debuginfo] target(s) in 3.40s
+PASS: real Python hello/EOF, cancelled host and owned Windows tree; inference untested. Evidence C:\Users\gabri\Todo\transcriber-v2\.local\e5-host-suspended-20260930-01\result.json
+PASS: Rust/Python host lifecycle verified; inference remains blocked/unaccepted. C:\Users\gabri\Todo\transcriber-v2\.local\e5-host-suspended-20260930-01\result.json

@@ -667,9 +667,14 @@ fn publish_verified_output(staging: &Path, destination: &Path, cancel: &AtomicBo
     }
     // La comprobación inicial exists() no protege frente a otro productor.
     // persist_noclobber conserva el destino incluso si apareció durante el render.
-    tempfile::TempPath::try_from_path(staging)?
-        .persist_noclobber(destination)
-        .map_err(|e| DomainError::io(format!("no se pudo publicar {} sin sobrescribir: {e}", destination.display())))?;
+    tempfile::TempPath::try_from_path(staging)?.persist_noclobber(destination).map_err(|e| {
+        if e.error.kind() == std::io::ErrorKind::AlreadyExists {
+            DomainError::precondition(format!("ya existe {}; otro productor publicó durante la exportación", destination.display()))
+                .with_action("elige otro nombre; nunca se sobrescribe una exportación")
+        } else {
+            DomainError::io(format!("no se pudo publicar {} sin sobrescribir: {e}", destination.display()))
+        }
+    })?;
     Ok(sha256)
 }
 
@@ -807,6 +812,113 @@ mod tests {
         let expected = file_sha256(&staging).unwrap();
         assert_eq!(publish_verified_output(&staging, &destination, &AtomicBool::new(false)).unwrap(), expected);
         assert_eq!(std::fs::read(&destination).unwrap(), b"verified output");
+    }
+
+    #[test]
+    fn real_export_preserves_concurrent_destination_and_legacy_temporaries() {
+        let tools = FfmpegTools::locate().unwrap();
+        let (timeline, assets) = timeline(&tools, "fixture-a.mp4");
+        let dir = tempfile::tempdir().unwrap();
+        let destination = dir.path().join("resultado.wav");
+        let sentinels = [".resultado.wav.write-test", ".resultado.wav.audio.wav", ".resultado.wav.partial"];
+        for name in sentinels {
+            std::fs::write(dir.path().join(name), name).unwrap();
+        }
+        let request = ExportRequest {
+            timeline,
+            assets,
+            preset: presets().into_iter().find(|p| p.id == "wav-pcm").unwrap(),
+            range: Some(TimeRange::new(Ticks::ZERO, Ticks::from_millis(250))),
+            destination: destination.clone(),
+            project_revision: 7,
+        };
+        let error = ExportJob::run(&tools, &request, &Arc::new(AtomicBool::new(false)), |progress| {
+            if progress.stage == "verificando" {
+                std::fs::write(&destination, b"otro productor").unwrap();
+            }
+        })
+        .unwrap_err();
+        assert_eq!(error.code, ErrorCode::Precondition);
+        assert_eq!(std::fs::read(&destination).unwrap(), b"otro productor");
+        for name in sentinels {
+            assert_eq!(std::fs::read(dir.path().join(name)).unwrap(), name.as_bytes());
+        }
+        assert_eq!(leftovers(dir.path()).len(), sentinels.len());
+    }
+
+    #[test]
+    fn real_export_cancellation_during_verification_cleans_only_owned_temporaries() {
+        let tools = FfmpegTools::locate().unwrap();
+        let (timeline, assets) = timeline(&tools, "fixture-a.mp4");
+        let dir = tempfile::tempdir().unwrap();
+        let sentinel = dir.path().join(".resultado.wav.partial");
+        std::fs::write(&sentinel, b"temporal ajeno").unwrap();
+        let request = ExportRequest {
+            timeline,
+            assets,
+            preset: presets().into_iter().find(|p| p.id == "wav-pcm").unwrap(),
+            range: Some(TimeRange::new(Ticks::ZERO, Ticks::from_millis(250))),
+            destination: dir.path().join("resultado.wav"),
+            project_revision: 7,
+        };
+        let cancel = Arc::new(AtomicBool::new(false));
+        let error = ExportJob::run(&tools, &request, &cancel, |progress| {
+            if progress.stage == "verificando" {
+                cancel.store(true, Ordering::Relaxed);
+            }
+        })
+        .unwrap_err();
+        assert_eq!(error.code, ErrorCode::Cancelled);
+        assert!(!request.destination.exists());
+        assert_eq!(std::fs::read(&sentinel).unwrap(), b"temporal ajeno");
+        assert_eq!(leftovers(dir.path()), vec![".resultado.wav.partial"]);
+    }
+
+    #[test]
+    fn concurrent_real_exports_to_one_destination_use_distinct_workspaces() {
+        let tools = FfmpegTools::locate().unwrap();
+        let (timeline, assets) = timeline(&tools, "fixture-a.mp4");
+        let dir = tempfile::tempdir().unwrap();
+        let request = ExportRequest {
+            timeline,
+            assets,
+            preset: presets().into_iter().find(|p| p.id == "wav-pcm").unwrap(),
+            range: Some(TimeRange::new(Ticks::ZERO, Ticks::from_millis(250))),
+            destination: dir.path().join("resultado.wav"),
+            project_revision: 7,
+        };
+        let (other_timeline, other_assets) = self::timeline(&tools, "fixture-b.mp4");
+        let other_request = ExportRequest { timeline: other_timeline, assets: other_assets, project_revision: 8, ..request.clone() };
+        let barrier = std::sync::Barrier::new(2);
+        let results = std::thread::scope(|scope| {
+            let run = |request: &ExportRequest| {
+                ExportJob::run(&tools, request, &Arc::new(AtomicBool::new(false)), |progress| {
+                    if progress.stage == "mezclando audio" && progress.fraction == 0.0 {
+                        barrier.wait();
+                    }
+                })
+            };
+            let first_request = &request;
+            let second_request = &other_request;
+            let first = scope.spawn(move || run(first_request));
+            let second = scope.spawn(move || run(second_request));
+            [first.join().unwrap(), second.join().unwrap()]
+        });
+        assert_eq!(results.iter().filter(|r| r.is_ok()).count(), 1);
+        assert_eq!(results.iter().filter(|r| r.as_ref().is_err_and(|e| e.code == ErrorCode::Precondition)).count(), 1);
+        let winner = results.iter().find_map(|r| r.as_ref().ok()).unwrap();
+        assert_eq!(file_sha256(&request.destination).unwrap(), winner.sha256);
+        assert_eq!(tools.probe(&request.destination).unwrap().audio.len(), 1);
+        // Distinct tones expose accidental sharing of the temporary audio.
+        let source = fixture(if winner.project_revision == 7 { "fixture-a.mp4" } else { "fixture-b.mp4" });
+        let mut original = crate::AudioDecoder::open(&tools, &source, 0, Ticks::ZERO, 48000, 1.0).unwrap();
+        let mut exported = crate::AudioDecoder::open(&tools, &request.destination, 0, Ticks::ZERO, 48000, 1.0).unwrap();
+        let mut expected = vec![0f32; 12000 * CHANNELS];
+        let mut observed = vec![0f32; 12000 * CHANNELS];
+        assert_eq!(original.read(&mut expected), 12000);
+        assert_eq!(exported.read(&mut observed), 12000);
+        assert!(expected.iter().zip(observed).all(|(a, b)| (a - b).abs() <= 1.0 / 32768.0));
+        assert!(leftovers(dir.path()).is_empty());
     }
 
     fn fixture(name: &str) -> PathBuf {

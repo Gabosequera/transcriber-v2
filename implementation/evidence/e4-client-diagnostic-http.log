@@ -1,0 +1,1 @@
+PASS: synthetic HTTP success forwards UTF-8 IDs/tool rejection; 202 notification is silent; mutation sent once; verification polls pending then complete. No editor or ControlEngine exercised.

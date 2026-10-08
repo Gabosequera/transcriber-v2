@@ -1,0 +1,770 @@
+{
+  "result": "PASS",
+  "exe": "C:\\Users\\gabri\\Todo\\transcriber-v2\\target\\release\\Transcriptor.exe",
+  "exe_sha256": "349df668c006a1565613ad6770edd918fb514243b5e2b32888469335f2837c36",
+  "pid": 28700,
+  "protected_human_pid": 26948,
+  "os": "Windows-11-10.0.26200-SP0",
+  "cpu_count": 16,
+  "external_process_context": "Human GUI PID26948 closed voluntarily; no other editor known. No inference active at last E4 confirmation; E3/E4 notified to reserve this window. Codex and other desktop apps remain open; not an isolated OS benchmark.",
+  "fixture": {
+    "clips": 1000,
+    "items": 20000,
+    "layers": 2,
+    "tracks": 2,
+    "sequence_seconds": 500,
+    "source_seconds": 12,
+    "source_bytes": 2129706,
+    "source_sha256": "ffb48c13e1b626ec2f73c3144147b689a153cf4a3d5017ce233fd5b3a4061f67",
+    "source": "C:/Users/gabri/Todo/transcriber-v2/tests/fixtures/media/fixture-a.mp4",
+    "project_bytes": 4910128,
+    "project_sha256": "4cb6b616938fed83aed3d49f9db72b036e1141481c8bd15bfe0c6df64dd1ed90",
+    "schema": "transcriptor-project/1",
+    "history": "none (synthetic input)"
+  },
+  "elapsed_seconds": 30.625301800027955,
+  "exit_code": 0,
+  "peak_working_set_bytes": 541466624,
+  "peak_private_bytes": 747442176,
+  "open_to_requested_frame_ms": 762.9746000166051,
+  "seek_during_export_to_frame_ms": 203.7000999553129,
+  "step_to_first_observed_position_ms": 565.1991000049748,
+  "playback_samples": [
+    {
+      "seconds": 12.445142099983059,
+      "player": {
+        "position_ms": 4193,
+        "playing": true,
+        "rate": 1.0,
+        "generation": 7,
+        "buffering": false,
+        "decode_ms": 2.069999933242798,
+        "audio_available": true
+      },
+      "last_frame": {
+        "position_ms": 4167,
+        "w": 732,
+        "h": 412,
+        "generation": 7
+      }
+    },
+    {
+      "seconds": 12.897918900009245,
+      "player": {
+        "position_ms": 4563,
+        "playing": true,
+        "rate": 1.0,
+        "generation": 7,
+        "buffering": false,
+        "decode_ms": 2.1196000576019287,
+        "audio_available": true
+      },
+      "last_frame": {
+        "position_ms": 4533,
+        "w": 732,
+        "h": 412,
+        "generation": 7
+      }
+    },
+    {
+      "seconds": 13.412328200007323,
+      "player": {
+        "position_ms": 4983,
+        "playing": true,
+        "rate": 1.0,
+        "generation": 7,
+        "buffering": false,
+        "decode_ms": 2.128199815750122,
+        "audio_available": true
+      },
+      "last_frame": {
+        "position_ms": 4967,
+        "w": 732,
+        "h": 412,
+        "generation": 7
+      }
+    },
+    {
+      "seconds": 14.014478900004178,
+      "player": {
+        "position_ms": 5513,
+        "playing": true,
+        "rate": 1.0,
+        "generation": 7,
+        "buffering": false,
+        "decode_ms": 2.1391000747680664,
+        "audio_available": true
+      },
+      "last_frame": {
+        "position_ms": 5500,
+        "w": 732,
+        "h": 412,
+        "generation": 7
+      }
+    },
+    {
+      "seconds": 14.741415600001346,
+      "player": {
+        "position_ms": 6113,
+        "playing": true,
+        "rate": 1.0,
+        "generation": 7,
+        "buffering": true,
+        "decode_ms": 63.87049865722656,
+        "audio_available": true
+      },
+      "last_frame": {
+        "position_ms": 6100,
+        "w": 732,
+        "h": 412,
+        "generation": 7
+      }
+    },
+    {
+      "seconds": 15.50952199997846,
+      "player": {
+        "position_ms": 6973,
+        "playing": true,
+        "rate": 1.0,
+        "generation": 7,
+        "buffering": false,
+        "decode_ms": 2.326900005340576,
+        "audio_available": true
+      },
+      "last_frame": {
+        "position_ms": 6967,
+        "w": 732,
+        "h": 412,
+        "generation": 7
+      }
+    },
+    {
+      "seconds": 16.30158259999007,
+      "player": {
+        "position_ms": 7783,
+        "playing": true,
+        "rate": 1.0,
+        "generation": 7,
+        "buffering": false,
+        "decode_ms": 4.691400051116943,
+        "audio_available": true
+      },
+      "last_frame": {
+        "position_ms": 7767,
+        "w": 732,
+        "h": 412,
+        "generation": 7
+      }
+    },
+    {
+      "seconds": 16.857453099975828,
+      "player": {
+        "position_ms": 8403,
+        "playing": true,
+        "rate": 1.0,
+        "generation": 7,
+        "buffering": false,
+        "decode_ms": 2.5669000148773193,
+        "audio_available": true
+      },
+      "last_frame": {
+        "position_ms": 8400,
+        "w": 732,
+        "h": 412,
+        "generation": 7
+      }
+    },
+    {
+      "seconds": 17.757337999995798,
+      "player": {
+        "position_ms": 9003,
+        "playing": true,
+        "rate": 1.0,
+        "generation": 7,
+        "buffering": true,
+        "decode_ms": 83.83649444580078,
+        "audio_available": true
+      },
+      "last_frame": {
+        "position_ms": 9000,
+        "w": 732,
+        "h": 412,
+        "generation": 7
+      }
+    },
+    {
+      "seconds": 18.346921499993186,
+      "player": {
+        "position_ms": 9853,
+        "playing": true,
+        "rate": 1.0,
+        "generation": 7,
+        "buffering": false,
+        "decode_ms": 2.3451998233795166,
+        "audio_available": true
+      },
+      "last_frame": {
+        "position_ms": 9833,
+        "w": 732,
+        "h": 412,
+        "generation": 7
+      }
+    },
+    {
+      "seconds": 18.989381499995943,
+      "player": {
+        "position_ms": 10523,
+        "playing": true,
+        "rate": 1.0,
+        "generation": 7,
+        "buffering": false,
+        "decode_ms": 4.22760009765625,
+        "audio_available": true
+      },
+      "last_frame": {
+        "position_ms": 10500,
+        "w": 732,
+        "h": 412,
+        "generation": 7
+      }
+    },
+    {
+      "seconds": 19.40912790002767,
+      "player": {
+        "position_ms": 11003,
+        "playing": true,
+        "rate": 1.0,
+        "generation": 7,
+        "buffering": true,
+        "decode_ms": 78.73699951171875,
+        "audio_available": true
+      },
+      "last_frame": {
+        "position_ms": 11000,
+        "w": 732,
+        "h": 412,
+        "generation": 7
+      }
+    },
+    {
+      "seconds": 19.76186189998407,
+      "player": {
+        "position_ms": 11503,
+        "playing": true,
+        "rate": 1.0,
+        "generation": 7,
+        "buffering": false,
+        "decode_ms": 1.38919997215271,
+        "audio_available": true
+      },
+      "last_frame": {
+        "position_ms": 11500,
+        "w": 732,
+        "h": 412,
+        "generation": 7
+      }
+    },
+    {
+      "seconds": 20.162454799981788,
+      "player": {
+        "position_ms": 11883,
+        "playing": true,
+        "rate": 1.0,
+        "generation": 7,
+        "buffering": false,
+        "decode_ms": 1.8660999536514282,
+        "audio_available": true
+      },
+      "last_frame": {
+        "position_ms": 11867,
+        "w": 732,
+        "h": 412,
+        "generation": 7
+      }
+    },
+    {
+      "seconds": 20.513177999993786,
+      "player": {
+        "position_ms": 12273,
+        "playing": true,
+        "rate": 1.0,
+        "generation": 7,
+        "buffering": false,
+        "decode_ms": 1.6990000009536743,
+        "audio_available": true
+      },
+      "last_frame": {
+        "position_ms": 12267,
+        "w": 732,
+        "h": 412,
+        "generation": 7
+      }
+    },
+    {
+      "seconds": 20.863091800012626,
+      "player": {
+        "position_ms": 12573,
+        "playing": true,
+        "rate": 1.0,
+        "generation": 7,
+        "buffering": false,
+        "decode_ms": 1.8050000667572021,
+        "audio_available": true
+      },
+      "last_frame": {
+        "position_ms": 12567,
+        "w": 732,
+        "h": 412,
+        "generation": 7
+      }
+    },
+    {
+      "seconds": 21.261411699990276,
+      "player": {
+        "position_ms": 12973,
+        "playing": true,
+        "rate": 1.0,
+        "generation": 7,
+        "buffering": false,
+        "decode_ms": 1.9980000257492065,
+        "audio_available": true
+      },
+      "last_frame": {
+        "position_ms": 12967,
+        "w": 732,
+        "h": 412,
+        "generation": 7
+      }
+    },
+    {
+      "seconds": 21.662524099985603,
+      "player": {
+        "position_ms": 13353,
+        "playing": true,
+        "rate": 1.0,
+        "generation": 7,
+        "buffering": false,
+        "decode_ms": 1.941499948501587,
+        "audio_available": true
+      },
+      "last_frame": {
+        "position_ms": 13333,
+        "w": 732,
+        "h": 412,
+        "generation": 7
+      }
+    },
+    {
+      "seconds": 22.011584800027777,
+      "player": {
+        "position_ms": 13793,
+        "playing": true,
+        "rate": 1.0,
+        "generation": 7,
+        "buffering": false,
+        "decode_ms": 1.829699993133545,
+        "audio_available": true
+      },
+      "last_frame": {
+        "position_ms": 13767,
+        "w": 732,
+        "h": 412,
+        "generation": 7
+      }
+    },
+    {
+      "seconds": 22.309041299973615,
+      "player": {
+        "position_ms": 13993,
+        "playing": true,
+        "rate": 1.0,
+        "generation": 7,
+        "buffering": false,
+        "decode_ms": 2.904599905014038,
+        "audio_available": true
+      },
+      "last_frame": {
+        "position_ms": 13967,
+        "w": 732,
+        "h": 412,
+        "generation": 7
+      }
+    },
+    {
+      "seconds": 22.653516400023364,
+      "player": {
+        "position_ms": 14413,
+        "playing": true,
+        "rate": 1.0,
+        "generation": 7,
+        "buffering": false,
+        "decode_ms": 1.9733998775482178,
+        "audio_available": true
+      },
+      "last_frame": {
+        "position_ms": 14400,
+        "w": 732,
+        "h": 412,
+        "generation": 7
+      }
+    },
+    {
+      "seconds": 22.949955600022804,
+      "player": {
+        "position_ms": 14713,
+        "playing": true,
+        "rate": 1.0,
+        "generation": 7,
+        "buffering": false,
+        "decode_ms": 1.8162000179290771,
+        "audio_available": true
+      },
+      "last_frame": {
+        "position_ms": 14700,
+        "w": 732,
+        "h": 412,
+        "generation": 7
+      }
+    },
+    {
+      "seconds": 23.26125999999931,
+      "player": {
+        "position_ms": 14993,
+        "playing": true,
+        "rate": 1.0,
+        "generation": 7,
+        "buffering": false,
+        "decode_ms": 1.5931999683380127,
+        "audio_available": true
+      },
+      "last_frame": {
+        "position_ms": 14967,
+        "w": 732,
+        "h": 412,
+        "generation": 7
+      }
+    },
+    {
+      "seconds": 23.609217900026124,
+      "player": {
+        "position_ms": 15373,
+        "playing": true,
+        "rate": 1.0,
+        "generation": 7,
+        "buffering": false,
+        "decode_ms": 1.7131999731063843,
+        "audio_available": true
+      },
+      "last_frame": {
+        "position_ms": 15367,
+        "w": 732,
+        "h": 412,
+        "generation": 7
+      }
+    },
+    {
+      "seconds": 23.856271099997684,
+      "player": {
+        "position_ms": 15573,
+        "playing": true,
+        "rate": 1.0,
+        "generation": 7,
+        "buffering": false,
+        "decode_ms": 1.1646000146865845,
+        "audio_available": true
+      },
+      "last_frame": {
+        "position_ms": 15567,
+        "w": 732,
+        "h": 412,
+        "generation": 7
+      }
+    },
+    {
+      "seconds": 24.149342200020328,
+      "player": {
+        "position_ms": 15953,
+        "playing": true,
+        "rate": 1.0,
+        "generation": 7,
+        "buffering": false,
+        "decode_ms": 2.1596999168395996,
+        "audio_available": true
+      },
+      "last_frame": {
+        "position_ms": 15933,
+        "w": 732,
+        "h": 412,
+        "generation": 7
+      }
+    },
+    {
+      "seconds": 24.441565499990247,
+      "player": {
+        "position_ms": 16233,
+        "playing": true,
+        "rate": 1.0,
+        "generation": 7,
+        "buffering": false,
+        "decode_ms": 2.1385998725891113,
+        "audio_available": true
+      },
+      "last_frame": {
+        "position_ms": 16233,
+        "w": 732,
+        "h": 412,
+        "generation": 7
+      }
+    },
+    {
+      "seconds": 24.736027400009334,
+      "player": {
+        "position_ms": 16513,
+        "playing": true,
+        "rate": 1.0,
+        "generation": 7,
+        "buffering": false,
+        "decode_ms": 1.6212999820709229,
+        "audio_available": true
+      },
+      "last_frame": {
+        "position_ms": 16500,
+        "w": 732,
+        "h": 412,
+        "generation": 7
+      }
+    },
+    {
+      "seconds": 24.982706399983726,
+      "player": {
+        "position_ms": 16793,
+        "playing": true,
+        "rate": 1.0,
+        "generation": 7,
+        "buffering": false,
+        "decode_ms": 1.3549998998641968,
+        "audio_available": true
+      },
+      "last_frame": {
+        "position_ms": 16767,
+        "w": 732,
+        "h": 412,
+        "generation": 7
+      }
+    },
+    {
+      "seconds": 25.32779660000233,
+      "player": {
+        "position_ms": 17003,
+        "playing": true,
+        "rate": 1.0,
+        "generation": 7,
+        "buffering": true,
+        "decode_ms": 78.36280059814453,
+        "audio_available": true
+      },
+      "last_frame": {
+        "position_ms": 17000,
+        "w": 732,
+        "h": 412,
+        "generation": 7
+      }
+    }
+  ],
+  "cache_playback_samples": [
+    {
+      "seconds": 26.846429600031115,
+      "player": {
+        "position_ms": 1040,
+        "playing": true,
+        "rate": 1.0,
+        "generation": 10,
+        "buffering": false,
+        "decode_ms": 2.327199935913086,
+        "audio_available": true
+      },
+      "last_frame": {
+        "position_ms": 1033,
+        "w": 816,
+        "h": 460,
+        "generation": 10
+      }
+    },
+    {
+      "seconds": 27.045167199976277,
+      "player": {
+        "position_ms": 1260,
+        "playing": true,
+        "rate": 1.0,
+        "generation": 10,
+        "buffering": false,
+        "decode_ms": 2.1582999229431152,
+        "audio_available": true
+      },
+      "last_frame": {
+        "position_ms": 1233,
+        "w": 816,
+        "h": 460,
+        "generation": 10
+      }
+    },
+    {
+      "seconds": 27.24823899997864,
+      "player": {
+        "position_ms": 1490,
+        "playing": true,
+        "rate": 1.0,
+        "generation": 10,
+        "buffering": false,
+        "decode_ms": 2.674299955368042,
+        "audio_available": true
+      },
+      "last_frame": {
+        "position_ms": 1467,
+        "w": 816,
+        "h": 460,
+        "generation": 10
+      }
+    },
+    {
+      "seconds": 27.461266099999193,
+      "player": {
+        "position_ms": 1710,
+        "playing": true,
+        "rate": 1.0,
+        "generation": 10,
+        "buffering": false,
+        "decode_ms": 2.3242998123168945,
+        "audio_available": true
+      },
+      "last_frame": {
+        "position_ms": 1700,
+        "w": 816,
+        "h": 460,
+        "generation": 10
+      }
+    },
+    {
+      "seconds": 27.706811300013214,
+      "player": {
+        "position_ms": 1920,
+        "playing": true,
+        "rate": 1.0,
+        "generation": 10,
+        "buffering": false,
+        "decode_ms": 2.040300130844116,
+        "audio_available": true
+      },
+      "last_frame": {
+        "position_ms": 1900,
+        "w": 816,
+        "h": 460,
+        "generation": 10
+      }
+    },
+    {
+      "seconds": 27.901896300027147,
+      "player": {
+        "position_ms": 2120,
+        "playing": true,
+        "rate": 1.0,
+        "generation": 10,
+        "buffering": false,
+        "decode_ms": 2.1536998748779297,
+        "audio_available": true
+      },
+      "last_frame": {
+        "position_ms": 2100,
+        "w": 816,
+        "h": 460,
+        "generation": 10
+      }
+    },
+    {
+      "seconds": 28.098833099997137,
+      "player": {
+        "position_ms": 2340,
+        "playing": true,
+        "rate": 1.0,
+        "generation": 10,
+        "buffering": false,
+        "decode_ms": 2.5230000019073486,
+        "audio_available": true
+      },
+      "last_frame": {
+        "position_ms": 2333,
+        "w": 816,
+        "h": 460,
+        "generation": 10
+      }
+    },
+    {
+      "seconds": 28.345788199978415,
+      "player": {
+        "position_ms": 2550,
+        "playing": true,
+        "rate": 1.0,
+        "generation": 10,
+        "buffering": false,
+        "decode_ms": 2.6821999549865723,
+        "audio_available": true
+      },
+      "last_frame": {
+        "position_ms": 2533,
+        "w": 816,
+        "h": 460,
+        "generation": 10
+      }
+    },
+    {
+      "seconds": 28.540299499989487,
+      "player": {
+        "position_ms": 2760,
+        "playing": true,
+        "rate": 1.0,
+        "generation": 10,
+        "buffering": false,
+        "decode_ms": 2.286900043487549,
+        "audio_available": true
+      },
+      "last_frame": {
+        "position_ms": 2733,
+        "w": 816,
+        "h": 460,
+        "generation": 10
+      }
+    },
+    {
+      "seconds": 28.73709130001953,
+      "player": {
+        "position_ms": 2960,
+        "playing": true,
+        "rate": 1.0,
+        "generation": 10,
+        "buffering": false,
+        "decode_ms": 2.435999870300293,
+        "audio_available": true
+      },
+      "last_frame": {
+        "position_ms": 2933,
+        "w": 816,
+        "h": 460,
+        "generation": 10
+      }
+    }
+  ],
+  "cache_open_to_requested_frame_ms": 260.35620004404336,
+  "sampler_max_interval_ms": 227.41549997590482,
+  "reuse_fixture": "implementation\\evidence\\e2\\continuacion-14\\perf-20260930-152825\\large.transcriptor\\project.json",
+  "extended": true,
+  "stderr": "",
+  "run_bytes": 308466085,
+  "source_unchanged": true,
+  "measurement_limits": [
+    "50 ms external sampling; includes GUI scheduling and script I/O",
+    "No isolated OS/DPI/IME/input-latency claim",
+    "Dump serializes 20000 items per sample; no claim of pure frame time",
+    "Peak working set is only own desktop process, excludes FFmpeg child working sets",
+    "Synthetic V2 /1 input excludes durable history, master and model memory"
+  ]
+}

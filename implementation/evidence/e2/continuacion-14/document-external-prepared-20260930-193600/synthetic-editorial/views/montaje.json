@@ -1,0 +1,97 @@
+{
+  "schema": "editorial-montaje/1",
+  "media": {
+    "size": 2245856,
+    "hash_muestreado": "5af6e20946b99936f1b56449a3d5d28f9f6f490a840cf09b5ad59abba5050604",
+    "inventario_sha256": "77aae5a1df8f009ed8f55643e2949f7ff3340026398608631ea992eae8a58d70"
+  },
+  "duration_source": 12.0,
+  "target_seconds": 900.0,
+  "revision": 1,
+  "next_id": 5,
+  "updated_at": "2026-09-08T00:17:13+00:00",
+  "tracks": [
+    {
+      "track_id": "V1",
+      "name": "V1"
+    },
+    {
+      "track_id": "V2",
+      "name": "V2"
+    },
+    {
+      "track_id": "V3",
+      "name": "V3"
+    }
+  ],
+  "clips": [
+    {
+      "clip_id": "clip-000001",
+      "track_id": "V1",
+      "source_ini": 1.0,
+      "source_fin": 5.0,
+      "seq_ini": 0.0,
+      "label": "Saludo",
+      "topic_ids": [],
+      "origin": "user",
+      "state": "proposed",
+      "edited": false,
+      "reason": "",
+      "confidence": null,
+      "junction_note": "",
+      "created_at": "2026-09-08T00:17:13+00:00"
+    },
+    {
+      "clip_id": "clip-000002",
+      "track_id": "V1",
+      "source_ini": 9.0,
+      "source_fin": 11.0,
+      "seq_ini": 4.0,
+      "label": "Cierre",
+      "topic_ids": [],
+      "origin": "user",
+      "state": "accepted",
+      "edited": true,
+      "reason": "",
+      "confidence": null,
+      "junction_note": "",
+      "created_at": "2026-09-08T00:17:13+00:00"
+    },
+    {
+      "clip_id": "clip-000004",
+      "track_id": "V1",
+      "source_ini": 1.0,
+      "source_fin": 2.0,
+      "seq_ini": 6.0,
+      "label": "Repetido",
+      "topic_ids": [],
+      "origin": "user",
+      "state": "proposed",
+      "edited": false,
+      "reason": "",
+      "confidence": null,
+      "junction_note": "",
+      "created_at": "2026-09-08T00:17:13+00:00"
+    },
+    {
+      "clip_id": "clip-000003",
+      "track_id": "V2",
+      "source_ini": 6.0,
+      "source_fin": 7.0,
+      "seq_ini": 2.0,
+      "label": "Risa encima",
+      "topic_ids": [],
+      "origin": "user",
+      "state": "proposed",
+      "edited": false,
+      "reason": "",
+      "confidence": null,
+      "junction_note": "",
+      "created_at": "2026-09-08T00:17:13+00:00"
+    }
+  ],
+  "analysis": {
+    "request_id": null,
+    "pass": 0
+  }
+}

@@ -1,0 +1,1 @@
+{"numpy_only": true, "torch_imported": false, "model_loaded": false, "root_pid": 9784, "timeout": false, "elapsed_seconds": 0.42199999996228144, "exit_code": 0, "stdout": "{\"stage\": \"before-numpy\", \"version\": \"2.5.3\"}\n{\"stage\": \"numpy-loaded\", \"version\": \"2.5.3\", \"seconds\": 0.09399999998277053, \"sum\": 3.0}\n"}

@@ -1,0 +1,38 @@
+paso 1: Log { text: "PERF_OPEN_BEGIN" }
+PERF_OPEN_BEGIN
+paso 2: Open { path: "C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-152825/large.transcriptor/project.json" }
+paso 3: Assert { markers: None, clips: Some(1000), layers: Some(2), items: Some(20000), revision: None, playing: None, rate: None, position: None, tracks: Some(2) }
+assert OK (clips 1000, capas 2, items 20000, rev 0, pos 0.000, rate 1, playing false)
+  toast: Info: Proyecto «Synthetic native performance» abierto (revisión 0)
+paso 4: Action { id: "view.fit" }
+  toast: Info: Proyecto «Synthetic native performance» abierto (revisión 0)
+paso 5: Seek { t: 1.0 }
+  toast: Info: Proyecto «Synthetic native performance» abierto (revisión 0)
+paso 6: WaitFrame { ms: 15000 }
+  toast: Info: Proyecto «Synthetic native performance» abierto (revisión 0)
+fotograma presentado: seq 1 (posición 00:00:01.000)
+paso 7: Log { text: "PERF_OPEN_FRAME_READY" }
+PERF_OPEN_FRAME_READY
+  toast: Info: Proyecto «Synthetic native performance» abierto (revisión 0)
+paso 8: SetIn { t: 0.0 }
+  toast: Info: Proyecto «Synthetic native performance» abierto (revisión 0)
+paso 9: SetOut { t: 4.0 }
+  toast: Info: Proyecto «Synthetic native performance» abierto (revisión 0)
+paso 10: Export { preset: "h264-720p", dest: "C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-152825/under-load.mp4", range: true, selection: None }
+  toast: Info: Exportación añadida a la cola (revisión congelada)
+paso 11: Log { text: "PERF_EXPORT_ENQUEUED" }
+PERF_EXPORT_ENQUEUED
+  toast: Info: Exportación añadida a la cola (revisión congelada)
+paso 12: Seek { t: 4.0 }
+  toast: Info: Exportación añadida a la cola (revisión congelada)
+paso 13: WaitFrame { ms: 15000 }
+  toast: Info: Exportación añadida a la cola (revisión congelada)
+fotograma presentado: seq 2 (posición 00:00:04.000)
+paso 14: Log { text: "PERF_SEEK_EXPORT_READY" }
+PERF_SEEK_EXPORT_READY
+  toast: Info: Exportación añadida a la cola (revisión congelada)
+paso 15: AdvanceFrames { frames: 1 }
+  toast: Info: Exportación añadida a la cola (revisión congelada)
+paso 16: Log { text: "PERF_STEP_BEGIN" }
+PERF_STEP_BEGIN
+  toast: Info: Exportado C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/perf-20260930-152825/under-load.mp4 (00:00:04.000, 120 fotogramas, 3.0 s)

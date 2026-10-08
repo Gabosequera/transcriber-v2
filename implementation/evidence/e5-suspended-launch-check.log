@@ -1,0 +1,18 @@
+    Checking windows-sys v0.61.2
+    Checking tempfile v3.27.0
+    Checking tv2-application v2.0.0-alpha.11 (C:\Users\gabri\Todo\transcriber-v2\crates\application)
+    Checking tv2-media v2.0.0-alpha.11 (C:\Users\gabri\Todo\transcriber-v2\crates\media)
+    Checking tv2-pipeline v2.0.0-alpha.11 (C:\Users\gabri\Todo\transcriber-v2\crates\pipeline)
+warning: method `resume_suspended` is never used
+  --> crates\pipeline\examples\..\src\process_tree.rs:36:12
+   |
+ 5 | impl ProcessTree {
+   | ---------------- method in this implementation
+...
+36 |     pub fn resume_suspended(&self, child: &std::process::Child) -> std::io::Result<()> {
+   |            ^^^^^^^^^^^^^^^^
+   |
+   = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: `tv2-pipeline` (example "runtime_smoke") generated 1 warning
+    Finished `dev` profile [optimized + debuginfo] target(s) in 4.91s

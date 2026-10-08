@@ -105,14 +105,24 @@ impl Drop for ControlService {
     }
 }
 
+// Only fixed phase names and OS error codes reach stderr; never HTTP contents.
+fn trace_io<T>(phase: &'static str, result: io::Result<T>) -> io::Result<T> {
+    if let Err(error) = &result {
+        let _ = writeln!(io::stderr().lock(), "[tv2-mcp-io] phase={phase} kind={:?} os={:?}", error.kind(), error.raw_os_error());
+    }
+    result
+}
 fn response(stream: &mut TcpStream, status: &str, body: Option<&Value>) -> io::Result<()> {
     let bytes = body.map(serde_json::to_vec).transpose()?.unwrap_or_default();
-    write!(
-        stream,
-        "HTTP/1.1 {status}\r\nContent-Type: application/json\r\nContent-Length: {}\r\nConnection: close\r\nCache-Control: no-store\r\nAllow: POST, GET\r\n\r\n",
-        bytes.len()
+    trace_io(
+        "response_header",
+        write!(
+            stream,
+            "HTTP/1.1 {status}\r\nContent-Type: application/json\r\nContent-Length: {}\r\nConnection: close\r\nCache-Control: no-store\r\nAllow: POST, GET\r\n\r\n",
+            bytes.len()
+        ),
     )?;
-    stream.write_all(&bytes)
+    trace_io("response_body", stream.write_all(&bytes))
 }
 fn constant_equal(a: &[u8], b: &[u8]) -> bool {
     if a.len() != b.len() {
@@ -121,9 +131,12 @@ fn constant_equal(a: &[u8], b: &[u8]) -> bool {
     a.iter().zip(b).fold(0u8, |diff, (x, y)| diff | (x ^ y)) == 0
 }
 fn serve(mut stream: TcpStream, token: &str, address: SocketAddr, requests: &Sender<PendingRequest>, wake: &dyn Fn()) -> io::Result<()> {
-    stream.set_read_timeout(Some(Duration::from_secs(3)))?;
-    stream.set_write_timeout(Some(Duration::from_secs(3)))?;
-    let mut reader = BufReader::new(stream.try_clone()?);
+    // Windows accepted sockets inherit FIONBIO from the nonblocking listener.
+    // Workers wait for headers with deadlines instead of returning early.
+    trace_io("headers", stream.set_nonblocking(false))?;
+    trace_io("headers", stream.set_read_timeout(Some(Duration::from_secs(3))))?;
+    trace_io("headers", stream.set_write_timeout(Some(Duration::from_secs(3))))?;
+    let mut reader = BufReader::new(trace_io("headers", stream.try_clone())?);
     let mut raw = Vec::new();
     let mut headers = BTreeMap::new();
     let mut start = String::new();
@@ -133,7 +146,7 @@ fn serve(mut stream: TcpStream, token: &str, address: SocketAddr, requests: &Sen
         if remaining == 0 {
             return response(&mut stream, "431 Request Header Fields Too Large", None);
         }
-        (&mut reader).take(remaining as u64).read_until(b'\n', &mut raw)?;
+        trace_io("headers", (&mut reader).take(remaining as u64).read_until(b'\n', &mut raw))?;
         let line = std::str::from_utf8(&raw[before..]).unwrap_or("").trim_end_matches(['\r', '\n']);
         if index == 0 {
             start = line.to_owned();
@@ -181,7 +194,7 @@ fn serve(mut stream: TcpStream, token: &str, address: SocketAddr, requests: &Sen
         return response(&mut stream, "413 Content Too Large", None);
     }
     let mut body = vec![0; length];
-    reader.read_exact(&mut body)?;
+    trace_io("body", reader.read_exact(&mut body))?;
     let message: Value = match serde_json::from_slice(&body) {
         Ok(value) => value,
         Err(_) => {

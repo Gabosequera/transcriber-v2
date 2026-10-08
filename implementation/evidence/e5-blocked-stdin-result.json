@@ -1,0 +1,33 @@
+{
+  "transport_fixture_only": true,
+  "inference_accepted": false,
+  "accepted": true,
+  "blocked_write": {
+    "padding_bytes": 131072,
+    "request_bytes": 132892,
+    "cancel_after_hello_ms": 300,
+    "elapsed_seconds": 0.6240197,
+    "error": {
+      "code": "CANCELLED",
+      "message": "Análisis cancelado"
+    },
+    "owned_handles": {
+      "worker_pid": 4160,
+      "child_pid": 24684
+    },
+    "worker_handle_signaled": true,
+    "child_handle_signaled": true,
+    "durable_state": "cancelled",
+    "job_id": "job-34e6941edb85"
+  },
+  "oversized_request": {
+    "padding_bytes": 1048576,
+    "elapsed_seconds": 0.2835699,
+    "error": {
+      "code": "INVALID",
+      "message": "Petición Python excesiva"
+    },
+    "durable_state": "failed",
+    "job_id": "job-39356c124ed8"
+  }
+}

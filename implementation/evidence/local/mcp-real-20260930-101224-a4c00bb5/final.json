@@ -1,0 +1,49 @@
+{
+  "revision": 2,
+  "view": "Sequence",
+  "playhead_ms": 0,
+  "player": {
+    "position_ms": 0,
+    "playing": false,
+    "rate": 1.0,
+    "generation": 6,
+    "buffering": false,
+    "decode_ms": 94.555908203125,
+    "audio_available": true
+  },
+  "last_frame": {
+    "position_ms": 0,
+    "w": 790,
+    "h": 444,
+    "generation": 6
+  },
+  "clips": [
+    {
+      "id": "clip-6e4f4824d980",
+      "track": "V1",
+      "position_ms": 0,
+      "source_start_ms": 0,
+      "source_end_ms": 12000,
+      "enabled": true,
+      "link": "link-84426efb7922"
+    },
+    {
+      "id": "clip-e5c7f1d700e9",
+      "track": "A1",
+      "position_ms": 0,
+      "source_start_ms": 0,
+      "source_end_ms": 12000,
+      "enabled": true,
+      "link": "link-84426efb7922"
+    }
+  ],
+  "layers": [],
+  "toasts": [
+    "Importado fixture-a.mp4: video · 640×360 · 30.000 fps · h264 · 1 pista(s) de audio 48000 Hz 1 can. · 00:00:12.000",
+    "Insertado en 00:00:00.000",
+    "Revisión 2 guardada en C:\\Users\\gabri\\Todo\\transcriber-v2\\implementation\\evidence\\local\\mcp-real-20260930-101224-a4c00bb5\\fixture.transcriptor",
+    "el proyecto en disco cambió desde su apertura · abre la versión externa o guarda tus cambios en otra carpeta",
+    "Proyecto «Sin título» abierto (revisión 2)"
+  ],
+  "undo": "Insertar medio"
+}

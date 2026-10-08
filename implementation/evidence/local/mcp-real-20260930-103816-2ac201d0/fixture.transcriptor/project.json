@@ -1,0 +1,162 @@
+{
+  "schema": "transcriptor-project/2",
+  "project_id": "proj-d966667c92fa",
+  "name": "Aceptación MCP árbol 00344913",
+  "revision": 5,
+  "created_at": "2026-09-30T14:38:20+00:00",
+  "updated_at": "2026-09-30T14:38:27+00:00",
+  "assets": [
+    {
+      "id": "asset-c9ab9e369446",
+      "kind": "video",
+      "name": "fixture-a.mp4",
+      "path": "C:/Users/gabri/Todo/transcriber-v2/tests/fixtures/media/fixture-a.mp4",
+      "probe": {
+        "container": "mov",
+        "duration": 8467200000,
+        "start_time": 0,
+        "video": {
+          "stream_index": 0,
+          "codec": "h264",
+          "width": 640,
+          "height": 360,
+          "rotation": 0,
+          "frame_rate": {
+            "num": 30,
+            "den": 1
+          },
+          "avg_frame_rate": {
+            "num": 30,
+            "den": 1
+          },
+          "time_base": {
+            "num": 1,
+            "den": 15360
+          },
+          "start_time": 0,
+          "pix_fmt": "yuv420p",
+          "nb_frames": 360,
+          "duration": 8467200000,
+          "variable_frame_rate": false
+        },
+        "audio": [
+          {
+            "stream_index": 1,
+            "audio_index": 0,
+            "codec": "aac",
+            "channels": 1,
+            "channel_layout": "mono",
+            "sample_rate": 48000,
+            "start_time": 0,
+            "duration": 8467200000,
+            "title": ""
+          }
+        ],
+        "size": 2129706
+      },
+      "fingerprint": {
+        "size": 2129706,
+        "mtime_ns": 1790774357811100300,
+        "hash_muestreado": "326bad7e9be71813ec86c3ea4c09e9575fccba40590be89f4c4012ce20ff82f7",
+        "inventario_sha256": "77aae5a1df8f009ed8f55643e2949f7ff3340026398608631ea992eae8a58d70"
+      },
+      "missing": false
+    }
+  ],
+  "sequences": [
+    {
+      "id": "seq-36953a269c1b",
+      "name": "Secuencia 1",
+      "frame_rate": {
+        "num": 30,
+        "den": 1
+      },
+      "width": 1920,
+      "height": 1080,
+      "sample_rate": 48000,
+      "tracks": [
+        {
+          "id": "track-13270d11e9d0",
+          "kind": "video",
+          "name": "V1",
+          "muted": false,
+          "solo": false,
+          "locked": false,
+          "visible": true,
+          "gain_db": 0.0
+        },
+        {
+          "id": "track-8a1f6de3d2dc",
+          "kind": "audio",
+          "name": "A1",
+          "muted": false,
+          "solo": false,
+          "locked": false,
+          "visible": true,
+          "gain_db": 0.0
+        }
+      ],
+      "clips": [
+        {
+          "id": "clip-b85ec5c9935e",
+          "track_id": "track-13270d11e9d0",
+          "asset_id": "asset-c9ab9e369446",
+          "source": {
+            "start": 0,
+            "end": 8467200000
+          },
+          "position": 0,
+          "enabled": true,
+          "name": "fixture-a.mp4",
+          "link_group": "link-6016e78eebf6",
+          "transform": {
+            "x": 0.0,
+            "y": 0.0,
+            "scale": 1.0,
+            "opacity": 1.0,
+            "fit": "fit"
+          },
+          "gain_db": 0.0,
+          "provenance": {
+            "origin": "user",
+            "created_at": "2026-09-30T14:38:20+00:00"
+          }
+        },
+        {
+          "id": "clip-41f43f6804c8",
+          "track_id": "track-8a1f6de3d2dc",
+          "asset_id": "asset-c9ab9e369446",
+          "source": {
+            "start": 0,
+            "end": 8467200000
+          },
+          "position": 0,
+          "enabled": true,
+          "name": "fixture-a.mp4",
+          "link_group": "link-6016e78eebf6",
+          "transform": {
+            "x": 0.0,
+            "y": 0.0,
+            "scale": 1.0,
+            "opacity": 1.0,
+            "fit": "fit"
+          },
+          "gain_db": 0.0,
+          "audio_stream": 0,
+          "provenance": {
+            "origin": "user",
+            "created_at": "2026-09-30T14:38:20+00:00"
+          }
+        }
+      ],
+      "markers": []
+    }
+  ],
+  "active_sequence": "seq-36953a269c1b",
+  "layers": [],
+  "layer_order": [],
+  "settings": {
+    "snapping": true,
+    "skip_trims_on_play": false
+  }
+}

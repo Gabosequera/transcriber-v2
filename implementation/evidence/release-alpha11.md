@@ -1,0 +1,14 @@
+# Transcriptor V2 2.0.0-alpha.11
+
+Prerelease de fuentes. Corrige fallos reproducidos de guardado, proyectos grandes y transporte MCP, y añade inferencia local opcional. El editor manual sigue funcionando sin Python ni modelos. No incluye ejecutables, entornos ni pesos y no declara terminada la aceptación de E2/E3/E4/E5.
+
+- E2: corregido el desbordamiento del buffer de la timeline en un proyecto de 1.000 clips y 20.000 tramos. La repetición nativa completó reproducción y exportación simultáneas. Exportación RF64 física de 4.300.800.114 bytes verificada con muestras después de 4 GiB; Save As, traslado y copia probados sobre fixtures aisladas.
+- E3: corregido el error `i128 is not supported`; guardado manual de revisión 9 observado por el usuario y confirmado en disco. 83 pruebas unitarias y tres integraciones de application ejecutadas, incluidas interrupciones de procesos propios y recuperación. Nuevos hooks de exportación documental y revisión de cambios externos están compilados; su recorrido nativo posterior sigue pendiente.
+- E4: cliente real conectado al editor verificó propuesta, preparación, aplicación, idempotencia, obsolescencia, undo/redo, revocación y reinicio. Corregida una carrera Winsock y ejecutada su regresión. Las autorizaciones del guion no sustituyen revisión visible humana.
+- E5: workers y jobs locales para ASR, alineación MMS, arousal, risas, generación de evidencias y propuestas editoriales; cancelación, checkpoints y resultados ligados a entradas, revisión y recursos. MMS/arousal/risas y generación común ejecutados por hosts Rust sobre una transcripción inventada explícitamente. Workflow probado con cancelación, reanudación y reutilización verificadas.
+
+El modelo editorial Qwen2.5-1.5B se ejecuta en CPU con carga acotada por tensor, atención SDPA y prefill por bloques sin recortar contexto. Los contratos locales rechazan cobertura incompleta de palabras y temas duplicados; las dos pasadas conservan IDs fuente, rangos y jerarquía. La evidencia conserva todos los intentos fallidos y distingue las micropruebas de la inferencia completa.
+
+Pendientes: ASR real bloqueado al cargar DLLs PyAV por Smart App Control; suites domain/desktop/V1compat/control bloqueadas por Windows4551; pruebas físicas de audio, sincronía, foco, gestos y DPI; aceptación de la nueva GUI y calidad editorial. No se cambiaron protecciones ni se movieron o renombraron binarios para eludir bloqueos. La evidencia de risas negativa no acredita sensibilidad; la muestra pública positiva y los recorridos de LLM tienen seguimiento separado.
+
+Estado detallado, builds, fixtures, límites y resultados: `implementation/STATUS.md`, `implementation/requirements-matrix.md` e `implementation/evidence/continuacion-14.md`. Los modelos tienen sus propias licencias y restricciones, documentadas en la evidencia y en `workers/python/README.md`.

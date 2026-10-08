@@ -1,4 +1,16 @@
-# Continuación 13 — fuentes alpha.10
+# Continuación 14 — fuentes alpha.11, publicación pendiente
+
+El encargo vigente autoriza commit/push/prerelease de fuentes al registrar un traspaso. E2/E3/E4/E5 siguen abiertas; no adjuntar un binario como aceptado sin evidencia de los recorridos requeridos. V1 no se modifica. La prerelease alpha.10 y sus referencias inferiores permanecen históricas.
+
+Alpha.11 se ha ejecutado nativamente con proyectos sintéticos: guiones E2, exports medidos y cliente MCP completo. El build humano SHA `349df668c006a1565613ad6770edd918fb514243b5e2b32888469335f2837c36` continúa abierto; guardado manual de revisión9 confirmado, audio/foco pendientes. Fuentes posteriores añaden previews acotados, supervisor Python cancelable y etapas E5; no se reasocia ese SHA a fuentes nuevas.
+
+La medición PERF sintética de1000 clips/20000 tramos pasó con349df tras corregir el panic wgpu; el fallo previo se conserva. RF64 físico de4.300.800.114bytes pasó con muestras exactas más allá de4GiB. ASR sigue bloqueado por PyAV/Smart App Control y suites4551 permanecen sin reintento. MMS/arousal/risas y generación común tienen evidencia de hosts Rust sobre parent ASR inventado; risas solo con fixtures negativas. DAG/GUI siguen en integración, sin aceptación global de E5.
+
+Antes de publicar: integrar y verificar los cambios de agentes, formato/check/Clippy afectados, redactar notas del alcance final y traspaso con causas/pendientes, revisar evidencia sin tokens/medios personales/venv/pesos, commit/push main/tag y crear prerelease de fuentes sin assets. Verificar SHA/tag/draft/prerelease/assets remotos en `publication-alpha11.json`; actualizar este registro después. No se declara publicación realizada hasta ese resultado.
+
+---
+
+# Histórico — continuación 13, fuentes alpha.10
 
 Publicación confirmada: [v2.0.0-alpha.10](https://github.com/Gabosequera/transcriber-v2/releases/tag/v2.0.0-alpha.10), código/tag `9180b5f4165eea9d596c4ba78a2798fc5bc254bf`; prerelease no draft, sin assets binarios. Registro remoto: `implementation/evidence/publication-alpha10.json`. Main incluye después el commit documental de esta verificación; el tag conserva el código compilado. No declara aceptación física ni inicia E5.
 

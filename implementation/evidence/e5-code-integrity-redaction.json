@@ -1,0 +1,10 @@
+{
+  "original_sha256": "973FECCFDB7AC4FBE72EDA4F191E42CC36F2EE3FFF94005157706AA97F1EB281",
+  "original_preserved_local": true,
+  "redacted_fields": [
+    "System.Computer",
+    "System.Security.UserID"
+  ],
+  "redacted_sha256": "B16E17584526BF38885C1C1EB872CD3331A3B68B74D917F1079D91804F5F33C8",
+  "policy_paths_hashes_times_unchanged": true
+}

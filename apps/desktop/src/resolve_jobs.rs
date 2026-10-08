@@ -26,15 +26,25 @@ pub struct Resolver {
     pub error: Option<String>,
     failed: Option<Key>,
     pub seek: Cell<Option<Ticks>>,
+    pub requested_position: Cell<Option<Ticks>>,
     pub playing: Cell<Option<bool>>,
 }
 impl Resolver {
     pub fn new(wake: egui::Context) -> Self {
-        Self { pending: None, wake, error: None, failed: None, seek: Cell::new(None), playing: Cell::new(None) }
+        Self { pending: None, wake, error: None, failed: None, seek: Cell::new(None), requested_position: Cell::new(None), playing: Cell::new(None) }
     }
     pub fn retry(&mut self) {
         self.failed = None;
         self.error = None;
+    }
+    pub fn accept_paused_position(&self, position: Ticks, rate: Rational) -> bool {
+        match self.requested_position.get() {
+            Some(target) if position != target.floor_to_frame(rate) => false,
+            _ => {
+                self.requested_position.set(None);
+                true
+            }
+        }
     }
 }
 impl TranscriptorApp {
@@ -140,6 +150,19 @@ fn resolve(project: &Project, view: ViewMode, source: Option<&AssetId>) -> Resol
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn queued_old_frame_does_not_replace_latest_paused_seek() {
+        let resolver = Resolver::new(egui::Context::default());
+        let rate = Rational::new(30, 1);
+        resolver.requested_position.set(Some(Ticks::from_millis(11500)));
+        assert!(!resolver.accept_paused_position(Ticks::from_millis(2067).floor_to_frame(rate), rate));
+        assert!(resolver.requested_position.get().is_some());
+        resolver.requested_position.set(Some(Ticks::from_millis(5201)));
+        assert!(!resolver.accept_paused_position(Ticks::from_millis(11500), rate));
+        assert!(resolver.accept_paused_position(Ticks::from_millis(5201).floor_to_frame(rate), rate));
+        assert!(resolver.requested_position.get().is_none());
+    }
 
     #[test]
     fn deferred_frame_steps_use_the_same_grid_as_the_player() {

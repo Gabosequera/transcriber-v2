@@ -1,0 +1,17 @@
+{
+  "started_at": "2026-09-30T10:09:45.2912010-04:00",
+  "cleanup_owned_pid": 27444,
+  "schema": "tv2-real-mcp-acceptance/1",
+  "accepted": false,
+  "error": "Tool failure calling tv2_context: E_PERMISSION: tool unavailable for current permissions/host capabilities",
+  "finished_at": "2026-09-30T10:09:55.9212202-04:00",
+  "fixture": {
+    "sha256": "FFB48C13E1B626EC2F73C3144147B689A153CF4A3D5017CE233FD5B3A4061F67",
+    "path": "C:\\Users\\gabri\\Todo\\transcriber-v2\\tests\\fixtures\\media\\fixture-a.mp4"
+  },
+  "authorization": "trusted local --script grants scoped automatic commands; no remote permission escalation",
+  "build": {
+    "sha256": "5C43F3675B9A8536E84452AF40CEAC09CCD7BF5F05DDFA5B769C4310BD01AC54",
+    "path": "C:\\Users\\gabri\\Todo\\transcriber-v2\\target\\release\\Transcriptor.exe"
+  }
+}

@@ -1,0 +1,9 @@
+{
+  "kind": "stdlib-read-only-cross-review-fixture",
+  "native_inference_executed": false,
+  "input_unchanged": true,
+  "conversation_extra_preserved": false,
+  "heuristics_extra_preserved": false,
+  "analysis_extra_preserved": true,
+  "original_archives_all_extras": true
+}

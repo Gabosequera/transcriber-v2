@@ -1,0 +1,14 @@
+{
+  "cap_bytes": 8589934592,
+  "deadline_seconds": 180,
+  "accepted": true,
+  "editorial_accepted": false,
+  "generation_executed": false,
+  "script_sha256": "778fca519aa67b82b3f2d5e3839deec827b23e5183cdc7da7ca4f941bdf612a5",
+  "supervisor_layout_sha256": "2eb9d9df43fb10edeed5a055ec85c6afc4933f99d6f36aa4bc662bc10a614934",
+  "pid": 26576,
+  "exit_code": 0,
+  "peak_job_memory": 8348938240,
+  "duration_seconds": 57.13999999995576,
+  "own_process_signaled": true
+}

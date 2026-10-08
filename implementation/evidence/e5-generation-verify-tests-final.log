@@ -1,0 +1,22 @@
+test_atomic_publication_leaves_no_partial (__main__.Boundaries.test_atomic_publication_leaves_no_partial) ... ok
+test_byte_identity_before_json (__main__.Boundaries.test_byte_identity_before_json) ... ok
+test_cancel_interrupts_input_hash (__main__.Boundaries.test_cancel_interrupts_input_hash) ... ok
+test_canonical_disallows_nonfinite_metrics (__main__.Boundaries.test_canonical_disallows_nonfinite_metrics) ... ok
+test_closed_reference (__main__.Boundaries.test_closed_reference) ... ok
+test_complete_json_without_newline_is_incomplete_at_eof (__main__.Boundaries.test_complete_json_without_newline_is_incomplete_at_eof) ... ok
+test_forged_checkpoint_cannot_authorize_derivation (__main__.Boundaries.test_forged_checkpoint_cannot_authorize_derivation) ... ok
+test_json_bound (__main__.Boundaries.test_json_bound) ... ok
+test_nonfinite_is_not_accepted (__main__.Boundaries.test_nonfinite_is_not_accepted) ... ok
+test_output_traversal_rejected_before_directory_creation (__main__.Boundaries.test_output_traversal_rejected_before_directory_creation) ... ok
+test_unknown_envelope_fields_and_nonstrings_are_rejected (__main__.Boundaries.test_unknown_envelope_fields_and_nonstrings_are_rejected) ... ok
+test_verified_source_cannot_be_replaced_by_timestamp_valid_pyc (__main__.Boundaries.test_verified_source_cannot_be_replaced_by_timestamp_valid_pyc) ... ok
+test_verify_cancel_and_changed_input_leave_all_outputs_untouched (__main__.Boundaries.test_verify_cancel_and_changed_input_leave_all_outputs_untouched) ... ok
+test_verify_closed_request_and_type_identity (__main__.Boundaries.test_verify_closed_request_and_type_identity) ... ok
+test_verify_fresh_derivation_is_read_only_and_preserves_extensions (__main__.Boundaries.test_verify_fresh_derivation_is_read_only_and_preserves_extensions) ... ok
+test_verify_real_protocol_child_is_read_only_and_requires_hello (__main__.Boundaries.test_verify_real_protocol_child_is_read_only_and_requires_hello) ... ok
+test_verify_rejects_rehashed_derivations_and_human_extension_forgery (__main__.Boundaries.test_verify_rejects_rehashed_derivations_and_human_extension_forgery) ... ok
+
+----------------------------------------------------------------------
+Ran 17 tests in 1.355s
+
+OK

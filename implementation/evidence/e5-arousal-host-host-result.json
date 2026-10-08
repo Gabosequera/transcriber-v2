@@ -1,0 +1,218 @@
+{
+  "parent_asr_fixture_only": true,
+  "asr_exercised": false,
+  "real_mms_host_accepted": true,
+  "real_arousal_host_accepted": true,
+  "project_unchanged": true,
+  "gui_exercised": false,
+  "mms_seconds": 11.9861937,
+  "arousal_seconds": 14.7873638,
+  "project_path": "C:/Users/gabri/Todo/transcriber-v2/.local/e5-arousal-host-01\\project.json",
+  "parent_asr_path": "C:/Users/gabri/Todo/transcriber-v2/.local/e5-arousal-host-01\\parent-asr.json",
+  "alignment_job_path": "C:/Users/gabri/Todo/transcriber-v2/.local/e5-arousal-host-01\\alignment-job.json",
+  "arousal_job_path": "C:/Users/gabri/Todo/transcriber-v2/.local/e5-arousal-host-01\\arousal-job.json",
+  "parent_asr_id": "job-57fe5b97cf1c",
+  "alignment_id": "job-0be1e8a200a1",
+  "arousal_id": "job-9df2fbd58fa5",
+  "validation_cases": [
+    "stale-revision",
+    "traversal",
+    "sibling",
+    "unknown-result",
+    "unknown-payload",
+    "word-id",
+    "asr-origin",
+    "human-comment",
+    "word-association",
+    "baseline",
+    "metadata-extra",
+    "event-extra",
+    "runtime-lock",
+    "source-lineage"
+  ],
+  "cancelled_job": "job-af113a7927a3",
+  "cancel_error": {
+    "code": "CANCELLED",
+    "message": "Análisis cancelado"
+  },
+  "result": {
+    "job_id": "job-9df2fbd58fa5",
+    "project_id": "proj-5789225831cf",
+    "revision": 1,
+    "project_digest": "fd3aa86252b56c5d2ea37ab05ee0e747d267fdfdc39976e108a58fb0079439e8",
+    "asset_id": "asset-76f1df4dc491",
+    "normalized_audio_sha256": "90f6dfc24eca1116f879c5269e0dbec6cc5e0687e7bcd89ccea11344f641397a",
+    "transcript_sha256": "a93c30c93a7c8d5aae569a2e2d796beb5d8c0e0bfa3dab0bc02f748d9e9d9456",
+    "model_digest": "18f38ce13568ec98a0173603e4bf653097e802ac8fb3c7fa34df751c97a3a36e",
+    "manifest_sha256": "93c9c89093955b3a515b80825457b9c49049707edb737e896b2bd1eb111c4de4",
+    "source_sha256": "90f6dfc24eca1116f879c5269e0dbec6cc5e0687e7bcd89ccea11344f641397a",
+    "source_duration_ticks": 6725073600,
+    "timebase": "canonical-normalized-pcm/1",
+    "arousal_path": "arousal/arousal-words.json",
+    "artifacts": {
+      "arousal/arousal-words.json": "b08b69aa500d384953c390b5aac8ffee433d0b3e4d8615f19389083d3e91637a"
+    }
+  },
+  "events": [
+    {
+      "event": "progress",
+      "fraction": 0,
+      "job_id": "job-0be1e8a200a1",
+      "protocol": "tv2-alignment/1",
+      "stage": "verify-inputs"
+    },
+    {
+      "event": "progress",
+      "fraction": 1,
+      "job_id": "job-0be1e8a200a1",
+      "protocol": "tv2-alignment/1",
+      "stage": "verify-inputs"
+    },
+    {
+      "event": "progress",
+      "fraction": 0,
+      "job_id": "job-0be1e8a200a1",
+      "protocol": "tv2-alignment/1",
+      "stage": "load-mms"
+    },
+    {
+      "event": "progress",
+      "fraction": 1,
+      "job_id": "job-0be1e8a200a1",
+      "protocol": "tv2-alignment/1",
+      "stage": "load-mms"
+    },
+    {
+      "cached": false,
+      "event": "progress",
+      "fraction": 1.0,
+      "job_id": "job-0be1e8a200a1",
+      "protocol": "tv2-alignment/1",
+      "stage": "alignment"
+    },
+    {
+      "cached": false,
+      "event": "progress",
+      "fraction": 1,
+      "job_id": "job-0be1e8a200a1",
+      "protocol": "tv2-alignment/1",
+      "stage": "complete"
+    },
+    {
+      "event": "progress",
+      "fraction": 0,
+      "job_id": "job-9df2fbd58fa5",
+      "protocol": "tv2-arousal/1",
+      "stage": "verify-inputs"
+    },
+    {
+      "event": "progress",
+      "fraction": 1,
+      "job_id": "job-9df2fbd58fa5",
+      "protocol": "tv2-arousal/1",
+      "stage": "verify-inputs"
+    },
+    {
+      "event": "progress",
+      "fraction": 0,
+      "job_id": "job-9df2fbd58fa5",
+      "protocol": "tv2-arousal/1",
+      "stage": "load-arousal"
+    },
+    {
+      "component": "torch-import",
+      "event": "progress",
+      "fraction": 0,
+      "job_id": "job-9df2fbd58fa5",
+      "protocol": "tv2-arousal/1",
+      "stage": "load-arousal"
+    },
+    {
+      "component": "safetensors-import",
+      "event": "progress",
+      "fraction": 0,
+      "job_id": "job-9df2fbd58fa5",
+      "protocol": "tv2-arousal/1",
+      "stage": "load-arousal"
+    },
+    {
+      "component": "transformers-import",
+      "event": "progress",
+      "fraction": 0,
+      "job_id": "job-9df2fbd58fa5",
+      "protocol": "tv2-arousal/1",
+      "stage": "load-arousal"
+    },
+    {
+      "component": "local-config",
+      "event": "progress",
+      "fraction": 0.1,
+      "job_id": "job-9df2fbd58fa5",
+      "protocol": "tv2-arousal/1",
+      "stage": "load-arousal"
+    },
+    {
+      "component": "safetensors-load",
+      "event": "progress",
+      "fraction": 0.5,
+      "job_id": "job-9df2fbd58fa5",
+      "protocol": "tv2-arousal/1",
+      "stage": "load-arousal"
+    },
+    {
+      "event": "progress",
+      "fraction": 1,
+      "job_id": "job-9df2fbd58fa5",
+      "protocol": "tv2-arousal/1",
+      "stage": "load-arousal"
+    },
+    {
+      "cached": false,
+      "event": "progress",
+      "fraction": 0.2,
+      "job_id": "job-9df2fbd58fa5",
+      "protocol": "tv2-arousal/1",
+      "stage": "arousal"
+    },
+    {
+      "cached": false,
+      "event": "progress",
+      "fraction": 0.4,
+      "job_id": "job-9df2fbd58fa5",
+      "protocol": "tv2-arousal/1",
+      "stage": "arousal"
+    },
+    {
+      "cached": false,
+      "event": "progress",
+      "fraction": 0.6,
+      "job_id": "job-9df2fbd58fa5",
+      "protocol": "tv2-arousal/1",
+      "stage": "arousal"
+    },
+    {
+      "cached": false,
+      "event": "progress",
+      "fraction": 0.8,
+      "job_id": "job-9df2fbd58fa5",
+      "protocol": "tv2-arousal/1",
+      "stage": "arousal"
+    },
+    {
+      "cached": false,
+      "event": "progress",
+      "fraction": 1.0,
+      "job_id": "job-9df2fbd58fa5",
+      "protocol": "tv2-arousal/1",
+      "stage": "arousal"
+    },
+    {
+      "cached": false,
+      "event": "progress",
+      "fraction": 1,
+      "job_id": "job-9df2fbd58fa5",
+      "protocol": "tv2-arousal/1",
+      "stage": "complete"
+    }
+  ]
+}

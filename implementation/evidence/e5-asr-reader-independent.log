@@ -1,0 +1,17 @@
+test_01_real_multistream_offsets_cache_and_corruption (__main__.ExtractionTests.test_01_real_multistream_offsets_cache_and_corruption) ... ok
+test_02_negative_offset_trims_exact_samples (__main__.ExtractionTests.test_02_negative_offset_trims_exact_samples) ... ok
+test_03_cancel_before_extract_preserves_checkpoint_and_source (__main__.ExtractionTests.test_03_cancel_before_extract_preserves_checkpoint_and_source) ... ok
+test_04_tampered_cache_path_is_ignored (__main__.ExtractionTests.test_04_tampered_cache_path_is_ignored) ... ok
+test_05_exact_runtime_mismatch_rejected_without_import (__main__.ExtractionTests.test_05_exact_runtime_mismatch_rejected_without_import) ... ok
+test_06_cancel_real_ffmpeg_reaps_process_and_cleans_partial (__main__.ExtractionTests.test_06_cancel_real_ffmpeg_reaps_process_and_cleans_partial) ... ok
+test_07_cross_job_language_model_changes_reuse_only_verified_extraction (__main__.ExtractionTests.test_07_cross_job_language_model_changes_reuse_only_verified_extraction) ... ok
+test_01_hello_runtime_and_closed_capabilities (__main__.ContractTests.test_01_hello_runtime_and_closed_capabilities) ... ok
+test_02_run_requires_hello_and_invalid_request_rejected (__main__.ContractTests.test_02_run_requires_hello_and_invalid_request_rejected) ... ok
+test_03_hash_preconditions_before_ffmpeg (__main__.ContractTests.test_03_hash_preconditions_before_ffmpeg) ... ok
+test_07_eof_cancels_and_leaves_no_success_master (__main__.ContractTests.test_07_eof_cancels_and_leaves_no_success_master) ... ok
+test_08_paths_reject_traversal_and_existing_escape (__main__.ContractTests.test_08_paths_reject_traversal_and_existing_escape) ... ok
+
+----------------------------------------------------------------------
+Ran 12 tests in 6.072s
+
+OK

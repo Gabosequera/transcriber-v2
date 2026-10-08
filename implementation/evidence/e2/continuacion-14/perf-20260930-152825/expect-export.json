@@ -1,0 +1,1 @@
+{"source":"C:/Users/gabri/Todo/transcriber-v2/tests/fixtures/media/fixture-a.mp4","fps":30,"duration":4.0,"tolerance_ms":80,"checks":[{"t":0.5,"source_t":0.5,"wrong_t":6.5},{"t":2.5,"source_t":2.5,"wrong_t":8.5},{"t":3.5,"source_t":3.5,"wrong_t":9.5}]}

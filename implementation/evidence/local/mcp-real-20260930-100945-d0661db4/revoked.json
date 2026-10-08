@@ -1,0 +1,43 @@
+{
+  "revision": 5,
+  "view": "Sequence",
+  "playhead_ms": 0,
+  "player": {
+    "position_ms": 0,
+    "playing": false,
+    "rate": 1.0,
+    "generation": 6,
+    "buffering": false,
+    "decode_ms": 112.48430633544922,
+    "audio_available": true
+  },
+  "last_frame": {
+    "position_ms": 0,
+    "w": 790,
+    "h": 444,
+    "generation": 6
+  },
+  "clips": [
+    {
+      "id": "clip-4a660eed4a18",
+      "track": "V1",
+      "position_ms": 0,
+      "source_start_ms": 0,
+      "source_end_ms": 12000,
+      "enabled": true,
+      "link": "link-e394c9a8cff2"
+    },
+    {
+      "id": "clip-5c18c704ed33",
+      "track": "A1",
+      "position_ms": 0,
+      "source_start_ms": 0,
+      "source_end_ms": 12000,
+      "enabled": true,
+      "link": "link-e394c9a8cff2"
+    }
+  ],
+  "layers": [],
+  "toasts": [],
+  "undo": "Renombrar proyecto"
+}

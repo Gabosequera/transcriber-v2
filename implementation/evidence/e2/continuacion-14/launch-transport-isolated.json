@@ -1,0 +1,9 @@
+{
+  "time": "2026-09-30T10:13:55.4924421-04:00",
+  "exe": "C:\\Users\\gabri\\Todo\\transcriber-v2\\target\\release\\Transcriptor.exe",
+  "sha256": "5C43F3675B9A8536E84452AF40CEAC09CCD7BF5F05DDFA5B769C4310BD01AC54",
+  "script": "C:\\Users\\gabri\\Todo\\transcriber-v2\\implementation\\evidence\\local\\prepared-20260930-141332-847281\\e2-transporte.json",
+  "pid": 5004,
+  "launched": true,
+  "otherTranscriptorInstances": 0
+}

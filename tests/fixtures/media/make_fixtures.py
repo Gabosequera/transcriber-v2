@@ -40,15 +40,18 @@ def make_base_video(path):
     size = "1920x1080" if hd else "640x360"
     label = "HD" if hd else ("A" if name == "fixture-a.mp4" else "B")
     tone = "220" if label == "A" else "440"
+    # E2 inserts B at 3 s over the 12 s A source: B must end at 11 s.
+    duration = 8 if name == "fixture-b.mp4" else 12
     vf = f"drawtext=fontfile='{FONT}':text='{label} %{{n}}':x=20:y=20:fontsize=48:fontcolor=white:box=1:boxcolor=black@0.7"
-    run(["-f", "lavfi", "-i", f"testsrc2=size={size}:rate=30:duration=12",
-         "-f", "lavfi", "-i", f"sine=frequency={tone}:sample_rate=48000:duration=12",
+    run(["-f", "lavfi", "-i", f"testsrc2=size={size}:rate=30:duration={duration}",
+         "-f", "lavfi", "-i", f"sine=frequency={tone}:sample_rate=48000:duration={duration}",
          "-vf", vf, "-c:v", "libx264", "-preset", "fast", "-crf", "18", "-g", "60",
          "-pix_fmt", "yuv420p", "-c:a", "aac", "-b:a", "192k", "-shortest", path])
 
 
 def make_tone(path):
-    run(["-f", "lavfi", "-i", "sine=frequency=220:sample_rate=48000:duration=12", "-c:a", "pcm_s16le", path])
+    # Probe/decoder acceptance expects a 10 s stereo PCM source.
+    run(["-f", "lavfi", "-i", "sine=frequency=220:sample_rate=48000:duration=10", "-ac", "2", "-c:a", "pcm_s16le", path])
 
 
 def make_sync(path):
@@ -130,7 +133,7 @@ def main():
         fn(path)
     uni_dir = os.path.join(HERE, "fixture-espacios", "ñ medios prueba")
     uni = os.path.join(uni_dir, "fixture-ñ.mp4")
-    if not os.path.exists(uni):
+    if not os.path.exists(uni) or "fixture-b.mp4" in force:
         os.makedirs(uni_dir, exist_ok=True)
         shutil.copyfile(os.path.join(HERE, "fixture-b.mp4"), uni)
         print(f"{uni}: copiado")

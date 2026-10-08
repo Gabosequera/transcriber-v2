@@ -1,0 +1,48 @@
+paso 1: Open { path: "C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/save-as-20260930-171900/relocated.transcriptor/project.json" }
+paso 2: Assert { markers: None, clips: None, layers: Some(10), items: Some(18), revision: Some(3), playing: None, rate: None, position: None, tracks: None }
+assert OK (clips 10, capas 10, items 18, rev 3, pos 0.000, rate 1, playing false)
+  toast: Info: Proyecto «Sin título» abierto (revisión 3)
+paso 3: Dump { path: "C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/save-as-20260930-171900/reopened-state.json" }
+estado volcado en C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/save-as-20260930-171900/reopened-state.json
+  toast: Info: Proyecto «Sin título» abierto (revisión 3)
+paso 4: Undo
+  toast: Info: Deshacer Añadir tramo
+paso 5: Assert { markers: None, clips: None, layers: Some(10), items: Some(17), revision: Some(4), playing: None, rate: None, position: None, tracks: None }
+assert OK (clips 10, capas 10, items 17, rev 4, pos 0.000, rate 1, playing false)
+  toast: Info: Deshacer Añadir tramo
+paso 6: Dump { path: "C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/save-as-20260930-171900/undo-state.json" }
+estado volcado en C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/save-as-20260930-171900/undo-state.json
+  toast: Info: Deshacer Añadir tramo
+paso 7: Redo
+  toast: Info: Rehacer Añadir tramo
+paso 8: Assert { markers: None, clips: None, layers: None, items: Some(18), revision: Some(5), playing: None, rate: None, position: None, tracks: None }
+assert OK (clips 10, capas 10, items 18, rev 5, pos 0.000, rate 1, playing false)
+  toast: Info: Rehacer Añadir tramo
+paso 9: Save { path: "C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/save-as-20260930-171900/relocated.transcriptor" }
+  toast: Info: Rehacer Añadir tramo
+paso 10: Wait { ms: 500 }
+  toast: Info: Revisión 5 guardada en C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/save-as-20260930-171900/relocated.transcriptor
+paso 11: Seek { t: 1.5 }
+  toast: Info: Revisión 5 guardada en C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/save-as-20260930-171900/relocated.transcriptor
+paso 12: WaitFrame { ms: 10000 }
+  toast: Info: Revisión 5 guardada en C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/save-as-20260930-171900/relocated.transcriptor
+fotograma presentado: seq 2 (posición 00:00:01.500)
+paso 13: SetIn { t: 0.0 }
+  toast: Info: Revisión 5 guardada en C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/save-as-20260930-171900/relocated.transcriptor
+paso 14: SetOut { t: 2.0 }
+  toast: Info: Revisión 5 guardada en C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/save-as-20260930-171900/relocated.transcriptor
+paso 15: Export { preset: "h264-720p", dest: "C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/save-as-20260930-171900/relocated-export.mp4", range: true, selection: None }
+  toast: Info: Exportación añadida a la cola (revisión congelada)
+paso 16: WaitExport { ms: 30000 }
+  toast: Info: Exportación añadida a la cola (revisión congelada)
+export OK: C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/save-as-20260930-171900/relocated-export.mp4 · 00:00:02.000 · 60 frames · sha256 a216052388286e94a610a1115d59988add43858f53e6b4d3ad9f1db4c6ad5c93
+paso 17: Dump { path: "C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/save-as-20260930-171900/redo-state.json" }
+estado volcado en C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/save-as-20260930-171900/redo-state.json
+  toast: Info: Exportado C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/save-as-20260930-171900/relocated-export.mp4 (00:00:02.000, 60 fotogramas, 1.2 s)
+paso 18: Screenshot { path: "C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/save-as-20260930-171900/relocated-native.png" }
+  toast: Info: Exportado C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/save-as-20260930-171900/relocated-export.mp4 (00:00:02.000, 60 fotogramas, 1.2 s)
+captura guardada en C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/save-as-20260930-171900/relocated-native.png (1920×1080)
+paso 19: Quit
+quit; fallos=false
+  toast: Info: Exportado C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/save-as-20260930-171900/relocated-export.mp4 (00:00:02.000, 60 fotogramas, 1.2 s)
+guion terminado; fallos=false

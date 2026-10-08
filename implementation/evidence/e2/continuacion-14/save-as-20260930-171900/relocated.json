@@ -1,0 +1,82 @@
+[
+  {
+    "op": "open",
+    "path": "C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/save-as-20260930-171900/relocated.transcriptor/project.json"
+  },
+  {
+    "op": "assert",
+    "revision": 3,
+    "layers": 10,
+    "items": 18
+  },
+  {
+    "op": "dump",
+    "path": "C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/save-as-20260930-171900/reopened-state.json"
+  },
+  {
+    "op": "undo"
+  },
+  {
+    "op": "assert",
+    "revision": 4,
+    "layers": 10,
+    "items": 17
+  },
+  {
+    "op": "dump",
+    "path": "C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/save-as-20260930-171900/undo-state.json"
+  },
+  {
+    "op": "redo"
+  },
+  {
+    "op": "assert",
+    "revision": 5,
+    "items": 18
+  },
+  {
+    "op": "save",
+    "path": "C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/save-as-20260930-171900/relocated.transcriptor"
+  },
+  {
+    "op": "wait",
+    "ms": 500
+  },
+  {
+    "op": "seek",
+    "t": 1.5
+  },
+  {
+    "op": "wait_frame",
+    "ms": 10000
+  },
+  {
+    "op": "set_in",
+    "t": 0
+  },
+  {
+    "op": "set_out",
+    "t": 2
+  },
+  {
+    "op": "export",
+    "preset": "h264-720p",
+    "dest": "C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/save-as-20260930-171900/relocated-export.mp4",
+    "range": true
+  },
+  {
+    "op": "wait_export",
+    "ms": 30000
+  },
+  {
+    "op": "dump",
+    "path": "C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/save-as-20260930-171900/redo-state.json"
+  },
+  {
+    "op": "screenshot",
+    "path": "C:/Users/gabri/Todo/transcriber-v2/implementation/evidence/e2/continuacion-14/save-as-20260930-171900/relocated-native.png"
+  },
+  {
+    "op": "quit"
+  }
+]

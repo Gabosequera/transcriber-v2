@@ -61,7 +61,43 @@ if (-not $Token) {
 $headers = @{ Authorization = "Bearer $Token"; Accept = 'application/json, text/event-stream'; 'MCP-Protocol-Version' = '2025-11-25' }
 function Send-Rpc([object]$Request) {
     $bytes = [System.Text.Encoding]::UTF8.GetBytes(($Request | ConvertTo-Json -Depth 100 -Compress))
-    Invoke-RestMethod -Method Post -Uri $Endpoint -Headers $headers -ContentType 'application/json' -Body $bytes -TimeoutSec 35
+    # Names are whitelisted, string IDs hashed: remote request contents may
+    # contain private data even in method/tool/ID fields. Never log messages,
+    # arguments, endpoint, headers or tokens, including exception messages.
+    $methods = @('initialize','ping','tools/list','tools/call','notifications/initialized','notifications/cancelled')
+    $tools = @('tv2_context','tv2_query','tv2_evidence','tv2_jobs','tv2_events','tv2_audit','tv2_propose','tv2_reprepare','tv2_proposals','tv2_preview','tv2_apply','tv2_verify','tv2_select','tv2_transport','tv2_cancel_job','tv2_export','tv2_import')
+    $method = if ($Request.method -cin $methods) { $Request.method } else { 'other' }
+    $toolName = if ($method -ceq 'tools/call' -and $Request.params.name -cin $tools) { $Request.params.name } else { 'none' }
+    $id = if ($null -eq $Request.id) { 'none' }
+        elseif ($Request.id -is [string]) { 'sha256:' + [Convert]::ToHexString([Security.Cryptography.SHA256]::HashData([Text.Encoding]::UTF8.GetBytes($Request.id))).ToLowerInvariant() }
+        elseif ($Request.id -is [ValueType] -and $Request.id -isnot [bool]) { 'number' }
+        else { 'other' }
+    $timer = [Diagnostics.Stopwatch]::StartNew()
+    $diagnostic = @{schema='tv2-mcp-client-diagnostic/1';method=$method;tool=$toolName;rpc_id=$id;status='complete'}
+    # Normal client IDs are integer counters; arbitrary non-string values are
+    # never formatted from the request into diagnostics.
+    if ($Request.id -is [int] -or $Request.id -is [long]) { $diagnostic.rpc_id=$Request.id }
+    try {
+        Invoke-RestMethod -Method Post -Uri $Endpoint -Headers $headers -ContentType 'application/json' -Body $bytes -TimeoutSec 35
+    } catch {
+        $diagnostic.status='failed'
+        $diagnostic.exceptions=@()
+        $exception=$_.Exception
+        for ($depth=0; $exception -and $depth -lt 8; $depth++) {
+            $entry=@{type=$exception.GetType().FullName}
+            if ($exception -is [Net.Sockets.SocketException]) {
+                $entry.socket_error=$exception.SocketErrorCode.ToString()
+                $entry.native_error=$exception.NativeErrorCode
+            }
+            $diagnostic.exceptions += $entry
+            $exception=$exception.InnerException
+        }
+        throw
+    } finally {
+        $timer.Stop()
+        $diagnostic.elapsed_ms=$timer.ElapsedMilliseconds
+        [Console]::Error.WriteLine(($diagnostic | ConvertTo-Json -Depth 6 -Compress))
+    }
 }
 if ($Stdio) {
     [Console]::InputEncoding = [System.Text.UTF8Encoding]::new($false)
@@ -83,9 +119,13 @@ if ($Stdio) {
         }
         try {
             $result = Send-Rpc $request
-            if ($null -ne $result) { [Console]::WriteLine(($result | ConvertTo-Json -Depth 100 -Compress)) }
+            # Invoke-RestMethod represents an empty HTTP 202 body as ''. MCP
+            # notifications must never emit that string (or any reply) on stdout.
+            if ($request.Contains('id') -and $null -ne $result -and $result -ne '') {
+                [Console]::WriteLine(($result | ConvertTo-Json -Depth 100 -Compress))
+            }
         } catch {
-            [Console]::Error.WriteLine($_.Exception.Message)
+            # Send-Rpc already emitted safe phase/type diagnostics on stderr.
             # Do not strand the caller's request when HTTP fails. Never retry a
             # mutation: the host may already have committed before a timeout.
             if ($request.Contains('id')) {

@@ -1,0 +1,20 @@
+   Compiling tv2-pipeline v2.0.0-alpha.11 (C:\Users\gabri\Todo\transcriber-v2\crates\pipeline)
+    Finished `test` profile [optimized + debuginfo] target(s) in 3.73s
+     Running unittests src\lib.rs (target\debug\deps\tv2_pipeline-3359e052aca71e8c.exe)
+
+running 12 tests
+test tests::cancellation_prevents_result_validation_and_preparation ... ok
+test tests::artifact_paths_cannot_escape_the_owned_job_even_with_matching_bytes ... ok
+test tests::result_linkage_rejects_each_changed_identity_and_missing_receipt_entry ... ok
+test tests::explicit_rebase_preserves_new_human_edit_and_requires_current_source_identity ... ok
+test tests::prepared_analysis_cannot_commit_after_local_human_edit ... ok
+test tests::stale_project_revision_identity_digest_and_asset_are_rejected ... ok
+test tests::undeclared_editorial_sibling_never_becomes_part_of_inference_proposal ... ok
+test tests::incorporation_preserves_human_decisions_preview_and_idempotent_receipts ... ok
+test tests::tampered_or_missing_artifact_is_rejected_before_preparing_any_change ... ok
+test tests::receipted_master_still_requires_original_media_fingerprint_and_duration ... ok
+test tests::fresh_analysis_cannot_silently_replace_existing_immutable_master ... ok
+test tests::analysis_evidence_history_receipt_and_save_as_survive_job_folder_move ... ok
+
+test result: ok. 12 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.07s
+

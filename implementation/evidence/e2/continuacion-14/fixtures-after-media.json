@@ -1,0 +1,68 @@
+[
+  {
+    "path": "C:\\Users\\gabri\\Todo\\transcriber-v2\\tests\\fixtures\\media\\fixture-a.mp4",
+    "bytes": 2129706,
+    "sha256": "ffb48c13e1b626ec2f73c3144147b689a153cf4a3d5017ce233fd5b3a4061f67",
+    "unchanged": true
+  },
+  {
+    "path": "C:\\Users\\gabri\\Todo\\transcriber-v2\\tests\\fixtures\\media\\fixture-audio-delay.mp4",
+    "bytes": 3108545,
+    "sha256": "2725bfbfa1a9b665adca31d88906a82743d50920b963e5b3d1da7170c75089f3",
+    "unchanged": true
+  },
+  {
+    "path": "C:\\Users\\gabri\\Todo\\transcriber-v2\\tests\\fixtures\\media\\fixture-b.mp4",
+    "bytes": 1438514,
+    "sha256": "6752fb85e5b528e74d702e0b863726eecb925671e70f234997371023e469b7c9",
+    "unchanged": true
+  },
+  {
+    "path": "C:\\Users\\gabri\\Todo\\transcriber-v2\\tests\\fixtures\\media\\fixture-hd.mp4",
+    "bytes": 15269758,
+    "sha256": "76283250dd1c1a155f4b21b2df09e86dfec70950b2201300f0602c06e67be1ee",
+    "unchanged": true
+  },
+  {
+    "path": "C:\\Users\\gabri\\Todo\\transcriber-v2\\tests\\fixtures\\media\\fixture-rot90.mp4",
+    "bytes": 595867,
+    "sha256": "b0b321367273131a66d4baf46d3fd1ebbca7c262518871ce831f24077a1c6194",
+    "unchanged": true
+  },
+  {
+    "path": "C:\\Users\\gabri\\Todo\\transcriber-v2\\tests\\fixtures\\media\\fixture-start5.ts",
+    "bytes": 2205428,
+    "sha256": "8a17f0495044b2ffc3ac16938b93abdebb2b3a2a65e6adc0a12e105a0adf0ac0",
+    "unchanged": true
+  },
+  {
+    "path": "C:\\Users\\gabri\\Todo\\transcriber-v2\\tests\\fixtures\\media\\fixture-sync.mp4",
+    "bytes": 3108661,
+    "sha256": "de15dbaf77f6ddc632fcb2020c4781f43b139c6befeab584e2905db39e985b21",
+    "unchanged": true
+  },
+  {
+    "path": "C:\\Users\\gabri\\Todo\\transcriber-v2\\tests\\fixtures\\media\\fixture-vfr.mp4",
+    "bytes": 561194,
+    "sha256": "294befb631314f82059c6cbeb45fcce059bbdfd3b4712e23c355fb953bd1d209",
+    "unchanged": true
+  },
+  {
+    "path": "C:\\Users\\gabri\\Todo\\transcriber-v2\\tests\\fixtures\\media\\overlay-alpha.png",
+    "bytes": 4861,
+    "sha256": "e813797cf4a4c909b4a31851d302fe5db8f3414c40b8edeb52aa65323f786369",
+    "unchanged": true
+  },
+  {
+    "path": "C:\\Users\\gabri\\Todo\\transcriber-v2\\tests\\fixtures\\media\\tone-220.wav",
+    "bytes": 1920078,
+    "sha256": "2696830c783f5a5b945f3fc4493d67322f2f1e526582c00049f420fd039d1a19",
+    "unchanged": true
+  },
+  {
+    "path": "C:\\Users\\gabri\\Todo\\transcriber-v2\\tests\\fixtures\\media\\fixture-espacios\\ñ medios prueba\\fixture-ñ.mp4",
+    "bytes": 1438514,
+    "sha256": "6752fb85e5b528e74d702e0b863726eecb925671e70f234997371023e469b7c9",
+    "unchanged": true
+  }
+]

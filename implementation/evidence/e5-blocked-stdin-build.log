@@ -1,0 +1,9 @@
+   Compiling tv2-pipeline v2.0.0-alpha.11 (C:\Users\gabri\Todo\transcriber-v2\crates\pipeline)
+error[E0599]: no method named `as_str` found for enum `ErrorCode` in the current scope
+  --> crates\pipeline\examples\blocked_stdin.rs:86:100
+   |
+86 |         return Err(format!("Expected bounded Cancelled, observed {} after {elapsed:?}", error.code.as_str()).into());
+   |                                                                                                    ^^^^^^ method not found in `ErrorCode`
+
+For more information about this error, try `rustc --explain E0599`.
+error: could not compile `tv2-pipeline` (example "blocked_stdin") due to 1 previous error

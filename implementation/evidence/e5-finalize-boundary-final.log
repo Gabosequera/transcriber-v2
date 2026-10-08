@@ -1,0 +1,15 @@
+test_atomic_publication_leaves_no_partial (__main__.Boundaries.test_atomic_publication_leaves_no_partial) ... ok
+test_byte_identity_before_json (__main__.Boundaries.test_byte_identity_before_json) ... ok
+test_cancel_interrupts_input_hash (__main__.Boundaries.test_cancel_interrupts_input_hash) ... ok
+test_canonical_disallows_nonfinite_metrics (__main__.Boundaries.test_canonical_disallows_nonfinite_metrics) ... ok
+test_closed_reference (__main__.Boundaries.test_closed_reference) ... ok
+test_complete_json_without_newline_is_incomplete_at_eof (__main__.Boundaries.test_complete_json_without_newline_is_incomplete_at_eof) ... ok
+test_json_bound (__main__.Boundaries.test_json_bound) ... ok
+test_nonfinite_is_not_accepted (__main__.Boundaries.test_nonfinite_is_not_accepted) ... ok
+test_output_traversal_rejected_before_directory_creation (__main__.Boundaries.test_output_traversal_rejected_before_directory_creation) ... ok
+test_unknown_envelope_fields_and_nonstrings_are_rejected (__main__.Boundaries.test_unknown_envelope_fields_and_nonstrings_are_rejected) ... ok
+
+----------------------------------------------------------------------
+Ran 10 tests in 0.024s
+
+OK
